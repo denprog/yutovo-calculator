@@ -4,7 +4,7 @@
 #include "ast.h"
 #include "script.h"
 
-namespace yutovo_calc
+namespace yutovo_calculator
 {
 	typedef Integer (*IntegerBinaryFunc)(const Integer& num1, const Integer& num2);
 	typedef Real (*RealUnaryFunc)(const Real& num1);

@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "parser.h"
 
-namespace yutovo_calc
+namespace yutovo_calculator
 {
   Integer pow(const Integer& num1, const Integer& num2);
 
@@ -45,11 +45,11 @@ namespace yutovo_calc
 
 	/**
 	 * Constructor.
-	 * @tparam yutovo_calc::Integer Integer type of the big numbers parser.
+	 * @tparam yutovo_calculator::Integer Integer type of the big numbers parser.
 	 * @param precision The precision.
 	 */
 	template<>
-	Parser<yutovo_calc::Integer>::Parser(const int precision) : solver(precision)
+	Parser<yutovo_calculator::Integer>::Parser(const int precision) : solver(precision)
 	{
 		IntegerBinaryFunc binaryFunc = &pow;
 		solver.AddBuildinFunction("pow", binaryFunc);
@@ -57,11 +57,11 @@ namespace yutovo_calc
 
 	/**
 	 * Constructor.
-	 * @tparam yutovo_calc::Real Real type of the big numbers parser.
+	 * @tparam yutovo_calculator::Real Real type of the big numbers parser.
 	 * @param precision The precision.
 	 */
 	template<>
-	Parser<yutovo_calc::Real>::Parser(const int precision) : solver(precision)
+	Parser<yutovo_calculator::Real>::Parser(const int precision) : solver(precision)
 	{
 		RealPrecisionVariable var;
 		var = &pi;
@@ -139,11 +139,11 @@ namespace yutovo_calc
 
 	/**
 	 * Constructor.
-	 * @tparam yutovo_calc::Rational Rational type of the big numbers parser.
+	 * @tparam yutovo_calculator::Rational Rational type of the big numbers parser.
 	 * @param precision The precision.
 	 */
 	template<>
-	Parser<yutovo_calc::Rational>::Parser(const int precision) : solver(precision)
+	Parser<yutovo_calculator::Rational>::Parser(const int precision) : solver(precision)
 	{
 	}
 

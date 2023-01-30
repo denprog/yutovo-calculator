@@ -7,7 +7,7 @@
 namespace yutovo_calc_test
 {
 
-using namespace yutovo_calc;
+using namespace yutovo_calculator;
 
 struct CalcTestInteger : public testing::Test
 {

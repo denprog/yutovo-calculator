@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "rational.h"
 
-namespace yutovo_calc
+namespace yutovo_calculator
 {
 	/**
 	 * Default constructor.

@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "integer.h"
 
-namespace yutovo_calc
+namespace yutovo_calculator
 {
 	Integer::Integer()
 	{

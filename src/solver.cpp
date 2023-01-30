@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "solver.h"
 
-namespace yutovo_calc
+namespace yutovo_calculator
 {
 	template<>
 	Solver<Integer>::Solver(int _precision, Integer _leftValue, SolverSymbols<Integer>* _symbols) : 

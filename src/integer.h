@@ -8,7 +8,7 @@
 
 using namespace std;
 
-namespace yutovo_calc
+namespace yutovo_calculator
 {
 	//Integer number.
 	class Integer

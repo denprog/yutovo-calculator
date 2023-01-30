@@ -3,7 +3,7 @@
 
 #include "ast.h"
 
-namespace yutovo_calc
+namespace yutovo_calculator
 {
 	//Annotation for nodes. Used in purposes of searching a node by a text position.
 	template<typename Number>

@@ -5,7 +5,7 @@
 #include "real.h"
 #include "rational.h"
 
-namespace yutovo_calc
+namespace yutovo_calculator
 {
 	map<int, int> MathHelper::bitPrecisions;
 	map<int, int> MathHelper::decimalPrecisions;

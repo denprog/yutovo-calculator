@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "expression.h"
 
-namespace yutovo_calc
+namespace yutovo_calculator
 {
 	template<>
 	Expression<Integer>::Expression(std::string& expr) : Expression::base_type(expression)
@@ -68,15 +68,15 @@ namespace yutovo_calc
 
 		//annotate the items with an expression's position
 		on_success(unary, 
-			boost::phoenix::function<Annotation<yutovo_calc::Integer> >(Annotation<yutovo_calc::Integer>(expr.begin(), expr.end()))(qi::_val, _1));
+			boost::phoenix::function<Annotation<yutovo_calculator::Integer> >(Annotation<yutovo_calculator::Integer>(expr.begin(), expr.end()))(qi::_val, _1));
 		on_success(addition, 
-			boost::phoenix::function<Annotation<yutovo_calc::Integer> >(Annotation<yutovo_calc::Integer>(expr.begin(), expr.end()))(qi::_val, _1));
+			boost::phoenix::function<Annotation<yutovo_calculator::Integer> >(Annotation<yutovo_calculator::Integer>(expr.begin(), expr.end()))(qi::_val, _1));
 		on_success(multiplication, 
-			boost::phoenix::function<Annotation<yutovo_calc::Integer> >(Annotation<yutovo_calc::Integer>(expr.begin(), expr.end()))(qi::_val, _1));
+			boost::phoenix::function<Annotation<yutovo_calculator::Integer> >(Annotation<yutovo_calculator::Integer>(expr.begin(), expr.end()))(qi::_val, _1));
 		on_success(multiply, 
-			boost::phoenix::function<Annotation<yutovo_calc::Integer> >(Annotation<yutovo_calc::Integer>(expr.begin(), expr.end()))(qi::_val, _1));
+			boost::phoenix::function<Annotation<yutovo_calculator::Integer> >(Annotation<yutovo_calculator::Integer>(expr.begin(), expr.end()))(qi::_val, _1));
 		on_success(identifier, 
-			boost::phoenix::function<Annotation<yutovo_calc::Integer> >(Annotation<yutovo_calc::Integer>(expr.begin(), expr.end()))(qi::_val, _1));
+			boost::phoenix::function<Annotation<yutovo_calculator::Integer> >(Annotation<yutovo_calculator::Integer>(expr.begin(), expr.end()))(qi::_val, _1));
 		
 		//work out the exceptions
 		on_error<fail>(expression, 
@@ -159,17 +159,17 @@ namespace yutovo_calc
 
 		//annotate the items with the expression's position
 		on_success(unary, 
-			boost::phoenix::function<Annotation<yutovo_calc::Real> >(Annotation<yutovo_calc::Real>(expr.begin(), expr.end()))(qi::_val, _1));
+			boost::phoenix::function<Annotation<yutovo_calculator::Real> >(Annotation<yutovo_calculator::Real>(expr.begin(), expr.end()))(qi::_val, _1));
 		on_success(addition, 
-			boost::phoenix::function<Annotation<yutovo_calc::Real> >(Annotation<yutovo_calc::Real>(expr.begin(), expr.end()))(qi::_val, _1));
+			boost::phoenix::function<Annotation<yutovo_calculator::Real> >(Annotation<yutovo_calculator::Real>(expr.begin(), expr.end()))(qi::_val, _1));
 		on_success(multiplication, 
-			boost::phoenix::function<Annotation<yutovo_calc::Real> >(Annotation<yutovo_calc::Real>(expr.begin(), expr.end()))(qi::_val, _1));
+			boost::phoenix::function<Annotation<yutovo_calculator::Real> >(Annotation<yutovo_calculator::Real>(expr.begin(), expr.end()))(qi::_val, _1));
 		on_success(multiply, 
-			boost::phoenix::function<Annotation<yutovo_calc::Real> >(Annotation<yutovo_calc::Real>(expr.begin(), expr.end()))(qi::_val, _1));
+			boost::phoenix::function<Annotation<yutovo_calculator::Real> >(Annotation<yutovo_calculator::Real>(expr.begin(), expr.end()))(qi::_val, _1));
 		on_success(functionCall, 
-			boost::phoenix::function<Annotation<yutovo_calc::Real> >(Annotation<yutovo_calc::Real>(expr.begin(), expr.end()))(qi::_val, _1));
+			boost::phoenix::function<Annotation<yutovo_calculator::Real> >(Annotation<yutovo_calculator::Real>(expr.begin(), expr.end()))(qi::_val, _1));
 		on_success(identifier, 
-			boost::phoenix::function<Annotation<yutovo_calc::Real> >(Annotation<yutovo_calc::Real>(expr.begin(), expr.end()))(qi::_val, _1));
+			boost::phoenix::function<Annotation<yutovo_calculator::Real> >(Annotation<yutovo_calculator::Real>(expr.begin(), expr.end()))(qi::_val, _1));
 		
 		on_error<fail>(expression, 
 			boost::phoenix::function<ErrorHandler<SyntaxException> >(ErrorHandler<SyntaxException>(expr.begin(), expr.end(), SyntaxError))(_3));
@@ -183,7 +183,7 @@ namespace yutovo_calc
 	}
 
 	template<>
-	Expression<yutovo_calc::Rational>::Expression(std::string& expr) : Expression::base_type(expression)
+	Expression<yutovo_calculator::Rational>::Expression(std::string& expr) : Expression::base_type(expression)
 	{
 		using boost::spirit::qi::char_;
 		using boost::spirit::qi::raw;
@@ -245,11 +245,11 @@ namespace yutovo_calc
 			'(' >> -(expression % ',') > ')';
 
 		//annotate the items with an expression's position
-		on_success(unary, boost::phoenix::function<Annotation<yutovo_calc::Rational> >(Annotation<yutovo_calc::Rational>(expr.begin(), expr.end()))(qi::_val, _1));
-		on_success(addition, boost::phoenix::function<Annotation<yutovo_calc::Rational> >(Annotation<yutovo_calc::Rational>(expr.begin(), expr.end()))(qi::_val, _1));
-		on_success(multiplication, boost::phoenix::function<Annotation<yutovo_calc::Rational> >(Annotation<yutovo_calc::Rational>(expr.begin(), expr.end()))(qi::_val, _1));
-		on_success(multiply, boost::phoenix::function<Annotation<yutovo_calc::Rational> >(Annotation<yutovo_calc::Rational>(expr.begin(), expr.end()))(qi::_val, _1));
-		on_success(identifier, boost::phoenix::function<Annotation<yutovo_calc::Rational> >(Annotation<yutovo_calc::Rational>(expr.begin(), expr.end()))(qi::_val, _1));
+		on_success(unary, boost::phoenix::function<Annotation<yutovo_calculator::Rational> >(Annotation<yutovo_calculator::Rational>(expr.begin(), expr.end()))(qi::_val, _1));
+		on_success(addition, boost::phoenix::function<Annotation<yutovo_calculator::Rational> >(Annotation<yutovo_calculator::Rational>(expr.begin(), expr.end()))(qi::_val, _1));
+		on_success(multiplication, boost::phoenix::function<Annotation<yutovo_calculator::Rational> >(Annotation<yutovo_calculator::Rational>(expr.begin(), expr.end()))(qi::_val, _1));
+		on_success(multiply, boost::phoenix::function<Annotation<yutovo_calculator::Rational> >(Annotation<yutovo_calculator::Rational>(expr.begin(), expr.end()))(qi::_val, _1));
+		on_success(identifier, boost::phoenix::function<Annotation<yutovo_calculator::Rational> >(Annotation<yutovo_calculator::Rational>(expr.begin(), expr.end()))(qi::_val, _1));
 		
 		//work out the exceptions
 		on_error<fail>(expression, 

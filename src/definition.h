@@ -4,7 +4,7 @@
 #include "ast.h"
 #include "expression.h"
 
-namespace yutovo_calc
+namespace yutovo_calculator
 {
 	/**
 	 * Spirit grammar for definitions.

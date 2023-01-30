@@ -5,7 +5,7 @@
 namespace yutovo_calc_test
 {
 
-using namespace yutovo_calc;
+using namespace yutovo_calculator;
 using namespace std::chrono_literals;
 
 TEST_F(CalcTestInteger, integers1)

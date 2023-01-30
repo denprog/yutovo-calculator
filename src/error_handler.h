@@ -3,7 +3,7 @@
 
 #include "parser_exception.h"
 
-namespace yutovo_calc
+namespace yutovo_calculator
 {
 	template<typename Exception>
 	struct ErrorHandler

@@ -25,7 +25,7 @@ enum AngleMeasure
 	GRAD
 };
 
-namespace yutovo_calc
+namespace yutovo_calculator
 {
 	class Real;
 	

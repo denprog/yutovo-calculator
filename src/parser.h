@@ -17,7 +17,7 @@ namespace qi = spirit::qi;
 namespace phx = boost::phoenix;
 namespace fusion = boost::fusion;
 
-namespace yutovo_calc
+namespace yutovo_calculator
 {
 	/**
 	 * Big numbers parser.

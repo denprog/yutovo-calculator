@@ -6,7 +6,7 @@
 #include "error_handler.h"
 #include "annotation.h"
 
-namespace yutovo_calc
+namespace yutovo_calculator
 {
 	//Spirit grammar for expression.
 	template<typename Number>

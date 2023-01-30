@@ -7,7 +7,7 @@
 
 using namespace std;
 
-namespace yutovo_calc
+namespace yutovo_calculator
 {
 	/**
 	 * Spirit grammar for main script.

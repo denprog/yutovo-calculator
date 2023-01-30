@@ -1,7 +1,7 @@
 #ifndef PARSEREXCEPTION_H
 #define PARSEREXCEPTION_H
 
-namespace yutovo_calc
+namespace yutovo_calculator
 {
 	enum ParserExceptionCode
 	{

@@ -6,7 +6,7 @@
 #include "real.h"
 #include "rational.h"
 
-namespace yutovo_calc
+namespace yutovo_calculator
 {
 	template<typename Number>
 	struct IdentifierNode;
@@ -146,101 +146,101 @@ namespace yutovo_calc
 
 //Integer adaptors
 
-BOOST_FUSION_ADAPT_STRUCT(yutovo_calc::UnaryOperationNode<yutovo_calc::Integer>, 
-	(char, op)(yutovo_calc::UnaryOperationNode<yutovo_calc::Integer>::Operand, operand))
+BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::UnaryOperationNode<yutovo_calculator::Integer>, 
+	(char, op)(yutovo_calculator::UnaryOperationNode<yutovo_calculator::Integer>::Operand, operand))
 
-BOOST_FUSION_ADAPT_STRUCT(yutovo_calc::OperationNode<yutovo_calc::Integer>, 
-	(char, op)(yutovo_calc::OperationNode<yutovo_calc::Integer>::Operand, operand))
+BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::OperationNode<yutovo_calculator::Integer>, 
+	(char, op)(yutovo_calculator::OperationNode<yutovo_calculator::Integer>::Operand, operand))
 
-BOOST_FUSION_ADAPT_STRUCT(yutovo_calc::VariableNode<yutovo_calc::Integer>, 
-	(yutovo_calc::IdentifierNode<yutovo_calc::Integer>, name)(yutovo_calc::ExpressionNode<yutovo_calc::Integer>, expression))
+BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::VariableNode<yutovo_calculator::Integer>, 
+	(yutovo_calculator::IdentifierNode<yutovo_calculator::Integer>, name)(yutovo_calculator::ExpressionNode<yutovo_calculator::Integer>, expression))
 
-BOOST_FUSION_ADAPT_STRUCT(yutovo_calc::FunctionNode<yutovo_calc::Integer>, 
-	(yutovo_calc::IdentifierNode<yutovo_calc::Integer>, name)
-	(std::list<yutovo_calc::IdentifierNode<yutovo_calc::Integer> >, arguments)
-	//(yutovo_calc::ExpressionNode<yutovo_calc::Integer>, expression)
-	(yutovo_calc::ExpressionNode<yutovo_calc::Integer>, returnExpression))
+BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::FunctionNode<yutovo_calculator::Integer>, 
+	(yutovo_calculator::IdentifierNode<yutovo_calculator::Integer>, name)
+	(std::list<yutovo_calculator::IdentifierNode<yutovo_calculator::Integer> >, arguments)
+	//(yutovo_calculator::ExpressionNode<yutovo_calculator::Integer>, expression)
+	(yutovo_calculator::ExpressionNode<yutovo_calculator::Integer>, returnExpression))
 
-BOOST_FUSION_ADAPT_STRUCT(yutovo_calc::DefinitionNode<yutovo_calc::Integer>, 
-	(yutovo_calc::DefinitionNode<yutovo_calc::Integer>::Definition, definition))
+BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::DefinitionNode<yutovo_calculator::Integer>, 
+	(yutovo_calculator::DefinitionNode<yutovo_calculator::Integer>::Definition, definition))
 
-BOOST_FUSION_ADAPT_STRUCT(yutovo_calc::IdentifierNode<yutovo_calc::Integer>, 
+BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::IdentifierNode<yutovo_calculator::Integer>, 
 	(std::string, name))
 
-BOOST_FUSION_ADAPT_STRUCT(yutovo_calc::FunctionCallNode<yutovo_calc::Integer>, 
-	(yutovo_calc::IdentifierNode<yutovo_calc::Integer>, name)
-	(std::list<yutovo_calc::ExpressionNode<yutovo_calc::Integer> >, arguments))
+BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::FunctionCallNode<yutovo_calculator::Integer>, 
+	(yutovo_calculator::IdentifierNode<yutovo_calculator::Integer>, name)
+	(std::list<yutovo_calculator::ExpressionNode<yutovo_calculator::Integer> >, arguments))
 
-BOOST_FUSION_ADAPT_STRUCT(yutovo_calc::ExpressionNode<yutovo_calc::Integer>, 
-	(yutovo_calc::ExpressionNode<yutovo_calc::Integer>::Operand, first)(std::list<yutovo_calc::OperationNode<yutovo_calc::Integer> >, rest))
+BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::ExpressionNode<yutovo_calculator::Integer>, 
+	(yutovo_calculator::ExpressionNode<yutovo_calculator::Integer>::Operand, first)(std::list<yutovo_calculator::OperationNode<yutovo_calculator::Integer> >, rest))
 
-BOOST_FUSION_ADAPT_STRUCT(yutovo_calc::ScriptNode<yutovo_calc::Integer>, 
-	(std::list<yutovo_calc::ScriptNode<yutovo_calc::Integer>::Operand>, list))
+BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::ScriptNode<yutovo_calculator::Integer>, 
+	(std::list<yutovo_calculator::ScriptNode<yutovo_calculator::Integer>::Operand>, list))
 
 //Real adaptors
 
-BOOST_FUSION_ADAPT_STRUCT(yutovo_calc::UnaryOperationNode<yutovo_calc::Real>, 
-	(char, op)(yutovo_calc::UnaryOperationNode<yutovo_calc::Real>::Operand, operand))
+BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::UnaryOperationNode<yutovo_calculator::Real>, 
+	(char, op)(yutovo_calculator::UnaryOperationNode<yutovo_calculator::Real>::Operand, operand))
 
-BOOST_FUSION_ADAPT_STRUCT(yutovo_calc::OperationNode<yutovo_calc::Real>, 
-	(char, op)(yutovo_calc::OperationNode<yutovo_calc::Real>::Operand, operand))
+BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::OperationNode<yutovo_calculator::Real>, 
+	(char, op)(yutovo_calculator::OperationNode<yutovo_calculator::Real>::Operand, operand))
 
-BOOST_FUSION_ADAPT_STRUCT(yutovo_calc::VariableNode<yutovo_calc::Real>, 
-	(yutovo_calc::IdentifierNode<yutovo_calc::Real>, name)(yutovo_calc::ExpressionNode<yutovo_calc::Real>, expression))
+BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::VariableNode<yutovo_calculator::Real>, 
+	(yutovo_calculator::IdentifierNode<yutovo_calculator::Real>, name)(yutovo_calculator::ExpressionNode<yutovo_calculator::Real>, expression))
 
-BOOST_FUSION_ADAPT_STRUCT(yutovo_calc::FunctionNode<yutovo_calc::Real>, 
-	(yutovo_calc::IdentifierNode<yutovo_calc::Real>, name)
-	(std::list<yutovo_calc::IdentifierNode<yutovo_calc::Real> >, arguments)
-	//(yutovo_calc::ExpressionNode<yutovo_calc::Real>, expression)
-	(yutovo_calc::ExpressionNode<yutovo_calc::Real>, returnExpression))
+BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::FunctionNode<yutovo_calculator::Real>, 
+	(yutovo_calculator::IdentifierNode<yutovo_calculator::Real>, name)
+	(std::list<yutovo_calculator::IdentifierNode<yutovo_calculator::Real> >, arguments)
+	//(yutovo_calculator::ExpressionNode<yutovo_calculator::Real>, expression)
+	(yutovo_calculator::ExpressionNode<yutovo_calculator::Real>, returnExpression))
 
-BOOST_FUSION_ADAPT_STRUCT(yutovo_calc::DefinitionNode<yutovo_calc::Real>, 
-	(yutovo_calc::DefinitionNode<yutovo_calc::Real>::Definition, definition))
+BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::DefinitionNode<yutovo_calculator::Real>, 
+	(yutovo_calculator::DefinitionNode<yutovo_calculator::Real>::Definition, definition))
 
-BOOST_FUSION_ADAPT_STRUCT(yutovo_calc::IdentifierNode<yutovo_calc::Real>, 
+BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::IdentifierNode<yutovo_calculator::Real>, 
 	(std::string, name))
 
-BOOST_FUSION_ADAPT_STRUCT(yutovo_calc::FunctionCallNode<yutovo_calc::Real>, 
-	(yutovo_calc::IdentifierNode<yutovo_calc::Real>, name)
-	(std::list<yutovo_calc::ExpressionNode<yutovo_calc::Real> >, arguments))
+BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::FunctionCallNode<yutovo_calculator::Real>, 
+	(yutovo_calculator::IdentifierNode<yutovo_calculator::Real>, name)
+	(std::list<yutovo_calculator::ExpressionNode<yutovo_calculator::Real> >, arguments))
 
-BOOST_FUSION_ADAPT_STRUCT(yutovo_calc::ExpressionNode<yutovo_calc::Real>, 
-	(yutovo_calc::ExpressionNode<yutovo_calc::Real>::Operand, first)(std::list<yutovo_calc::OperationNode<yutovo_calc::Real> >, rest))
+BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::ExpressionNode<yutovo_calculator::Real>, 
+	(yutovo_calculator::ExpressionNode<yutovo_calculator::Real>::Operand, first)(std::list<yutovo_calculator::OperationNode<yutovo_calculator::Real> >, rest))
 
-BOOST_FUSION_ADAPT_STRUCT(yutovo_calc::ScriptNode<yutovo_calc::Real>, 
-	(std::list<yutovo_calc::ScriptNode<yutovo_calc::Real>::Operand>, list))
+BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::ScriptNode<yutovo_calculator::Real>, 
+	(std::list<yutovo_calculator::ScriptNode<yutovo_calculator::Real>::Operand>, list))
 
 //Rational adaptors
 
-BOOST_FUSION_ADAPT_STRUCT(yutovo_calc::UnaryOperationNode<yutovo_calc::Rational>, 
-	(char, op)(yutovo_calc::UnaryOperationNode<yutovo_calc::Rational>::Operand, operand))
+BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::UnaryOperationNode<yutovo_calculator::Rational>, 
+	(char, op)(yutovo_calculator::UnaryOperationNode<yutovo_calculator::Rational>::Operand, operand))
 
-BOOST_FUSION_ADAPT_STRUCT(yutovo_calc::OperationNode<yutovo_calc::Rational>, 
-	(char, op)(yutovo_calc::OperationNode<yutovo_calc::Rational>::Operand, operand))
+BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::OperationNode<yutovo_calculator::Rational>, 
+	(char, op)(yutovo_calculator::OperationNode<yutovo_calculator::Rational>::Operand, operand))
 
-BOOST_FUSION_ADAPT_STRUCT(yutovo_calc::VariableNode<yutovo_calc::Rational>, 
-	(yutovo_calc::IdentifierNode<yutovo_calc::Rational>, name)(yutovo_calc::ExpressionNode<yutovo_calc::Rational>, expression))
+BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::VariableNode<yutovo_calculator::Rational>, 
+	(yutovo_calculator::IdentifierNode<yutovo_calculator::Rational>, name)(yutovo_calculator::ExpressionNode<yutovo_calculator::Rational>, expression))
 
-BOOST_FUSION_ADAPT_STRUCT(yutovo_calc::FunctionNode<yutovo_calc::Rational>, 
-	(yutovo_calc::IdentifierNode<yutovo_calc::Rational>, name)
-	(std::list<yutovo_calc::IdentifierNode<yutovo_calc::Rational> >, arguments)
-	//(yutovo_calc::ExpressionNode<yutovo_calc::Rational>, expression)
-	(yutovo_calc::ExpressionNode<yutovo_calc::Rational>, returnExpression))
+BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::FunctionNode<yutovo_calculator::Rational>, 
+	(yutovo_calculator::IdentifierNode<yutovo_calculator::Rational>, name)
+	(std::list<yutovo_calculator::IdentifierNode<yutovo_calculator::Rational> >, arguments)
+	//(yutovo_calculator::ExpressionNode<yutovo_calculator::Rational>, expression)
+	(yutovo_calculator::ExpressionNode<yutovo_calculator::Rational>, returnExpression))
 
-BOOST_FUSION_ADAPT_STRUCT(yutovo_calc::DefinitionNode<yutovo_calc::Rational>, 
-	(yutovo_calc::DefinitionNode<yutovo_calc::Rational>::Definition, definition))
+BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::DefinitionNode<yutovo_calculator::Rational>, 
+	(yutovo_calculator::DefinitionNode<yutovo_calculator::Rational>::Definition, definition))
 
-BOOST_FUSION_ADAPT_STRUCT(yutovo_calc::IdentifierNode<yutovo_calc::Rational>, 
+BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::IdentifierNode<yutovo_calculator::Rational>, 
 	(std::string, name))
 
-BOOST_FUSION_ADAPT_STRUCT(yutovo_calc::FunctionCallNode<yutovo_calc::Rational>, 
-	(yutovo_calc::IdentifierNode<yutovo_calc::Rational>, name)
-	(std::list<yutovo_calc::ExpressionNode<yutovo_calc::Rational> >, arguments))
+BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::FunctionCallNode<yutovo_calculator::Rational>, 
+	(yutovo_calculator::IdentifierNode<yutovo_calculator::Rational>, name)
+	(std::list<yutovo_calculator::ExpressionNode<yutovo_calculator::Rational> >, arguments))
 
-BOOST_FUSION_ADAPT_STRUCT(yutovo_calc::ExpressionNode<yutovo_calc::Rational>, 
-	(yutovo_calc::ExpressionNode<yutovo_calc::Rational>::Operand, first)(std::list<yutovo_calc::OperationNode<yutovo_calc::Rational> >, rest))
+BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::ExpressionNode<yutovo_calculator::Rational>, 
+	(yutovo_calculator::ExpressionNode<yutovo_calculator::Rational>::Operand, first)(std::list<yutovo_calculator::OperationNode<yutovo_calculator::Rational> >, rest))
 
-BOOST_FUSION_ADAPT_STRUCT(yutovo_calc::ScriptNode<yutovo_calc::Rational>, 
-	(std::list<yutovo_calc::ScriptNode<yutovo_calc::Rational>::Operand>, list))
+BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::ScriptNode<yutovo_calculator::Rational>, 
+	(std::list<yutovo_calculator::ScriptNode<yutovo_calculator::Rational>::Operand>, list))
 
 #endif

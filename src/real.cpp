@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "real.h"
 
-namespace yutovo_calc
+namespace yutovo_calculator
 {
   Real pi(const int precision);
 
