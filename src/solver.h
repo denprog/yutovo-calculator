@@ -9,7 +9,7 @@ namespace yutovo_calculator
 	typedef Integer (*IntegerBinaryFunc)(const Integer& num1, const Integer& num2);
 	typedef Real (*RealUnaryFunc)(const Real& num1);
 	typedef Real (*RealBinaryFunc)(const Real& num1, const Real& num2);
-	typedef Real (*RealTrigonometricFunc)(const Real& num1, const AngleMeasure angleMeasure);
+	typedef Real (*RealTrigonometricFunc)(const Real& num1, const AngleMeasure angle_measure);
 	
 	typedef Integer (*IntegerVariable)();
 	typedef Real (*RealPrecisionVariable)(const int precision);
@@ -23,7 +23,7 @@ namespace yutovo_calculator
 		//build-in functions' typedefs
 		typedef Number (*UnaryFunction)(const Number& num);
 		typedef Number (*BinaryFunction)(const Number& num1, const Number& num2);
-		typedef Number (*TrigonometricFunction)(const Number& num1, const AngleMeasure angleMeasure);
+		typedef Number (*TrigonometricFunction)(const Number& num1, const AngleMeasure angle_measure);
 		typedef boost::variant<UnaryFunction, BinaryFunction, TrigonometricFunction> BuildinFunction;
 		
 		//build-in variables' typedefs
@@ -31,12 +31,12 @@ namespace yutovo_calculator
 		typedef Number (*PrecisionVariable)(const int precision);
 		typedef boost::variant<Variable, PrecisionVariable> BuildinVariable;
 
-		mutable deque<TempVariable> tempVariables; ///< The temporary variables
-		mutable deque<VariableNode<Number> > variables;	///< The variables
-		mutable vector<FunctionNode<Number> > functions; ///< The functions
+		mutable deque<TempVariable> temp_variables; ///< The temporary variables
+		mutable deque<VariableNode<Number>> variables;	///< The variables
+		mutable vector<FunctionNode<Number>> functions; ///< The functions
 
-		map<std::string, BuildinFunction> buildinFunctions; ///< The buildin functions
-		map<std::string, BuildinVariable> buildinVariables; ///< The buildin variables
+		map<std::string, BuildinFunction> buildin_functions; ///< The buildin functions
+		map<std::string, BuildinVariable> buildin_variables; ///< The buildin variables
 	};
 		
 	/**
@@ -63,9 +63,9 @@ namespace yutovo_calculator
 		/**
 		 * Constructor.
 		 * @param _precision The precision.
-		 * @param _leftValue (optional) the left value.
+		 * @param _left_value (optional) the left value.
 		 */
-		Solver(int _precision, Number _leftValue = Number(), SolverSymbols<Number>* _symbols = NULL);
+		Solver(int _precision, Number _left_value = Number(), SolverSymbols<Number>* _symbols = NULL);
 		
 		/**
 		 * Sets a precision.
@@ -161,13 +161,13 @@ namespace yutovo_calculator
 				switch (op.op)
 				{
 				case '+':
-					return leftValue + right;
+					return left_value + right;
 				case '-':
-					return leftValue - right;
+					return left_value - right;
 				case '*':
-					return leftValue * right;
+					return left_value * right;
 				case '/':
-					return leftValue / right;
+					return left_value / right;
 				}
 			}
 			catch (MathException e)
@@ -207,7 +207,7 @@ namespace yutovo_calculator
 		 */
 		void PushTempVariable(const std::string& name, Number& value) const
 		{
-			symbols->tempVariables.push_back(TempVariable(name, value));
+			symbols->temp_variables.push_back(TempVariable(name, value));
 		}
 		
 		/**
@@ -217,7 +217,7 @@ namespace yutovo_calculator
 		void PopTempVariable(int count = 1) const
 		{
 			for (int i = 0; i < count; ++i)
-				symbols->tempVariables.pop_back();
+				symbols->temp_variables.pop_back();
 		}
 		
 		/**
@@ -227,10 +227,10 @@ namespace yutovo_calculator
 		 */
 		TempVariable* FindTempVariable(const std::string& name) const
 		{
-			for (int i = symbols->tempVariables.size() - 1; i >= 0; --i)
+			for (int i = symbols->temp_variables.size() - 1; i >= 0; --i)
 			{
-				if (symbols->tempVariables[i].first == name)
-					return &symbols->tempVariables[i];
+				if (symbols->temp_variables[i].first == name)
+					return &symbols->temp_variables[i];
 			}
 			
 			return NULL;
@@ -245,14 +245,6 @@ namespace yutovo_calculator
 			symbols->variables.push_back(var);
 		}
 		
-		/**
-		 * Pops the variable.
-		 */
-		void PopVariable() const
-		{
-			symbols->variables.pop_back();
-		}
-
 		/**
 		 * Searches for the first variable.
 		 * @param name The name.
@@ -294,7 +286,7 @@ namespace yutovo_calculator
 		 */
 		void AddBuildinFunction(const char* name, UnaryFunction& func)
 		{
-			symbols->buildinFunctions[std::string(name)] = func;
+			symbols->buildin_functions[std::string(name)] = func;
 		}
 
 		/**
@@ -304,7 +296,7 @@ namespace yutovo_calculator
 		 */
 		void AddBuildinFunction(const char* name, BinaryFunction& func)
 		{
-			symbols->buildinFunctions[std::string(name)] = func;
+			symbols->buildin_functions[std::string(name)] = func;
 		}
 
 		/**
@@ -314,7 +306,7 @@ namespace yutovo_calculator
 		 */
 		void AddBuildinFunction(const char* name, TrigonometricFunction& func)
 		{
-			symbols->buildinFunctions[std::string(name)] = func;
+			symbols->buildin_functions[std::string(name)] = func;
 		}
 		
 		/**
@@ -324,8 +316,8 @@ namespace yutovo_calculator
 		 */
 		BuildinFunction* FindBuildinFunction(const std::string& name) const
 		{
-			typename map<std::string, BuildinFunction>::const_iterator iter = symbols->buildinFunctions.find(name);
-			if (iter == symbols->buildinFunctions.end())
+			typename map<std::string, BuildinFunction>::const_iterator iter = symbols->buildin_functions.find(name);
+			if (iter == symbols->buildin_functions.end())
 				return NULL;
 			return (BuildinFunction*)&(*iter).second;
 		}
@@ -337,7 +329,7 @@ namespace yutovo_calculator
 		 */
 		void AddBuildinVariable(const char* name, PrecisionVariable& var)
 		{
-			symbols->buildinVariables[std::string(name)] = var;
+			symbols->buildin_variables[std::string(name)] = var;
 		}
 		
 		/**
@@ -347,14 +339,14 @@ namespace yutovo_calculator
 		 */
 		BuildinVariable* FindBuildinVariable(const std::string& name) const
 		{
-			typename map<std::string, BuildinVariable>::const_iterator iter = symbols->buildinVariables.find(name);
-			if (iter == symbols->buildinVariables.end())
+			typename map<std::string, BuildinVariable>::const_iterator iter = symbols->buildin_variables.find(name);
+			if (iter == symbols->buildin_variables.end())
 				return NULL;
 			return (BuildinVariable*)&(*iter).second;
 		}
 		
 		mutable int precision; ///< The precision
-		Number leftValue; ///< The left solved value
+		Number left_value; ///< The left solved value
 	};
 };
 

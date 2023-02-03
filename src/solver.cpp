@@ -4,24 +4,24 @@
 namespace yutovo_calculator
 {
 	template<>
-	Solver<Integer>::Solver(int _precision, Integer _leftValue, SolverSymbols<Integer>* _symbols) : 
-		precision(_precision), leftValue(_leftValue), symbols(_symbols)
+	Solver<Integer>::Solver(int _precision, Integer _left_value, SolverSymbols<Integer>* _symbols) : 
+		precision(_precision), left_value(_left_value), symbols(_symbols)
 	{
 		if (symbols == NULL)
 			symbols = new SolverSymbols<Integer>();
 	}
 		
 	template<>
-	Solver<Real>::Solver(int _precision, Real _leftValue, SolverSymbols<Real>* _symbols) : 
-		precision(_precision), leftValue(_leftValue), symbols(_symbols)
+	Solver<Real>::Solver(int _precision, Real _left_value, SolverSymbols<Real>* _symbols) : 
+		precision(_precision), left_value(_left_value), symbols(_symbols)
 	{
 		if (symbols == NULL)
 			symbols = new SolverSymbols<Real>();
 	}
 	
 	template<>
-	Solver<Rational>::Solver(int _precision, Rational _leftValue, SolverSymbols<Rational>* _symbols) : 
-		precision(_precision), leftValue(_leftValue), symbols(_symbols)
+	Solver<Rational>::Solver(int _precision, Rational _left_value, SolverSymbols<Rational>* _symbols) : 
+		precision(_precision), left_value(_left_value), symbols(_symbols)
 	{
 		if (symbols == NULL)
 			symbols = new SolverSymbols<Rational>();
@@ -50,7 +50,7 @@ namespace yutovo_calculator
 					Integer arg = (*this)(*callIter);
 					PushTempVariable(funcIter->name, arg);
 				}
-				res = (*this)(func.returnExpression);
+				res = (*this)(func.return_expression);
 				PopTempVariable(op.arguments.size());
 				return res;
 			}
@@ -119,7 +119,7 @@ namespace yutovo_calculator
 					Real arg = (*this)(*callIter);
 					PushTempVariable(funcIter->name, arg);
 				}
-				res = (*this)(func.returnExpression);
+				res = (*this)(func.return_expression);
 				PopTempVariable(op.arguments.size());
 				return res;
 			}
@@ -202,7 +202,7 @@ namespace yutovo_calculator
 					Rational arg = (*this)(*callIter);
 					PushTempVariable(funcIter->name, arg);
 				}
-				res = (*this)(func.returnExpression);
+				res = (*this)(func.return_expression);
 				PopTempVariable(op.arguments.size());
 				return res;
 			}

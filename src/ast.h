@@ -89,7 +89,7 @@ namespace yutovo_calculator
 	{
 		IdentifierNode<Number> name;
 		std::list<IdentifierNode<Number> > arguments;
-		ExpressionNode<Number> returnExpression;
+		ExpressionNode<Number> return_expression;
 	};
 
 	//Definition node.
@@ -159,7 +159,7 @@ BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::FunctionNode<yutovo_calculator::Int
 	(yutovo_calculator::IdentifierNode<yutovo_calculator::Integer>, name)
 	(std::list<yutovo_calculator::IdentifierNode<yutovo_calculator::Integer> >, arguments)
 	//(yutovo_calculator::ExpressionNode<yutovo_calculator::Integer>, expression)
-	(yutovo_calculator::ExpressionNode<yutovo_calculator::Integer>, returnExpression))
+	(yutovo_calculator::ExpressionNode<yutovo_calculator::Integer>, return_expression))
 
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::DefinitionNode<yutovo_calculator::Integer>, 
 	(yutovo_calculator::DefinitionNode<yutovo_calculator::Integer>::Definition, definition))
@@ -192,7 +192,7 @@ BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::FunctionNode<yutovo_calculator::Rea
 	(yutovo_calculator::IdentifierNode<yutovo_calculator::Real>, name)
 	(std::list<yutovo_calculator::IdentifierNode<yutovo_calculator::Real> >, arguments)
 	//(yutovo_calculator::ExpressionNode<yutovo_calculator::Real>, expression)
-	(yutovo_calculator::ExpressionNode<yutovo_calculator::Real>, returnExpression))
+	(yutovo_calculator::ExpressionNode<yutovo_calculator::Real>, return_expression))
 
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::DefinitionNode<yutovo_calculator::Real>, 
 	(yutovo_calculator::DefinitionNode<yutovo_calculator::Real>::Definition, definition))
@@ -225,7 +225,7 @@ BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::FunctionNode<yutovo_calculator::Rat
 	(yutovo_calculator::IdentifierNode<yutovo_calculator::Rational>, name)
 	(std::list<yutovo_calculator::IdentifierNode<yutovo_calculator::Rational> >, arguments)
 	//(yutovo_calculator::ExpressionNode<yutovo_calculator::Rational>, expression)
-	(yutovo_calculator::ExpressionNode<yutovo_calculator::Rational>, returnExpression))
+	(yutovo_calculator::ExpressionNode<yutovo_calculator::Rational>, return_expression))
 
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::DefinitionNode<yutovo_calculator::Rational>, 
 	(yutovo_calculator::DefinitionNode<yutovo_calculator::Rational>::Definition, definition))

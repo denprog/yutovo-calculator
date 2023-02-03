@@ -1353,20 +1353,20 @@ namespace yutovo_calculator
 	 * Sine function.
 	 * @exception MathException Thrown when the mathematics error condition occurs.
 	 * @param num	The argument.
-	 * @param angleMeasure The angle measure.
+	 * @param angle_measure The angle measure.
 	 * @return The sinus of the number.
 	 */
-	Real sin(const Real& num, AngleMeasure angleMeasure)
+	Real sin(const Real& num, AngleMeasure angle_measure)
 	{
 		Real res(num.GetBitPrecision());
 
-		if (angleMeasure != RADIAN)
+		if (angle_measure != RADIAN)
 		{
 			Real _num(num.GetBitPrecision());
 
-			if (angleMeasure == DEGREE)
+			if (angle_measure == DEGREE)
 				_num = num.DegreeToRadian();
-			else if (angleMeasure == GRAD)
+			else if (angle_measure == GRAD)
 				_num = num.GradToRadian();
 
 			while (mpfr_sin(res.number, _num.number, DEFAULT_RND) < 0)
@@ -1416,20 +1416,20 @@ namespace yutovo_calculator
 	 * Cosine function.
 	 * @exception MathException Thrown when the mathematics error condition occurs.
 	 * @param num	The argument.
-	 * @param angleMeasure The angle measure.
+	 * @param angle_measure The angle measure.
 	 * @return The cosine of the number.
 	 */
-	Real cos(const Real& num, AngleMeasure angleMeasure)
+	Real cos(const Real& num, AngleMeasure angle_measure)
 	{
 		Real res(num.GetBitPrecision());
 
-		if (angleMeasure != RADIAN)
+		if (angle_measure != RADIAN)
 		{
 			Real _num(num.GetBitPrecision());
 
-			if (angleMeasure == DEGREE)
+			if (angle_measure == DEGREE)
 				_num = num.DegreeToRadian();
-			else if (angleMeasure == GRAD)
+			else if (angle_measure == GRAD)
 				_num = num.GradToRadian();
 
 			while (mpfr_cos(res.number, _num.number, DEFAULT_RND) < 0)
@@ -1486,20 +1486,20 @@ namespace yutovo_calculator
 	 * Tangent function.
 	 * @exception MathException Thrown when the mathematics error condition occurs.
 	 * @param num	The argument.
-	 * @param angleMeasure The angle measure.
+	 * @param angle_measure The angle measure.
 	 * @return The tangent of the number.
 	 */
-	Real tg(const Real& num, AngleMeasure angleMeasure)
+	Real tg(const Real& num, AngleMeasure angle_measure)
 	{
 		Real res(num.GetBitPrecision());
 
-		if (angleMeasure != RADIAN)
+		if (angle_measure != RADIAN)
 		{
 			Real _num(num.GetBitPrecision());
 
-			if (angleMeasure == DEGREE)
+			if (angle_measure == DEGREE)
 				_num = num.DegreeToRadian();
-			else if (angleMeasure == GRAD)
+			else if (angle_measure == GRAD)
 				_num = num.GradToRadian();
 
 			while (mpfr_tan(res.number, _num.number, DEFAULT_RND) < 0)
@@ -1531,20 +1531,20 @@ namespace yutovo_calculator
 	 * Cotangent function.
 	 * @exception MathException Thrown when the mathematics error condition occurs.
 	 * @param num	The argument.
-	 * @param angleMeasure The angle measure.
+	 * @param angle_measure The angle measure.
 	 * @return The cotangent of the number.
 	 */
-	Real ctg(const Real& num, AngleMeasure angleMeasure)
+	Real ctg(const Real& num, AngleMeasure angle_measure)
 	{
 		Real res(num.GetBitPrecision());
 
-		if (angleMeasure != RADIAN)
+		if (angle_measure != RADIAN)
 		{
 			Real _num(num.GetBitPrecision());
 
-			if (angleMeasure == DEGREE)
+			if (angle_measure == DEGREE)
 				_num = num.DegreeToRadian();
-			else if (angleMeasure == GRAD)
+			else if (angle_measure == GRAD)
 				_num = num.GradToRadian();
 
 			while (mpfr_cot(res.number, _num.number, DEFAULT_RND) < 0)
@@ -1576,20 +1576,20 @@ namespace yutovo_calculator
 	 * Secant function.
 	 * @exception MathException Thrown when the mathematics error condition occurs.
 	 * @param num	The argument.
-	 * @param angleMeasure The angle measure.
+	 * @param angle_measure The angle measure.
 	 * @return The secant of the number.
 	 */
-	Real sec(const Real& num, AngleMeasure angleMeasure)
+	Real sec(const Real& num, AngleMeasure angle_measure)
 	{
 		Real res(num.GetBitPrecision());
 
-		if (angleMeasure != RADIAN)
+		if (angle_measure != RADIAN)
 		{
 			Real _num(num.GetBitPrecision());
 
-			if (angleMeasure == DEGREE)
+			if (angle_measure == DEGREE)
 				_num = num.DegreeToRadian();
-			else if (angleMeasure == GRAD)
+			else if (angle_measure == GRAD)
 				_num = num.GradToRadian();
 
 			while (mpfr_sec(res.number, _num.number, DEFAULT_RND) < 0)
@@ -1618,20 +1618,20 @@ namespace yutovo_calculator
 	 * Cosecant function.
 	 * @exception MathException Thrown when the mathematics error condition occurs.
 	 * @param num	The argument.
-	 * @param angleMeasure The angle measure.
+	 * @param angle_measure The angle measure.
 	 * @return The cosecant of the number.
 	 */
-	Real cosec(const Real& num, AngleMeasure angleMeasure)
+	Real cosec(const Real& num, AngleMeasure angle_measure)
 	{
 		Real res(num.GetBitPrecision());
 
-		if (angleMeasure != RADIAN)
+		if (angle_measure != RADIAN)
 		{
 			Real _num(num.GetBitPrecision());
 
-			if (angleMeasure == DEGREE)
+			if (angle_measure == DEGREE)
 				_num = num.DegreeToRadian();
-			else if (angleMeasure == GRAD)
+			else if (angle_measure == GRAD)
 				_num = num.GradToRadian();
 
 			while (mpfr_csc(res.number, _num.number, DEFAULT_RND) < 0)
@@ -1660,10 +1660,10 @@ namespace yutovo_calculator
 	 * Arcsine function.
 	 * @exception MathException Thrown when the mathematics error condition occurs.
 	 * @param num	The argument.
-	 * @param angleMeasure The angle measure.
+	 * @param angle_measure The angle measure.
 	 * @return The arcsine of the number.
 	 */
-	Real arcsin(const Real& num, AngleMeasure angleMeasure)
+	Real arcsin(const Real& num, AngleMeasure angle_measure)
 	{
 		Real res(num.GetBitPrecision());
 
@@ -1678,9 +1678,9 @@ namespace yutovo_calculator
 			res.SetBitPrecision(res.GetBitPrecision() + DEFAULT_INCREASE_PRECISION);
 		}
 
-		if (angleMeasure == DEGREE)
+		if (angle_measure == DEGREE)
 			res = res.RadianToDegree();
-		else if (angleMeasure == GRAD)
+		else if (angle_measure == GRAD)
 			res = res.RadianToGrad();
 
 		return res;
@@ -1690,10 +1690,10 @@ namespace yutovo_calculator
 	 * Arccosine function.
 	 * @exception MathException Thrown when the mathematics error condition occurs.
 	 * @param num	The argument.
-	 * @param angleMeasure The angle measure.
+	 * @param angle_measure The angle measure.
 	 * @return The arccosine of the number.
 	 */
-	Real arccos(const Real& num, AngleMeasure angleMeasure)
+	Real arccos(const Real& num, AngleMeasure angle_measure)
 	{
 		Real res(num.GetBitPrecision());
 
@@ -1708,9 +1708,9 @@ namespace yutovo_calculator
 			res.SetBitPrecision(res.GetBitPrecision() + DEFAULT_INCREASE_PRECISION);
 		}
 
-		if (angleMeasure == DEGREE)
+		if (angle_measure == DEGREE)
 			res = res.RadianToDegree();
-		else if (angleMeasure == GRAD)
+		else if (angle_measure == GRAD)
 			res = res.RadianToGrad();
 
 		return res;
@@ -1720,10 +1720,10 @@ namespace yutovo_calculator
 	 * Arctangent function.
 	 * @exception MathException Thrown when the mathematics error condition occurs.
 	 * @param num	The argument.
-	 * @param angleMeasure The angle measure.
+	 * @param angle_measure The angle measure.
 	 * @return The arctangent of the number.
 	 */
-	Real arctg(const Real& num, AngleMeasure angleMeasure)
+	Real arctg(const Real& num, AngleMeasure angle_measure)
 	{
 		Real res(num.GetBitPrecision());
 
@@ -1735,9 +1735,9 @@ namespace yutovo_calculator
 			res.SetBitPrecision(res.GetBitPrecision() + DEFAULT_INCREASE_PRECISION);
 		}
 
-		if (angleMeasure == DEGREE)
+		if (angle_measure == DEGREE)
 			res = res.RadianToDegree();
-		else if (angleMeasure == GRAD)
+		else if (angle_measure == GRAD)
 			res = res.RadianToGrad();
 
 		return res;
@@ -1747,19 +1747,19 @@ namespace yutovo_calculator
 	 * Arccotangent function.
 	 * @exception MathException Thrown when the mathematics error condition occurs.
 	 * @param num	The argument.
-	 * @param angleMeasure The angle measure.
+	 * @param angle_measure The angle measure.
 	 * @return The arccotangent of the number.
 	 */
-	Real arcctg(const Real& num, AngleMeasure angleMeasure)
+	Real arcctg(const Real& num, AngleMeasure angle_measure)
 	{
 		Real _pi = pi(num.GetBitPrecision());
 
-		if (angleMeasure == DEGREE)
+		if (angle_measure == DEGREE)
 			_pi = _pi.RadianToDegree();
-		else if (angleMeasure == GRAD)
+		else if (angle_measure == GRAD)
 			_pi = _pi.RadianToGrad();
 
-		Real res(_pi / 2 - arctg(num, angleMeasure));
+		Real res(_pi / 2 - arctg(num, angle_measure));
 
 		return res;
 	}
@@ -1768,12 +1768,12 @@ namespace yutovo_calculator
 	 * Arcsecant function.
 	 * @exception MathException Thrown when the mathematics error condition occurs.
 	 * @param num	The argument.
-	 * @param angleMeasure The angle measure.
+	 * @param angle_measure The angle measure.
 	 * @return The arcsecant of the number.
 	 */
-	Real arcsec(const Real& num, AngleMeasure angleMeasure)
+	Real arcsec(const Real& num, AngleMeasure angle_measure)
 	{
-		Real res(arccos(1 / num, angleMeasure));
+		Real res(arccos(1 / num, angle_measure));
 
 		return res;
 	}
@@ -1782,12 +1782,12 @@ namespace yutovo_calculator
 	 * Acrcosecant function.
 	 * @exception MathException Thrown when the mathematics error condition occurs.
 	 * @param num	The argument.
-	 * @param angleMeasure The angle measure.
+	 * @param angle_measure The angle measure.
 	 * @return The arccosecant of the number.
 	 */
-	Real arccosec(const Real& num, AngleMeasure angleMeasure)
+	Real arccosec(const Real& num, AngleMeasure angle_measure)
 	{
-		Real res(arcsin(1 / num, angleMeasure));
+		Real res(arcsin(1 / num, angle_measure));
 
 		return res;
 	}
@@ -1796,20 +1796,20 @@ namespace yutovo_calculator
 	 * Hyperbolic sine function.
 	 * @exception MathException Thrown when the mathematics error condition occurs.
 	 * @param num	The argument.
-	 * @param angleMeasure The angle measure.
+	 * @param angle_measure The angle measure.
 	 * @return The hyperbolic sine of the number.
 	 */
-	Real sh(const Real& num, AngleMeasure angleMeasure)
+	Real sh(const Real& num, AngleMeasure angle_measure)
 	{
 		Real res(num.GetBitPrecision());
 
-		if (angleMeasure != RADIAN)
+		if (angle_measure != RADIAN)
 		{
 			Real _num(num.GetBitPrecision());
 
-			if (angleMeasure == DEGREE)
+			if (angle_measure == DEGREE)
 				_num = num.DegreeToRadian();
-			else if (angleMeasure == GRAD)
+			else if (angle_measure == GRAD)
 				_num = num.GradToRadian();
 
 			while (mpfr_sinh(res.number, _num.number, DEFAULT_RND) < 0)
@@ -1845,20 +1845,20 @@ namespace yutovo_calculator
 	 * Hyperbolic cosine function.
 	 * @exception MathException Thrown when the mathematics error condition occurs.
 	 * @param num	The argument.
-	 * @param angleMeasure The angle measure.
+	 * @param angle_measure The angle measure.
 	 * @return The hyperbolic cosine of the number.
 	 */
-	Real ch(const Real& num, AngleMeasure angleMeasure)
+	Real ch(const Real& num, AngleMeasure angle_measure)
 	{
 		Real res(num.GetBitPrecision());
 
-		if (angleMeasure != RADIAN)
+		if (angle_measure != RADIAN)
 		{
 			Real _num(num.GetBitPrecision());
 
-			if (angleMeasure == DEGREE)
+			if (angle_measure == DEGREE)
 				_num = num.DegreeToRadian();
-			else if (angleMeasure == GRAD)
+			else if (angle_measure == GRAD)
 				_num = num.GradToRadian();
 
 			while (mpfr_cosh(res.number, _num.number, DEFAULT_RND) < 0)
@@ -1894,20 +1894,20 @@ namespace yutovo_calculator
 	 * Hyperbolic tangent function.
 	 * @exception MathException Thrown when the mathematics error condition occurs.
 	 * @param num	The argument.
-	 * @param angleMeasure The angle measure.
+	 * @param angle_measure The angle measure.
 	 * @return The hyperbolic tangent of the number.
 	 */
-	Real th(const Real& num, AngleMeasure angleMeasure)
+	Real th(const Real& num, AngleMeasure angle_measure)
 	{
 		Real res(num.GetBitPrecision());
 
-		if (angleMeasure != RADIAN)
+		if (angle_measure != RADIAN)
 		{
 			Real _num(num.GetBitPrecision());
 
-			if (angleMeasure == DEGREE)
+			if (angle_measure == DEGREE)
 				_num = num.DegreeToRadian();
-			else if (angleMeasure == GRAD)
+			else if (angle_measure == GRAD)
 				_num = num.GradToRadian();
 
 			while (mpfr_tanh(res.number, _num.number, DEFAULT_RND) < 0)
@@ -1943,20 +1943,20 @@ namespace yutovo_calculator
 	 * Hyperbolic cotangent function.
 	 * @exception MathException Thrown when the mathematics error condition occurs.
 	 * @param num	The argument.
-	 * @param angleMeasure The angle measure.
+	 * @param angle_measure The angle measure.
 	 * @return The hyperbolic cotangent of the number.
 	 */
-	Real cth(const Real& num, AngleMeasure angleMeasure)
+	Real cth(const Real& num, AngleMeasure angle_measure)
 	{
 		Real res(num.GetBitPrecision());
 
-		if (angleMeasure != RADIAN)
+		if (angle_measure != RADIAN)
 		{
 			Real _num(num.GetBitPrecision());
 
-			if (angleMeasure == DEGREE)
+			if (angle_measure == DEGREE)
 				_num = num.DegreeToRadian();
-			else if (angleMeasure == GRAD)
+			else if (angle_measure == GRAD)
 				_num = num.GradToRadian();
 
 			while (mpfr_coth(res.number, _num.number, DEFAULT_RND) < 0)
@@ -1992,20 +1992,20 @@ namespace yutovo_calculator
 	 * Hyperbolic secant function.
 	 * @exception MathException Thrown when the mathematics error condition occurs.
 	 * @param num	The argument.
-	 * @param angleMeasure The angle measure.
+	 * @param angle_measure The angle measure.
 	 * @return The hyperbolic secant of the number.
 	 */
-	Real sch(const Real& num, AngleMeasure angleMeasure)
+	Real sch(const Real& num, AngleMeasure angle_measure)
 	{
 		Real res(num.GetBitPrecision());
 
-		if (angleMeasure != RADIAN)
+		if (angle_measure != RADIAN)
 		{
 			Real _num(num.GetBitPrecision());
 
-			if (angleMeasure == DEGREE)
+			if (angle_measure == DEGREE)
 				_num = num.DegreeToRadian();
-			else if (angleMeasure == GRAD)
+			else if (angle_measure == GRAD)
 				_num = num.GradToRadian();
 
 			mpfr_sech(res.number, _num.number, DEFAULT_RND);
@@ -2022,20 +2022,20 @@ namespace yutovo_calculator
 	 * Hyperbolic cosecant function.
 	 * @exception MathException Thrown when the mathematics error condition occurs.
 	 * @param num	The argument.
-	 * @param angleMeasure The angle measure.
+	 * @param angle_measure The angle measure.
 	 * @return The hyperbolic cosecant of the number.
 	 */
-	Real csch(const Real& num, AngleMeasure angleMeasure)
+	Real csch(const Real& num, AngleMeasure angle_measure)
 	{
 		Real res(num.GetBitPrecision());
 
-		if (angleMeasure != RADIAN)
+		if (angle_measure != RADIAN)
 		{
 			Real _num(num.GetBitPrecision());
 
-			if (angleMeasure == DEGREE)
+			if (angle_measure == DEGREE)
 				_num = num.DegreeToRadian();
-			else if (angleMeasure == GRAD)
+			else if (angle_measure == GRAD)
 				_num = num.GradToRadian();
 
 			mpfr_csch(res.number, _num.number, DEFAULT_RND);
@@ -2052,10 +2052,10 @@ namespace yutovo_calculator
 	 * Hyperbolic arcsine function.
 	 * @exception MathException Thrown when the mathematics error condition occurs.
 	 * @param num	The argument.
-	 * @param angleMeasure The angle measure.
+	 * @param angle_measure The angle measure.
 	 * @return The hyperbolic arcsine of the number.
 	 */
-	Real arsh(const Real& num, AngleMeasure angleMeasure)
+	Real arsh(const Real& num, AngleMeasure angle_measure)
 	{
 		Real res(num.GetBitPrecision());
 
@@ -2064,9 +2064,9 @@ namespace yutovo_calculator
 		if (res.IsInfinity() || res.IsNaN())
 			throw MathException(Overflow);
 
-		if (angleMeasure == DEGREE)
+		if (angle_measure == DEGREE)
 			res = res.RadianToDegree();
-		else if (angleMeasure == GRAD)
+		else if (angle_measure == GRAD)
 			res = res.RadianToGrad();
 
 		return res;
@@ -2076,10 +2076,10 @@ namespace yutovo_calculator
 	 * Hyperbolic arccosine function.
 	 * @exception MathException Thrown when the mathematics error condition occurs.
 	 * @param num	The argument.
-	 * @param angleMeasure The angle measure.
+	 * @param angle_measure The angle measure.
 	 * @return The hyperbolic arccosine of the number.
 	 */
-	Real arch(const Real& num, AngleMeasure angleMeasure)
+	Real arch(const Real& num, AngleMeasure angle_measure)
 	{
 		Real res(num.GetBitPrecision());
 
@@ -2088,9 +2088,9 @@ namespace yutovo_calculator
 		if (res.IsInfinity() || res.IsNaN())
 			throw MathException(Overflow);
 
-		if (angleMeasure == DEGREE)
+		if (angle_measure == DEGREE)
 			res = res.RadianToDegree();
-		else if (angleMeasure == GRAD)
+		else if (angle_measure == GRAD)
 			res = res.RadianToGrad();
 
 		return res;
@@ -2100,10 +2100,10 @@ namespace yutovo_calculator
 	 * Hyperbolic arctangent function.
 	 * @exception MathException Thrown when the mathematics error condition occurs.
 	 * @param num	The argument.
-	 * @param angleMeasure The angle measure.
+	 * @param angle_measure The angle measure.
 	 * @return The hyperbolic arctangent of the number.
 	 */
-	Real arth(const Real& num, AngleMeasure angleMeasure)
+	Real arth(const Real& num, AngleMeasure angle_measure)
 	{
 		Real res(num.GetBitPrecision());
 
@@ -2112,9 +2112,9 @@ namespace yutovo_calculator
 		if (res.IsInfinity() || res.IsNaN())
 			throw MathException(Overflow);
 
-		if (angleMeasure == DEGREE)
+		if (angle_measure == DEGREE)
 			res = res.RadianToDegree();
-		else if (angleMeasure == GRAD)
+		else if (angle_measure == GRAD)
 			res = res.RadianToGrad();
 
 		return res;
@@ -2124,19 +2124,19 @@ namespace yutovo_calculator
 	 * Hyperbolic arccotangent function.
 	 * @exception MathException Thrown when the mathematics error condition occurs.
 	 * @param num	The argument.
-	 * @param angleMeasure The angle measure.
+	 * @param angle_measure The angle measure.
 	 * @return The hyperbolic arccotangent of the number.
 	 */
-	Real arcth(const Real& num, AngleMeasure angleMeasure)
+	Real arcth(const Real& num, AngleMeasure angle_measure)
 	{
 		Real res(num.GetBitPrecision());
 
 		//res = (ln((num + 1) / (num - 1))) / 2;
-		res = arth(1 / num, angleMeasure);
+		res = arth(1 / num, angle_measure);
 
-		if (angleMeasure == DEGREE)
+		if (angle_measure == DEGREE)
 			res = res.RadianToDegree();
-		else if (angleMeasure == GRAD)
+		else if (angle_measure == GRAD)
 			res = res.RadianToGrad();
 
 		return res;
@@ -2146,19 +2146,19 @@ namespace yutovo_calculator
 	 * Hyperbolic arcsecant function.
 	 * @exception MathException Thrown when the mathematics error condition occurs.
 	 * @param num	The argument.
-	 * @param angleMeasure The angle measure.
+	 * @param angle_measure The angle measure.
 	 * @return The hyperbolic arcsecant of the number.
 	 */
-	Real arsch(const Real& num, AngleMeasure angleMeasure)
+	Real arsch(const Real& num, AngleMeasure angle_measure)
 	{
 		Real res(num.GetBitPrecision());
 
 		//res = ln(sqrt((1 / num) - 1) * sqrt((1 / num) + 1) + (1 / num));
-		res = arch(1 / num, angleMeasure);
+		res = arch(1 / num, angle_measure);
 
-		if (angleMeasure == DEGREE)
+		if (angle_measure == DEGREE)
 			res = res.RadianToDegree();
-		else if (angleMeasure == GRAD)
+		else if (angle_measure == GRAD)
 			res = res.RadianToGrad();
 
 		return res;
@@ -2168,19 +2168,19 @@ namespace yutovo_calculator
 	 * Hyperbolic arccosecant function.
 	 * @exception MathException Thrown when the mathematics error condition occurs.
 	 * @param num	The argument.
-	 * @param angleMeasure The angle measure.
+	 * @param angle_measure The angle measure.
 	 * @return The hyperbolic arccosecant of the number.
 	 */
-	Real arcsch(const Real& num, AngleMeasure angleMeasure)
+	Real arcsch(const Real& num, AngleMeasure angle_measure)
 	{
 		Real res(num.GetBitPrecision());
 
 		//res = ln(sqrt(1 + 1 / sqr(num)) + 1 / num);
-		res = arsh(1 / num, angleMeasure);
+		res = arsh(1 / num, angle_measure);
 
-		if (angleMeasure == DEGREE)
+		if (angle_measure == DEGREE)
 			res = res.RadianToDegree();
-		else if (angleMeasure == GRAD)
+		else if (angle_measure == GRAD)
 			res = res.RadianToGrad();
 
 		return res;
@@ -2519,14 +2519,14 @@ namespace yutovo_calculator
 	/**
 	 * Converts rad to an angle measure.
 	 * @param num	The argument.
-	 * @param angleMeasure The angle measure.
+	 * @param angle_measure The angle measure.
 	 * @return The result of the conversion.
 	 */
-	Real rad(const Real& num, AngleMeasure angleMeasure)
+	Real rad(const Real& num, AngleMeasure angle_measure)
 	{
 		Real res(num);
 
-		switch (angleMeasure)
+		switch (angle_measure)
 		{
 		case DEGREE:
 			res = res.RadianToDegree();
@@ -2542,14 +2542,14 @@ namespace yutovo_calculator
 	/**
 	 * Converts degree to an angle measure.
 	 * @param num	The argument.
-	 * @param angleMeasure The angle measure.
+	 * @param angle_measure The angle measure.
 	 * @return The result of the conversion.
 	 */
-	Real degree(const Real& num, AngleMeasure angleMeasure)
+	Real degree(const Real& num, AngleMeasure angle_measure)
 	{
 		Real res = num;
 
-		switch (angleMeasure)
+		switch (angle_measure)
 		{
 		case RADIAN:
 			res = res.DegreeToRadian();
@@ -2565,14 +2565,14 @@ namespace yutovo_calculator
 	/**
 	 * Converts degree minutes to an angle measure.
 	 * @param num	The argument.
-	 * @param angleMeasure The angle measure.
+	 * @param angle_measure The angle measure.
 	 * @return The result of the conversion.
 	 */
-	Real minute(const Real& num, AngleMeasure angleMeasure)
+	Real minute(const Real& num, AngleMeasure angle_measure)
 	{
 		Real res = num;
 
-		switch (angleMeasure)
+		switch (angle_measure)
 		{
 		case RADIAN:
 			res /= 60;
@@ -2593,14 +2593,14 @@ namespace yutovo_calculator
 	/**
 	 * Converts degree seconds to an angle measure.
 	 * @param num	The argument.
-	 * @param angleMeasure The angle measure.
+	 * @param angle_measure The angle measure.
 	 * @return The result of the conversion.
 	 */
-	Real second(const Real& num, AngleMeasure angleMeasure)
+	Real second(const Real& num, AngleMeasure angle_measure)
 	{
 		Real res = num;
 
-		switch (angleMeasure)
+		switch (angle_measure)
 		{
 		case RADIAN:
 			res /= 3600;
@@ -2621,14 +2621,14 @@ namespace yutovo_calculator
 	/**
 	 * Converts grad to an angle measure.
 	 * @param num	The argument.
-	 * @param angleMeasure The angle measure.
+	 * @param angle_measure The angle measure.
 	 * @return The result of the conversion.
 	 */
-	Real grad(const Real& num, AngleMeasure angleMeasure)
+	Real grad(const Real& num, AngleMeasure angle_measure)
 	{
 		Real res = num;
 
-		switch (angleMeasure)
+		switch (angle_measure)
 		{
 		case RADIAN:
 			res = res.GradToRadian();

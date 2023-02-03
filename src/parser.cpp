@@ -7,30 +7,30 @@ namespace yutovo_calculator
 
   Real pow(const Real& num1, const Real& num2);
 
-  Real sin(const Real& num, AngleMeasure angleMeasure);
-  Real cos(const Real& num, AngleMeasure angleMeasure);
-  Real tg(const Real& num, AngleMeasure angleMeasure);
-  Real ctg(const Real& num, AngleMeasure angleMeasure);
-  Real sec(const Real& num, AngleMeasure angleMeasure);
-  Real cosec(const Real& num, AngleMeasure angleMeasure);
-  Real arcsin(const Real& num, AngleMeasure angleMeasure);
-  Real arccos(const Real& num, AngleMeasure angleMeasure);
-  Real arctg(const Real& num, AngleMeasure angleMeasure);
-  Real arcctg(const Real& num, AngleMeasure angleMeasure);
-  Real arcsec(const Real& num, AngleMeasure angleMeasure);
-  Real arccosec(const Real& num, AngleMeasure angleMeasure);
-  Real sh(const Real& num, AngleMeasure angleMeasure);
-  Real ch(const Real& num, AngleMeasure angleMeasure);
-  Real th(const Real& num, AngleMeasure angleMeasure);
-  Real cth(const Real& num, AngleMeasure angleMeasure);
-  Real sch(const Real& num, AngleMeasure angleMeasure);
-  Real csch(const Real& num, AngleMeasure angleMeasure);
-  Real arsh(const Real& num, AngleMeasure angleMeasure);
-  Real arch(const Real& num, AngleMeasure angleMeasure);
-  Real arth(const Real& num, AngleMeasure angleMeasure);
-  Real arcth(const Real& num, AngleMeasure angleMeasure);
-  Real arsch(const Real& num, AngleMeasure angleMeasure);
-  Real arcsch(const Real& num, AngleMeasure angleMeasure);
+  Real sin(const Real& num, AngleMeasure angle_measure);
+  Real cos(const Real& num, AngleMeasure angle_measure);
+  Real tg(const Real& num, AngleMeasure angle_measure);
+  Real ctg(const Real& num, AngleMeasure angle_measure);
+  Real sec(const Real& num, AngleMeasure angle_measure);
+  Real cosec(const Real& num, AngleMeasure angle_measure);
+  Real arcsin(const Real& num, AngleMeasure angle_measure);
+  Real arccos(const Real& num, AngleMeasure angle_measure);
+  Real arctg(const Real& num, AngleMeasure angle_measure);
+  Real arcctg(const Real& num, AngleMeasure angle_measure);
+  Real arcsec(const Real& num, AngleMeasure angle_measure);
+  Real arccosec(const Real& num, AngleMeasure angle_measure);
+  Real sh(const Real& num, AngleMeasure angle_measure);
+  Real ch(const Real& num, AngleMeasure angle_measure);
+  Real th(const Real& num, AngleMeasure angle_measure);
+  Real cth(const Real& num, AngleMeasure angle_measure);
+  Real sch(const Real& num, AngleMeasure angle_measure);
+  Real csch(const Real& num, AngleMeasure angle_measure);
+  Real arsh(const Real& num, AngleMeasure angle_measure);
+  Real arch(const Real& num, AngleMeasure angle_measure);
+  Real arth(const Real& num, AngleMeasure angle_measure);
+  Real arcth(const Real& num, AngleMeasure angle_measure);
+  Real arsch(const Real& num, AngleMeasure angle_measure);
+  Real arcsch(const Real& num, AngleMeasure angle_measure);
 
   Real pi(const int precision);
   Real exp(const int precision);
@@ -51,8 +51,8 @@ namespace yutovo_calculator
 	template<>
 	Parser<yutovo_calculator::Integer>::Parser(const int precision) : solver(precision)
 	{
-		IntegerBinaryFunc binaryFunc = &pow;
-		solver.AddBuildinFunction("pow", binaryFunc);
+		IntegerBinaryFunc binary_func = &pow;
+		solver.AddBuildinFunction("pow", binary_func);
 	}
 
 	/**
@@ -69,72 +69,72 @@ namespace yutovo_calculator
 		var = &exp;
 		solver.AddBuildinVariable("e", var);
 		
-		RealUnaryFunc unaryFunc;
-		unaryFunc = &exp;
-		solver.AddBuildinFunction("exp", unaryFunc);
-		unaryFunc = &ln;
-		solver.AddBuildinFunction("ln", unaryFunc);
-		unaryFunc = &lg;
-		solver.AddBuildinFunction("lg", unaryFunc);
-		unaryFunc = &sqrt;
-		solver.AddBuildinFunction("sqrt", unaryFunc);
+		RealUnaryFunc unary_func;
+		unary_func = &exp;
+		solver.AddBuildinFunction("exp", unary_func);
+		unary_func = &ln;
+		solver.AddBuildinFunction("ln", unary_func);
+		unary_func = &lg;
+		solver.AddBuildinFunction("lg", unary_func);
+		unary_func = &sqrt;
+		solver.AddBuildinFunction("sqrt", unary_func);
 		
-		RealTrigonometricFunc trigonometricFunc;
-		trigonometricFunc = &sin;
-		solver.AddBuildinFunction("sin", trigonometricFunc);
-		trigonometricFunc = &cos;
-		solver.AddBuildinFunction("cos", trigonometricFunc);
-		trigonometricFunc = &tg;
-		solver.AddBuildinFunction("tg", trigonometricFunc);
-		trigonometricFunc = &ctg;
-		solver.AddBuildinFunction("ctg", trigonometricFunc);
-		trigonometricFunc = &sec;
-		solver.AddBuildinFunction("sec", trigonometricFunc);
-		trigonometricFunc = &cosec;
-		solver.AddBuildinFunction("cosec", trigonometricFunc);
-		trigonometricFunc = &arcsin;
-		solver.AddBuildinFunction("arcsin", trigonometricFunc);
-		trigonometricFunc = &arccos;
-		solver.AddBuildinFunction("arccos", trigonometricFunc);
-		trigonometricFunc = &arctg;
-		solver.AddBuildinFunction("arctg", trigonometricFunc);
-		trigonometricFunc = &arcctg;
-		solver.AddBuildinFunction("arcctg", trigonometricFunc);
-		trigonometricFunc = &arcsec;
-		solver.AddBuildinFunction("arcsec", trigonometricFunc);
-		trigonometricFunc = &arccosec;
-		solver.AddBuildinFunction("arccosec", trigonometricFunc);
-		trigonometricFunc = &sh;
-		solver.AddBuildinFunction("sh", trigonometricFunc);
-		trigonometricFunc = &ch;
-		solver.AddBuildinFunction("ch", trigonometricFunc);
-		trigonometricFunc = &th;
-		solver.AddBuildinFunction("th", trigonometricFunc);
-		trigonometricFunc = &cth;
-		solver.AddBuildinFunction("cth", trigonometricFunc);
-		trigonometricFunc = &sch;
-		solver.AddBuildinFunction("sch", trigonometricFunc);
-		trigonometricFunc = &csch;
-		solver.AddBuildinFunction("csch", trigonometricFunc);
-		trigonometricFunc = &arsh;
-		solver.AddBuildinFunction("arsh", trigonometricFunc);
-		trigonometricFunc = &arch;
-		solver.AddBuildinFunction("arch", trigonometricFunc);
-		trigonometricFunc = &arth;
-		solver.AddBuildinFunction("arth", trigonometricFunc);
-		trigonometricFunc = &arcth;
-		solver.AddBuildinFunction("arcth", trigonometricFunc);
-		trigonometricFunc = &arsch;
-		solver.AddBuildinFunction("arsch", trigonometricFunc);
-		trigonometricFunc = &arcsch;
-		solver.AddBuildinFunction("arcsch", trigonometricFunc);
+		RealTrigonometricFunc trigonometric_func;
+		trigonometric_func = &sin;
+		solver.AddBuildinFunction("sin", trigonometric_func);
+		trigonometric_func = &cos;
+		solver.AddBuildinFunction("cos", trigonometric_func);
+		trigonometric_func = &tg;
+		solver.AddBuildinFunction("tg", trigonometric_func);
+		trigonometric_func = &ctg;
+		solver.AddBuildinFunction("ctg", trigonometric_func);
+		trigonometric_func = &sec;
+		solver.AddBuildinFunction("sec", trigonometric_func);
+		trigonometric_func = &cosec;
+		solver.AddBuildinFunction("cosec", trigonometric_func);
+		trigonometric_func = &arcsin;
+		solver.AddBuildinFunction("arcsin", trigonometric_func);
+		trigonometric_func = &arccos;
+		solver.AddBuildinFunction("arccos", trigonometric_func);
+		trigonometric_func = &arctg;
+		solver.AddBuildinFunction("arctg", trigonometric_func);
+		trigonometric_func = &arcctg;
+		solver.AddBuildinFunction("arcctg", trigonometric_func);
+		trigonometric_func = &arcsec;
+		solver.AddBuildinFunction("arcsec", trigonometric_func);
+		trigonometric_func = &arccosec;
+		solver.AddBuildinFunction("arccosec", trigonometric_func);
+		trigonometric_func = &sh;
+		solver.AddBuildinFunction("sh", trigonometric_func);
+		trigonometric_func = &ch;
+		solver.AddBuildinFunction("ch", trigonometric_func);
+		trigonometric_func = &th;
+		solver.AddBuildinFunction("th", trigonometric_func);
+		trigonometric_func = &cth;
+		solver.AddBuildinFunction("cth", trigonometric_func);
+		trigonometric_func = &sch;
+		solver.AddBuildinFunction("sch", trigonometric_func);
+		trigonometric_func = &csch;
+		solver.AddBuildinFunction("csch", trigonometric_func);
+		trigonometric_func = &arsh;
+		solver.AddBuildinFunction("arsh", trigonometric_func);
+		trigonometric_func = &arch;
+		solver.AddBuildinFunction("arch", trigonometric_func);
+		trigonometric_func = &arth;
+		solver.AddBuildinFunction("arth", trigonometric_func);
+		trigonometric_func = &arcth;
+		solver.AddBuildinFunction("arcth", trigonometric_func);
+		trigonometric_func = &arsch;
+		solver.AddBuildinFunction("arsch", trigonometric_func);
+		trigonometric_func = &arcsch;
+		solver.AddBuildinFunction("arcsch", trigonometric_func);
 	
-		RealBinaryFunc binaryFunc = &pow;
-		solver.AddBuildinFunction("pow", binaryFunc);
-		binaryFunc = &log;
-		solver.AddBuildinFunction("log", binaryFunc);
-		binaryFunc = &root;
-		solver.AddBuildinFunction("root", binaryFunc);
+		RealBinaryFunc binary_func = &pow;
+		solver.AddBuildinFunction("pow", binary_func);
+		binary_func = &log;
+		solver.AddBuildinFunction("log", binary_func);
+		binary_func = &root;
+		solver.AddBuildinFunction("root", binary_func);
 	}
 
 	/**
@@ -145,65 +145,5 @@ namespace yutovo_calculator
 	template<>
 	Parser<yutovo_calculator::Rational>::Parser(const int precision) : solver(precision)
 	{
-	}
-
-	template<>
-	Integer Parser<Integer>::Parse(std::string expression, const int precision)
-	{
-		if (expression.empty() | expression == ";")
-			throw SyntaxException(ExpressionExpected, 0, 0);
-		
-		Integer res;
-		std::string::iterator iter = expression.begin();
-		std::string::iterator end = expression.end();
-		qi::space_type space;
-
-		Script<Integer> script(expression);
-		ScriptNode<Integer> scriptNode;
-
-		phrase_parse(iter, end, script, space, scriptNode);
-		res = solver(scriptNode, precision);
-
-		return res;
-	}
-
-	template<>
-	Real Parser<Real>::Parse(std::string expression, const int precision)
-	{
-		if (expression.empty() | expression == ";")
-			throw SyntaxException(ExpressionExpected, 0, 0);
-		
-		Real res;
-		std::string::iterator iter = expression.begin();
-		std::string::iterator end = expression.end();
-		qi::space_type space;
-
-		Script<Real> script(expression);
-		ScriptNode<Real> scriptNode;
-
-		phrase_parse(iter, end, script, space, scriptNode);
-		res = solver(scriptNode, precision);
-
-		return res;
-	}
-
-	template<>
-	Rational Parser<Rational>::Parse(std::string expression, const int precision)
-	{
-		if (expression.empty() | expression == ";")
-			throw SyntaxException(ExpressionExpected, 0, 0);
-		
-		Rational res;
-		std::string::iterator iter = expression.begin();
-		std::string::iterator end = expression.end();
-		qi::space_type space;
-
-		Script<Rational> script(expression);
-		ScriptNode<Rational> scriptNode;
-
-		phrase_parse(iter, end, script, space, scriptNode);
-		res = solver(scriptNode, precision);
-
-		return res;
 	}
 };

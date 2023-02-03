@@ -131,53 +131,53 @@ namespace yutovo_calculator
 		friend Real lg(const Real& num);
 		friend Real log(const Real& num1, const Real& num2);
 
-		friend Real sin(const Real& num, AngleMeasure angleMeasure);
+		friend Real sin(const Real& num, AngleMeasure angle_measure);
 
-		friend Real cos(const Real& num, AngleMeasure angleMeasure);
+		friend Real cos(const Real& num, AngleMeasure angle_measure);
 
-		friend Real tg(const Real& num, AngleMeasure angleMeasure);
+		friend Real tg(const Real& num, AngleMeasure angle_measure);
 
-		friend Real ctg(const Real& num, AngleMeasure angleMeasure);
+		friend Real ctg(const Real& num, AngleMeasure angle_measure);
 
-		friend Real sec(const Real& num, AngleMeasure angleMeasure);
+		friend Real sec(const Real& num, AngleMeasure angle_measure);
 
-		friend Real cosec(const Real& num, AngleMeasure angleMeasure);
+		friend Real cosec(const Real& num, AngleMeasure angle_measure);
 
-		friend Real arcsin(const Real& num, AngleMeasure angleMeasure);
+		friend Real arcsin(const Real& num, AngleMeasure angle_measure);
 
-		friend Real arccos(const Real& num, AngleMeasure angleMeasure);
+		friend Real arccos(const Real& num, AngleMeasure angle_measure);
 
-		friend Real arctg(const Real& num, AngleMeasure angleMeasure);
+		friend Real arctg(const Real& num, AngleMeasure angle_measure);
 
-		friend Real arcctg(const Real& num, AngleMeasure angleMeasure);
+		friend Real arcctg(const Real& num, AngleMeasure angle_measure);
 
-		friend Real arcsec(const Real& num, AngleMeasure angleMeasure);
+		friend Real arcsec(const Real& num, AngleMeasure angle_measure);
 
-		friend Real arccosec(const Real& num, AngleMeasure angleMeasure);
+		friend Real arccosec(const Real& num, AngleMeasure angle_measure);
 
-		friend Real sh(const Real& num, AngleMeasure angleMeasure);
+		friend Real sh(const Real& num, AngleMeasure angle_measure);
 
-		friend Real ch(const Real& num, AngleMeasure angleMeasure);
+		friend Real ch(const Real& num, AngleMeasure angle_measure);
 
-		friend Real th(const Real& num, AngleMeasure angleMeasure);
+		friend Real th(const Real& num, AngleMeasure angle_measure);
 
-		friend Real cth(const Real& num, AngleMeasure angleMeasure);
+		friend Real cth(const Real& num, AngleMeasure angle_measure);
 
-		friend Real sch(const Real& num, AngleMeasure angleMeasure);
+		friend Real sch(const Real& num, AngleMeasure angle_measure);
 
-		friend Real csch(const Real& num, AngleMeasure angleMeasure);
+		friend Real csch(const Real& num, AngleMeasure angle_measure);
 
-		friend Real arsh(const Real& num, AngleMeasure angleMeasure);
+		friend Real arsh(const Real& num, AngleMeasure angle_measure);
 
-		friend Real arch(const Real& num, AngleMeasure angleMeasure);
+		friend Real arch(const Real& num, AngleMeasure angle_measure);
 
-		friend Real arth(const Real& num, AngleMeasure angleMeasure);
+		friend Real arth(const Real& num, AngleMeasure angle_measure);
 
-		friend Real arcth(const Real& num, AngleMeasure angleMeasure);
+		friend Real arcth(const Real& num, AngleMeasure angle_measure);
 
-		friend Real arsch(const Real& num, AngleMeasure angleMeasure);
+		friend Real arsch(const Real& num, AngleMeasure angle_measure);
 
-		friend Real arcsch(const Real& num, AngleMeasure angleMeasure);
+		friend Real arcsch(const Real& num, AngleMeasure angle_measure);
 
 		friend Real pow(const Real& num1, const Real& num2);
 
@@ -225,11 +225,11 @@ namespace yutovo_calculator
 		Real DegreeToGrad() const;
 		Real GradToDegree() const;
 
-		friend Real rad(const Real& num, AngleMeasure angleMeasure);
-		friend Real degree(const Real& num, AngleMeasure angleMeasure);
-		friend Real minute(const Real& num, AngleMeasure angleMeasure);
-		friend Real second(const Real& num, AngleMeasure angleMeasure);
-		friend Real grad(const Real& num, AngleMeasure angleMeasure);
+		friend Real rad(const Real& num, AngleMeasure angle_measure);
+		friend Real degree(const Real& num, AngleMeasure angle_measure);
+		friend Real minute(const Real& num, AngleMeasure angle_measure);
+		friend Real second(const Real& num, AngleMeasure angle_measure);
+		friend Real grad(const Real& num, AngleMeasure angle_measure);
 
 	public:
 		bool IsNumber() const

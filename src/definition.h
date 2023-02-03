@@ -16,7 +16,7 @@ namespace yutovo_calculator
 		 * Constructor.
 		 * @param [in] expr The expression.
 		 */
-		Definition(std::string& expr) : Definition::base_type(definition), expression(expr), returnExpression(expr)
+		Definition(std::string& expr) : Definition::base_type(definition), expression(expr), return_expression(expr)
 		{
 			using boost::spirit::qi::lit;
 			using boost::spirit::qi::raw;
@@ -34,12 +34,12 @@ namespace yutovo_calculator
 			//the function definition
 			function = 
 				identifier >> 
-				'(' >> argumentList >> ')' >> 
+				'(' >> argument_list >> ')' >> 
 				(lit('=') >  
-				'{' > "return" > returnExpression > ';' > '}');
+				'{' > "return" > return_expression > ';' > '}');
 			
 			//the function's argument list
-			argumentList = 
+			argument_list = 
 				-(identifier % ',');
 			
 			//the variable definition
@@ -56,7 +56,7 @@ namespace yutovo_calculator
 				raw[lexeme[(alpha | '_') >> *(alnum | '_')]];
 
 			//BOOST_SPIRIT_DEBUG_NODE(definition);
-			//BOOST_SPIRIT_DEBUG_NODE(argumentList);
+			//BOOST_SPIRIT_DEBUG_NODE(argument_list);
 			//BOOST_SPIRIT_DEBUG_NODE(identifier);
 			//BOOST_SPIRIT_DEBUG_NODE(name);
 		}
@@ -66,10 +66,10 @@ namespace yutovo_calculator
 		qi::rule<std::string::iterator, VariableNode<Number>(), qi::space_type> variable;
 		qi::rule<std::string::iterator, std::string(), qi::space_type> name;
 		qi::rule<std::string::iterator, IdentifierNode<Number>(), qi::space_type> identifier;
-		qi::rule<std::string::iterator, std::list<IdentifierNode<Number> >(), qi::space_type> argumentList;
+		qi::rule<std::string::iterator, std::list<IdentifierNode<Number> >(), qi::space_type> argument_list;
 		//qi::rule<std::string::iterator, ExpressionNode<Number>(), qi::space_type> body;
 		Expression<Number> expression;
-		Expression<Number> returnExpression;
+		Expression<Number> return_expression;
 	};
 };
 

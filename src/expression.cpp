@@ -41,9 +41,9 @@ namespace yutovo_calculator
 		
 		unary = 
 			number | 
-			functionCall | 
+			function_call | 
 			identifier | 
-			unaryOperation | 
+			unary_operation | 
 			'(' > expression > ')';
 		
 		number = 
@@ -58,11 +58,11 @@ namespace yutovo_calculator
 		name = 
 			raw[lexeme[(alpha | '_') >> *(alnum | '_')]];
 
-		unaryOperation = 
+		unary_operation = 
 			(qi::char_('+') > unary) | 
 			(qi::char_('-') > unary);
 		
-		functionCall = 
+		function_call = 
 			identifier >> 
 			'(' >> -(expression % ',') > ')';
 
@@ -86,7 +86,7 @@ namespace yutovo_calculator
 		//BOOST_SPIRIT_DEBUG_NODE(addition);
 		//BOOST_SPIRIT_DEBUG_NODE(multiplication);
 		//BOOST_SPIRIT_DEBUG_NODE(number);
-		//BOOST_SPIRIT_DEBUG_NODE(functionCall);
+		//BOOST_SPIRIT_DEBUG_NODE(function_call);
 		//BOOST_SPIRIT_DEBUG_NODE(identifier);
 	}
 
@@ -128,19 +128,19 @@ namespace yutovo_calculator
 		
 		unary = 
 			number | 
-			functionCall | 
+			function_call | 
 			identifier | 
-			unaryOperation | 
+			unary_operation | 
 			'(' > expression > ')';
 		
 		number = 
-			expNumber | 
+			exp_number | 
 			str;
 		
 		str = 
 			+char_("0-9.");
 		
-		expNumber = 
+		exp_number = 
 			+char_("0-9.") >> raw[lexeme[(no_case[char_("E")] > (char_('+') | char_('-')))]] > +(char_("0-9"));
 
 		identifier = 
@@ -149,11 +149,11 @@ namespace yutovo_calculator
 		name = 
 			raw[lexeme[(alpha | '_') >> *(alnum | '_')]];
 
-		unaryOperation = 
+		unary_operation = 
 			(qi::char_('+') > unary) | 
 			(qi::char_('-') > unary);
 		
-		functionCall = 
+		function_call = 
 			identifier >> 
 			'(' >> -(expression % ',') > ')';
 
@@ -166,7 +166,7 @@ namespace yutovo_calculator
 			boost::phoenix::function<Annotation<yutovo_calculator::Real> >(Annotation<yutovo_calculator::Real>(expr.begin(), expr.end()))(qi::_val, _1));
 		on_success(multiply, 
 			boost::phoenix::function<Annotation<yutovo_calculator::Real> >(Annotation<yutovo_calculator::Real>(expr.begin(), expr.end()))(qi::_val, _1));
-		on_success(functionCall, 
+		on_success(function_call, 
 			boost::phoenix::function<Annotation<yutovo_calculator::Real> >(Annotation<yutovo_calculator::Real>(expr.begin(), expr.end()))(qi::_val, _1));
 		on_success(identifier, 
 			boost::phoenix::function<Annotation<yutovo_calculator::Real> >(Annotation<yutovo_calculator::Real>(expr.begin(), expr.end()))(qi::_val, _1));
@@ -178,7 +178,7 @@ namespace yutovo_calculator
 		//BOOST_SPIRIT_DEBUG_NODE(addition);
 		//BOOST_SPIRIT_DEBUG_NODE(multiplication);
 		//BOOST_SPIRIT_DEBUG_NODE(number);
-		//BOOST_SPIRIT_DEBUG_NODE(functionCall);
+		//BOOST_SPIRIT_DEBUG_NODE(function_call);
 		//BOOST_SPIRIT_DEBUG_NODE(identifier);
 	}
 
@@ -219,9 +219,9 @@ namespace yutovo_calculator
 		
 		unary = 
 			number | 
-			functionCall | 
+			function_call | 
 			identifier | 
-			unaryOperation | 
+			unary_operation | 
 			'(' > expression > ')';
 		
 		number = 
@@ -236,20 +236,25 @@ namespace yutovo_calculator
 		name = 
 			raw[lexeme[(alpha | '_') >> *(alnum | '_')]];
 
-		unaryOperation = 
+		unary_operation = 
 			(qi::char_('+') > unary) | 
 			(qi::char_('-') > unary);
 		
-		functionCall = 
+		function_call = 
 			identifier >> 
 			'(' >> -(expression % ',') > ')';
 
 		//annotate the items with an expression's position
-		on_success(unary, boost::phoenix::function<Annotation<yutovo_calculator::Rational> >(Annotation<yutovo_calculator::Rational>(expr.begin(), expr.end()))(qi::_val, _1));
-		on_success(addition, boost::phoenix::function<Annotation<yutovo_calculator::Rational> >(Annotation<yutovo_calculator::Rational>(expr.begin(), expr.end()))(qi::_val, _1));
-		on_success(multiplication, boost::phoenix::function<Annotation<yutovo_calculator::Rational> >(Annotation<yutovo_calculator::Rational>(expr.begin(), expr.end()))(qi::_val, _1));
-		on_success(multiply, boost::phoenix::function<Annotation<yutovo_calculator::Rational> >(Annotation<yutovo_calculator::Rational>(expr.begin(), expr.end()))(qi::_val, _1));
-		on_success(identifier, boost::phoenix::function<Annotation<yutovo_calculator::Rational> >(Annotation<yutovo_calculator::Rational>(expr.begin(), expr.end()))(qi::_val, _1));
+		on_success(unary, boost::phoenix::function<Annotation<yutovo_calculator::Rational>>(Annotation<yutovo_calculator::Rational>(expr.begin(), 
+			expr.end()))(qi::_val, _1));
+		on_success(addition, boost::phoenix::function<Annotation<yutovo_calculator::Rational>>(Annotation<yutovo_calculator::Rational>(expr.begin(), 
+			expr.end()))(qi::_val, _1));
+		on_success(multiplication, boost::phoenix::function<Annotation<yutovo_calculator::Rational>>(Annotation<yutovo_calculator::Rational>(expr.begin(), 
+			expr.end()))(qi::_val, _1));
+		on_success(multiply, boost::phoenix::function<Annotation<yutovo_calculator::Rational>>(Annotation<yutovo_calculator::Rational>(expr.begin(), 
+			expr.end()))(qi::_val, _1));
+		on_success(identifier, boost::phoenix::function<Annotation<yutovo_calculator::Rational>>(Annotation<yutovo_calculator::Rational>(expr.begin(), 
+			expr.end()))(qi::_val, _1));
 		
 		//work out the exceptions
 		on_error<fail>(expression, 
@@ -259,7 +264,7 @@ namespace yutovo_calculator
 		//BOOST_SPIRIT_DEBUG_NODE(addition);
 		//BOOST_SPIRIT_DEBUG_NODE(multiplication);
 		//BOOST_SPIRIT_DEBUG_NODE(number);
-		//BOOST_SPIRIT_DEBUG_NODE(functionCall);
+		//BOOST_SPIRIT_DEBUG_NODE(function_call);
 		//BOOST_SPIRIT_DEBUG_NODE(identifier);
 	}
 };
