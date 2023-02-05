@@ -21,8 +21,8 @@ TEST_F(CalcTestInteger, variables1)
 
 TEST_F(CalcTestInteger, functions1)
 {
-    ASSERT_TRUE(parser.Parse("f(x)={return x+5;};f(2)") == parser.Parse("7"));
-    ASSERT_TRUE(parser.Parse("a=5+6;f(t)={return a*t;};f(2)") == parser.Parse("22"));
+    ASSERT_TRUE(parser.Parse("f(x)=x+5;f(2)") == parser.Parse("7"));
+    ASSERT_TRUE(parser.Parse("a=5+6;f(t)=a*t;f(2)") == parser.Parse("22"));
 }
 
 }

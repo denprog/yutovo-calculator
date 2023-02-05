@@ -68,19 +68,19 @@ namespace yutovo_calculator
 
 		//annotate the items with an expression's position
 		on_success(unary, 
-			boost::phoenix::function<Annotation<yutovo_calculator::Integer> >(Annotation<yutovo_calculator::Integer>(expr.begin(), expr.end()))(qi::_val, _1));
+			boost::phoenix::function<Annotation<yutovo_calculator::Integer>>(Annotation<yutovo_calculator::Integer>(expr.begin(), expr.end()))(qi::_val, _1));
 		on_success(addition, 
-			boost::phoenix::function<Annotation<yutovo_calculator::Integer> >(Annotation<yutovo_calculator::Integer>(expr.begin(), expr.end()))(qi::_val, _1));
+			boost::phoenix::function<Annotation<yutovo_calculator::Integer>>(Annotation<yutovo_calculator::Integer>(expr.begin(), expr.end()))(qi::_val, _1));
 		on_success(multiplication, 
-			boost::phoenix::function<Annotation<yutovo_calculator::Integer> >(Annotation<yutovo_calculator::Integer>(expr.begin(), expr.end()))(qi::_val, _1));
+			boost::phoenix::function<Annotation<yutovo_calculator::Integer>>(Annotation<yutovo_calculator::Integer>(expr.begin(), expr.end()))(qi::_val, _1));
 		on_success(multiply, 
-			boost::phoenix::function<Annotation<yutovo_calculator::Integer> >(Annotation<yutovo_calculator::Integer>(expr.begin(), expr.end()))(qi::_val, _1));
+			boost::phoenix::function<Annotation<yutovo_calculator::Integer>>(Annotation<yutovo_calculator::Integer>(expr.begin(), expr.end()))(qi::_val, _1));
 		on_success(identifier, 
-			boost::phoenix::function<Annotation<yutovo_calculator::Integer> >(Annotation<yutovo_calculator::Integer>(expr.begin(), expr.end()))(qi::_val, _1));
+			boost::phoenix::function<Annotation<yutovo_calculator::Integer>>(Annotation<yutovo_calculator::Integer>(expr.begin(), expr.end()))(qi::_val, _1));
 		
 		//work out the exceptions
 		on_error<fail>(expression, 
-			boost::phoenix::function<ErrorHandler<SyntaxException> >(ErrorHandler<SyntaxException>(expr.begin(), expr.end(), SyntaxError))(_3));
+			boost::phoenix::function<ErrorHandler<SyntaxException>>(ErrorHandler<SyntaxException>(expr.begin(), expr.end(), SyntaxError))(_3));
 		
 		//BOOST_SPIRIT_DEBUG_NODE(expression);
 		//BOOST_SPIRIT_DEBUG_NODE(addition);
@@ -159,20 +159,20 @@ namespace yutovo_calculator
 
 		//annotate the items with the expression's position
 		on_success(unary, 
-			boost::phoenix::function<Annotation<yutovo_calculator::Real> >(Annotation<yutovo_calculator::Real>(expr.begin(), expr.end()))(qi::_val, _1));
+			boost::phoenix::function<Annotation<yutovo_calculator::Real>>(Annotation<yutovo_calculator::Real>(expr.begin(), expr.end()))(qi::_val, _1));
 		on_success(addition, 
-			boost::phoenix::function<Annotation<yutovo_calculator::Real> >(Annotation<yutovo_calculator::Real>(expr.begin(), expr.end()))(qi::_val, _1));
+			boost::phoenix::function<Annotation<yutovo_calculator::Real>>(Annotation<yutovo_calculator::Real>(expr.begin(), expr.end()))(qi::_val, _1));
 		on_success(multiplication, 
-			boost::phoenix::function<Annotation<yutovo_calculator::Real> >(Annotation<yutovo_calculator::Real>(expr.begin(), expr.end()))(qi::_val, _1));
+			boost::phoenix::function<Annotation<yutovo_calculator::Real>>(Annotation<yutovo_calculator::Real>(expr.begin(), expr.end()))(qi::_val, _1));
 		on_success(multiply, 
-			boost::phoenix::function<Annotation<yutovo_calculator::Real> >(Annotation<yutovo_calculator::Real>(expr.begin(), expr.end()))(qi::_val, _1));
+			boost::phoenix::function<Annotation<yutovo_calculator::Real>>(Annotation<yutovo_calculator::Real>(expr.begin(), expr.end()))(qi::_val, _1));
 		on_success(function_call, 
-			boost::phoenix::function<Annotation<yutovo_calculator::Real> >(Annotation<yutovo_calculator::Real>(expr.begin(), expr.end()))(qi::_val, _1));
+			boost::phoenix::function<Annotation<yutovo_calculator::Real>>(Annotation<yutovo_calculator::Real>(expr.begin(), expr.end()))(qi::_val, _1));
 		on_success(identifier, 
-			boost::phoenix::function<Annotation<yutovo_calculator::Real> >(Annotation<yutovo_calculator::Real>(expr.begin(), expr.end()))(qi::_val, _1));
+			boost::phoenix::function<Annotation<yutovo_calculator::Real>>(Annotation<yutovo_calculator::Real>(expr.begin(), expr.end()))(qi::_val, _1));
 		
 		on_error<fail>(expression, 
-			boost::phoenix::function<ErrorHandler<SyntaxException> >(ErrorHandler<SyntaxException>(expr.begin(), expr.end(), SyntaxError))(_3));
+			boost::phoenix::function<ErrorHandler<SyntaxException>>(ErrorHandler<SyntaxException>(expr.begin(), expr.end(), SyntaxError))(_3));
 		
 		//BOOST_SPIRIT_DEBUG_NODE(expression);
 		//BOOST_SPIRIT_DEBUG_NODE(addition);

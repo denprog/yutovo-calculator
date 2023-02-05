@@ -25,24 +25,25 @@ namespace yutovo_calculator
 			using boost::spirit::qi::alpha;
 			using boost::spirit::qi::on_error;
 			using boost::spirit::qi::fail;
+			qi::_1_type _1;
+			qi::_3_type _3;
 			
-			//the definition is a variable or a function
+			//definition is a variable or a function
 			definition = 
 				variable | 
 				function;
 			
-			//the function definition
+			//function definition
 			function = 
 				identifier >> 
 				'(' >> argument_list >> ')' >> 
-				(lit('=') >  
-				'{' > "return" > return_expression > ';' > '}');
+				('=' > expression);
 			
-			//the function's argument list
+			//function's argument list
 			argument_list = 
 				-(identifier % ',');
 			
-			//the variable definition
+			//variable definition
 			variable = 
 				identifier >> 
 				('=' > expression);
@@ -59,6 +60,10 @@ namespace yutovo_calculator
 			//BOOST_SPIRIT_DEBUG_NODE(argument_list);
 			//BOOST_SPIRIT_DEBUG_NODE(identifier);
 			//BOOST_SPIRIT_DEBUG_NODE(name);
+
+			//work out the exceptions
+			on_error<fail>(definition, 
+				boost::phoenix::function<ErrorHandler<SyntaxException>>(ErrorHandler<SyntaxException>(expr.begin(), expr.end(), SyntaxError))(_3));
 		}
 
 		qi::rule<std::string::iterator, DefinitionNode<Number>(), qi::space_type> definition;
@@ -67,7 +72,7 @@ namespace yutovo_calculator
 		qi::rule<std::string::iterator, std::string(), qi::space_type> name;
 		qi::rule<std::string::iterator, IdentifierNode<Number>(), qi::space_type> identifier;
 		qi::rule<std::string::iterator, std::list<IdentifierNode<Number> >(), qi::space_type> argument_list;
-		//qi::rule<std::string::iterator, ExpressionNode<Number>(), qi::space_type> body;
+		
 		Expression<Number> expression;
 		Expression<Number> return_expression;
 	};

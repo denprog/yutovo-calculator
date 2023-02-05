@@ -50,6 +50,11 @@ namespace yutovo_calculator
 			return solver(scriptNode, precision);
 		}
 
+		bool RemoveIdentifier(const std::string& name)
+		{
+			return solver.RemoveIdentifier(name);
+		}
+
 		/**
 		 * Sets a precision.
 		 * @param precision The precision.

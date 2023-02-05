@@ -116,7 +116,7 @@ namespace yutovo_calculator
 		Number operator()(VariableNode<Number> const& op) const
 		{
 			//store the variable
-			PushVariable(op);
+			AddVariable(op);
 			return Number();
 		}
 		
@@ -236,15 +236,11 @@ namespace yutovo_calculator
 			return NULL;
 		}
 
-		/**
-		 * Pushes a variable.
-		 * @param var The variable.
-		 */
-		void PushVariable(VariableNode<Number> const& var) const
+		void AddVariable(VariableNode<Number> const& var) const
 		{
 			symbols->variables.push_back(var);
 		}
-		
+
 		/**
 		 * Searches for the first variable.
 		 * @param name The name.
@@ -343,6 +339,26 @@ namespace yutovo_calculator
 			if (iter == symbols->buildin_variables.end())
 				return NULL;
 			return (BuildinVariable*)&(*iter).second;
+		}
+
+		bool RemoveIdentifier(const std::string& name)
+		{
+			auto var_it = symbols->variables.erase(std::remove_if(symbols->variables.begin(), symbols->variables.end(), 
+				[name](auto& var)
+				{
+					return var.name.name == name;
+				}), 
+				symbols->variables.end());
+			if (var_it != symbols->variables.end())
+				return true;
+
+			auto func_it = symbols->functions.erase(std::remove_if(symbols->functions.begin(), symbols->functions.end(), 
+				[name](auto& func)
+				{
+					return func.name.name == name;
+				}), 
+				symbols->functions.end());
+			return func_it != symbols->functions.end();
 		}
 		
 		mutable int precision; ///< The precision
