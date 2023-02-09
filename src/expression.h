@@ -16,11 +16,12 @@ namespace yutovo_calculator
 
 		typedef boost::variant<
 			Number, 
-			boost::recursive_wrapper<IdentifierNode<Number> >, 
-			boost::recursive_wrapper<UnaryOperationNode<Number> >, 
-			boost::recursive_wrapper<OperationNode<Number> >, 
-			boost::recursive_wrapper<FunctionCallNode<Number> >, 
-			boost::recursive_wrapper<ExpressionNode<Number> > >
+			boost::recursive_wrapper<IdentifierNode<Number>>, 
+			boost::recursive_wrapper<UnaryOperationNode<Number>>, 
+			boost::recursive_wrapper<OperationNode<Number>>, 
+			boost::recursive_wrapper<FunctionCallNode<Number>>, 
+			boost::recursive_wrapper<NoFencesFunctionCallNode<Number>>, 
+			boost::recursive_wrapper<ExpressionNode<Number>>>
 			Operand;
 		
 		qi::rule<std::string::iterator, ExpressionNode<Number>(), qi::space_type> expression, term, addition, multiplication;
@@ -29,6 +30,8 @@ namespace yutovo_calculator
 		qi::rule<std::string::iterator, UnaryOperationNode<Number>(), qi::space_type> unary_operation;
 		qi::rule<std::string::iterator, IdentifierNode<Number>(), qi::space_type> identifier;
 		qi::rule<std::string::iterator, FunctionCallNode<Number>(), qi::space_type> function_call;
+		qi::rule<std::string::iterator, NoFencesFunctionCallNode<Number>(), qi::space_type> no_fences_function_call;
+		qi::rule<std::string::iterator, FunctionParamNode<Number>(), qi::space_type> function_param;
 		qi::rule<std::string::iterator, std::string(), qi::space_type> str, exp_number;
 		qi::rule<std::string::iterator, std::string(), qi::space_type> name;
 		qi::rule<std::string::iterator, Number(), qi::space_type> number;

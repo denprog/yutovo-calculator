@@ -23,8 +23,8 @@ namespace yutovo_calculator
 		{
 			script = 
 				*(
-					definition >> ";" | 
-					expression >> ";"
+					(definition >> ";") | 
+					(expression >> ";")
 				);
 		}
 

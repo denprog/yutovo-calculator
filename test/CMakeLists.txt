@@ -11,7 +11,8 @@ include_directories(${GTEST_INCLUDE_DIR})
 
 add_executable(${PROJECT_NAME}_tests
 	main.cpp
-	integers.cpp
+	integer.cpp
+	real.cpp
 )
 
 target_link_libraries(${PROJECT_NAME}_tests PRIVATE

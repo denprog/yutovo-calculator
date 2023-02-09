@@ -248,6 +248,51 @@ namespace yutovo_calculator
 		return res;
 	}
 
+	template<>
+	Integer Solver<Integer>::operator()(NoFencesFunctionCallNode<Integer> const& op) const
+	{
+		Integer res;
+		return res;
+	}
+
+	template<>
+	Real Solver<Real>::operator()(NoFencesFunctionCallNode<Real> const& op) const
+	{
+		Real res;
+		
+		//find in the build-in functions		
+		BuildinFunction* func = FindBuildinFunction(op.name.name);
+		if (func)
+		{
+			try
+			{
+				BinaryFunction b = boost::get<BinaryFunction>(*func);
+				if (op.arguments.size() != 1)
+					throw SyntaxException(WrongArgumentsCount, op.pos, op.line);
+				
+				ExpressionNodesIter callIter = op.arguments.begin();
+				Real arg1 = (*this)(*callIter++);
+				Real arg2 = (*this)(op.last_argument);
+				return (*b)(arg1, arg2);
+			}
+			catch (boost::bad_get)
+			{
+			}
+		}
+
+		//there is no such a function		
+		throw SyntaxException(UnknownIdentifier, op.pos, op.line);
+		
+		return res;
+	}
+
+	template<>
+	Rational Solver<Rational>::operator()(NoFencesFunctionCallNode<Rational> const& op) const
+	{
+		Rational res;
+		return res;
+	}
+
 	/**
 	 * Visitor's functor for IdentifierNode<Integer>.
 	 */

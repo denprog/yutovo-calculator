@@ -2890,7 +2890,7 @@ namespace yutovo_calculator
 		}
 	}
 
-#ifdef _DEBUG
+#ifdef DEBUG
 	/**
 	 * Convert this number into a std::string representation.
 	 * @param exp	The exponent.

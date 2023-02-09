@@ -326,7 +326,7 @@ namespace yutovo_calculator
 		std::string ToString() const;
 		void ToString(int exp, int accuracy, bool& mantissaSign, std::string& mantissa, bool& exponentSign, std::string& exponent) const;
 		
-#ifdef _DEBUG
+#ifdef DEBUG
 		std::string ToString(int exp, int accuracy) const;
 #endif
 

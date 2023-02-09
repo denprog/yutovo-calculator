@@ -109,7 +109,7 @@ namespace yutovo_calculator
 		std::string ToString() const;
 		static Integer FromString(const std::string& str);
 
-#ifdef _DEBUG
+#ifdef DEBUG
 		std::string ToString(int exp, int accuracy) const;
 #endif
 

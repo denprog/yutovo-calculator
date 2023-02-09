@@ -12,11 +12,21 @@ using namespace yutovo_calculator;
 struct CalcTestInteger : public testing::Test
 {
     CalcTestInteger() :
-        parser(10)
+        parser(0)
     {
     }
 
     Parser<Integer> parser;
+};
+
+struct CalcTestReal : public testing::Test
+{
+    CalcTestReal() :
+        parser(3)
+    {
+    }
+
+    Parser<Real> parser;
 };
 
 }

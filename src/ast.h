@@ -19,6 +19,8 @@ namespace yutovo_calculator
 	template<typename Number>
 	struct FunctionCallNode;
 	template<typename Number>
+	struct NoFencesFunctionCallNode;
+	template<typename Number>
 	struct ExpressionNode;
 
 	//Expression position.
@@ -47,11 +49,12 @@ namespace yutovo_calculator
 	{
 		typedef boost::variant<
 			Number, 
-			boost::recursive_wrapper<IdentifierNode<Number> >, 
-			boost::recursive_wrapper<UnaryOperationNode<Number> >, 
-			boost::recursive_wrapper<OperationNode<Number> >, 
-			boost::recursive_wrapper<FunctionCallNode<Number> >, 
-			boost::recursive_wrapper<ExpressionNode<Number> > > 
+			boost::recursive_wrapper<IdentifierNode<Number>>, 
+			boost::recursive_wrapper<UnaryOperationNode<Number>>, 
+			boost::recursive_wrapper<OperationNode<Number>>, 
+			boost::recursive_wrapper<FunctionCallNode<Number>>, 
+			boost::recursive_wrapper<NoFencesFunctionCallNode<Number>>, 
+			boost::recursive_wrapper<ExpressionNode<Number>>> 
 			Operand;
 		
 		char op;
@@ -64,11 +67,12 @@ namespace yutovo_calculator
 	{
 		typedef boost::variant<
 			Number, 
-			boost::recursive_wrapper<IdentifierNode<Number> >, 
-			boost::recursive_wrapper<UnaryOperationNode<Number> >, 
-			boost::recursive_wrapper<OperationNode<Number> >, 
-			boost::recursive_wrapper<FunctionCallNode<Number> >, 
-			boost::recursive_wrapper<ExpressionNode<Number> > > 
+			boost::recursive_wrapper<IdentifierNode<Number>>, 
+			boost::recursive_wrapper<UnaryOperationNode<Number>>, 
+			boost::recursive_wrapper<OperationNode<Number>>, 
+			boost::recursive_wrapper<FunctionCallNode<Number>>, 
+			boost::recursive_wrapper<NoFencesFunctionCallNode<Number>>, 
+			boost::recursive_wrapper<ExpressionNode<Number>>> 
 			Operand;
 		
 		char op;
@@ -88,7 +92,7 @@ namespace yutovo_calculator
 	struct FunctionNode
 	{
 		IdentifierNode<Number> name;
-		std::list<IdentifierNode<Number> > arguments;
+		std::list<IdentifierNode<Number>> arguments;
 		ExpressionNode<Number> return_expression;
 	};
 
@@ -97,8 +101,8 @@ namespace yutovo_calculator
 	struct DefinitionNode
 	{
 		typedef boost::variant<
-			boost::recursive_wrapper<VariableNode<Number> >, 
-			boost::recursive_wrapper<FunctionNode<Number> > > 
+			boost::recursive_wrapper<VariableNode<Number>>, 
+			boost::recursive_wrapper<FunctionNode<Number>>> 
 			Definition;
 		
 		Definition definition;
@@ -109,25 +113,46 @@ namespace yutovo_calculator
 	struct FunctionCallNode : ExpressionPosition
 	{
 		IdentifierNode<Number> name;
-		std::list<ExpressionNode<Number> > arguments;
+		std::list<ExpressionNode<Number>> arguments;
 	};
-	
-	//Expression node.
+
+	template<typename Number>
+	struct FunctionParamNode : ExpressionPosition
+	{
+		typedef Number value_type;
+		typedef boost::variant<
+			Number, 
+			boost::recursive_wrapper<IdentifierNode<Number>>, 
+			boost::recursive_wrapper<ExpressionNode<Number>>>
+			Operand;
+		
+		Operand op;
+	};
+
+	template<typename Number>
+	struct NoFencesFunctionCallNode : ExpressionPosition
+	{
+		IdentifierNode<Number> name;
+		std::list<ExpressionNode<Number>> arguments;
+		FunctionParamNode<Number> last_argument;
+	};
+
 	template<typename Number>
 	struct ExpressionNode : ExpressionPosition
 	{
 		typedef Number value_type;
 		typedef boost::variant<
 			Number, 
-			boost::recursive_wrapper<IdentifierNode<Number> >, 
-			boost::recursive_wrapper<UnaryOperationNode<Number> >, 
-			boost::recursive_wrapper<OperationNode<Number> >,
-			boost::recursive_wrapper<FunctionCallNode<Number> >, 
-			boost::recursive_wrapper<ExpressionNode<Number> > >
+			boost::recursive_wrapper<IdentifierNode<Number>>, 
+			boost::recursive_wrapper<UnaryOperationNode<Number>>, 
+			boost::recursive_wrapper<OperationNode<Number>>,
+			boost::recursive_wrapper<FunctionCallNode<Number>>, 
+			boost::recursive_wrapper<NoFencesFunctionCallNode<Number>>, 
+			boost::recursive_wrapper<ExpressionNode<Number>>>
 			Operand;
 		
 		Operand first;
-		std::list<OperationNode<Number> > rest;
+		std::list<OperationNode<Number>> rest;
 	};
 	
 	//Script node.
@@ -136,8 +161,8 @@ namespace yutovo_calculator
 	{
 		typedef Number value_type;
 		typedef boost::variant<
-			boost::recursive_wrapper<DefinitionNode<Number> >, 
-			boost::recursive_wrapper<ExpressionNode<Number> > > 
+			boost::recursive_wrapper<DefinitionNode<Number>>, 
+			boost::recursive_wrapper<ExpressionNode<Number>>> 
 			Operand;
 		
 		std::list<Operand> list;
@@ -157,8 +182,7 @@ BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::VariableNode<yutovo_calculator::Int
 
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::FunctionNode<yutovo_calculator::Integer>, 
 	(yutovo_calculator::IdentifierNode<yutovo_calculator::Integer>, name)
-	(std::list<yutovo_calculator::IdentifierNode<yutovo_calculator::Integer> >, arguments)
-	//(yutovo_calculator::ExpressionNode<yutovo_calculator::Integer>, expression)
+	(std::list<yutovo_calculator::IdentifierNode<yutovo_calculator::Integer>>, arguments)
 	(yutovo_calculator::ExpressionNode<yutovo_calculator::Integer>, return_expression))
 
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::DefinitionNode<yutovo_calculator::Integer>, 
@@ -169,10 +193,19 @@ BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::IdentifierNode<yutovo_calculator::I
 
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::FunctionCallNode<yutovo_calculator::Integer>, 
 	(yutovo_calculator::IdentifierNode<yutovo_calculator::Integer>, name)
-	(std::list<yutovo_calculator::ExpressionNode<yutovo_calculator::Integer> >, arguments))
+	(std::list<yutovo_calculator::ExpressionNode<yutovo_calculator::Integer>>, arguments))
+
+BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::NoFencesFunctionCallNode<yutovo_calculator::Integer>, 
+	(yutovo_calculator::IdentifierNode<yutovo_calculator::Integer>, name)
+	(std::list<yutovo_calculator::ExpressionNode<yutovo_calculator::Integer>>, arguments)
+	(yutovo_calculator::FunctionParamNode<yutovo_calculator::Integer>, last_argument))
+
+BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::FunctionParamNode<yutovo_calculator::Integer>, 
+	(yutovo_calculator::FunctionParamNode<yutovo_calculator::Integer>::Operand, op))
 
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::ExpressionNode<yutovo_calculator::Integer>, 
-	(yutovo_calculator::ExpressionNode<yutovo_calculator::Integer>::Operand, first)(std::list<yutovo_calculator::OperationNode<yutovo_calculator::Integer> >, rest))
+	(yutovo_calculator::ExpressionNode<yutovo_calculator::Integer>::Operand, first)
+	(std::list<yutovo_calculator::OperationNode<yutovo_calculator::Integer>>, rest))
 
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::ScriptNode<yutovo_calculator::Integer>, 
 	(std::list<yutovo_calculator::ScriptNode<yutovo_calculator::Integer>::Operand>, list))
@@ -186,12 +219,12 @@ BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::OperationNode<yutovo_calculator::Re
 	(char, op)(yutovo_calculator::OperationNode<yutovo_calculator::Real>::Operand, operand))
 
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::VariableNode<yutovo_calculator::Real>, 
-	(yutovo_calculator::IdentifierNode<yutovo_calculator::Real>, name)(yutovo_calculator::ExpressionNode<yutovo_calculator::Real>, expression))
+	(yutovo_calculator::IdentifierNode<yutovo_calculator::Real>, name)
+	(yutovo_calculator::ExpressionNode<yutovo_calculator::Real>, expression))
 
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::FunctionNode<yutovo_calculator::Real>, 
 	(yutovo_calculator::IdentifierNode<yutovo_calculator::Real>, name)
-	(std::list<yutovo_calculator::IdentifierNode<yutovo_calculator::Real> >, arguments)
-	//(yutovo_calculator::ExpressionNode<yutovo_calculator::Real>, expression)
+	(std::list<yutovo_calculator::IdentifierNode<yutovo_calculator::Real>>, arguments)
 	(yutovo_calculator::ExpressionNode<yutovo_calculator::Real>, return_expression))
 
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::DefinitionNode<yutovo_calculator::Real>, 
@@ -202,10 +235,19 @@ BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::IdentifierNode<yutovo_calculator::R
 
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::FunctionCallNode<yutovo_calculator::Real>, 
 	(yutovo_calculator::IdentifierNode<yutovo_calculator::Real>, name)
-	(std::list<yutovo_calculator::ExpressionNode<yutovo_calculator::Real> >, arguments))
+	(std::list<yutovo_calculator::ExpressionNode<yutovo_calculator::Real>>, arguments))
+
+BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::NoFencesFunctionCallNode<yutovo_calculator::Real>, 
+	(yutovo_calculator::IdentifierNode<yutovo_calculator::Real>, name)
+	(std::list<yutovo_calculator::ExpressionNode<yutovo_calculator::Real>>, arguments)
+	(yutovo_calculator::FunctionParamNode<yutovo_calculator::Real>, last_argument))
+
+BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::FunctionParamNode<yutovo_calculator::Real>, 
+	(yutovo_calculator::FunctionParamNode<yutovo_calculator::Real>::Operand, op))
 
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::ExpressionNode<yutovo_calculator::Real>, 
-	(yutovo_calculator::ExpressionNode<yutovo_calculator::Real>::Operand, first)(std::list<yutovo_calculator::OperationNode<yutovo_calculator::Real> >, rest))
+	(yutovo_calculator::ExpressionNode<yutovo_calculator::Real>::Operand, first)
+	(std::list<yutovo_calculator::OperationNode<yutovo_calculator::Real>>, rest))
 
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::ScriptNode<yutovo_calculator::Real>, 
 	(std::list<yutovo_calculator::ScriptNode<yutovo_calculator::Real>::Operand>, list))
@@ -219,12 +261,12 @@ BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::OperationNode<yutovo_calculator::Ra
 	(char, op)(yutovo_calculator::OperationNode<yutovo_calculator::Rational>::Operand, operand))
 
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::VariableNode<yutovo_calculator::Rational>, 
-	(yutovo_calculator::IdentifierNode<yutovo_calculator::Rational>, name)(yutovo_calculator::ExpressionNode<yutovo_calculator::Rational>, expression))
+	(yutovo_calculator::IdentifierNode<yutovo_calculator::Rational>, name)
+	(yutovo_calculator::ExpressionNode<yutovo_calculator::Rational>, expression))
 
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::FunctionNode<yutovo_calculator::Rational>, 
 	(yutovo_calculator::IdentifierNode<yutovo_calculator::Rational>, name)
-	(std::list<yutovo_calculator::IdentifierNode<yutovo_calculator::Rational> >, arguments)
-	//(yutovo_calculator::ExpressionNode<yutovo_calculator::Rational>, expression)
+	(std::list<yutovo_calculator::IdentifierNode<yutovo_calculator::Rational>>, arguments)
 	(yutovo_calculator::ExpressionNode<yutovo_calculator::Rational>, return_expression))
 
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::DefinitionNode<yutovo_calculator::Rational>, 
@@ -235,10 +277,19 @@ BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::IdentifierNode<yutovo_calculator::R
 
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::FunctionCallNode<yutovo_calculator::Rational>, 
 	(yutovo_calculator::IdentifierNode<yutovo_calculator::Rational>, name)
-	(std::list<yutovo_calculator::ExpressionNode<yutovo_calculator::Rational> >, arguments))
+	(std::list<yutovo_calculator::ExpressionNode<yutovo_calculator::Rational>>, arguments))
+
+BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::NoFencesFunctionCallNode<yutovo_calculator::Rational>, 
+	(yutovo_calculator::IdentifierNode<yutovo_calculator::Rational>, name)
+	(std::list<yutovo_calculator::ExpressionNode<yutovo_calculator::Rational>>, arguments)
+	(yutovo_calculator::FunctionParamNode<yutovo_calculator::Rational>, last_argument))
+
+BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::FunctionParamNode<yutovo_calculator::Rational>, 
+	(yutovo_calculator::FunctionParamNode<yutovo_calculator::Rational>::Operand, op))
 
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::ExpressionNode<yutovo_calculator::Rational>, 
-	(yutovo_calculator::ExpressionNode<yutovo_calculator::Rational>::Operand, first)(std::list<yutovo_calculator::OperationNode<yutovo_calculator::Rational> >, rest))
+	(yutovo_calculator::ExpressionNode<yutovo_calculator::Rational>::Operand, first)
+	(std::list<yutovo_calculator::OperationNode<yutovo_calculator::Rational>>, rest))
 
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::ScriptNode<yutovo_calculator::Rational>, 
 	(std::list<yutovo_calculator::ScriptNode<yutovo_calculator::Rational>::Operand>, list))

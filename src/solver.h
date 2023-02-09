@@ -180,6 +180,13 @@ namespace yutovo_calculator
 
 		Number operator()(FunctionCallNode<Number> const& op) const;
 
+		Number operator()(FunctionParamNode<Number> const& expr) const
+		{
+			return boost::apply_visitor(*this, expr.op);
+		}
+
+		Number operator()(NoFencesFunctionCallNode<Number> const& op) const;
+
 		Number operator()(IdentifierNode<Number> const& op) const;
 		
 		/**

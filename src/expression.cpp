@@ -11,6 +11,7 @@ namespace yutovo_calculator
 		using boost::spirit::qi::lexeme;
 		using boost::spirit::qi::alnum;
 		using boost::spirit::qi::alpha;
+		using boost::spirit::qi::omit;
 		using boost::spirit::qi::on_error;
 		using boost::spirit::qi::on_success;
 		using boost::spirit::qi::fail;
@@ -42,6 +43,7 @@ namespace yutovo_calculator
 		unary = 
 			number | 
 			function_call | 
+			no_fences_function_call | 
 			identifier | 
 			unary_operation | 
 			'(' > expression > ')';
@@ -65,6 +67,14 @@ namespace yutovo_calculator
 		function_call = 
 			identifier >> 
 			'(' >> -(expression % ',') > ')';
+
+		no_fences_function_call =
+			(identifier >> '%' >> *(expression >> omit[',']) >> function_param);
+		
+		function_param = 
+			number |
+			identifier | 
+			'(' > expression > ')';
 
 		//annotate the items with an expression's position
 		on_success(unary, 
@@ -98,6 +108,7 @@ namespace yutovo_calculator
 		using boost::spirit::qi::lexeme;
 		using boost::spirit::qi::alnum;
 		using boost::spirit::qi::alpha;
+		using boost::spirit::qi::omit;
 		using boost::spirit::qi::no_case;
 		using boost::spirit::qi::on_error;
 		using boost::spirit::qi::fail;
@@ -129,6 +140,7 @@ namespace yutovo_calculator
 		unary = 
 			number | 
 			function_call | 
+			no_fences_function_call | 
 			identifier | 
 			unary_operation | 
 			'(' > expression > ')';
@@ -156,6 +168,14 @@ namespace yutovo_calculator
 		function_call = 
 			identifier >> 
 			'(' >> -(expression % ',') > ')';
+		
+		no_fences_function_call =
+			(identifier >> '%' >> *(expression >> omit[',']) >> function_param);
+		
+		function_param = 
+			number |
+			identifier | 
+			'(' > expression > ')';
 
 		//annotate the items with the expression's position
 		on_success(unary, 
@@ -167,6 +187,8 @@ namespace yutovo_calculator
 		on_success(multiply, 
 			boost::phoenix::function<Annotation<yutovo_calculator::Real>>(Annotation<yutovo_calculator::Real>(expr.begin(), expr.end()))(qi::_val, _1));
 		on_success(function_call, 
+			boost::phoenix::function<Annotation<yutovo_calculator::Real>>(Annotation<yutovo_calculator::Real>(expr.begin(), expr.end()))(qi::_val, _1));
+		on_success(no_fences_function_call, 
 			boost::phoenix::function<Annotation<yutovo_calculator::Real>>(Annotation<yutovo_calculator::Real>(expr.begin(), expr.end()))(qi::_val, _1));
 		on_success(identifier, 
 			boost::phoenix::function<Annotation<yutovo_calculator::Real>>(Annotation<yutovo_calculator::Real>(expr.begin(), expr.end()))(qi::_val, _1));
@@ -190,6 +212,7 @@ namespace yutovo_calculator
 		using boost::spirit::qi::lexeme;
 		using boost::spirit::qi::alnum;
 		using boost::spirit::qi::alpha;
+		using boost::spirit::qi::omit;
 		using boost::spirit::qi::on_error;
 		using boost::spirit::qi::fail;
 		using boost::phoenix::function;
@@ -220,6 +243,7 @@ namespace yutovo_calculator
 		unary = 
 			number | 
 			function_call | 
+			no_fences_function_call |
 			identifier | 
 			unary_operation | 
 			'(' > expression > ')';
@@ -241,8 +265,15 @@ namespace yutovo_calculator
 			(qi::char_('-') > unary);
 		
 		function_call = 
-			identifier >> 
-			'(' >> -(expression % ',') > ')';
+			(identifier >> '(' >> -(expression % ',') > ')');
+
+		no_fences_function_call =
+			(identifier >> '%' >> *(expression >> omit[',']) >> function_param);
+		
+		function_param = 
+			number |
+			identifier | 
+			'(' > expression > ')';
 
 		//annotate the items with an expression's position
 		on_success(unary, boost::phoenix::function<Annotation<yutovo_calculator::Rational>>(Annotation<yutovo_calculator::Rational>(expr.begin(), 

@@ -11,11 +11,12 @@ namespace yutovo_calculator
 	{
 		typedef boost::variant<
 			Number, 
-			boost::recursive_wrapper<IdentifierNode<Number> >, 
-			boost::recursive_wrapper<UnaryOperationNode<Number> >, 
-			boost::recursive_wrapper<OperationNode<Number> >, 
-			boost::recursive_wrapper<FunctionCallNode<Number> >, 
-			boost::recursive_wrapper<ExpressionNode<Number> > >
+			boost::recursive_wrapper<IdentifierNode<Number>>, 
+			boost::recursive_wrapper<UnaryOperationNode<Number>>, 
+			boost::recursive_wrapper<OperationNode<Number>>, 
+			boost::recursive_wrapper<FunctionCallNode<Number>>, 
+			boost::recursive_wrapper<NoFencesFunctionCallNode<Number>>, 
+			boost::recursive_wrapper<ExpressionNode<Number>>>
 			Operand;
 
 		Annotation(std::string::iterator _first, std::string::iterator _last) : first(_first), last(_last)
@@ -83,9 +84,10 @@ namespace yutovo_calculator
 			UpdatePosition(pos, op);
 		}
 
-		//void operator()(UnaryOperationNode<Number>& op, std::string::iterator pos) const
-		//{
-		//}
+		void operator()(NoFencesFunctionCallNode<Number>& op, std::string::iterator pos) const
+		{
+			UpdatePosition(pos, op);
+		}
 
 		/**
 		 * Operand visitor.
@@ -119,7 +121,12 @@ namespace yutovo_calculator
 			{
 				annotation->UpdatePosition(iter, op);
 			}
-			
+
+			void operator()(NoFencesFunctionCallNode<Num> const& op) const
+			{
+				annotation->UpdatePosition(iter, op);
+			}
+
 			//The visitor's functor for ExpressionNode.
 			void operator()(ExpressionNode<Num> const& op) const
 			{

@@ -467,7 +467,7 @@ namespace yutovo_calculator
 		return res;
 	}
 
-#ifdef _DEBUG
+#ifdef DEBUG
 	std::string Integer::ToString(int exp, int accuracy) const
 	{
 		std::string res;
