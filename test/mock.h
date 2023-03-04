@@ -29,6 +29,16 @@ struct CalcTestReal : public testing::Test
     Parser<Real> parser;
 };
 
+struct CalcTestRational : public testing::Test
+{
+    CalcTestRational() :
+        parser(0)
+    {
+    }
+
+    Parser<Rational> parser;
+};
+
 }
 
 #endif

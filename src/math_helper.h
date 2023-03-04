@@ -35,10 +35,6 @@ namespace yutovo_calculator
 	class MathHelper
 	{
 	public:
-		static wstring AToW(const std::string& str);
-		static wstring AToW(const char* str);
-		static std::string WToA(const wstring& str);
-		
 		static int ToBitPrecision(const int precision);
 		static int ToDecimalPrecision(const int precision);
 

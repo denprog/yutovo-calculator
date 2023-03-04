@@ -19,14 +19,14 @@ namespace yutovo_calculator
 		Integer(const int num);
 		Integer(const int precision, const double num);
 		Integer(const Integer& source);
-		Integer(const std::string& num);
+		Integer(const std::u32string& num);
 		~Integer();
 
 	public:
 		typedef Integer value_type;
 		
 		Integer& operator=(const Integer& source);
-		Integer& operator=(const std::string& num);
+		Integer& operator=(const std::u32string& num);
 		Integer& operator=(const mpz_t& source);
 		
 		Integer operator+();
@@ -106,12 +106,10 @@ namespace yutovo_calculator
 
 	public:
 		bool IsNan();
-		std::string ToString() const;
-		static Integer FromString(const std::string& str);
-
-#ifdef DEBUG
-		std::string ToString(int exp, int accuracy) const;
-#endif
+		std::u32string ToString() const;
+		static Integer FromString(const std::u32string& str);
+		std::u32string ToString(int exp, int accuracy) const;
+		std::string ToStdString() const;
 
 	private:
 #ifdef TRACE_OUTPUT
@@ -122,7 +120,7 @@ namespace yutovo_calculator
 		mpz_t number;
 
 #ifdef TRACE_OUTPUT
-		std::string number_str;
+		std::u32string number_str;
 #endif
 	};
 }

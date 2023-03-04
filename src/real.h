@@ -21,7 +21,7 @@ namespace yutovo_calculator
 		explicit Real(int precision, const char* num);
 		explicit Real(int precision, int num);
 		explicit Real(int precision, float num);
-		Real(const std::string& num);
+		Real(const std::u32string& num);
 		Real(const Real& source);
 		~Real();
 
@@ -32,7 +32,7 @@ namespace yutovo_calculator
 		Real& operator=(const int num);
 		Real& operator=(const double num);
 		Real& operator=(const char* source);
-		Real& operator=(const std::string& num);
+		Real& operator=(const std::u32string& num);
 
 		Real operator+();
 		Real operator-();
@@ -323,24 +323,23 @@ namespace yutovo_calculator
 		}
 
 	public:
-		std::string ToString() const;
+		std::u32string ToString() const;
+		void ToString(int exp, int accuracy, bool& mantissaSign, std::u32string& mantissa, bool& exponentSign, std::u32string& exponent) const;
 		void ToString(int exp, int accuracy, bool& mantissaSign, std::string& mantissa, bool& exponentSign, std::string& exponent) const;
-		
-#ifdef DEBUG
-		std::string ToString(int exp, int accuracy) const;
-#endif
+		std::u32string ToString(int exp, int accuracy) const;
+		std::string ToStdString(int exp, int accuracy) const;
 
 		Real GetNumber();
 
 	private:
 		mpfr_t number;	///< The number
 		//int addPrecision;
-		std::string stringNumber;
+		std::u32string stringNumber;
 
 #ifdef TRACE_OUTPUT
 	void UpdateNumberStr();
 
-	std::string number_str; ///< The std::string representation of the number for debug purposes.
+	std::u32string number_str; ///< The std::u32string representation of the number for debug purposes.
 #endif
 	};
 }

@@ -19,21 +19,21 @@ namespace yutovo_calculator
 			boost::recursive_wrapper<ExpressionNode<Number>>>
 			Operand;
 
-		Annotation(std::string::iterator _first, std::string::iterator _last) : first(_first), last(_last)
+		Annotation(std::u32string::iterator _first, std::u32string::iterator _last) : first(_first), last(_last)
 		{
 		}
 
 		//Updates the position in the expression.
-		void UpdatePosition(std::string::iterator p, ExpressionPosition const& position) const
+		void UpdatePosition(std::u32string::iterator p, ExpressionPosition const& position) const
 		{
 			UpdatePosition(p, (ExpressionPosition&)position);
 		}
 		
 		//Updates the position in the expression.
-		void UpdatePosition(std::string::iterator p, ExpressionPosition& position) const
+		void UpdatePosition(std::u32string::iterator p, ExpressionPosition& position) const
 		{
 			int i = 0, j = 0;
-			std::string::iterator k = first;
+			std::u32string::iterator k = first;
 			
 			while (k != p)
 			{
@@ -55,36 +55,36 @@ namespace yutovo_calculator
 		}
 		
 		//Updates the position in the expression.
-		void operator()(Operand& op, std::string::iterator pos) const
+		void operator()(Operand& op, std::u32string::iterator pos) const
 		{
 			boost::apply_visitor(OperandVisitor<Number>(this, pos), op);
 		}
 
 		//Updates the position in the expression.
-		void operator()(IdentifierNode<Number>& op, std::string::iterator pos) const
+		void operator()(IdentifierNode<Number>& op, std::u32string::iterator pos) const
 		{
 			UpdatePosition(pos, op);
 		}
 
 		//Updates the position in the expression.
-		void operator()(ExpressionNode<Number>& expr, std::string::iterator pos) const
+		void operator()(ExpressionNode<Number>& expr, std::u32string::iterator pos) const
 		{
 			UpdatePosition(pos, expr);
 		}
 
 		//Updates the position in the expression.
-		void operator()(OperationNode<Number>& op, std::string::iterator pos) const
+		void operator()(OperationNode<Number>& op, std::u32string::iterator pos) const
 		{
 			UpdatePosition(pos, op);
 		}
 
 		//Updates the position in the expression.
-		void operator()(FunctionCallNode<Number>& op, std::string::iterator pos) const
+		void operator()(FunctionCallNode<Number>& op, std::u32string::iterator pos) const
 		{
 			UpdatePosition(pos, op);
 		}
 
-		void operator()(NoFencesFunctionCallNode<Number>& op, std::string::iterator pos) const
+		void operator()(NoFencesFunctionCallNode<Number>& op, std::u32string::iterator pos) const
 		{
 			UpdatePosition(pos, op);
 		}
@@ -95,7 +95,7 @@ namespace yutovo_calculator
 		template<typename Num>
 		struct OperandVisitor
 		{
-			OperandVisitor(Annotation<Num> const* _annotation, std::string::iterator _iter) : annotation(_annotation), iter(_iter)
+			OperandVisitor(Annotation<Num> const* _annotation, std::u32string::iterator _iter) : annotation(_annotation), iter(_iter)
 			{
 			}
 			
@@ -140,7 +140,7 @@ namespace yutovo_calculator
 			
 			typedef void result_type;
 			Annotation<Num> const* annotation;
-			std::string::iterator iter;
+			std::u32string::iterator iter;
 		};
 
 		template<typename, typename>
@@ -150,8 +150,8 @@ namespace yutovo_calculator
 		};
 
 		//typedef void result;
-		std::string::iterator first;
-		std::string::iterator last;
+		std::u32string::iterator first;
+		std::u32string::iterator last;
 	};
 }
 

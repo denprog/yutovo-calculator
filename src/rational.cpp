@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "rational.h"
+#include "util.h"
 
 namespace yutovo_calculator
 {
@@ -74,13 +75,13 @@ namespace yutovo_calculator
 	}
 
 	/**
-	 * Constructor from std::string.
+	 * Constructor from std::u32string.
 	 * @param num Number.
 	 */
-	Rational::Rational(const std::string& num)
+	Rational::Rational(const std::u32string& num)
 	{
 		mpq_init(number);
-		mpq_set_str(number, num.c_str(), 10);
+		mpq_set_str(number, (ToBasicString(num)).c_str(), 10);
 
 	#ifdef TRACE_OUTPUT
 		UpdateNumberStr();
@@ -122,11 +123,11 @@ namespace yutovo_calculator
 	 * @param source Source.
 	 * @return The result number.
 	 */
-	Rational& Rational::operator=(const std::string& source)
+	Rational& Rational::operator=(const std::u32string& source)
 	{
 		if (source.find(L'.') != -1)
 		{
-			std::string intPart, fractPart;
+			std::u32string intPart, fractPart;
 			int i = 0;
 
 			while (i < (int)source.length() && source[i] != '.')
@@ -143,10 +144,10 @@ namespace yutovo_calculator
 				++i;
 			}
 
-			if (fractPart != "")
+			if (fractPart != U"")
 			{
 				int n = fractPart.length();
-				std::string t("1");
+				std::u32string t(U"1");
 
 				for (int j = 0; j < n; ++j)
 					t += '0';
@@ -157,7 +158,7 @@ namespace yutovo_calculator
 			}
 		}
 
-		mpq_set_str(number, source.c_str(), DEFAULT_BASE);
+		mpq_set_str(number, ToBasicString(source).c_str(), DEFAULT_BASE);
 
 	#ifdef TRACE_OUTPUT
 		UpdateNumberStr();
@@ -630,19 +631,24 @@ namespace yutovo_calculator
 	}
 
 	/**
-	 * Convert this number into a std::string representation.
-	 * @return A std::string representation of this number.
+	 * Convert this number into a std::u32string representation.
+	 * @return A std::u32string representation of this number.
 	 */
-	std::string Rational::ToString() const
+	std::u32string Rational::ToString() const
 	{
 		char* tmp = (char*)malloc(mpz_sizeinbase(mpq_numref(number), 10) + 
 			mpz_sizeinbase(mpq_denref(number), 10) + 3);
 
 		char* str = mpq_get_str(tmp, 10, number);
-		std::string res(str);
+		std::u32string res(ToUtfString(str));
 		free(str);
 
 		return res;
+	}
+
+	std::string Rational::ToStdString() const
+	{
+		return ToBasicString(ToString());
 	}
 
 	#ifdef TRACE_OUTPUT

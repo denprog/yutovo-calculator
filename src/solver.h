@@ -3,6 +3,7 @@
 
 #include "ast.h"
 #include "script.h"
+#include "util.h"
 
 namespace yutovo_calculator
 {
@@ -18,7 +19,7 @@ namespace yutovo_calculator
 	template<typename Number>
 	struct SolverSymbols
 	{
-		typedef pair<std::string, Number> TempVariable;
+		typedef pair<std::u32string, Number> TempVariable;
 
 		//build-in functions' typedefs
 		typedef Number (*UnaryFunction)(const Number& num);
@@ -35,8 +36,8 @@ namespace yutovo_calculator
 		mutable deque<VariableNode<Number>> variables;	///< The variables
 		mutable vector<FunctionNode<Number>> functions; ///< The functions
 
-		map<std::string, BuildinFunction> buildin_functions; ///< The buildin functions
-		map<std::string, BuildinVariable> buildin_variables; ///< The buildin variables
+		map<std::u32string, BuildinFunction> buildin_functions; ///< The buildin functions
+		map<std::u32string, BuildinVariable> buildin_variables; ///< The buildin variables
 	};
 		
 	/**
@@ -212,7 +213,7 @@ namespace yutovo_calculator
 		 * @param name The name.
 		 * @param [in,out] value The value.
 		 */
-		void PushTempVariable(const std::string& name, Number& value) const
+		void PushTempVariable(const std::u32string& name, Number& value) const
 		{
 			symbols->temp_variables.push_back(TempVariable(name, value));
 		}
@@ -232,7 +233,7 @@ namespace yutovo_calculator
 		 * @param name The name.
 		 * @return null if it fails, else the found temporary variable.
 		 */
-		TempVariable* FindTempVariable(const std::string& name) const
+		TempVariable* FindTempVariable(const std::u32string& name) const
 		{
 			for (int i = symbols->temp_variables.size() - 1; i >= 0; --i)
 			{
@@ -253,7 +254,7 @@ namespace yutovo_calculator
 		 * @param name The name.
 		 * @return null if it fails, else the found variable.
 		 */
-		VariableNode<Number>* FindVariable(const std::string& name) const
+		VariableNode<Number>* FindVariable(const std::u32string& name) const
 		{
 			for (int i = symbols->variables.size() - 1; i >= 0; --i)
 			{
@@ -282,73 +283,73 @@ namespace yutovo_calculator
 			symbols->functions.push_back((FunctionNode<Number>&)func);
 		}
 		
-		/**
-		 * Adds a buildin function.
-		 * @param name The name.
-		 * @param [in,out] func The function.
-		 */
+		void AddBuildinFunction(const u_char* name, UnaryFunction& func)
+		{
+			symbols->buildin_functions[std::u32string(name)] = func;
+		}
+
 		void AddBuildinFunction(const char* name, UnaryFunction& func)
 		{
-			symbols->buildin_functions[std::string(name)] = func;
+			symbols->buildin_functions[ToUtfString(name)] = func;
 		}
 
-		/**
-		 * Adds a buildin function.
-		 * @param name The name.
-		 * @param [in,out] func The function.
-		 */
+		void AddBuildinFunction(const u_char* name, BinaryFunction& func)
+		{
+			symbols->buildin_functions[std::u32string(name)] = func;
+		}
+
 		void AddBuildinFunction(const char* name, BinaryFunction& func)
 		{
-			symbols->buildin_functions[std::string(name)] = func;
+			symbols->buildin_functions[ToUtfString(name)] = func;
 		}
 
-		/**
-		 * Adds a buildin function.
-		 * @param name The name.
-		 * @param [in,out] func The function.
-		 */
+		void AddBuildinFunction(const u_char* name, TrigonometricFunction& func)
+		{
+			symbols->buildin_functions[std::u32string(name)] = func;
+		}
+
 		void AddBuildinFunction(const char* name, TrigonometricFunction& func)
 		{
-			symbols->buildin_functions[std::string(name)] = func;
+			symbols->buildin_functions[ToUtfString(name)] = func;
 		}
-		
+
 		/**
 		 * Searches for the first buildin function.
 		 * @param name The name.
 		 * @return null if it fails, else the found buildin function.
 		 */
-		BuildinFunction* FindBuildinFunction(const std::string& name) const
+		BuildinFunction* FindBuildinFunction(const std::u32string& name) const
 		{
-			typename map<std::string, BuildinFunction>::const_iterator iter = symbols->buildin_functions.find(name);
+			typename map<std::u32string, BuildinFunction>::const_iterator iter = symbols->buildin_functions.find(name);
 			if (iter == symbols->buildin_functions.end())
 				return NULL;
 			return (BuildinFunction*)&(*iter).second;
 		}
 
-		/**
-		 * Adds a buildin variable.
-		 * @param name The name.
-		 * @param [in,out] var The variable.
-		 */
+		void AddBuildinVariable(const u_char* name, PrecisionVariable& var)
+		{
+			symbols->buildin_variables[std::u32string(name)] = var;
+		}
+
 		void AddBuildinVariable(const char* name, PrecisionVariable& var)
 		{
-			symbols->buildin_variables[std::string(name)] = var;
+			symbols->buildin_variables[ToUtfString(name)] = var;
 		}
-		
+
 		/**
 		 * Searches for the first buildin variable.
 		 * @param name The name.
 		 * @return null if it fails, else the found buildin variable.
 		 */
-		BuildinVariable* FindBuildinVariable(const std::string& name) const
+		BuildinVariable* FindBuildinVariable(const std::u32string& name) const
 		{
-			typename map<std::string, BuildinVariable>::const_iterator iter = symbols->buildin_variables.find(name);
+			typename map<std::u32string, BuildinVariable>::const_iterator iter = symbols->buildin_variables.find(name);
 			if (iter == symbols->buildin_variables.end())
 				return NULL;
 			return (BuildinVariable*)&(*iter).second;
 		}
 
-		bool RemoveIdentifier(const std::string& name)
+		bool RemoveIdentifier(const std::u32string& name)
 		{
 			auto var_it = symbols->variables.erase(std::remove_if(symbols->variables.begin(), symbols->variables.end(), 
 				[name](auto& var)

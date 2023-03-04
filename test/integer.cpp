@@ -10,19 +10,26 @@ using namespace std::chrono_literals;
 
 TEST_F(CalcTestInteger, integers1)
 {
-    ASSERT_TRUE(parser.Parse("1+1") == parser.Parse("2"));
+    ASSERT_TRUE(parser.Parse(U"1+1") == parser.Parse(U"2"));
 }
 
 TEST_F(CalcTestInteger, variables1)
 {
-    ASSERT_TRUE(parser.Parse("a=5;a") == parser.Parse("5"));
-    ASSERT_TRUE(parser.Parse("a=5+6;b=a+7;b+3") == parser.Parse("21"));
+    ASSERT_TRUE(parser.Parse(U"a=5;a") == parser.Parse(U"5"));
+    ASSERT_TRUE(parser.Parse(U"a=5+6;b=a+7;b+3") == parser.Parse(U"21"));
+}
+
+TEST_F(CalcTestInteger, variables2)
+{
+    ASSERT_TRUE(parser.Parse(U"п=55;п") == parser.Parse(U"55")) << parser.Parse(U"п=55;п").ToStdString();
+    ASSERT_TRUE(parser.Parse(U"пр=55;пр+5") == parser.Parse(U"60")) << parser.Parse(U"пр=55;п+5").ToStdString();
+    ASSERT_TRUE(parser.Parse(U"fп=55;fп+5") == parser.Parse(U"60")) << parser.Parse(U"fп=55;fп+5").ToStdString();
 }
 
 TEST_F(CalcTestInteger, functions1)
 {
-    ASSERT_TRUE(parser.Parse("f(x)=x+5;f(2)") == parser.Parse("7"));
-    ASSERT_TRUE(parser.Parse("a=5+6;f(t)=a*t;f(2)") == parser.Parse("22"));
+    ASSERT_TRUE(parser.Parse(U"f(x)=x+5;f(2)") == parser.Parse(U"7"));
+    ASSERT_TRUE(parser.Parse(U"a=5+6;f(t)=a*t;f(2)") == parser.Parse(U"22"));
 }
 
 }

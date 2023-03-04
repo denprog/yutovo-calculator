@@ -33,15 +33,15 @@ namespace yutovo_calculator
 		 * @param precision	(optional) the precision.
 		 * @return The result.
 		 */
-		Number Parse(std::string expression, const int precision = -1)
+		Number Parse(std::u32string expression, const int precision = -1)
 		{
-			if (expression.empty() || expression == ";")
+			if (expression.empty() || expression == U";")
 				throw SyntaxException(ExpressionExpected, 0, 0);
 			
 			Number res;
-			std::string::iterator iter = expression.begin();
-			std::string::iterator end = expression.end();
-			qi::space_type space;
+			std::u32string::iterator iter = expression.begin();
+			std::u32string::iterator end = expression.end();
+			unicode::space_type space;
 
 			Script<Number> script(expression);
 			ScriptNode<Number> scriptNode;
@@ -50,9 +50,19 @@ namespace yutovo_calculator
 			return solver(scriptNode, precision);
 		}
 
-		bool RemoveIdentifier(const std::string& name)
+		Number Parse(std::string expression, const int precision = -1)
+		{
+			return Parse(ToUtfString(expression), precision);
+		}
+
+		bool RemoveIdentifier(const std::u32string& name)
 		{
 			return solver.RemoveIdentifier(name);
+		}
+
+		bool RemoveIdentifier(const std::string& name)
+		{
+			return RemoveIdentifier(ToUtfString(name));
 		}
 
 		/**

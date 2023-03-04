@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "real.h"
+#include "util.h"
 
 namespace yutovo_calculator
 {
@@ -44,7 +45,7 @@ namespace yutovo_calculator
 		mpfr_init2(number, max((int)mpfr_get_default_prec(), precision));
 		//mpfr_init2(number, strlen(num) + 1);
 		mpfr_set_str(number, num, DEFAULT_BASE, MPFR_RNDZ);
-		stringNumber = num;
+		stringNumber = ToUtfString(num);
 		//mpfr_prec_round(number, precision / 2, GMP_RNDN);
 		//addPrecision = (int)strchr(num, '.');
 		//if (!addPrecision)
@@ -92,14 +93,14 @@ namespace yutovo_calculator
 	}
 
 	/**
-	 * Constructor from std::string.
+	 * Constructor from std::u32string.
 	 * @param num The number.
 	 */
-	Real::Real(const std::string& num)
+	Real::Real(const std::u32string& num)
 	{
 		stringNumber = num;
 		mpfr_init2(number, max((int)mpfr_get_default_prec(), MathHelper::ToBitPrecision(num.length() * 2)) + 1);
-		mpfr_set_str(number, num.c_str(), DEFAULT_BASE, MPFR_RNDA);
+		mpfr_set_str(number, ToBasicString(num).c_str(), DEFAULT_BASE, MPFR_RNDA);
 		SetPrecision(GetPrecision() + GetExp());
 
 #ifdef TRACE_OUTPUT
@@ -208,7 +209,7 @@ namespace yutovo_calculator
 			mpfr_clear(t);
 		}
 
-		stringNumber = num;
+		stringNumber = ToUtfString(num);
 
 #ifdef TRACE_OUTPUT
 		UpdateNumberStr();
@@ -218,11 +219,11 @@ namespace yutovo_calculator
 	}
 
 	/**
-	 * = operator from std::string.
+	 * = operator from std::u32string.
 	 * @param num The number.
 	 * @return The result number.
 	 */
-	Real& Real::operator=(const std::string& num)
+	Real& Real::operator=(const std::u32string& num)
 	{
 		mpfr_t t;
 
@@ -234,7 +235,7 @@ namespace yutovo_calculator
 		else
 			mpfr_init2(t, GetBitPrecision());
 
-		if (mpfr_set_str(t, num.c_str(), DEFAULT_BASE, GMP_RNDN) == 0)
+		if (mpfr_set_str(t, ToBasicString(num).c_str(), DEFAULT_BASE, GMP_RNDN) == 0)
 		{
 			mpfr_set(number, t, GMP_RNDN);
 			mpfr_clear(t);
@@ -2661,8 +2662,8 @@ namespace yutovo_calculator
 		else
 		{
 			SetBitPrecision(max((int)mpfr_get_default_prec(), MathHelper::ToBitPrecision(precision + 2)));
-			//renew the number because of not being precios getting by std::string
-			mpfr_set_str(number, stringNumber.c_str(), DEFAULT_BASE, MPFR_RNDA);
+			//renew the number because of not being precios getting by std::u32string
+			mpfr_set_str(number, ToBasicString(stringNumber).c_str(), DEFAULT_BASE, MPFR_RNDA);
 		}
 		//SetBitPrecision(MathHelper::ToBitPrecision(precision + addPrecision + 1));
 
@@ -2700,10 +2701,10 @@ namespace yutovo_calculator
 	}
 
 	/**
-	 * Convert this number into a plain std::string representation.
-	 * @return A std::string representation of this number.
+	 * Convert this number into a plain std::u32string representation.
+	 * @return A std::u32string representation of this number.
 	 */
-	std::string Real::ToString() const
+	std::u32string Real::ToString() const
 	{
 		std::ostringstream s;
 		mp_exp_t exp;
@@ -2713,7 +2714,7 @@ namespace yutovo_calculator
 		--exp;
 
 		if (c_str == NULL)
-			return "";
+			return U"";
 
 		if (mpfr_number_p(number))
 		{
@@ -2742,13 +2743,11 @@ namespace yutovo_calculator
 			s << std::abs(exp);
 		}
 
-		std::string res = s.str();
-
-		return res;
+		return ToUtfString(s.str().c_str());
 	}
 
 	/**
-	 * Convert this number into a std::string representation.
+	 * Convert this number into a std::u32string representation.
 	 * @param exp The exponent.
 	 * @param accuracy The accuracy.
 	 * @param [in,out] mantissaSign The mantissa sign.
@@ -2756,7 +2755,7 @@ namespace yutovo_calculator
 	 * @param [in,out] exponentSign The exponent sign.
 	 * @param [in,out] exponent	The exponent.
 	 */
-	void Real::ToString(int exp, int accuracy, bool& mantissaSign, std::string& mantissa, bool& exponentSign, std::string& exponent) const
+	void Real::ToString(int exp, int accuracy, bool& mantissaSign, std::u32string& mantissa, bool& exponentSign, std::u32string& exponent) const
 	{
 		Real res(abs(*this));
 		char* numStr;
@@ -2784,7 +2783,7 @@ namespace yutovo_calculator
 			numStr = mpfr_get_str(NULL, &numExp, 10, accuracy, number, DEFAULT_RND);
 		}
 
-		mantissa = numStr;
+		mantissa = ToUtfString(numStr);
 		mpfr_free_str(numStr);
 
 		if (mantissaSign)
@@ -2802,20 +2801,20 @@ namespace yutovo_calculator
 #else
 				sprintf(buf, "%d", (int)numExp);
 #endif
-				exponent = buf;
+				exponent = ToUtfString(buf);
 			}
 			else
 			{
 				mantissa.insert(numExp, 1, '.');
-				exponent = "";
+				exponent = U"";
 			}
 		}
 		else
 		{
 			if (IsZero())
 			{
-				mantissa = "0.";
-				exponent = "";
+				mantissa = U"0.";
+				exponent = U"";
 				return;
 			}
 
@@ -2841,10 +2840,10 @@ namespace yutovo_calculator
 #else
 					  sprintf(buf, "%ld", ::abs(numExp));
 #endif
-						exponent = buf;
+						exponent = ToUtfString(buf);
 					}
 					else
-						exponent = "";
+						exponent = U"";
 				}
 				else
 				{
@@ -2854,7 +2853,7 @@ namespace yutovo_calculator
 					if (numExp < 0)
 						mantissa.insert(2, ::abs(numExp), '0');
 
-					exponent = "";
+					exponent = U"";
 				}
 			}
 			else
@@ -2872,10 +2871,10 @@ namespace yutovo_calculator
 #else
 					sprintf(buf, "%ld", ::abs(numExp));
 #endif
-					exponent = buf;
+					exponent = ToUtfString(buf);
 				}
 				else
-					exponent = "";
+					exponent = U"";
 			}
 		}
 
@@ -2890,32 +2889,43 @@ namespace yutovo_calculator
 		}
 	}
 
-#ifdef DEBUG
+	void Real::ToString(int exp, int accuracy, bool& mantissaSign, std::string& mantissa, bool& exponentSign, std::string& exponent) const
+	{
+		std::u32string m, e;
+		ToString(exp, accuracy, mantissaSign, m, exponentSign, e);
+		mantissa = ToBasicString(m);
+		exponent = ToBasicString(e);
+	}
+
 	/**
-	 * Convert this number into a std::string representation.
+	 * Convert this number into a std::u32string representation.
 	 * @param exp	The exponent.
 	 * @param accuracy The accuracy.
-	 * @return A std::string representation of this number.
+	 * @return A std::u32string representation of this number.
 	 */
-	std::string Real::ToString(int exp, int accuracy) const
+	std::u32string Real::ToString(int exp, int accuracy) const
 	{
 		bool mantissaSign;
-		std::string mantissa;
+		std::u32string mantissa;
 		bool exponentSign;
-		std::string exponent;
+		std::u32string exponent;
 		
 		ToString(exp, accuracy, mantissaSign, mantissa, exponentSign, exponent);
 		
-		std::string res;
-		res += mantissaSign ? "-" : "";
+		std::u32string res;
+		res += mantissaSign ? U"-" : U"";
 		res += mantissa;
-		res += "E";
-		res += exponentSign ? "-" : "+";
-		res += exponent.empty() ? "0" : exponent;
+		res += U"E";
+		res += exponentSign ? U"-" : U"+";
+		res += exponent.empty() ? U"0" : exponent;
 		
 		return res;
 	}
-#endif
+
+	std::string Real::ToStdString(int exp, int accuracy) const
+	{
+		return ToBasicString(ToString(exp, accuracy));
+	}
 
 	/**
 	 * Gets the number.
@@ -2943,14 +2953,14 @@ namespace yutovo_calculator
 	//#endif
 	//}
 
-	//std::string Real::ToString() const
+	//std::u32string Real::ToString() const
 	//{
 	//	char buf[100];
 	//	
 	//	gmp_sprintf(buf, "%.Fe", number);
 	//	int p = mpf_get_prec(number);
 	//	
-	//	return std::string(buf);
+	//	return std::u32string(buf);
 	//	
 	//	//std::ostringstream s;
 	//	//mp_exp_t exp;
@@ -2965,12 +2975,12 @@ namespace yutovo_calculator
 	//	////if (mpf_number_p(number))
 	//	////{
 	//	////	if (c_str[0] != '-')
-	//	////		s << std::string(c_str).insert(1, 1, '.');
+	//	////		s << std::u32string(c_str).insert(1, 1, '.');
 	//	////	else
-	//	////		s << std::string(c_str).insert(2, 1, '.');
+	//	////		s << std::u32string(c_str).insert(2, 1, '.');
 	//	////}
 	//	////else
-	//	//	s << std::string(c_str);
+	//	//	s << std::u32string(c_str);
 
 	//	////mpf_free_str(c_str);
 	//	//free_function(c_str);
@@ -2990,7 +3000,7 @@ namespace yutovo_calculator
 	//	//	s << std::abs(exp);
 	//	//}
 
-	//	//std::string res = s.str();
+	//	//std::u32string res = s.str();
 
 	//	//return res;
 	//}

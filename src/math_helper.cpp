@@ -19,51 +19,7 @@ namespace yutovo_calculator
     }
   };
 
-	/**
-	 * Converts a std::string to a wstring.
-	 * @param str The narrow std::string.
-	 * @return Wide std::string.
-	 */
-	wstring MathHelper::AToW(const std::string& str)
-	{
-		wstring res;
 
-		std::transform(str.begin(), str.end(), std::back_inserter(res), Widen());
-
-		return res;
-	}
-
-	/**
-	 * Converts a std::string to a wstring.
-	 * @param str The narrow std::string.
-	 * @return Wide std::string.
-	 */
-	wstring MathHelper::AToW(const char* str)
-	{
-		return AToW(std::string(str));
-	}
-
-  struct Narrow
-  {
-    char operator()(wchar_t c)
-    {
-      return std::use_facet<std::ctype<wchar_t> >(std::locale()).narrow(c, '@');
-    }
-  };
-
-	/**
-	 * Converts a wstring to a std::string.
-	 * @param str The wide std::string.
-	 * @return Narrow std::string.
-	 */
-	std::string MathHelper::WToA(const wstring& str)
-	{
-		std::string res;
-
-		std::transform(str.begin(), str.end(), std::back_inserter(res), Narrow());
-
-		return res;
-	}
 
 	/**
 	 * Converts the decimal precision to the bit precision of the mpfr.

@@ -4,13 +4,13 @@
 namespace yutovo_calculator
 {
 	template<>
-	Expression<Integer>::Expression(std::string& expr) : Expression::base_type(expression)
+	Expression<Integer>::Expression(std::u32string& expr) : Expression::base_type(expression)
 	{
-		using boost::spirit::qi::char_;
+		using unicode::char_;
 		using boost::spirit::qi::raw;
 		using boost::spirit::qi::lexeme;
-		using boost::spirit::qi::alnum;
-		using boost::spirit::qi::alpha;
+		using unicode::alnum;
+		using unicode::alpha;
 		using boost::spirit::qi::omit;
 		using boost::spirit::qi::on_error;
 		using boost::spirit::qi::on_success;
@@ -92,22 +92,22 @@ namespace yutovo_calculator
 		on_error<fail>(expression, 
 			boost::phoenix::function<ErrorHandler<SyntaxException>>(ErrorHandler<SyntaxException>(expr.begin(), expr.end(), SyntaxError))(_3));
 		
-		//BOOST_SPIRIT_DEBUG_NODE(expression);
-		//BOOST_SPIRIT_DEBUG_NODE(addition);
-		//BOOST_SPIRIT_DEBUG_NODE(multiplication);
-		//BOOST_SPIRIT_DEBUG_NODE(number);
-		//BOOST_SPIRIT_DEBUG_NODE(function_call);
-		//BOOST_SPIRIT_DEBUG_NODE(identifier);
+		// BOOST_SPIRIT_DEBUG_NODE(expression);
+		// BOOST_SPIRIT_DEBUG_NODE(addition);
+		// BOOST_SPIRIT_DEBUG_NODE(multiplication);
+		// BOOST_SPIRIT_DEBUG_NODE(number);
+		// BOOST_SPIRIT_DEBUG_NODE(function_call);
+		// BOOST_SPIRIT_DEBUG_NODE(identifier);
 	}
 
 	template<>
-	Expression<Real>::Expression(std::string& expr) : Expression::base_type(expression)
+	Expression<Real>::Expression(std::u32string& expr) : Expression::base_type(expression)
 	{
-		using boost::spirit::qi::char_;
+		using unicode::char_;
 		using boost::spirit::qi::raw;
 		using boost::spirit::qi::lexeme;
-		using boost::spirit::qi::alnum;
-		using boost::spirit::qi::alpha;
+		using unicode::alnum;
+		using unicode::alpha;
 		using boost::spirit::qi::omit;
 		using boost::spirit::qi::no_case;
 		using boost::spirit::qi::on_error;
@@ -196,22 +196,22 @@ namespace yutovo_calculator
 		on_error<fail>(expression, 
 			boost::phoenix::function<ErrorHandler<SyntaxException>>(ErrorHandler<SyntaxException>(expr.begin(), expr.end(), SyntaxError))(_3));
 		
-		//BOOST_SPIRIT_DEBUG_NODE(expression);
-		//BOOST_SPIRIT_DEBUG_NODE(addition);
-		//BOOST_SPIRIT_DEBUG_NODE(multiplication);
-		//BOOST_SPIRIT_DEBUG_NODE(number);
-		//BOOST_SPIRIT_DEBUG_NODE(function_call);
-		//BOOST_SPIRIT_DEBUG_NODE(identifier);
+		// BOOST_SPIRIT_DEBUG_NODE(expression);
+		// BOOST_SPIRIT_DEBUG_NODE(addition);
+		// BOOST_SPIRIT_DEBUG_NODE(multiplication);
+		// BOOST_SPIRIT_DEBUG_NODE(number);
+		// BOOST_SPIRIT_DEBUG_NODE(function_call);
+		// BOOST_SPIRIT_DEBUG_NODE(identifier);
 	}
 
 	template<>
-	Expression<yutovo_calculator::Rational>::Expression(std::string& expr) : Expression::base_type(expression)
+	Expression<yutovo_calculator::Rational>::Expression(std::u32string& expr) : Expression::base_type(expression)
 	{
-		using boost::spirit::qi::char_;
+		using unicode::char_;
 		using boost::spirit::qi::raw;
 		using boost::spirit::qi::lexeme;
-		using boost::spirit::qi::alnum;
-		using boost::spirit::qi::alpha;
+		using unicode::alnum;
+		using unicode::alpha;
 		using boost::spirit::qi::omit;
 		using boost::spirit::qi::on_error;
 		using boost::spirit::qi::fail;
@@ -289,7 +289,7 @@ namespace yutovo_calculator
 		
 		//work out the exceptions
 		on_error<fail>(expression, 
-			boost::phoenix::function<ErrorHandler<SyntaxException> >(ErrorHandler<SyntaxException>(expr.begin(), expr.end(), SyntaxError))(_3));
+			boost::phoenix::function<ErrorHandler<SyntaxException>>(ErrorHandler<SyntaxException>(expr.begin(), expr.end(), SyntaxError))(_3));
 		
 		//BOOST_SPIRIT_DEBUG_NODE(expression);
 		//BOOST_SPIRIT_DEBUG_NODE(addition);

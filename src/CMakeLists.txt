@@ -15,6 +15,7 @@ add_library(${PROJECT_NAME}
     real.cpp
     script.cpp
     solver.cpp
+    util.cpp
 )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE 
@@ -51,6 +52,7 @@ install(
         script.h
         solver.h
         stdafx.h
+        util.h
     DESTINATION ${INSTALL_PATH}/include/${PROJECT_NAME}
     COMPONENT ${PROJECT_NAME}
 )

@@ -21,12 +21,12 @@ namespace yutovo_calculator
 		Rational(const int num);
 		Rational(const int precision, const double num);
 		Rational(const int precision, const int num);
-		Rational(const std::string& num);
+		Rational(const std::u32string& num);
 		~Rational();
 		
 	public:
 		Rational& operator=(const Rational& source);
-		Rational& operator=(const std::string& source);
+		Rational& operator=(const std::u32string& source);
 		
 		Rational operator+();
 		Rational operator-();
@@ -79,7 +79,7 @@ namespace yutovo_calculator
 		Integer GetNumerator();
 		Integer GetDenomerator();
 	
-		std::string ToString() const;
+		std::u32string ToString() const;
 
 		int GetPrecision() const
 		{
@@ -93,7 +93,9 @@ namespace yutovo_calculator
 		void SetBitPrecision(const int precision)
 		{
 		}
-		
+
+	std::string ToStdString() const;
+
 	private:
 	#ifdef TRACE_OUTPUT
 		void UpdateNumberStr();
@@ -103,7 +105,7 @@ namespace yutovo_calculator
 		mpq_t number; ///< The number 
 
 	#ifdef TRACE_OUTPUT
-		std::string number_str; ///< The std::string representation of the number for debug purposes
+		std::u32string number_str; ///< The std::u32string representation of the number for debug purposes
 	#endif
 	};
 }

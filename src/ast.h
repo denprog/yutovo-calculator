@@ -8,6 +8,8 @@
 
 namespace yutovo_calculator
 {
+	namespace unicode = boost::spirit::unicode;
+
 	template<typename Number>
 	struct IdentifierNode;
 	template<typename Number>
@@ -40,7 +42,7 @@ namespace yutovo_calculator
 	template<typename Number>
 	struct IdentifierNode : public ExpressionPosition
 	{
-		std::string name;
+		std::u32string name;
 	};
 
 	//Unary operation node.
@@ -189,7 +191,7 @@ BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::DefinitionNode<yutovo_calculator::I
 	(yutovo_calculator::DefinitionNode<yutovo_calculator::Integer>::Definition, definition))
 
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::IdentifierNode<yutovo_calculator::Integer>, 
-	(std::string, name))
+	(std::u32string, name))
 
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::FunctionCallNode<yutovo_calculator::Integer>, 
 	(yutovo_calculator::IdentifierNode<yutovo_calculator::Integer>, name)
@@ -231,7 +233,7 @@ BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::DefinitionNode<yutovo_calculator::R
 	(yutovo_calculator::DefinitionNode<yutovo_calculator::Real>::Definition, definition))
 
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::IdentifierNode<yutovo_calculator::Real>, 
-	(std::string, name))
+	(std::u32string, name))
 
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::FunctionCallNode<yutovo_calculator::Real>, 
 	(yutovo_calculator::IdentifierNode<yutovo_calculator::Real>, name)
@@ -273,7 +275,7 @@ BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::DefinitionNode<yutovo_calculator::R
 	(yutovo_calculator::DefinitionNode<yutovo_calculator::Rational>::Definition, definition))
 
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::IdentifierNode<yutovo_calculator::Rational>, 
-	(std::string, name))
+	(std::u32string, name))
 
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::FunctionCallNode<yutovo_calculator::Rational>, 
 	(yutovo_calculator::IdentifierNode<yutovo_calculator::Rational>, name)

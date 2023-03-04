@@ -8,15 +8,15 @@ namespace yutovo_calculator
 	template<typename Exception>
 	struct ErrorHandler
 	{
-		ErrorHandler(std::string::iterator _first, std::string::iterator _last, ParserExceptionCode _id) : first(_first), last(_last)
+		ErrorHandler(std::u32string::iterator _first, std::u32string::iterator _last, ParserExceptionCode _id) : first(_first), last(_last)
 		{
 			id = _id;
 		}
 		
-		void operator()(std::string::iterator p) const
+		void operator()(std::u32string::iterator p) const
 		{
 			int i = 0, j = 0;
-			std::string::iterator k = first;
+			std::u32string::iterator k = first;
 			
 			while (k != p)
 			{
@@ -43,8 +43,8 @@ namespace yutovo_calculator
 		};
 
 		typedef void result_type;
-		std::string::iterator first;
-		std::string::iterator last;
+		std::u32string::iterator first;
+		std::u32string::iterator last;
 		ParserExceptionCode id;
 	};
 }

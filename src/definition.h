@@ -10,19 +10,20 @@ namespace yutovo_calculator
 	 * Spirit grammar for definitions.
 	 */
 	template<typename Number>
-	struct Definition : qi::grammar<std::string::iterator, DefinitionNode<Number>(), qi::space_type>
+	struct Definition : qi::grammar<std::u32string::iterator, DefinitionNode<Number>(), unicode::space_type>
 	{
 		/**
 		 * Constructor.
 		 * @param [in] expr The expression.
 		 */
-		Definition(std::string& expr) : Definition::base_type(definition), expression(expr), return_expression(expr)
+		Definition(std::u32string& expr) : Definition::base_type(definition), expression(expr), return_expression(expr)
 		{
+			using unicode::char_;
 			using boost::spirit::qi::lit;
 			using boost::spirit::qi::raw;
 			using boost::spirit::qi::lexeme;
-			using boost::spirit::qi::alnum;
-			using boost::spirit::qi::alpha;
+			using unicode::alnum;
+			using unicode::alpha;
 			using boost::spirit::qi::on_error;
 			using boost::spirit::qi::fail;
 			qi::_1_type _1;
@@ -52,26 +53,26 @@ namespace yutovo_calculator
 			identifier = 
 				name;
 			
-			//name is a letter-numeric std::string with an letter in the beginning
+			//name is a letter-numeric std::u32string with an letter in the beginning
 			name = 
 				raw[lexeme[(alpha | '_') >> *(alnum | '_')]];
 
-			//BOOST_SPIRIT_DEBUG_NODE(definition);
-			//BOOST_SPIRIT_DEBUG_NODE(argument_list);
-			//BOOST_SPIRIT_DEBUG_NODE(identifier);
-			//BOOST_SPIRIT_DEBUG_NODE(name);
+			// BOOST_SPIRIT_DEBUG_NODE(definition);
+			// BOOST_SPIRIT_DEBUG_NODE(argument_list);
+			// BOOST_SPIRIT_DEBUG_NODE(identifier);
+			// BOOST_SPIRIT_DEBUG_NODE(name);
 
 			//work out the exceptions
 			on_error<fail>(definition, 
 				boost::phoenix::function<ErrorHandler<SyntaxException>>(ErrorHandler<SyntaxException>(expr.begin(), expr.end(), SyntaxError))(_3));
 		}
 
-		qi::rule<std::string::iterator, DefinitionNode<Number>(), qi::space_type> definition;
-		qi::rule<std::string::iterator, FunctionNode<Number>(), qi::space_type> function;
-		qi::rule<std::string::iterator, VariableNode<Number>(), qi::space_type> variable;
-		qi::rule<std::string::iterator, std::string(), qi::space_type> name;
-		qi::rule<std::string::iterator, IdentifierNode<Number>(), qi::space_type> identifier;
-		qi::rule<std::string::iterator, std::list<IdentifierNode<Number> >(), qi::space_type> argument_list;
+		qi::rule<std::u32string::iterator, DefinitionNode<Number>(), unicode::space_type> definition;
+		qi::rule<std::u32string::iterator, FunctionNode<Number>(), unicode::space_type> function;
+		qi::rule<std::u32string::iterator, VariableNode<Number>(), unicode::space_type> variable;
+		qi::rule<std::u32string::iterator, std::u32string(), unicode::space_type> name;
+		qi::rule<std::u32string::iterator, IdentifierNode<Number>(), unicode::space_type> identifier;
+		qi::rule<std::u32string::iterator, std::list<IdentifierNode<Number> >(), unicode::space_type> argument_list;
 		
 		Expression<Number> expression;
 		Expression<Number> return_expression;

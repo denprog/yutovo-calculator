@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "integer.h"
+#include "util.h"
 
 namespace yutovo_calculator
 {
@@ -52,10 +53,10 @@ namespace yutovo_calculator
 	#endif
 	}
 
-	Integer::Integer(const std::string& num)
+	Integer::Integer(const std::u32string& num)
 	{
 		mpz_init(number);
-		mpz_set_str(number, num.c_str(), 10);
+		mpz_set_str(number, (ToBasicString(num)).c_str(), 10);
 
 	#ifdef TRACE_OUTPUT
 		UpdateNumberStr();
@@ -84,10 +85,10 @@ namespace yutovo_calculator
 		return *this;
 	}
 
-	Integer& Integer::operator=(const std::string& num)
+	Integer& Integer::operator=(const std::u32string& num)
 	{
 		mpz_init(number);
-		mpz_set_str(number, num.c_str(), 10);
+		mpz_set_str(number, (ToBasicString(num)).c_str(), 10);
 
 	#ifdef TRACE_OUTPUT
 		UpdateNumberStr();
@@ -455,28 +456,29 @@ namespace yutovo_calculator
 		return false;
 	}
 
-	std::string Integer::ToString() const
+	std::u32string Integer::ToString() const
 	{
 		int len = mpz_sizeinbase(number, 10) + 1;
 		char *tmp = (char*)malloc(len + 1);
 
 		char* str = mpz_get_str(tmp, 10, number);
-		std::string res(str);
+		std::u32string res(ToUtfString(str));
 		free(tmp);
 
 		return res;
 	}
 
-#ifdef DEBUG
-	std::string Integer::ToString(int exp, int accuracy) const
+	std::u32string Integer::ToString(int exp, int accuracy) const
 	{
-		std::string res;
-		
-		return res;
+		return ToString();
 	}
-#endif
 
-	Integer Integer::FromString(const std::string& str)
+	std::string Integer::ToStdString() const
+	{
+		return ToBasicString(ToString());
+	}
+
+	Integer Integer::FromString(const std::u32string& str)
 	{
 		return Integer(str);
 	}

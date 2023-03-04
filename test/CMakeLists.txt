@@ -13,6 +13,7 @@ add_executable(${PROJECT_NAME}_tests
 	main.cpp
 	integer.cpp
 	real.cpp
+	rational.cpp
 )
 
 target_link_libraries(${PROJECT_NAME}_tests PRIVATE
