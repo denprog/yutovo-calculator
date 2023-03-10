@@ -5,6 +5,10 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
+set(Boost_USE_STATIC_LIBS ON)
+set(Boost_USE_MULTITHREADED ON)
+find_package(Boost 1.81.0 REQUIRED PATHS ${INSTALL_PATH}/lib/cmake/)
+
 add_library(${PROJECT_NAME}
     parser.cpp
     definition.cpp
@@ -15,13 +19,18 @@ add_library(${PROJECT_NAME}
     real.cpp
     script.cpp
     solver.cpp
-    util.cpp
+    utils.cpp
 )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE 
     stdc++
     mpfr
     gmp
+)
+
+target_include_directories(${PROJECT_NAME} PUBLIC
+	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+    ${INSTALL_PATH}/include
 )
 
 target_include_directories(${PROJECT_NAME} PUBLIC
@@ -52,7 +61,7 @@ install(
         script.h
         solver.h
         stdafx.h
-        util.h
+        utils.h
     DESTINATION ${INSTALL_PATH}/include/${PROJECT_NAME}
     COMPONENT ${PROJECT_NAME}
 )
