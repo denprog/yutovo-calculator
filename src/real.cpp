@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "real.h"
-#include "util.h"
+#include "utils.h"
 
 namespace yutovo_calculator
 {
@@ -2838,7 +2838,7 @@ namespace yutovo_calculator
 #ifdef _WIN32
 					  _itoa_s(::abs(numExp), buf, 10);
 #else
-					  sprintf(buf, "%ld", ::abs(numExp));
+					  sprintf(buf, "%d", ::abs(numExp));
 #endif
 						exponent = ToUtfString(buf);
 					}
@@ -2869,7 +2869,7 @@ namespace yutovo_calculator
 #ifdef _WIN32
 					_itoa_s(::abs(numExp), buf, 10);
 #else
-					sprintf(buf, "%ld", ::abs(numExp));
+					sprintf(buf, "%d", ::abs(numExp));
 #endif
 					exponent = ToUtfString(buf);
 				}

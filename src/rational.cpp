@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "rational.h"
-#include "util.h"
+#include "utils.h"
 
 namespace yutovo_calculator
 {

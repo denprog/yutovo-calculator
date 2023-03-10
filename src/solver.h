@@ -3,7 +3,7 @@
 
 #include "ast.h"
 #include "script.h"
-#include "util.h"
+#include "utils.h"
 
 namespace yutovo_calculator
 {
@@ -195,6 +195,9 @@ namespace yutovo_calculator
 		 */
 		Number operator()(ScriptNode<Number> const& script, int prec = -1) const
 		{
+			if (script.list.empty())
+				throw SyntaxException(ParserExceptionCode::ExpressionExpected);
+			
 			if (prec != -1)
 				precision = prec;
 			

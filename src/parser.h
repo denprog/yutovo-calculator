@@ -9,12 +9,12 @@
 #include "script.h"
 #include "solver.h"
 #include "error_handler.h"
+#include "utils.h"
 
 using namespace std;
 
 namespace spirit = boost::spirit;
 namespace qi = spirit::qi;
-namespace phx = boost::phoenix;
 namespace fusion = boost::fusion;
 
 namespace yutovo_calculator
