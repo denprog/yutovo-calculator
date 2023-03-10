@@ -57,4 +57,10 @@ TEST_F(CalcTestReal, variables2)
     ASSERT_TRUE(parser.Parse(U"пр=55.5;пр+5") == parser.Parse(U"60.5")) << parser.Parse(U"пр=55.5;п+5").ToStdString(3, 3);
 }
 
+TEST_F(CalcTestReal, symbols1)
+{
+    EXPECT_THROW(parser.Parse(U"•"), yutovo_calculator::SyntaxException) << parser.Parse(U"•").ToStdString(3, 3);
+    EXPECT_THROW(parser.Parse(U"‣"), yutovo_calculator::SyntaxException) << parser.Parse(U"‣").ToStdString(3, 3);
+}
+
 }

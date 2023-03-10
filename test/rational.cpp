@@ -15,4 +15,10 @@ TEST_F(CalcTestRational, variables1)
     ASSERT_TRUE(parser.Parse(U"пр=3/2;пр+5") == parser.Parse(U"13/2")) << parser.Parse(U"пр=3/2;пр+5").ToStdString();
 }
 
+TEST_F(CalcTestRational, symbols1)
+{
+    EXPECT_THROW(parser.Parse(U"•"), yutovo_calculator::SyntaxException) << parser.Parse(U"•").ToStdString();
+    EXPECT_THROW(parser.Parse(U"‣"), yutovo_calculator::SyntaxException) << parser.Parse(U"‣").ToStdString();
+}
+
 }

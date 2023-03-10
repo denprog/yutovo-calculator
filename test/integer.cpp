@@ -32,4 +32,10 @@ TEST_F(CalcTestInteger, functions1)
     ASSERT_TRUE(parser.Parse(U"a=5+6;f(t)=a*t;f(2)") == parser.Parse(U"22"));
 }
 
+TEST_F(CalcTestInteger, symbols1)
+{
+    EXPECT_THROW(parser.Parse(U"•"), yutovo_calculator::SyntaxException) << parser.Parse(U"•").ToStdString();
+    EXPECT_THROW(parser.Parse(U"‣"), yutovo_calculator::SyntaxException) << parser.Parse(U"‣").ToStdString();
+}
+
 }
