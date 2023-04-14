@@ -16,6 +16,8 @@ namespace yutovo_calculator
 	typedef Real (*RealPrecisionVariable)(const int precision);
 	typedef Rational (*RationalVariable)();
 
+	typedef std::vector<std::u32string> Dependencies;
+
 	template<typename Number>
 	struct SolverSymbols
 	{
@@ -40,9 +42,6 @@ namespace yutovo_calculator
 		map<std::u32string, BuildinVariable> buildin_variables; ///< The buildin variables
 	};
 		
-	/**
-	 * Solver.
-	 */
 	template<typename Number>
 	struct Solver : public boost::static_visitor<Number>
 	{
@@ -61,49 +60,36 @@ namespace yutovo_calculator
 		
 		SolverSymbols<Number>* symbols;
 		
-		/**
-		 * Constructor.
-		 * @param _precision The precision.
-		 * @param _left_value (optional) the left value.
-		 */
 		Solver(int _precision, Number _left_value = Number(), SolverSymbols<Number>* _symbols = NULL);
 		
-		/**
-		 * Sets a precision.
-		 * @param prec The prec.
-		 */
 		void SetPrecision(int prec)
 		{
 			precision = prec;
 		}
 		
-		/**
-		 * Visitor's functor for Number.
-		 */
+		//Visitor for Number.
 		Number operator()(Number n) const
 		{
 			n.SetPrecision(precision);
 			return n;
 		}
 
-		/**
-		 * Visitor's functor for ExpressionNode.
-		 */
+		//Visitor for ExpressionNode.
 		Number operator()(ExpressionNode<Number> const& expr) const
 		{
 			//calculate all the expression's nodes
 			Number res = boost::apply_visitor(*this, expr.first);
 			BOOST_FOREACH(typename OperationNode<Number>::Operand const& op, expr.rest)
 			{
-				res = boost::apply_visitor(Solver<Number>(precision, res, symbols), op);
+				Solver<Number> solver(precision, res, symbols);
+				solver.SetDependencies(dependencies);
+				res = boost::apply_visitor(solver, op);
 			}
 			
 			return res;
 		}
 		
-		/**
-		 * Visitor's functor for DefinitionNode.
-		 */
+		//Visitor for DefinitionNode.
 		Number operator()(DefinitionNode<Number> const& op) const
 		{
 			//pass the definition to the special functor
@@ -111,9 +97,7 @@ namespace yutovo_calculator
 			return Number();
 		}
 
-		/**
-		 * Visitor's functor for VariableNode.
-		 */
+		//Visitor for VariableNode.
 		Number operator()(VariableNode<Number> const& op) const
 		{
 			//store the variable
@@ -121,9 +105,7 @@ namespace yutovo_calculator
 			return Number();
 		}
 		
-		/**
-		 * Visitor's functor for FunctionNode.
-		 */
+		//Visitor for FunctionNode.
 		Number operator()(FunctionNode<Number> const& op) const
 		{
 			//store the function
@@ -131,9 +113,7 @@ namespace yutovo_calculator
 			return Number();
 		}
 
-		/**
-		 * Visitor's functor for UnaryOperationNode.
-		 */
+		//Visitor for UnaryOperationNode.
 		Number operator()(UnaryOperationNode<Number> const& op) const
 		{
 			Number right = boost::apply_visitor(*this, op.operand);
@@ -148,10 +128,7 @@ namespace yutovo_calculator
 			return Number();
 		}
 
-		/**
-		 * Visitor's functor for OperationNode.
-		 * @exception MathException Thrown when the mathematics error condition occurs.
-		 */
+		//Visitor for OperationNode.
 		Number operator()(OperationNode<Number> const& op) const
 		{
 			Number right = boost::apply_visitor(*this, op.operand);
@@ -190,9 +167,7 @@ namespace yutovo_calculator
 
 		Number operator()(IdentifierNode<Number> const& op) const;
 		
-		/**
-		 * The beginning of the solving.
-		 */
+		//The beginning of the solving.
 		Number operator()(ScriptNode<Number> const& script, int prec = -1) const
 		{
 			if (script.list.empty())
@@ -211,31 +186,20 @@ namespace yutovo_calculator
 			return res;
 		}
 
-		/**
-		 * Pushes a temporary variable.
-		 * @param name The name.
-		 * @param [in,out] value The value.
-		 */
+		//Push a temporary variable.
 		void PushTempVariable(const std::u32string& name, Number& value) const
 		{
 			symbols->temp_variables.push_back(TempVariable(name, value));
 		}
 		
-		/**
-		 * Pops a number of the temporary variables.
-		 * @param count (optional) number of variables.
-		 */
+		//Pop a number of the temporary variables.
 		void PopTempVariable(int count = 1) const
 		{
 			for (int i = 0; i < count; ++i)
 				symbols->temp_variables.pop_back();
 		}
 		
-		/**
-		 * Searches for the temporary variable.
-		 * @param name The name.
-		 * @return null if it fails, else the found temporary variable.
-		 */
+		//Find a temporary variable.
 		TempVariable* FindTempVariable(const std::u32string& name) const
 		{
 			for (int i = symbols->temp_variables.size() - 1; i >= 0; --i)
@@ -252,11 +216,7 @@ namespace yutovo_calculator
 			symbols->variables.push_back(var);
 		}
 
-		/**
-		 * Searches for the first variable.
-		 * @param name The name.
-		 * @return null if it fails, else the found variable.
-		 */
+		//Find a variable.
 		VariableNode<Number>* FindVariable(const std::u32string& name) const
 		{
 			for (int i = symbols->variables.size() - 1; i >= 0; --i)
@@ -268,10 +228,7 @@ namespace yutovo_calculator
 			return NULL;
 		}
 		
-		/**
-		 * Adds a function.
-		 * @param func The function.
-		 */
+		//Add a function.
 		void AddFunction(FunctionNode<Number> const& func) const
 		{
 			for (int i = 0; i < (int)symbols->functions.size(); ++i)
@@ -316,11 +273,7 @@ namespace yutovo_calculator
 			symbols->buildin_functions[ToUtfString(name)] = func;
 		}
 
-		/**
-		 * Searches for the first buildin function.
-		 * @param name The name.
-		 * @return null if it fails, else the found buildin function.
-		 */
+		//Find a buildin function.
 		BuildinFunction* FindBuildinFunction(const std::u32string& name) const
 		{
 			typename map<std::u32string, BuildinFunction>::const_iterator iter = symbols->buildin_functions.find(name);
@@ -339,11 +292,7 @@ namespace yutovo_calculator
 			symbols->buildin_variables[ToUtfString(name)] = var;
 		}
 
-		/**
-		 * Searches for the first buildin variable.
-		 * @param name The name.
-		 * @return null if it fails, else the found buildin variable.
-		 */
+		//Find a buildin variable.
 		BuildinVariable* FindBuildinVariable(const std::u32string& name) const
 		{
 			typename map<std::u32string, BuildinVariable>::const_iterator iter = symbols->buildin_variables.find(name);
@@ -371,9 +320,22 @@ namespace yutovo_calculator
 				symbols->functions.end());
 			return func_it != symbols->functions.end();
 		}
+
+		void SetDependencies(Dependencies* _dependencies)
+		{
+			dependencies = _dependencies;
+		}
+
+	private:
+		void AddDependency(const std::u32string& name) const
+		{
+			if (std::find(dependencies->begin(), dependencies->end(), name) == dependencies->end())
+				dependencies->push_back(name);
+		}
 		
-		mutable int precision; ///< The precision
-		Number left_value; ///< The left solved value
+		mutable int precision;
+		Number left_value; //left solved value
+		mutable Dependencies* dependencies = nullptr;
 	};
 };
 

@@ -19,21 +19,13 @@ namespace fusion = boost::fusion;
 
 namespace yutovo_calculator
 {
-	/**
-	 * Big numbers parser.
-	 */
+	//Big numbers parser
 	template<typename Number>
 	struct Parser
 	{
 		Parser(const int precision);
 		
-		/**
-		 * Parses an expression.
-		 * @param [in,out] expression The expression.
-		 * @param precision	(optional) the precision.
-		 * @return The result.
-		 */
-		Number Parse(std::u32string expression, const int precision = -1)
+		Number Parse(std::u32string expression, Dependencies& dependencies, const int precision = -1)
 		{
 			if (expression.empty() || expression == U";")
 				throw SyntaxException(ExpressionExpected, 0, 0);
@@ -44,15 +36,22 @@ namespace yutovo_calculator
 			unicode::space_type space;
 
 			Script<Number> script(expression);
-			ScriptNode<Number> scriptNode;
+			ScriptNode<Number> script_node;
 
-			phrase_parse(iter, end, script, space, scriptNode);
-			return solver(scriptNode, precision);
+			phrase_parse(iter, end, script, space, script_node);
+			solver.SetDependencies(&dependencies);
+			return solver(script_node, precision);
 		}
 
-		Number Parse(std::string expression, const int precision = -1)
+		Number Parse(std::u32string expression, const int precision = -1)
 		{
-			return Parse(ToUtfString(expression), precision);
+			Dependencies dependencies;
+			return Parse(expression, dependencies, precision);
+		}
+
+		Number Parse(std::string expression, Dependencies& dependencies, const int precision = -1)
+		{
+			return Parse(ToUtfString(expression), dependencies, precision);
 		}
 
 		bool RemoveIdentifier(const std::u32string& name)
@@ -65,10 +64,6 @@ namespace yutovo_calculator
 			return RemoveIdentifier(ToUtfString(name));
 		}
 
-		/**
-		 * Sets a precision.
-		 * @param precision The precision.
-		 */
 		void SetPrecision(const int precision)
 		{
 			solver.SetPrecision(precision);

@@ -3,6 +3,8 @@
 
 namespace yutovo_calculator
 {
+	//Solver
+
 	template<>
 	Solver<Integer>::Solver(int _precision, Integer _left_value, SolverSymbols<Integer>* _symbols) : 
 		precision(_precision), left_value(_left_value), symbols(_symbols)
@@ -10,7 +12,7 @@ namespace yutovo_calculator
 		if (symbols == NULL)
 			symbols = new SolverSymbols<Integer>();
 	}
-		
+
 	template<>
 	Solver<Real>::Solver(int _precision, Real _left_value, SolverSymbols<Real>* _symbols) : 
 		precision(_precision), left_value(_left_value), symbols(_symbols)
@@ -27,12 +29,12 @@ namespace yutovo_calculator
 			symbols = new SolverSymbols<Rational>();
 	}
 	
-	/**
-	 * Visitor's functor for FunctionCallNode<Integer>.
-	 */
+	//Visitor for FunctionCallNode<Integer>
 	template<>
 	Integer Solver<Integer>::operator()(FunctionCallNode<Integer> const& op) const
 	{
+		AddDependency(op.name.name);
+
 		Integer res;
 		
 		//find in the user defined functions		
@@ -96,12 +98,12 @@ namespace yutovo_calculator
 		return res;
 	}
 
-	/**
-	 * Visitor's functor for FunctionCallNode<Real>.
-	 */
+	//Visitor for FunctionCallNode<Real>
 	template<>
 	Real Solver<Real>::operator()(FunctionCallNode<Real> const& op) const
 	{
+		AddDependency(op.name.name);
+
 		Real res;
 		
 		//find in the user defined functions		
@@ -179,12 +181,12 @@ namespace yutovo_calculator
 		return res;
 	}
 
-	/**
-	 * Visitor's functor for FunctionCallNode<Rational>.
-	 */
+	//Visitor for FunctionCallNode<Rational>
 	template<>
 	Rational Solver<Rational>::operator()(FunctionCallNode<Rational> const& op) const
 	{
+		AddDependency(op.name.name);
+
 		Rational res;
 		
 		//find in the user defined functions		
@@ -251,6 +253,8 @@ namespace yutovo_calculator
 	template<>
 	Integer Solver<Integer>::operator()(NoFencesFunctionCallNode<Integer> const& op) const
 	{
+		AddDependency(op.name.name);
+
 		Integer res;
 		return res;
 	}
@@ -258,6 +262,8 @@ namespace yutovo_calculator
 	template<>
 	Real Solver<Real>::operator()(NoFencesFunctionCallNode<Real> const& op) const
 	{
+		AddDependency(op.name.name);
+
 		Real res;
 		
 		//find in the build-in functions		
@@ -289,16 +295,18 @@ namespace yutovo_calculator
 	template<>
 	Rational Solver<Rational>::operator()(NoFencesFunctionCallNode<Rational> const& op) const
 	{
+		AddDependency(op.name.name);
+
 		Rational res;
 		return res;
 	}
 
-	/**
-	 * Visitor's functor for IdentifierNode<Integer>.
-	 */
+	//Visitor for IdentifierNode<Integer>
 	template<>
 	Integer Solver<Integer>::operator()(IdentifierNode<Integer> const& op) const
 	{
+		AddDependency(op.name);
+
 		TempVariable* t = FindTempVariable(op.name);
 		if (t)
 			return t->second;
@@ -327,12 +335,12 @@ namespace yutovo_calculator
 		return 0;
 	}
 
-	/**
-	 * Visitor's functor for IdentifierNode<Real>.
-	 */
+	//Visitor for IdentifierNode<Real>
 	template<>
 	Real Solver<Real>::operator()(IdentifierNode<Real> const& op) const
 	{
+		AddDependency(op.name);
+
 		TempVariable* t = FindTempVariable(op.name);
 		if (t)
 			return t->second;
@@ -362,12 +370,12 @@ namespace yutovo_calculator
 		return Real();
 	}
 
-	/**
-	 * Visitor's functor for IdentifierNode<Rational>.
-	 */
+	//Visitor for IdentifierNode<Rational>
 	template<>
 	Rational Solver<Rational>::operator()(IdentifierNode<Rational> const& op) const
 	{
+		AddDependency(op.name);
+
 		TempVariable* t = FindTempVariable(op.name);
 		if (t)
 			return t->second;

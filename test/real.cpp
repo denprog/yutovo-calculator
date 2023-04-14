@@ -44,10 +44,12 @@ TEST_F(CalcTestReal, str1)
 
 TEST_F(CalcTestReal, variables1)
 {
+    std::vector<std::u32string> dependencies;
     ASSERT_TRUE(parser.Parse(U"v=555;v") == parser.Parse(U"555")) << parser.Parse(U"v=555;v").ToStdString(3, 3);
     ASSERT_TRUE(parser.Parse(U"v=55.5;") == parser.Parse(U"v=55.5;")) << parser.Parse(U"v=55.5;").ToStdString(3, 3);
     ASSERT_TRUE(parser.Parse(U"v=55.5;v") == parser.Parse(U"55.5")) << parser.Parse(U"v=55.5;v").ToStdString(3, 3);
-    ASSERT_TRUE(parser.Parse(U"vp=55.5;vp+5") == parser.Parse(U"60.5")) << parser.Parse(U"vp=55.5;vp+5").ToStdString(3, 3);
+    ASSERT_TRUE(parser.Parse(U"vp=55.5;vp+5", dependencies) == parser.Parse(U"60.5")) << parser.Parse(U"vp=55.5;vp+5").ToStdString(3, 3);
+    ASSERT_TRUE(std::find(dependencies.begin(), dependencies.end(), U"vp") != dependencies.end());
 }
 
 TEST_F(CalcTestReal, variables2)
