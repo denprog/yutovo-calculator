@@ -6,16 +6,10 @@
 
 namespace yutovo_calculator
 {
-	/**
-	 * Spirit grammar for definitions.
-	 */
+	//Spirit grammar for definitions.
 	template<typename Number>
 	struct Definition : qi::grammar<std::u32string::iterator, DefinitionNode<Number>(), unicode::space_type>
 	{
-		/**
-		 * Constructor.
-		 * @param [in] expr The expression.
-		 */
 		Definition(std::u32string& expr) : Definition::base_type(definition), expression(expr), return_expression(expr)
 		{
 			using unicode::char_;

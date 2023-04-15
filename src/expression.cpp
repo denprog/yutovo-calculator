@@ -20,61 +20,31 @@ namespace yutovo_calculator
 		qi::_1_type _1;
 		qi::_3_type _3;
 
-		expression = 
-			addition.alias();
+		expression = addition.alias();
 		
-		addition = 
-			multiplication >> 
-			*(
-				(char_('+') > multiplication) | 
-				(char_('-') > multiplication)
-			);
+		addition = multiplication >> *((char_('+') > multiplication) | (char_('-') > multiplication));
 		
-		multiplication = 
-			unary >> 
-			*(
-				multiply
-			);
+		multiplication = unary >> *(multiply);
 
-		multiply = 
-			char_('*') > unary | 
-			char_('/') > unary;
+		multiply = char_('*') > unary | char_('/') > unary;
 		
-		unary = 
-			number | 
-			function_call | 
-			no_fences_function_call | 
-			identifier | 
-			unary_operation | 
-			'(' > expression > ')';
+		unary = number | function_call | no_fences_function_call | identifier | unary_operation | '(' > expression > ')';
 		
-		number = 
-			str;
+		number = digits_number;
 		
-		str = 
-			+char_("0-9");
+		digits_number = +char_("0-9");
 
-		identifier = 
-			name;
+		identifier = name;
 		
-		name = 
-			raw[lexeme[(alpha | '_') >> *(alnum | '_')]];
+		name = raw[lexeme[(alpha | '_') >> *(alnum | '_')]];
 
-		unary_operation = 
-			(qi::char_('+') > unary) | 
-			(qi::char_('-') > unary);
+		unary_operation = (qi::char_('+') > unary) | (qi::char_('-') > unary);
 		
-		function_call = 
-			identifier >> 
-			'(' >> -(expression % ',') > ')';
+		function_call = identifier >> '(' >> -(expression % ',') > ')';
 
-		no_fences_function_call =
-			(identifier >> '%' >> *(expression >> omit[',']) >> function_param);
+		no_fences_function_call = (identifier >> '%' >> *(expression >> omit[',']) >> function_param);
 		
-		function_param = 
-			number |
-			identifier | 
-			'(' > expression > ')';
+		function_param = number | identifier | '(' > expression > ')';
 
 		//annotate the items with an expression's position
 		on_success(unary, 
@@ -117,65 +87,33 @@ namespace yutovo_calculator
 		qi::_1_type _1;
 		qi::_3_type _3;
 
-		expression = 
-			addition.alias();
+		expression = addition.alias();
 		
-		addition = 
-			multiplication >> 
-			*(
-				(char_('+') > multiplication) | 
-				(char_('-') > multiplication)
-			);
+		addition = multiplication >> *((char_('+') > multiplication) | (char_('-') > multiplication));
 		
-		multiplication = 
-			unary >> 
-			*(
-				multiply
-			);
+		multiplication = unary >> *(multiply);
 
-		multiply = 
-			char_('*') > unary | 
-			char_('/') > unary;
+		multiply = char_('*') > unary | char_('/') > unary;
 		
-		unary = 
-			number | 
-			function_call | 
-			no_fences_function_call | 
-			identifier | 
-			unary_operation | 
-			'(' > expression > ')';
+		unary = number | function_call | no_fences_function_call | identifier | unary_operation | '(' > expression > ')';
 		
-		number = 
-			exp_number | 
-			str;
+		number = exp_number | digits_number;
 		
-		str = 
-			+char_("0-9.");
+		digits_number = +char_("0-9.");
 		
-		exp_number = 
-			+char_("0-9.") >> raw[lexeme[(no_case[char_("E")] > (char_('+') | char_('-')))]] > +(char_("0-9"));
+		exp_number = +char_("0-9.") >> raw[lexeme[(no_case[char_("E")] > (char_('+') | char_('-')))]] > +(char_("0-9"));
 
-		identifier = 
-			name;
+		identifier = name;
 		
-		name = 
-			raw[lexeme[(alpha | '_') >> *(alnum | '_')]];
+		name = raw[lexeme[(alpha | '_') >> *(alnum | '_')]];
 
-		unary_operation = 
-			(qi::char_('+') > unary) | 
-			(qi::char_('-') > unary);
+		unary_operation = (qi::char_('+') > unary) | (qi::char_('-') > unary);
 		
-		function_call = 
-			identifier >> 
-			'(' >> -(expression % ',') > ')';
+		function_call = identifier >> '(' >> -(expression % ',') > ')';
 		
-		no_fences_function_call =
-			(identifier >> '%' >> *(expression >> omit[',']) >> function_param);
+		no_fences_function_call = (identifier >> '%' >> *(expression >> omit[',']) >> function_param);
 		
-		function_param = 
-			number |
-			identifier | 
-			'(' > expression > ')';
+		function_param = number | identifier | '(' > expression > ')';
 
 		//annotate the items with the expression's position
 		on_success(unary, 
@@ -220,60 +158,31 @@ namespace yutovo_calculator
 		qi::_1_type _1;
 		qi::_3_type _3;
 
-		expression = 
-			addition.alias();
+		expression = addition.alias();
 		
-		addition = 
-			multiplication >> 
-			*(
-				(char_('+') > multiplication) | 
-				(char_('-') > multiplication)
-			);
+		addition = multiplication >> *((char_('+') > multiplication) | (char_('-') > multiplication));
 		
-		multiplication = 
-			unary >> 
-			*(
-				multiply
-			);
+		multiplication = unary >> *(multiply);
 
-		multiply = 
-			char_('*') > unary | 
-			char_('/') > unary;
+		multiply = char_('*') > unary | char_('/') > unary;
 		
-		unary = 
-			number | 
-			function_call | 
-			no_fences_function_call |
-			identifier | 
-			unary_operation | 
-			'(' > expression > ')';
+		unary = number | function_call | no_fences_function_call | identifier | unary_operation | '(' > expression > ')';
 		
-		number = 
-			str;
+		number = digits_number;
 		
-		str = 
-			+char_("0-9");
+		digits_number = +char_("0-9");
 
-		identifier = 
-			name;
+		identifier = name;
 		
-		name = 
-			raw[lexeme[(alpha | '_') >> *(alnum | '_')]];
+		name = raw[lexeme[(alpha | '_') >> *(alnum | '_')]];
 
-		unary_operation = 
-			(qi::char_('+') > unary) | 
-			(qi::char_('-') > unary);
+		unary_operation = (qi::char_('+') > unary) | (qi::char_('-') > unary);
 		
-		function_call = 
-			(identifier >> '(' >> -(expression % ',') > ')');
+		function_call = (identifier >> '(' >> -(expression % ',') > ')');
 
-		no_fences_function_call =
-			(identifier >> '%' >> *(expression >> omit[',']) >> function_param);
+		no_fences_function_call = (identifier >> '%' >> *(expression >> omit[',']) >> function_param);
 		
-		function_param = 
-			number |
-			identifier | 
-			'(' > expression > ')';
+		function_param = number | identifier | '(' > expression > ')';
 
 		//annotate the items with an expression's position
 		on_success(unary, boost::phoenix::function<Annotation<yutovo_calculator::Rational>>(Annotation<yutovo_calculator::Rational>(expr.begin(), 

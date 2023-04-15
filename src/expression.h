@@ -32,7 +32,7 @@ namespace yutovo_calculator
 		qi::rule<std::u32string::iterator, FunctionCallNode<Number>(), unicode::space_type> function_call;
 		qi::rule<std::u32string::iterator, NoFencesFunctionCallNode<Number>(), unicode::space_type> no_fences_function_call;
 		qi::rule<std::u32string::iterator, FunctionParamNode<Number>(), unicode::space_type> function_param;
-		qi::rule<std::u32string::iterator, std::u32string(), unicode::space_type> str, exp_number;
+		qi::rule<std::u32string::iterator, std::u32string(), unicode::space_type> digits_number, exp_number;
 		qi::rule<std::u32string::iterator, std::u32string(), unicode::space_type> name;
 		qi::rule<std::u32string::iterator, Number(), unicode::space_type> number;
 	};
