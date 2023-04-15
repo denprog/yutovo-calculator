@@ -22,8 +22,8 @@ namespace yutovo_calculator
 
 			script = 
 				*(
-					(definition >> ";") | 
-					(expression >> ";")
+					(definition > ";") | 
+					(expression > ";")
 				);
 
 			on_error<fail>(script, 

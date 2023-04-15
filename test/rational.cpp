@@ -11,14 +11,21 @@ using namespace std::chrono_literals;
 
 TEST_F(CalcTestRational, variables1)
 {
-    ASSERT_TRUE(parser.Parse(U"п=3/2;п") == parser.Parse(U"3/2")) << parser.Parse(U"п=3/2;п").ToStdString();
-    ASSERT_TRUE(parser.Parse(U"пр=3/2;пр+5") == parser.Parse(U"13/2")) << parser.Parse(U"пр=3/2;пр+5").ToStdString();
+    ASSERT_TRUE(parser.Parse(U"п=3/2;п;") == parser.Parse(U"3/2;")) << parser.Parse(U"п=3/2;п;").ToStdString();
+    ASSERT_TRUE(parser.Parse(U"пр=3/2;пр+5;") == parser.Parse(U"13/2;")) << parser.Parse(U"пр=3/2;пр+5;").ToStdString();
 }
 
 TEST_F(CalcTestRational, symbols1)
 {
-    EXPECT_THROW(parser.Parse(U"•"), yutovo_calculator::SyntaxException) << parser.Parse(U"•").ToStdString();
-    EXPECT_THROW(parser.Parse(U"‣"), yutovo_calculator::SyntaxException) << parser.Parse(U"‣").ToStdString();
+    EXPECT_THROW(parser.Parse(U"•;"), yutovo_calculator::SyntaxException) << parser.Parse(U"•;").ToStdString();
+    EXPECT_THROW(parser.Parse(U"‣;"), yutovo_calculator::SyntaxException) << parser.Parse(U"‣;").ToStdString();
+}
+
+TEST_F(CalcTestRational, error1)
+{
+    EXPECT_THROW(parser.Parse(U"123"), yutovo_calculator::SyntaxException);
+    EXPECT_THROW(parser.Parse(U"123+(2/3)"), yutovo_calculator::SyntaxException);
+    EXPECT_THROW(parser.Parse(U"123+3;45"), yutovo_calculator::SyntaxException);
 }
 
 }
