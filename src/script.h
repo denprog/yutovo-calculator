@@ -14,7 +14,7 @@ namespace yutovo_calculator
 	template<typename Number>
 	struct Script : qi::grammar<std::u32string::iterator, ScriptNode<Number>(), unicode::space_type>
 	{
-		Script(std::u32string& expr) : Script::base_type(script), definition(expr), expression(expr)
+		Script(ElementId id, std::u32string& expr) : Script::base_type(script), definition(id, expr), expression(id, expr)
 		{
 			using boost::spirit::qi::on_error;
 			using boost::spirit::qi::fail;
@@ -27,7 +27,7 @@ namespace yutovo_calculator
 				);
 
 			on_error<fail>(script, 
-				boost::phoenix::function<ErrorHandler<SyntaxException>>(ErrorHandler<SyntaxException>(expr.begin(), expr.end(), SyntaxError))(_3));
+				boost::phoenix::function<ErrorHandler<SyntaxException>>(ErrorHandler<SyntaxException>(id, expr.begin(), expr.end(), SyntaxError))(_3));
 		}
 
 		Definition<Number> definition;

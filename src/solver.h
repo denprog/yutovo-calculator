@@ -82,6 +82,7 @@ namespace yutovo_calculator
 			BOOST_FOREACH(typename OperationNode<Number>::Operand const& op, expr.rest)
 			{
 				Solver<Number> solver(precision, res, symbols);
+				solver.id = id;
 				solver.SetDependencies(dependencies);
 				res = boost::apply_visitor(solver, op);
 			}
@@ -150,7 +151,7 @@ namespace yutovo_calculator
 			}
 			catch (MathException e)
 			{
-				throw MathException(e.id, op.pos, op.line);
+				throw MathException(e.id, e.ex_id, op.pos, op.line);
 			}
 			
 			return Number();
@@ -168,13 +169,15 @@ namespace yutovo_calculator
 		Number operator()(IdentifierNode<Number> const& op) const;
 		
 		//The beginning of the solving.
-		Number operator()(ScriptNode<Number> const& script, int prec = -1) const
+		Number operator()(ScriptNode<Number> const& script, ElementId _id, int _precision = -1) const
 		{
 			if (script.list.empty())
-				throw SyntaxException(ParserExceptionCode::ExpressionExpected);
+				throw SyntaxException(id, ParserExceptionCode::ExpressionExpected);
 			
-			if (prec != -1)
-				precision = prec;
+			id = _id;
+
+			if (_precision != -1)
+				precision = _precision;
 			
 			Number res;
 			//calculate all the script nodes
@@ -213,6 +216,7 @@ namespace yutovo_calculator
 
 		void AddVariable(VariableNode<Number> const& var) const
 		{
+			var.id = id;
 			symbols->variables.push_back(var);
 		}
 
@@ -301,7 +305,7 @@ namespace yutovo_calculator
 			return (BuildinVariable*)&(*iter).second;
 		}
 
-		bool RemoveIdentifier(const std::u32string& name)
+		bool RemoveIdentifier(ElementId id, const std::u32string& name)
 		{
 			auto var_it = symbols->variables.erase(std::remove_if(symbols->variables.begin(), symbols->variables.end(), 
 				[name](auto& var)
@@ -333,6 +337,7 @@ namespace yutovo_calculator
 				dependencies->push_back(name);
 		}
 		
+		mutable ElementId id;
 		mutable int precision;
 		Number left_value; //left solved value
 		mutable Dependencies* dependencies = nullptr;

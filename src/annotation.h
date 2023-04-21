@@ -19,7 +19,10 @@ namespace yutovo_calculator
 			boost::recursive_wrapper<ExpressionNode<Number>>>
 			Operand;
 
-		Annotation(std::u32string::iterator _first, std::u32string::iterator _last) : first(_first), last(_last)
+		Annotation(std::u32string::iterator _first, std::u32string::iterator _last, ElementId& _id) : 
+			first(_first),
+			last(_last),
+			id(_id)
 		{
 		}
 
@@ -50,6 +53,7 @@ namespace yutovo_calculator
 				++i;
 			}
 			
+			position.id = id;
 			position.pos = i;
 			position.line = j;
 		}
@@ -149,7 +153,7 @@ namespace yutovo_calculator
 			typedef void type;
 		};
 
-		//typedef void result;
+		ElementId id;
 		std::u32string::iterator first;
 		std::u32string::iterator last;
 	};

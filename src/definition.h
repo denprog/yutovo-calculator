@@ -10,7 +10,7 @@ namespace yutovo_calculator
 	template<typename Number>
 	struct Definition : qi::grammar<std::u32string::iterator, DefinitionNode<Number>(), unicode::space_type>
 	{
-		Definition(std::u32string& expr) : Definition::base_type(definition), expression(expr), return_expression(expr)
+		Definition(ElementId id, std::u32string& expr) : Definition::base_type(definition), expression(id, expr), return_expression(id, expr)
 		{
 			using unicode::char_;
 			using boost::spirit::qi::lit;
@@ -58,7 +58,7 @@ namespace yutovo_calculator
 
 			//work out the exceptions
 			on_error<fail>(definition, 
-				boost::phoenix::function<ErrorHandler<SyntaxException>>(ErrorHandler<SyntaxException>(expr.begin(), expr.end(), SyntaxError))(_3));
+				boost::phoenix::function<ErrorHandler<SyntaxException>>(ErrorHandler<SyntaxException>(id, expr.begin(), expr.end(), SyntaxError))(_3));
 		}
 
 		qi::rule<std::u32string::iterator, DefinitionNode<Number>(), unicode::space_type> definition;

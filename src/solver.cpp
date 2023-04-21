@@ -7,7 +7,9 @@ namespace yutovo_calculator
 
 	template<>
 	Solver<Integer>::Solver(int _precision, Integer _left_value, SolverSymbols<Integer>* _symbols) : 
-		precision(_precision), left_value(_left_value), symbols(_symbols)
+		precision(_precision),
+		left_value(_left_value),
+		symbols(_symbols)
 	{
 		if (symbols == NULL)
 			symbols = new SolverSymbols<Integer>();
@@ -15,7 +17,9 @@ namespace yutovo_calculator
 
 	template<>
 	Solver<Real>::Solver(int _precision, Real _left_value, SolverSymbols<Real>* _symbols) : 
-		precision(_precision), left_value(_left_value), symbols(_symbols)
+		precision(_precision),
+		left_value(_left_value),
+		symbols(_symbols)
 	{
 		if (symbols == NULL)
 			symbols = new SolverSymbols<Real>();
@@ -23,7 +27,9 @@ namespace yutovo_calculator
 	
 	template<>
 	Solver<Rational>::Solver(int _precision, Rational _left_value, SolverSymbols<Rational>* _symbols) : 
-		precision(_precision), left_value(_left_value), symbols(_symbols)
+		precision(_precision),
+		left_value(_left_value),
+		symbols(_symbols)
 	{
 		if (symbols == NULL)
 			symbols = new SolverSymbols<Rational>();
@@ -44,7 +50,7 @@ namespace yutovo_calculator
 			if (func.name.name == op.name.name)
 			{
 				if (func.arguments.size() != op.arguments.size())
-					throw SyntaxException(WrongArgumentsCount, op.pos, op.line);
+					throw SyntaxException(op.id, WrongArgumentsCount, U"Wrong arguments count in '" + op.name.name, op.pos, op.line);
 				
 				IdentifierNodesIter funcIter = func.arguments.begin();
 				for (ExpressionNodesIter callIter = op.arguments.begin(); callIter != op.arguments.end(); ++callIter, ++funcIter)
@@ -66,7 +72,7 @@ namespace yutovo_calculator
 			{
 				UnaryFunction u = boost::get<UnaryFunction>(*func);
 				if (op.arguments.size() != 1)
-					throw SyntaxException(WrongArgumentsCount, op.pos, op.line);
+					throw SyntaxException(op.id, WrongArgumentsCount, U"Wrong arguments count in '" + op.name.name, op.pos, op.line);
 				
 				ExpressionNodesIter callIter = op.arguments.begin();
 				Integer arg = (*this)(*callIter);
@@ -80,7 +86,7 @@ namespace yutovo_calculator
 			{
 				BinaryFunction b = boost::get<BinaryFunction>(*func);
 				if (op.arguments.size() != 2)
-					throw SyntaxException(WrongArgumentsCount, op.pos, op.line);
+					throw SyntaxException(op.id, WrongArgumentsCount, U"Wrong arguments count in '" + op.name.name, op.pos, op.line);
 				
 				ExpressionNodesIter callIter = op.arguments.begin();
 				Integer arg1 = (*this)(*callIter++);
@@ -93,7 +99,7 @@ namespace yutovo_calculator
 		}
 
 		//there is no such a function		
-		throw SyntaxException(UnknownIdentifier, op.pos, op.line);
+		throw SyntaxException(op.id, UnknownIdentifier, op.pos, op.line);
 		
 		return res;
 	}
@@ -113,7 +119,7 @@ namespace yutovo_calculator
 			if (func.name.name == op.name.name)
 			{
 				if (func.arguments.size() != op.arguments.size())
-					throw SyntaxException(WrongArgumentsCount);
+					throw SyntaxException(op.id, WrongArgumentsCount, U"Wrong arguments count in '" + op.name.name, op.pos, op.line);
 				
 				IdentifierNodesIter funcIter = func.arguments.begin();
 				for (ExpressionNodesIter callIter = op.arguments.begin(); callIter != op.arguments.end(); ++callIter, ++funcIter)
@@ -135,7 +141,7 @@ namespace yutovo_calculator
 			{
 				UnaryFunction u = boost::get<UnaryFunction>(*func);
 				if (op.arguments.size() != 1)
-					throw SyntaxException(WrongArgumentsCount, op.pos, op.line);
+					throw SyntaxException(op.id, WrongArgumentsCount, U"Wrong arguments count in '" + op.name.name, op.pos, op.line);
 				
 				ExpressionNodesIter callIter = op.arguments.begin();
 				Real arg = (*this)(*callIter);
@@ -149,7 +155,7 @@ namespace yutovo_calculator
 			{
 				BinaryFunction b = boost::get<BinaryFunction>(*func);
 				if (op.arguments.size() != 2)
-					throw SyntaxException(WrongArgumentsCount, op.pos, op.line);
+					throw SyntaxException(op.id, WrongArgumentsCount, U"Wrong arguments count in '" + op.name.name, op.pos, op.line);
 				
 				ExpressionNodesIter callIter = op.arguments.begin();
 				Real arg1 = (*this)(*callIter++);
@@ -164,7 +170,7 @@ namespace yutovo_calculator
 			{
 				RealTrigonometricFunc t = boost::get<RealTrigonometricFunc>(*func);
 				if (op.arguments.size() != 1)
-					throw SyntaxException(WrongArgumentsCount, op.pos, op.line);
+					throw SyntaxException(op.id, WrongArgumentsCount, U"Wrong arguments count in '" + op.name.name, op.pos, op.line);
 				
 				ExpressionNodesIter callIter = op.arguments.begin();
 				Real arg = (*this)(*callIter);
@@ -176,7 +182,7 @@ namespace yutovo_calculator
 		}
 
 		//there is no such a function		
-		throw SyntaxException(UnknownIdentifier, op.pos, op.line);
+		throw SyntaxException(op.id, UnknownIdentifier, op.pos, op.line);
 		
 		return res;
 	}
@@ -196,7 +202,7 @@ namespace yutovo_calculator
 			if (func.name.name == op.name.name)
 			{
 				if (func.arguments.size() != op.arguments.size())
-					throw SyntaxException(WrongArgumentsCount, op.pos, op.line);
+					throw SyntaxException(op.id, WrongArgumentsCount, U"Wrong arguments count in '" + op.name.name, op.pos, op.line);
 				
 				IdentifierNodesIter funcIter = func.arguments.begin();
 				for (ExpressionNodesIter callIter = op.arguments.begin(); callIter != op.arguments.end(); ++callIter, ++funcIter)
@@ -218,7 +224,7 @@ namespace yutovo_calculator
 			{
 				UnaryFunction u = boost::get<UnaryFunction>(*func);
 				if (op.arguments.size() != 1)
-					throw SyntaxException(WrongArgumentsCount, op.pos, op.line);
+					throw SyntaxException(op.id, WrongArgumentsCount, U"Wrong arguments count in '" + op.name.name, op.pos, op.line);
 				
 				ExpressionNodesIter callIter = op.arguments.begin();
 				Rational arg = (*this)(*callIter);
@@ -232,7 +238,7 @@ namespace yutovo_calculator
 			{
 				BinaryFunction b = boost::get<BinaryFunction>(*func);
 				if (op.arguments.size() != 2)
-					throw SyntaxException(WrongArgumentsCount, op.pos, op.line);
+					throw SyntaxException(op.id, WrongArgumentsCount, U"Wrong arguments count in '" + op.name.name, op.pos, op.line);
 				
 				ExpressionNodesIter callIter = op.arguments.begin();
 				Rational arg1 = (*this)(*callIter++);
@@ -245,7 +251,7 @@ namespace yutovo_calculator
 		}
 
 		//there is no such a function		
-		throw SyntaxException(UnknownIdentifier, op.pos, op.line);
+		throw SyntaxException(op.id, UnknownIdentifier, U"Identifier '" + op.name.name + U"' not found", op.pos, op.line);
 		
 		return res;
 	}
@@ -274,7 +280,7 @@ namespace yutovo_calculator
 			{
 				BinaryFunction b = boost::get<BinaryFunction>(*func);
 				if (op.arguments.size() != 1)
-					throw SyntaxException(WrongArgumentsCount, op.pos, op.line);
+					throw SyntaxException(op.id, WrongArgumentsCount, U"Wrong arguments count in '" + op.name.name, op.pos, op.line);
 				
 				ExpressionNodesIter callIter = op.arguments.begin();
 				Real arg1 = (*this)(*callIter++);
@@ -286,8 +292,8 @@ namespace yutovo_calculator
 			}
 		}
 
-		//there is no such a function		
-		throw SyntaxException(UnknownIdentifier, op.pos, op.line);
+		//there is no such a function
+		throw SyntaxException(op.id, UnknownIdentifier, U"Identifier '" + op.name.name + U"' not found", op.pos, op.line);
 		
 		return res;
 	}
@@ -330,7 +336,7 @@ namespace yutovo_calculator
 		}
 		
 		//there is no such an identifier
-		throw SyntaxException(UnknownIdentifier, op.pos, op.line);
+		throw SyntaxException(op.id, UnknownIdentifier, U"Identifier '" + op.name + U"' not found", op.pos, op.line);
 		
 		return 0;
 	}
@@ -365,7 +371,7 @@ namespace yutovo_calculator
 		}
 		
 		//there is no such an identifier
-		throw SyntaxException(UnknownIdentifier, op.pos, op.line);
+		throw SyntaxException(op.id, UnknownIdentifier, U"Identifier '" + op.name + U"' not found", op.pos, op.line);
 		
 		return Real();
 	}
@@ -399,7 +405,7 @@ namespace yutovo_calculator
 		}
 		
 		//there is no such an identifier
-		throw SyntaxException(UnknownIdentifier, op.pos, op.line);
+		throw SyntaxException(op.id, UnknownIdentifier, U"Identifier '" + op.name + U"' not found", op.pos, op.line);
 		
 		return 0;
 	}

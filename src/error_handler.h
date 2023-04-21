@@ -8,9 +8,12 @@ namespace yutovo_calculator
 	template<typename Exception>
 	struct ErrorHandler
 	{
-		ErrorHandler(std::u32string::iterator _first, std::u32string::iterator _last, ParserExceptionCode _id) : first(_first), last(_last)
+		ErrorHandler(ElementId _id, std::u32string::iterator _first, std::u32string::iterator _last, ParserExceptionCode _ex_id) : 
+			id(_id),
+			first(_first), 
+			last(_last),
+			ex_id(_ex_id)
 		{
-			id = _id;
 		}
 		
 		void operator()(std::u32string::iterator p) const
@@ -33,7 +36,7 @@ namespace yutovo_calculator
 				++i;
 			}
 			
-			throw Exception(id, i, j);
+			throw Exception(id, ex_id, i, j);
 		}
 
 		template<typename>
@@ -45,7 +48,8 @@ namespace yutovo_calculator
 		typedef void result_type;
 		std::u32string::iterator first;
 		std::u32string::iterator last;
-		ParserExceptionCode id;
+		ElementId id;
+		ParserExceptionCode ex_id;
 	};
 }
 

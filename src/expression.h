@@ -12,7 +12,7 @@ namespace yutovo_calculator
 	template<typename Number>
 	struct Expression : qi::grammar<std::u32string::iterator, ExpressionNode<Number>(), unicode::space_type>
 	{
-		Expression(std::u32string& expr);
+		Expression(ElementId id, std::u32string& expr);
 
 		typedef boost::variant<
 			Number, 

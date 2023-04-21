@@ -25,43 +25,43 @@ namespace yutovo_calculator
 	{
 		Parser(const int precision);
 		
-		Number Parse(std::u32string expression, Dependencies& dependencies, const int precision = -1)
+		Number Parse(ElementId id, std::u32string expression, Dependencies& dependencies, const int precision = -1)
 		{
 			if (expression.empty() || expression == U";")
-				throw SyntaxException(ExpressionExpected, 0, 0);
+				throw SyntaxException(id, ExpressionExpected, 0, 0);
 			
 			Number res;
 			std::u32string::iterator iter = expression.begin();
 			std::u32string::iterator end = expression.end();
 			unicode::space_type space;
 
-			Script<Number> script(expression);
+			Script<Number> script(id, expression);
 			ScriptNode<Number> script_node;
 
 			phrase_parse(iter, end, script, space, script_node);
 			solver.SetDependencies(&dependencies);
-			return solver(script_node, precision);
+			return solver(script_node, id, precision);
 		}
 
-		Number Parse(std::u32string expression, const int precision = -1)
+		Number Parse(ElementId id, std::u32string expression, const int precision = -1)
 		{
 			Dependencies dependencies;
-			return Parse(expression, dependencies, precision);
+			return Parse(id, expression, dependencies, precision);
 		}
 
-		Number Parse(std::string expression, Dependencies& dependencies, const int precision = -1)
+		Number Parse(ElementId id, std::string expression, Dependencies& dependencies, const int precision = -1)
 		{
-			return Parse(ToUtfString(expression), dependencies, precision);
+			return Parse(id, ToUtfString(expression), dependencies, precision);
 		}
 
-		bool RemoveIdentifier(const std::u32string& name)
+		bool RemoveIdentifier(ElementId id, const std::u32string& name)
 		{
-			return solver.RemoveIdentifier(name);
+			return solver.RemoveIdentifier(id, name);
 		}
 
-		bool RemoveIdentifier(const std::string& name)
+		bool RemoveIdentifier(ElementId id, const std::string& name)
 		{
-			return RemoveIdentifier(ToUtfString(name));
+			return RemoveIdentifier(id, ToUtfString(name));
 		}
 
 		void SetPrecision(const int precision)

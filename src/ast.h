@@ -5,6 +5,7 @@
 #include "integer.h"
 #include "real.h"
 #include "rational.h"
+#include "utils.h"
 
 namespace yutovo_calculator
 {
@@ -34,6 +35,7 @@ namespace yutovo_calculator
 			line = -1;
 		}
 		
+		ElementId id;
 		int pos; //position in a line
 		int line; //line number
 	};
@@ -85,6 +87,7 @@ namespace yutovo_calculator
 	template<typename Number>
 	struct VariableNode
 	{
+		mutable ElementId id;
 		IdentifierNode<Number> name;
 		ExpressionNode<Number> expression;
 	};
