@@ -11,7 +11,7 @@ namespace yutovo_calculator
 		left_value(_left_value),
 		symbols(_symbols)
 	{
-		if (symbols == NULL)
+		if (symbols == nullptr)
 			symbols = new SolverSymbols<Integer>();
 	}
 
@@ -21,7 +21,7 @@ namespace yutovo_calculator
 		left_value(_left_value),
 		symbols(_symbols)
 	{
-		if (symbols == NULL)
+		if (symbols == nullptr)
 			symbols = new SolverSymbols<Real>();
 	}
 	
@@ -31,7 +31,7 @@ namespace yutovo_calculator
 		left_value(_left_value),
 		symbols(_symbols)
 	{
-		if (symbols == NULL)
+		if (symbols == nullptr)
 			symbols = new SolverSymbols<Rational>();
 	}
 	
@@ -43,25 +43,20 @@ namespace yutovo_calculator
 
 		Integer res;
 		
-		//find in the user defined functions		
-		for (int i = 0; i < (int)symbols->functions.size(); ++i)
+		//find in the user defined functions
+		FunctionNode<Integer>* user_func = FindFunction(op);
+		if (user_func)
 		{
-			const FunctionNode<Integer>& func = symbols->functions[i];
-			if (func.name.name == op.name.name)
+			IdentifierNodesIter funcIter = user_func->arguments.begin();
+			for (ExpressionNodesIter callIter = op.arguments.begin(); callIter != op.arguments.end(); ++callIter, ++funcIter)
 			{
-				if (func.arguments.size() != op.arguments.size())
-					throw SyntaxException(op.id, WrongArgumentsCount, U"Wrong arguments count in '" + op.name.name, op.pos, op.line);
-				
-				IdentifierNodesIter funcIter = func.arguments.begin();
-				for (ExpressionNodesIter callIter = op.arguments.begin(); callIter != op.arguments.end(); ++callIter, ++funcIter)
-				{
-					Integer arg = (*this)(*callIter);
-					PushTempVariable(funcIter->name, arg);
-				}
-				res = (*this)(func.return_expression);
-				PopTempVariable(op.arguments.size());
-				return res;
+				Integer arg = (*this)(*callIter);
+				PushTempVariable(funcIter->name, arg);
 			}
+
+			res = (*this)(user_func->return_expression);
+			PopTempVariable(op.arguments.size());
+			return res;
 		}
 
 		//find in the build-in functions		
@@ -112,25 +107,20 @@ namespace yutovo_calculator
 
 		Real res;
 		
-		//find in the user defined functions		
-		for (int i = 0; i < (int)symbols->functions.size(); ++i)
+		//find in the user defined functions
+		FunctionNode<Real>* user_func = FindFunction(op);
+		if (user_func)
 		{
-			const FunctionNode<Real>& func = symbols->functions[i];
-			if (func.name.name == op.name.name)
+			IdentifierNodesIter funcIter = user_func->arguments.begin();
+			for (ExpressionNodesIter callIter = op.arguments.begin(); callIter != op.arguments.end(); ++callIter, ++funcIter)
 			{
-				if (func.arguments.size() != op.arguments.size())
-					throw SyntaxException(op.id, WrongArgumentsCount, U"Wrong arguments count in '" + op.name.name, op.pos, op.line);
-				
-				IdentifierNodesIter funcIter = func.arguments.begin();
-				for (ExpressionNodesIter callIter = op.arguments.begin(); callIter != op.arguments.end(); ++callIter, ++funcIter)
-				{
-					Real arg = (*this)(*callIter);
-					PushTempVariable(funcIter->name, arg);
-				}
-				res = (*this)(func.return_expression);
-				PopTempVariable(op.arguments.size());
-				return res;
+				Real arg = (*this)(*callIter);
+				PushTempVariable(funcIter->name, arg);
 			}
+
+			res = (*this)(user_func->return_expression);
+			PopTempVariable(op.arguments.size());
+			return res;
 		}
 		
 		//find in the build-in functions		
@@ -195,25 +185,20 @@ namespace yutovo_calculator
 
 		Rational res;
 		
-		//find in the user defined functions		
-		for (int i = 0; i < (int)symbols->functions.size(); ++i)
+		//find in the user defined functions
+		FunctionNode<Rational>* user_func = FindFunction(op);
+		if (user_func)
 		{
-			const FunctionNode<Rational>& func = symbols->functions[i];
-			if (func.name.name == op.name.name)
+			IdentifierNodesIter funcIter = user_func->arguments.begin();
+			for (ExpressionNodesIter callIter = op.arguments.begin(); callIter != op.arguments.end(); ++callIter, ++funcIter)
 			{
-				if (func.arguments.size() != op.arguments.size())
-					throw SyntaxException(op.id, WrongArgumentsCount, U"Wrong arguments count in '" + op.name.name, op.pos, op.line);
-				
-				IdentifierNodesIter funcIter = func.arguments.begin();
-				for (ExpressionNodesIter callIter = op.arguments.begin(); callIter != op.arguments.end(); ++callIter, ++funcIter)
-				{
-					Rational arg = (*this)(*callIter);
-					PushTempVariable(funcIter->name, arg);
-				}
-				res = (*this)(func.return_expression);
-				PopTempVariable(op.arguments.size());
-				return res;
+				Rational arg = (*this)(*callIter);
+				PushTempVariable(funcIter->name, arg);
 			}
+
+			res = (*this)(user_func->return_expression);
+			PopTempVariable(op.arguments.size());
+			return res;
 		}
 
 		//find in the build-in functions		
@@ -320,7 +305,13 @@ namespace yutovo_calculator
 		//find in user defined variables
 		VariableNode<Integer>* v = FindVariable(op.name);
 		if (v)
-			return (*this)(v->expression);
+		{
+			ElementId _id = id;
+			id = v->id;
+			Integer res = (*this)(v->expression);
+			id = _id;
+			return res;
+		}
 		
 		BuildinVariable* var = FindBuildinVariable(op.name);
 		if (var)
@@ -354,7 +345,13 @@ namespace yutovo_calculator
 		//find in the user defined variables
 		VariableNode<Real>* v = FindVariable(op.name);
 		if (v)
-			return (*this)(v->expression);
+		{
+			ElementId _id = id;
+			id = v->id;
+			Real res = (*this)(v->expression);
+			id = _id;
+			return res;
+		}
 		
 		//find in the build-in variables
 		BuildinVariable* var = FindBuildinVariable(op.name);
@@ -389,7 +386,13 @@ namespace yutovo_calculator
 		//find in user defined variables
 		VariableNode<Rational>* v = FindVariable(op.name);
 		if (v)
-			return (*this)(v->expression);
+		{
+			ElementId _id = id;
+			id = v->id;
+			Rational res = (*this)(v->expression);
+			id = _id;
+			return res;
+		}
 		
 		BuildinVariable* var = FindBuildinVariable(op.name);
 		if (var)

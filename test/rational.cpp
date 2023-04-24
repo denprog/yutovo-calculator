@@ -11,10 +11,21 @@ using namespace std::chrono_literals;
 
 TEST_F(CalcTestRational, variables1)
 {
-    ASSERT_TRUE(parser.Parse(ElementId{0, 0, 0, 0, 1}, U"п=3/2;п;") == parser.Parse(ElementId{0, 0, 0, 0, 1}, U"3/2;")) << 
-        parser.Parse(ElementId{0, 0, 0, 0, 1}, U"п=3/2;п;").ToStdString();
-    ASSERT_TRUE(parser.Parse(ElementId{0, 0, 0, 0, 1}, U"пр=3/2;пр+5;") == parser.Parse(ElementId{0, 0, 0, 0, 1}, U"13/2;")) << 
-        parser.Parse(ElementId{0, 0, 0, 0, 1}, U"пр=3/2;пр+5;").ToStdString();
+    parser.Parse(ElementId{0, 0, 0, 0, 1}, U"п=3/2;");
+    ASSERT_TRUE(parser.Parse(ElementId{0, 0, 0, 0, 2}, U"п;") == parser.Parse(ElementId{0, 0, 0, 0, 2}, U"3/2;")) << 
+        parser.Parse(ElementId{0, 0, 0, 0, 1}, U"п;").ToStdString();
+    parser.Parse(ElementId{0, 0, 0, 0, 1}, U"пр=3/2;");
+    ASSERT_TRUE(parser.Parse(ElementId{0, 0, 1, 0, 1}, U"пр+5;") == parser.Parse(ElementId{0, 0, 1, 0, 1}, U"13/2;")) << 
+        parser.Parse(ElementId{0, 0, 1, 0, 1}, U"пр+5;").ToStdString();
+}
+
+TEST_F(CalcTestRational, functions1)
+{
+    parser.Parse(ElementId{0, 0, 0, 0, 2}, U"f(x)=2*x/3;");
+    ASSERT_TRUE(parser.Parse(ElementId{0, 0, 0, 0, 3}, U"f(2);") == parser.Parse(ElementId{0, 0, 0, 0, 2, 0}, U"4/3;"));
+    parser.Parse(ElementId{0, 0, 0, 0, 1}, U"f(x)=x/4;");
+    ASSERT_TRUE(parser.Parse(ElementId{0, 0, 0, 2, 3, 1}, U"f(2);") == parser.Parse(ElementId{0, 0, 0, 2, 3, 1}, U"4/3;")) << 
+        parser.Parse(ElementId{0, 0, 0, 2, 3, 1}, U"f(2);").ToStdString();
 }
 
 TEST_F(CalcTestRational, symbols1)

@@ -96,6 +96,7 @@ namespace yutovo_calculator
 	template<typename Number>
 	struct FunctionNode
 	{
+		mutable ElementId id;
 		IdentifierNode<Number> name;
 		std::list<IdentifierNode<Number>> arguments;
 		ExpressionNode<Number> return_expression;

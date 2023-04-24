@@ -34,12 +34,12 @@ namespace yutovo_calculator
 		typedef Number (*PrecisionVariable)(const int precision);
 		typedef boost::variant<Variable, PrecisionVariable> BuildinVariable;
 
-		mutable deque<TempVariable> temp_variables; ///< The temporary variables
-		mutable deque<VariableNode<Number>> variables;	///< The variables
-		mutable vector<FunctionNode<Number>> functions; ///< The functions
+		mutable deque<TempVariable> temp_variables;
+		mutable deque<VariableNode<Number>> variables; //user variables
+		mutable vector<FunctionNode<Number>> functions; //user functions
 
-		map<std::u32string, BuildinFunction> buildin_functions; ///< The buildin functions
-		map<std::u32string, BuildinVariable> buildin_variables; ///< The buildin variables
+		map<std::u32string, BuildinFunction> buildin_functions;
+		map<std::u32string, BuildinVariable> buildin_variables;
 	};
 		
 	template<typename Number>
@@ -60,7 +60,7 @@ namespace yutovo_calculator
 		
 		SolverSymbols<Number>* symbols;
 		
-		Solver(int _precision, Number _left_value = Number(), SolverSymbols<Number>* _symbols = NULL);
+		Solver(int _precision, Number _left_value = Number(), SolverSymbols<Number>* _symbols = nullptr);
 		
 		void SetPrecision(int prec)
 		{
@@ -172,7 +172,7 @@ namespace yutovo_calculator
 		Number operator()(ScriptNode<Number> const& script, ElementId _id, int _precision = -1) const
 		{
 			if (script.list.empty())
-				throw SyntaxException(id, ParserExceptionCode::ExpressionExpected);
+				throw SyntaxException(_id, ParserExceptionCode::ExpressionExpected);
 			
 			id = _id;
 
@@ -211,39 +211,77 @@ namespace yutovo_calculator
 					return &symbols->temp_variables[i];
 			}
 			
-			return NULL;
+			return nullptr;
 		}
 
 		void AddVariable(VariableNode<Number> const& var) const
 		{
+			for (int i = 0; i < symbols->variables.size(); ++i)
+			{
+				auto& v = symbols->variables[i];
+				if (v.id == id)
+				{
+					v = var;
+					return;
+				}
+			}
 			var.id = id;
 			symbols->variables.push_back(var);
 		}
 
-		//Find a variable.
 		VariableNode<Number>* FindVariable(const std::u32string& name) const
 		{
+			VariableNode<Number>* res = nullptr;
+			ElementId var_id;
 			for (int i = symbols->variables.size() - 1; i >= 0; --i)
 			{
-				if (symbols->variables[i].name.name == name)
-					return &symbols->variables[i];
+				auto& var = symbols->variables[i];
+				if (var.name.name == name && IsLess(var.id, id))
+				{
+					if (!var_id.empty() && IsLess(var.id, var_id))
+						continue;
+					res = &var;
+					var_id = var.id;
+				}
 			}
 			
-			return NULL;
+			return res;
 		}
+
+		FunctionNode<Number>* FindFunction(FunctionCallNode<Number> const& op) const
+		{
+			FunctionNode<Number>* res = nullptr;
+			ElementId func_id;
+			for (int i = 0; i < (int)symbols->functions.size(); ++i)
+			{
+				auto& func = symbols->functions[i];
+				if (func.name.name == op.name.name && IsLess(func.id, id))
+				{
+					if (func.arguments.size() != op.arguments.size())
+						throw SyntaxException(op.id, WrongArgumentsCount, U"Wrong arguments count in '" + op.name.name, op.pos, op.line);
+					if (!func_id.empty() && IsLess(func.id, func_id))
+						continue;
+					res = &func;
+					func_id = func.id;
+				}
+			}
 		
+			return res;
+		}
+
 		//Add a function.
 		void AddFunction(FunctionNode<Number> const& func) const
 		{
-			for (int i = 0; i < (int)symbols->functions.size(); ++i)
+			for (int i = 0; i < symbols->functions.size(); ++i)
 			{
-				if (symbols->functions[i].name.name == func.name.name)
+				auto& f = symbols->functions[i];
+				if (f.id == id)
 				{
-					symbols->functions[i] = func;
+					f = func;
 					return;
 				}
 			}
-
+			func.id = id;
 			symbols->functions.push_back((FunctionNode<Number>&)func);
 		}
 		
@@ -282,7 +320,7 @@ namespace yutovo_calculator
 		{
 			typename map<std::u32string, BuildinFunction>::const_iterator iter = symbols->buildin_functions.find(name);
 			if (iter == symbols->buildin_functions.end())
-				return NULL;
+				return nullptr;
 			return (BuildinFunction*)&(*iter).second;
 		}
 
@@ -301,25 +339,25 @@ namespace yutovo_calculator
 		{
 			typename map<std::u32string, BuildinVariable>::const_iterator iter = symbols->buildin_variables.find(name);
 			if (iter == symbols->buildin_variables.end())
-				return NULL;
+				return nullptr;
 			return (BuildinVariable*)&(*iter).second;
 		}
 
 		bool RemoveIdentifier(ElementId id, const std::u32string& name)
 		{
 			auto var_it = symbols->variables.erase(std::remove_if(symbols->variables.begin(), symbols->variables.end(), 
-				[name](auto& var)
+				[id, name](auto& var)
 				{
-					return var.name.name == name;
+					return var.name.name == name && var.id == id;
 				}), 
 				symbols->variables.end());
 			if (var_it != symbols->variables.end())
 				return true;
 
 			auto func_it = symbols->functions.erase(std::remove_if(symbols->functions.begin(), symbols->functions.end(), 
-				[name](auto& func)
+				[id, name](auto& func)
 				{
-					return func.name.name == name;
+					return func.name.name == name && func.id == id;;
 				}), 
 				symbols->functions.end());
 			return func_it != symbols->functions.end();

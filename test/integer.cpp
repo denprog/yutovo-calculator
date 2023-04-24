@@ -15,24 +15,33 @@ TEST_F(CalcTestInteger, integers1)
 
 TEST_F(CalcTestInteger, variables1)
 {
-    ASSERT_TRUE(parser.Parse(ElementId{0, 0, 0, 0, 1}, U"a=5;a;") == parser.Parse(ElementId{0, 0, 0, 0, 1}, U"5;"));
-    ASSERT_TRUE(parser.Parse(ElementId{0, 0, 0, 0, 2}, U"a=5+6;b=a+7;b+3;") == parser.Parse(ElementId{0, 0, 0, 0, 2}, U"21;"));
+    parser.Parse(ElementId{0, 0, 0, 0, 1}, U"a=5;");
+    parser.Parse(ElementId{0, 0, 0, 0, 2}, U"a=5+6;");
+    parser.Parse(ElementId{0, 0, 0, 1, 0}, U"b=a+7;");
+    ASSERT_TRUE(parser.Parse(ElementId{0, 0, 1, 1, 0}, U"b+3;") == parser.Parse(ElementId{0, 0, 1, 1, 0}, U"21;"));
 }
 
 TEST_F(CalcTestInteger, variables2)
 {
-    ASSERT_TRUE(parser.Parse(ElementId{0, 0, 0, 0, 1}, U"п=55;п;") == parser.Parse(ElementId{0, 0, 0, 0, 1}, U"55;")) << 
-        parser.Parse(ElementId{0, 0, 0, 0, 1}, U"п=55;п;").ToStdString();
-    ASSERT_TRUE(parser.Parse(ElementId{0, 0, 0, 0, 1}, U"пр=55;пр+5;") == parser.Parse(ElementId{0, 0, 0, 0, 2}, U"60;")) << 
-        parser.Parse(ElementId{0, 0, 0, 0, 2}, U"пр=55;п+5;").ToStdString();
-    ASSERT_TRUE(parser.Parse(ElementId{0, 0, 0, 0, 3}, U"fп=55;fп+5;") == parser.Parse(ElementId{0, 0, 0, 0, 3}, U"60;")) << 
-        parser.Parse(ElementId{0, 0, 0, 0, 3}, U"fп=55;fп+5;").ToStdString();
+    parser.Parse(ElementId{0, 0, 0, 0, 1}, U"п=55;");
+    ASSERT_TRUE(parser.Parse(ElementId{0, 0, 0, 0, 2}, U"п;") == parser.Parse(ElementId{0, 0, 0, 0, 1}, U"55;")) << 
+        parser.Parse(ElementId{0, 0, 0, 0, 1}, U"п;").ToStdString();
+    parser.Parse(ElementId{0, 0, 0, 0, 1}, U"пр=55;");
+    ASSERT_TRUE(parser.Parse(ElementId{0, 0, 0, 0, 2}, U"пр+5;") == parser.Parse(ElementId{0, 0, 0, 0, 2}, U"60;")) << 
+        parser.Parse(ElementId{0, 0, 0, 0, 2}, U"п+5;").ToStdString();
+    parser.Parse(ElementId{0, 0, 0, 0, 3}, U"fп=55;");
+    ASSERT_TRUE(parser.Parse(ElementId{0, 0, 0, 0, 4}, U"fп+5;") == parser.Parse(ElementId{0, 0, 0, 0, 3}, U"60;")) << 
+        parser.Parse(ElementId{0, 0, 0, 0, 4}, U"fп+5;").ToStdString();
 }
 
 TEST_F(CalcTestInteger, functions1)
 {
-    ASSERT_TRUE(parser.Parse(ElementId{0, 0, 0, 0, 1}, U"f(x)=x+5;f(2);") == parser.Parse(ElementId{0, 0, 0, 0, 1}, U"7;"));
-    ASSERT_TRUE(parser.Parse(ElementId{0, 0, 0, 0, 1}, U"a=5+6;f(t)=a*t;f(2);") == parser.Parse(ElementId{0, 0, 0, 0, 1}, U"22;"));
+    parser.Parse(ElementId{0, 0, 0, 0, 1}, U"f(x)=x+5;");
+    ASSERT_TRUE(parser.Parse(ElementId{0, 0, 0, 0, 2, 0}, U"f(2);") == parser.Parse(ElementId{0, 0, 0, 0, 2, 0}, U"7;"));
+    parser.Parse(ElementId{0, 0, 0, 0, 2}, U"a=5+6;");
+    parser.Parse(ElementId{0, 0, 0, 2, 3, 0}, U"f(t)=a*t;");
+    ASSERT_TRUE(parser.Parse(ElementId{0, 0, 0, 2, 3, 1}, U"f(2);") == parser.Parse(ElementId{0, 0, 0, 2, 3, 1}, U"22;")) << 
+        parser.Parse(ElementId{0, 0, 0, 2, 3, 1}, U"f(2);").ToStdString();
 }
 
 TEST_F(CalcTestInteger, symbols1)

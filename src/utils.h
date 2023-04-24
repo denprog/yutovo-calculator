@@ -17,6 +17,8 @@ ElementId MakeElementId(ElementId id);
 
 std::string ElementIdToString(const ElementId& id);
 
+bool IsLess(const ElementId& id1, const ElementId& id2);
+
 }
 
 #endif
