@@ -37,7 +37,7 @@ std::string ElementIdToString(const ElementId& id)
 
 bool IsLess(const ElementId& id1, const ElementId& id2)
 {
-	for (size_t i = 0, j = 0; i < id1.size(), j < id2.size(); ++i, ++j)
+	for (size_t i = 0, j = 0; i < id1.size() && j < id2.size(); ++i, ++j)
 	{
 		if (id1[i] > id2[j])
 			return false;
