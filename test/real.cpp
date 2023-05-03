@@ -171,4 +171,18 @@ TEST_F(CalcTestReal, errors4)
     ASSERT_FALSE(true);
 }
 
+TEST_F(CalcTestReal, errors5)
+{
+    try
+    {
+        parser.Parse(ElementId{0, 0, 1}, U"sqrt();");
+    }
+    catch (yutovo_calculator::SyntaxException& ex)
+    {
+        ASSERT_TRUE(ex.id == MakeElementId(ElementId{0, 0, 1}) && ex.ex_id == ParserExceptionCode::WrongArgumentsCount && ex.pos == 0) << ex.ex_id;
+        return;
+    }
+    ASSERT_FALSE(true);
+}
+
 }

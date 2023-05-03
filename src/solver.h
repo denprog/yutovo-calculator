@@ -258,7 +258,7 @@ namespace yutovo_calculator
 				if (func.name.name == op.name.name && IsLess(func.id, id))
 				{
 					if (func.arguments.size() != op.arguments.size())
-						throw SyntaxException(op.id, WrongArgumentsCount, U"Wrong arguments count in '" + op.name.name, op.pos, op.line);
+						throw SyntaxException(op.id, WrongArgumentsCount, U"Wrong arguments count in '" + op.name.name + U"'", op.pos, op.line);
 					if (!func_id.empty() && IsLess(func.id, func_id))
 						continue;
 					res = &func;
