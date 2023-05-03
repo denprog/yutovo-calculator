@@ -50,6 +50,20 @@ TEST_F(CalcTestReal, user_functions1)
         parser.Parse(ElementId{0, 0, 3}, U"f(2);").ToStdString(3, 3);
 }
 
+TEST_F(CalcTestReal, user_functions2)
+{
+    parser.Parse(ElementId{0, 0, 1}, U"f(x)=x;");
+    ASSERT_TRUE(parser.Parse(ElementId{0, 0, 2}, U"f(2);") == parser.Parse(ElementId{0, 0, 2}, U"2;")) << 
+        parser.Parse(ElementId{0, 0, 2}, U"f(2);").ToStdString(3, 3);
+    parser.Parse(ElementId{0, 0, 3}, U"f(x)=x+7;");
+    ASSERT_TRUE(parser.Parse(ElementId{0, 0, 4}, U"f(2);") == parser.Parse(ElementId{0, 0, 4}, U"9;")) << 
+        parser.Parse(ElementId{0, 0, 4}, U"f(2);").ToStdString(3, 3);
+    ASSERT_TRUE(parser.Parse(ElementId{0, 0, 2}, U"f(3);") == parser.Parse(ElementId{0, 0, 2}, U"3;")) << 
+        parser.Parse(ElementId{0, 0, 2}, U"f(3);").ToStdString(3, 3);
+    ASSERT_TRUE(parser.Parse(ElementId{0, 0, 4}, U"f(3);") == parser.Parse(ElementId{0, 0, 4}, U"10;")) << 
+        parser.Parse(ElementId{0, 0, 4}, U"f(10);").ToStdString(3, 3);
+}
+
 TEST_F(CalcTestReal, str1)
 {
     EXPECT_THROW(parser.Parse(ElementId{0, 0, 1}, U"в;"), yutovo_calculator::SyntaxException);
