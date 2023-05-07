@@ -222,6 +222,7 @@ namespace yutovo_calculator
 				if (v.id == id)
 				{
 					v = var;
+					v.id = id;
 					return;
 				}
 			}
@@ -278,6 +279,7 @@ namespace yutovo_calculator
 				if (f.id == id)
 				{
 					f = func;
+					f.id = id;
 					return;
 				}
 			}
