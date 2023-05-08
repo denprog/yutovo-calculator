@@ -7,6 +7,7 @@
 namespace yutovo_calculator
 {
 
+typedef unsigned int uint;
 typedef std::vector<uint> ElementId;
 
 std::u32string ToUtfString(const std::string& str);

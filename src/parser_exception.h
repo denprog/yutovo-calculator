@@ -1,10 +1,11 @@
 #ifndef PARSEREXCEPTION_H
 #define PARSEREXCEPTION_H
 
-#include "utils.h"
-
 namespace yutovo_calculator
 {
+	typedef unsigned int uint;
+	typedef std::vector<uint> ElementId;
+
 	enum ParserExceptionCode
 	{
 		None = -1, 
