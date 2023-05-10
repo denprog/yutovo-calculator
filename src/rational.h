@@ -10,89 +10,95 @@ using namespace std;
 
 namespace yutovo_calculator
 {
-	/**
-	 * Rational number.
-	 */
-	class Rational
-	{
-	public:
-		Rational();
-		Rational(const Rational& source);
-		Rational(const int num);
-		Rational(const int precision, const double num);
-		Rational(const int precision, const int num);
-		Rational(const std::u32string& num);
-		~Rational();
-		
-	public:
-		Rational& operator=(const Rational& source);
-		Rational& operator=(const std::u32string& source);
-		
-		Rational operator+();
-		Rational operator-();
 
-		friend Rational operator+(const Rational& num1, const Rational& num2);
-		friend Rational operator+(const Rational& num1, const int num2);
-		friend Rational operator+(const int num1, const Rational& num2);
-
-		friend Rational operator-(const Rational& num1, const Rational& num2);
-		friend Rational operator-(const Rational& num1, const int num2);
-		friend Rational operator-(const int num1, const Rational& num2);
-
-		friend Rational operator*(const Rational& num1, const Rational& num2);
-		friend Rational operator*(const Rational& num1, const int num2);
-		friend Rational operator*(const int num1, const Rational& num2);
-
-		friend Rational operator/(const Rational& num1, const Rational& num2);
-		friend Rational operator/(const Rational& num1, const int num2);
-		friend Rational operator/(const int num1, const Rational& num2);
-
-	public:
-		void operator+=(const Rational& num);
-
-	public:
-		friend bool operator==(const Rational& num1, const Rational& num2);
-		friend bool operator==(const Rational& num1, const int num2);
-		friend bool operator==(const int num1, const Rational& num2);
-
-		friend bool operator!=(const Rational& num1, const Rational& num2);
-		friend bool operator!=(const Rational& num1, const int num2);
-		friend bool operator!=(const int num1, const Rational& num2);
-
-		friend bool operator>(const Rational& num1, const Rational& num2);
-		friend bool operator>(const Rational& num1, const int num2);
-		friend bool operator>(const int num1, const Rational& num2);
-
-		friend bool operator>=(const Rational& num1, const Rational& num2);
-		friend bool operator>=(const Rational& num1, const int num2);
-		friend bool operator>=(const int num1, const Rational& num2);
-
-		friend bool operator<(const Rational& num1, const Rational& num2);
-		friend bool operator<(const Rational& num1, const int num2);
-		friend bool operator<(const int num1, const Rational& num2);
-
-		friend bool operator<=(const Rational& num1, const Rational& num2);
-		friend bool operator<=(const Rational& num1, const int num2);
-		friend bool operator<=(const int num1, const Rational& num2);
-
-	public:
-		Integer GetNumerator();
-		Integer GetDenomerator();
+//Rational number
+class Rational
+{
+public:
+	Rational();
+	Rational(const Rational& source);
+	Rational(const int num);
+	Rational(const int precision, const double num);
+	Rational(const int precision, const int num);
+	Rational(const std::u32string& num);
+	~Rational();
 	
-		std::u32string ToString() const;
+public:
+	typedef Rational value_type;
 
-		int GetPrecision() const
-		{
-			return 0;
-		}
+	Rational& operator=(const Rational& source);
+	Rational& operator=(const std::u32string& source);
+	
+	Rational operator+();
+	Rational operator-();
 
-		void SetPrecision(int precision)
-		{
-		}
+	friend Rational operator+(const Rational& num1, const Rational& num2);
+	friend Rational operator+(const Rational& num1, const int num2);
+	friend Rational operator+(const int num1, const Rational& num2);
 
-		void SetBitPrecision(const int precision)
-		{
-		}
+	friend Rational operator-(const Rational& num1, const Rational& num2);
+	friend Rational operator-(const Rational& num1, const int num2);
+	friend Rational operator-(const int num1, const Rational& num2);
+
+	friend Rational operator*(const Rational& num1, const Rational& num2);
+	friend Rational operator*(const Rational& num1, const int num2);
+	friend Rational operator*(const int num1, const Rational& num2);
+
+	friend Rational operator/(const Rational& num1, const Rational& num2);
+	friend Rational operator/(const Rational& num1, const int num2);
+	friend Rational operator/(const int num1, const Rational& num2);
+
+public:
+	void operator+=(const Rational& num);
+
+public:
+	void operator=(const int num);
+	
+	operator int() const;
+
+public:
+	friend bool operator==(const Rational& num1, const Rational& num2);
+	friend bool operator==(const Rational& num1, const int num2);
+	friend bool operator==(const int num1, const Rational& num2);
+
+	friend bool operator!=(const Rational& num1, const Rational& num2);
+	friend bool operator!=(const Rational& num1, const int num2);
+	friend bool operator!=(const int num1, const Rational& num2);
+
+	friend bool operator>(const Rational& num1, const Rational& num2);
+	friend bool operator>(const Rational& num1, const int num2);
+	friend bool operator>(const int num1, const Rational& num2);
+
+	friend bool operator>=(const Rational& num1, const Rational& num2);
+	friend bool operator>=(const Rational& num1, const int num2);
+	friend bool operator>=(const int num1, const Rational& num2);
+
+	friend bool operator<(const Rational& num1, const Rational& num2);
+	friend bool operator<(const Rational& num1, const int num2);
+	friend bool operator<(const int num1, const Rational& num2);
+
+	friend bool operator<=(const Rational& num1, const Rational& num2);
+	friend bool operator<=(const Rational& num1, const int num2);
+	friend bool operator<=(const int num1, const Rational& num2);
+
+public:
+	Integer GetNumerator();
+	Integer GetDenomerator();
+
+	std::u32string ToString() const;
+
+	int GetPrecision() const
+	{
+		return 0;
+	}
+
+	void SetPrecision(int precision)
+	{
+	}
+
+	void SetBitPrecision(const int precision)
+	{
+	}
 
 	std::string ToStdString() const;
 
@@ -102,12 +108,13 @@ namespace yutovo_calculator
 	#endif
 		
 	private:
-		mpq_t number; ///< The number 
+		mpq_t number;
 
 	#ifdef TRACE_OUTPUT
-		std::u32string number_str; ///< The std::u32string representation of the number for debug purposes
+		std::u32string number_str; //the std::u32string representation of the number for debug purposes
 	#endif
-	};
+};
+
 }
 
 #endif

@@ -95,11 +95,15 @@ namespace yutovo_calculator
 
 		multiply = char_('*') > unary | char_('/') > unary;
 		
-		unary = number | function_call | no_fences_function_call | identifier | unary_operation | '(' > expression > ')';
+		unary = mixed_division | number | function_call | no_fences_function_call | identifier | unary_operation | '(' > expression > ')';
 		
 		number = exp_number | digits_number;
 		
 		digits_number = +char_("0-9.");
+
+		integer_number = +char_("0-9");
+
+		mixed_division = (integer_number >> '(' > integer_number > '/' > integer_number > ')');
 		
 		exp_number = +char_("0-9.") >> raw[lexeme[(no_case[char_("E")] > (char_('+') | char_('-')))]] > +(char_("0-9"));
 
@@ -130,6 +134,8 @@ namespace yutovo_calculator
 			boost::phoenix::function<Annotation<yutovo_calculator::Real>>(Annotation<yutovo_calculator::Real>(expr.begin(), expr.end(), id))(qi::_val, _1));
 		on_success(identifier, 
 			boost::phoenix::function<Annotation<yutovo_calculator::Real>>(Annotation<yutovo_calculator::Real>(expr.begin(), expr.end(), id))(qi::_val, _1));
+		on_success(mixed_division, 
+			boost::phoenix::function<Annotation<yutovo_calculator::Real>>(Annotation<yutovo_calculator::Real>(expr.begin(), expr.end(), id))(qi::_val, _1));
 		
 		on_error<fail>(expression, 
 			boost::phoenix::function<ErrorHandler<SyntaxException>>(ErrorHandler<SyntaxException>(id, expr.begin(), expr.end(), SyntaxError))(_3));
@@ -137,6 +143,7 @@ namespace yutovo_calculator
 		// BOOST_SPIRIT_DEBUG_NODE(expression);
 		// BOOST_SPIRIT_DEBUG_NODE(addition);
 		// BOOST_SPIRIT_DEBUG_NODE(multiplication);
+		// BOOST_SPIRIT_DEBUG_NODE(mixed_division);
 		// BOOST_SPIRIT_DEBUG_NODE(number);
 		// BOOST_SPIRIT_DEBUG_NODE(function_call);
 		// BOOST_SPIRIT_DEBUG_NODE(identifier);
@@ -162,13 +169,15 @@ namespace yutovo_calculator
 		
 		addition = multiplication >> *((char_('+') > multiplication) | (char_('-') > multiplication));
 		
-		multiplication = unary >> *(multiply);
+		multiplication = (unary >> *(multiply));
 
-		multiply = char_('*') > unary | char_('/') > unary;
+		multiply = (char_('*') > unary) | (char_('/') > unary);
 		
-		unary = number | function_call | no_fences_function_call | identifier | unary_operation | '(' > expression > ')';
+		unary = mixed_division | number | function_call | no_fences_function_call | identifier | unary_operation | '(' > expression > ')';
 		
 		number = digits_number;
+
+		mixed_division = (number >> '(' > number > '/' > number > ')');
 		
 		digits_number = +char_("0-9");
 
@@ -195,16 +204,19 @@ namespace yutovo_calculator
 			expr.end(), id))(qi::_val, _1));
 		on_success(identifier, boost::phoenix::function<Annotation<yutovo_calculator::Rational>>(Annotation<yutovo_calculator::Rational>(expr.begin(), 
 			expr.end(), id))(qi::_val, _1));
+		on_success(mixed_division, boost::phoenix::function<Annotation<yutovo_calculator::Rational>>(Annotation<yutovo_calculator::Rational>(expr.begin(), 
+			expr.end(), id))(qi::_val, _1));
 		
 		//work out the exceptions
 		on_error<fail>(expression, 
 			boost::phoenix::function<ErrorHandler<SyntaxException>>(ErrorHandler<SyntaxException>(id, expr.begin(), expr.end(), SyntaxError))(_3));
 		
-		//BOOST_SPIRIT_DEBUG_NODE(expression);
-		//BOOST_SPIRIT_DEBUG_NODE(addition);
-		//BOOST_SPIRIT_DEBUG_NODE(multiplication);
-		//BOOST_SPIRIT_DEBUG_NODE(number);
-		//BOOST_SPIRIT_DEBUG_NODE(function_call);
-		//BOOST_SPIRIT_DEBUG_NODE(identifier);
+		// BOOST_SPIRIT_DEBUG_NODE(expression);
+		// BOOST_SPIRIT_DEBUG_NODE(addition);
+		// BOOST_SPIRIT_DEBUG_NODE(mixed_division);
+		// BOOST_SPIRIT_DEBUG_NODE(multiplication);
+		// BOOST_SPIRIT_DEBUG_NODE(number);
+		// BOOST_SPIRIT_DEBUG_NODE(function_call);
+		// BOOST_SPIRIT_DEBUG_NODE(identifier);
 	}
 };

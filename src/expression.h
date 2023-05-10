@@ -19,6 +19,7 @@ namespace yutovo_calculator
 			boost::recursive_wrapper<IdentifierNode<Number>>, 
 			boost::recursive_wrapper<UnaryOperationNode<Number>>, 
 			boost::recursive_wrapper<OperationNode<Number>>, 
+			boost::recursive_wrapper<MixedDivivsionNode<Number>>, 
 			boost::recursive_wrapper<FunctionCallNode<Number>>, 
 			boost::recursive_wrapper<NoFencesFunctionCallNode<Number>>, 
 			boost::recursive_wrapper<ExpressionNode<Number>>>
@@ -28,11 +29,12 @@ namespace yutovo_calculator
 		qi::rule<std::u32string::iterator, Operand(), unicode::space_type> unary;
 		qi::rule<std::u32string::iterator, OperationNode<Number>(), unicode::space_type> multiply;
 		qi::rule<std::u32string::iterator, UnaryOperationNode<Number>(), unicode::space_type> unary_operation;
+		qi::rule<std::u32string::iterator, MixedDivivsionNode<Number>(), unicode::space_type> mixed_division;
 		qi::rule<std::u32string::iterator, IdentifierNode<Number>(), unicode::space_type> identifier;
 		qi::rule<std::u32string::iterator, FunctionCallNode<Number>(), unicode::space_type> function_call;
 		qi::rule<std::u32string::iterator, NoFencesFunctionCallNode<Number>(), unicode::space_type> no_fences_function_call;
 		qi::rule<std::u32string::iterator, FunctionParamNode<Number>(), unicode::space_type> function_param;
-		qi::rule<std::u32string::iterator, std::u32string(), unicode::space_type> digits_number, exp_number;
+		qi::rule<std::u32string::iterator, std::u32string(), unicode::space_type> digits_number, exp_number, integer_number;
 		qi::rule<std::u32string::iterator, std::u32string(), unicode::space_type> name;
 		qi::rule<std::u32string::iterator, Number(), unicode::space_type> number;
 	};

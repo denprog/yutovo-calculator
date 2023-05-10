@@ -14,6 +14,7 @@ namespace yutovo_calculator
 			boost::recursive_wrapper<IdentifierNode<Number>>, 
 			boost::recursive_wrapper<UnaryOperationNode<Number>>, 
 			boost::recursive_wrapper<OperationNode<Number>>, 
+			boost::recursive_wrapper<MixedDivivsionNode<Number>>, 
 			boost::recursive_wrapper<FunctionCallNode<Number>>, 
 			boost::recursive_wrapper<NoFencesFunctionCallNode<Number>>, 
 			boost::recursive_wrapper<ExpressionNode<Number>>>
@@ -58,31 +59,31 @@ namespace yutovo_calculator
 			position.line = j;
 		}
 		
-		//Updates the position in the expression.
 		void operator()(Operand& op, std::u32string::iterator pos) const
 		{
 			boost::apply_visitor(OperandVisitor<Number>(this, pos), op);
 		}
 
-		//Updates the position in the expression.
 		void operator()(IdentifierNode<Number>& op, std::u32string::iterator pos) const
 		{
 			UpdatePosition(pos, op);
 		}
 
-		//Updates the position in the expression.
 		void operator()(ExpressionNode<Number>& expr, std::u32string::iterator pos) const
 		{
 			UpdatePosition(pos, expr);
 		}
 
-		//Updates the position in the expression.
 		void operator()(OperationNode<Number>& op, std::u32string::iterator pos) const
 		{
 			UpdatePosition(pos, op);
 		}
 
-		//Updates the position in the expression.
+		void operator()(MixedDivivsionNode<Number>& op, std::u32string::iterator pos) const
+		{
+			UpdatePosition(pos, op);
+		}
+
 		void operator()(FunctionCallNode<Number>& op, std::u32string::iterator pos) const
 		{
 			UpdatePosition(pos, op);
@@ -111,6 +112,10 @@ namespace yutovo_calculator
 
 			//The visitor's functor for UnaryOperationNode.
 			void operator()(UnaryOperationNode<Num> const& op) const
+			{
+			}
+
+			void operator()(MixedDivivsionNode<Num> const& op) const
 			{
 			}
 

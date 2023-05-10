@@ -400,6 +400,19 @@ namespace yutovo_calculator
 		*this = *this + num;
 	}
 
+	void Rational::operator=(const int num)
+	{
+		*this = num;
+	}
+	
+	Rational::operator int() const
+	{
+		mpz_t numer;
+		mpz_init(numer);
+		mpq_get_num(numer, number);
+		return mpz_get_si(numer);
+	}
+
 	/**
 	 * Equality operator.
 	 * @param num1 The first instance to compare.

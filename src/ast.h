@@ -18,6 +18,8 @@ namespace yutovo_calculator
 	template<typename Number>
 	struct OperationNode;
 	template<typename Number>
+	struct MixedDivivsionNode;
+	template<typename Number>
 	struct VariableNode;
 	template<typename Number>
 	struct FunctionCallNode;
@@ -56,6 +58,7 @@ namespace yutovo_calculator
 			boost::recursive_wrapper<IdentifierNode<Number>>, 
 			boost::recursive_wrapper<UnaryOperationNode<Number>>, 
 			boost::recursive_wrapper<OperationNode<Number>>, 
+			boost::recursive_wrapper<MixedDivivsionNode<Number>>, 
 			boost::recursive_wrapper<FunctionCallNode<Number>>, 
 			boost::recursive_wrapper<NoFencesFunctionCallNode<Number>>, 
 			boost::recursive_wrapper<ExpressionNode<Number>>> 
@@ -74,6 +77,7 @@ namespace yutovo_calculator
 			boost::recursive_wrapper<IdentifierNode<Number>>, 
 			boost::recursive_wrapper<UnaryOperationNode<Number>>, 
 			boost::recursive_wrapper<OperationNode<Number>>, 
+			boost::recursive_wrapper<MixedDivivsionNode<Number>>, 
 			boost::recursive_wrapper<FunctionCallNode<Number>>, 
 			boost::recursive_wrapper<NoFencesFunctionCallNode<Number>>, 
 			boost::recursive_wrapper<ExpressionNode<Number>>> 
@@ -82,7 +86,15 @@ namespace yutovo_calculator
 		char op;
 		Operand operand;
 	};
-	
+
+	template<typename Number>
+	struct MixedDivivsionNode : ExpressionPosition
+	{
+		Number left;
+		Number numerator;
+		Number denominator;
+	};
+
 	//Variable node.
 	template<typename Number>
 	struct VariableNode
@@ -152,6 +164,7 @@ namespace yutovo_calculator
 			boost::recursive_wrapper<IdentifierNode<Number>>, 
 			boost::recursive_wrapper<UnaryOperationNode<Number>>, 
 			boost::recursive_wrapper<OperationNode<Number>>,
+			boost::recursive_wrapper<MixedDivivsionNode<Number>>,
 			boost::recursive_wrapper<FunctionCallNode<Number>>, 
 			boost::recursive_wrapper<NoFencesFunctionCallNode<Number>>, 
 			boost::recursive_wrapper<ExpressionNode<Number>>>
@@ -224,6 +237,11 @@ BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::UnaryOperationNode<yutovo_calculato
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::OperationNode<yutovo_calculator::Real>, 
 	(char, op)(yutovo_calculator::OperationNode<yutovo_calculator::Real>::Operand, operand))
 
+BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::MixedDivivsionNode<yutovo_calculator::Real>, 
+	(yutovo_calculator::Real, left)
+	(yutovo_calculator::Real, numerator)
+	(yutovo_calculator::Real, denominator))
+
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::VariableNode<yutovo_calculator::Real>, 
 	(yutovo_calculator::IdentifierNode<yutovo_calculator::Real>, name)
 	(yutovo_calculator::ExpressionNode<yutovo_calculator::Real>, expression))
@@ -265,6 +283,11 @@ BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::UnaryOperationNode<yutovo_calculato
 
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::OperationNode<yutovo_calculator::Rational>, 
 	(char, op)(yutovo_calculator::OperationNode<yutovo_calculator::Rational>::Operand, operand))
+
+BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::MixedDivivsionNode<yutovo_calculator::Rational>, 
+	(yutovo_calculator::Rational, left)
+	(yutovo_calculator::Rational, numerator)
+	(yutovo_calculator::Rational, denominator))
 
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::VariableNode<yutovo_calculator::Rational>, 
 	(yutovo_calculator::IdentifierNode<yutovo_calculator::Rational>, name)

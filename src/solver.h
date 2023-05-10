@@ -157,6 +157,11 @@ namespace yutovo_calculator
 			return Number();
 		}
 
+		Number operator()(MixedDivivsionNode<Number> const& op) const
+		{
+			return op.left + op.numerator / op.denominator;
+		}
+
 		Number operator()(FunctionCallNode<Number> const& op) const;
 
 		Number operator()(FunctionParamNode<Number> const& expr) const

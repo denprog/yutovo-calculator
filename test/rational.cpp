@@ -34,11 +34,25 @@ TEST_F(CalcTestRational, symbols1)
     EXPECT_THROW(parser.Parse(ElementId{0, 0, 0, 0, 1}, U"‣;"), yutovo_calculator::SyntaxException) << parser.Parse(ElementId{0, 0, 0, 0, 1}, U"‣;").ToStdString();
 }
 
-TEST_F(CalcTestRational, error1)
+TEST_F(CalcTestRational, errors1)
 {
     EXPECT_THROW(parser.Parse(ElementId{0, 0, 0, 0, 1}, U"123"), yutovo_calculator::SyntaxException);
     EXPECT_THROW(parser.Parse(ElementId{0, 0, 0, 0, 2}, U"123+(2/3)"), yutovo_calculator::SyntaxException);
     EXPECT_THROW(parser.Parse(ElementId{0, 0, 0, 0, 3}, U"123+3;45"), yutovo_calculator::SyntaxException);
+}
+
+TEST_F(CalcTestRational, rationals1)
+{
+    ASSERT_TRUE(parser.Parse(ElementId{0, 0, 0, 0, 1}, U"2/4;") == parser.Parse(ElementId{0, 0, 0, 0, 2}, U"1/2;")) << 
+        parser.Parse(ElementId{0, 0, 0, 0, 1}, U"2/4;").ToStdString();
+}
+
+TEST_F(CalcTestRational, rationals2)
+{
+    ASSERT_TRUE(parser.Parse(ElementId{0, 0, 0, 0, 1}, U"2(1/4);") == parser.Parse(ElementId{0, 0, 0, 0, 2}, U"9/4;")) << 
+        parser.Parse(ElementId{0, 0, 0, 0, 1}, U"2(1/4);").ToStdString();
+    ASSERT_TRUE(parser.Parse(ElementId{0, 0, 0, 0, 1}, U"3*22(3/5);") == parser.Parse(ElementId{0, 0, 0, 0, 2}, U"339/5;")) << 
+        parser.Parse(ElementId{0, 0, 0, 0, 1}, U"3*22(3/5);").ToStdString();
 }
 
 }

@@ -19,6 +19,12 @@ TEST_F(CalcTestReal, numbers1)
         parser.Parse(ElementId{0, 0, 1}, U"0.2;").ToStdString(3, 3);
 }
 
+TEST_F(CalcTestReal, numbers2)
+{
+    ASSERT_TRUE(parser.Parse(ElementId{0, 0, 0, 0, 1}, U"2(3/4);").ToStdString(3, 3) == parser.Parse(ElementId{0, 0, 0, 0, 1}, U"2.75;").ToStdString(3, 3)) << 
+        parser.Parse(ElementId{0, 0, 0, 0, 1}, U"2(3/4);").ToStdString(3, 3);
+}
+
 TEST_F(CalcTestReal, functions1)
 {
     ASSERT_TRUE(parser.Parse(ElementId{0, 0, 1}, U"sin(1);").ToStdString(3, 3) == parser.Parse(ElementId{0, 0, 1}, U"0.841E+0;").ToStdString(3, 3)) << 
