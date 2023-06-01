@@ -6,33 +6,33 @@ namespace yutovo_calculator
 	//Solver
 
 	template<>
-	Solver<Integer>::Solver(int _precision, Integer _left_value, SolverSymbols<Integer>* _symbols) : 
+	Solver<Integer>::Solver(int _precision, Integer _left_value, std::shared_ptr<SolverSymbols<Integer>> _symbols) : 
 		precision(_precision),
 		left_value(_left_value),
 		symbols(_symbols)
 	{
-		if (symbols == nullptr)
-			symbols = new SolverSymbols<Integer>();
+		if (!symbols)
+			symbols.reset(new SolverSymbols<Integer>());
 	}
 
 	template<>
-	Solver<Real>::Solver(int _precision, Real _left_value, SolverSymbols<Real>* _symbols) : 
+	Solver<Real>::Solver(int _precision, Real _left_value, std::shared_ptr<SolverSymbols<Real>> _symbols) : 
 		precision(_precision),
 		left_value(_left_value),
 		symbols(_symbols)
 	{
-		if (symbols == nullptr)
-			symbols = new SolverSymbols<Real>();
+		if (!symbols)
+			symbols.reset(new SolverSymbols<Real>());
 	}
 	
 	template<>
-	Solver<Rational>::Solver(int _precision, Rational _left_value, SolverSymbols<Rational>* _symbols) : 
+	Solver<Rational>::Solver(int _precision, Rational _left_value, std::shared_ptr<SolverSymbols<Rational>> _symbols) : 
 		precision(_precision),
 		left_value(_left_value),
 		symbols(_symbols)
 	{
-		if (symbols == nullptr)
-			symbols = new SolverSymbols<Rational>();
+		if (!symbols)
+			symbols.reset(new SolverSymbols<Rational>());
 	}
 	
 	//Visitor for FunctionCallNode<Integer>

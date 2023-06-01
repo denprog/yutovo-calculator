@@ -58,9 +58,9 @@ namespace yutovo_calculator
 		typedef typename SolverSymbols<Number>::BuildinVariable BuildinVariable;
 		typedef typename SolverSymbols<Number>::Variable Variable;
 		
-		SolverSymbols<Number>* symbols;
+		std::shared_ptr<SolverSymbols<Number>> symbols;
 		
-		Solver(int _precision, Number _left_value = Number(), SolverSymbols<Number>* _symbols = nullptr);
+		Solver(int _precision, Number _left_value = Number(), std::shared_ptr<SolverSymbols<Number>> _symbols = nullptr);
 		
 		void SetPrecision(int prec)
 		{
