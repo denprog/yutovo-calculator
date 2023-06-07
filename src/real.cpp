@@ -1745,19 +1745,19 @@ Real rad(const Real& num)
 	return num.ToRadian();
 }
 
-Real degree(const Real& num)
+Real deg(const Real& num)
 {
 	return num.ToDegree();
 }
 
 Real minute(const Real& num)
 {
-	return num / 60;
+	return num.ToDegree() / 60;
 }
 
 Real second(const Real& num)
 {
-	return num / 3600;
+	return num.ToDegree() / 3600;
 }
 
 Real grad(const Real& num)

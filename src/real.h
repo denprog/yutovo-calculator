@@ -222,7 +222,7 @@ public:
 	friend void ToCommonAngleMeasure(Real& num1, Real& num2);
 
 	friend Real rad(const Real& num);
-	friend Real degree(const Real& num);
+	friend Real deg(const Real& num);
 	friend Real minute(const Real& num);
 	friend Real second(const Real& num);
 	friend Real grad(const Real& num);

@@ -48,6 +48,21 @@ TEST_F(CalcTestReal, functions1)
         parser.Parse(ElementId{0, 0, 1}, U"log%2,(1+3);").ToStdString(3, 3);
 }
 
+TEST_F(CalcTestReal, functions2)
+{
+    Real res = parser.Parse(ElementId{0, 0, 1}, U"rad(pi/2);", AngleMeasure::Radian, AngleMeasure::Degree);
+    ASSERT_TRUE(res.angle_measure == AngleMeasure::Degree && res.ToStdString(3, 3) == parser.Parse(ElementId{0, 0, 1}, U"90;").ToStdString(3, 3)) << 
+        res.ToStdString(3, 3);
+
+    res = parser.Parse(ElementId{0, 0, 1}, U"deg(180);", AngleMeasure::Degree, AngleMeasure::Radian);
+    ASSERT_TRUE(res.angle_measure == AngleMeasure::Radian && res.ToStdString(3, 3) == parser.Parse(ElementId{0, 0, 1}, U"pi;").ToStdString(3, 3)) << 
+        res.ToStdString(3, 3);
+
+    res = parser.Parse(ElementId{0, 0, 1}, U"grad(1);", AngleMeasure::Grad, AngleMeasure::Degree);
+    ASSERT_TRUE(res.angle_measure == AngleMeasure::Degree && res.ToStdString(3, 3) == parser.Parse(ElementId{0, 0, 1}, U"0.9;").ToStdString(3, 3)) << 
+        res.ToStdString(3, 3);
+}
+
 TEST_F(CalcTestReal, user_functions1)
 {
     parser.Parse(ElementId{0, 0, 1}, U"f(x)=5;");

@@ -44,6 +44,12 @@ Real log(const Real& num1, const Real& num2);
 Real sqrt(const Real& num);
 Real root(const Real& num1, const Real& num2);
 
+Real rad(const Real& num);
+Real deg(const Real& num);
+Real minute(const Real& num);
+Real second(const Real& num);
+Real grad(const Real& num);
+
 template<>
 Parser<yutovo_calculator::Integer>::Parser(const int precision) : 
 	solver(precision)
@@ -71,7 +77,18 @@ Parser<yutovo_calculator::Real>::Parser(const int precision) :
 	solver.AddBuildinFunction("lg", unary_func);
 	unary_func = &sqrt;
 	solver.AddBuildinFunction("sqrt", unary_func);
-	
+
+	unary_func = &rad;
+	solver.AddBuildinFunction("rad", unary_func);
+	unary_func = &deg;
+	solver.AddBuildinFunction("deg", unary_func);
+	unary_func = &minute;
+	solver.AddBuildinFunction("minute", unary_func);
+	unary_func = &second;
+	solver.AddBuildinFunction("second", unary_func);
+	unary_func = &grad;
+	solver.AddBuildinFunction("grad", unary_func);
+
 	RealTrigonometricFunc trigonometric_func;
 	trigonometric_func = &sin;
 	solver.AddBuildinFunction("sin", trigonometric_func);
