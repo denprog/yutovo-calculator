@@ -28,7 +28,7 @@ struct SolverSymbols
 	typedef Number (*UnaryFunction)(const Number& num);
 	typedef Number (*BinaryFunction)(const Number& num1, const Number& num2);
 	typedef Number (*TrigonometricFunction)(const Number& num);
-	typedef boost::variant<UnaryFunction, BinaryFunction, TrigonometricFunction> BuildinFunction;
+	typedef boost::variant<UnaryFunction, BinaryFunction> BuildinFunction;
 	
 	//build-in variables' typedefs
 	typedef Number (*Variable)();
@@ -40,6 +40,7 @@ struct SolverSymbols
 	mutable vector<FunctionNode<Number>> functions; //user functions
 
 	map<std::u32string, BuildinFunction> buildin_functions;
+	map<std::u32string, TrigonometricFunction> trigonometric_functions;
 	map<std::u32string, BuildinVariable> buildin_variables;
 };
 	
@@ -298,12 +299,25 @@ struct Solver : public boost::static_visitor<Number>
 		symbols->buildin_functions[ToUtfString(name)] = func;
 	}
 
+	void AddTrigonometricFunction(const char* name, TrigonometricFunction& func)
+	{
+		symbols->trigonometric_functions[ToUtfString(name)] = func;
+	}
+
 	BuildinFunction* FindBuildinFunction(const std::u32string& name) const
 	{
 		typename map<std::u32string, BuildinFunction>::const_iterator iter = symbols->buildin_functions.find(name);
 		if (iter == symbols->buildin_functions.end())
 			return nullptr;
 		return (BuildinFunction*)&(*iter).second;
+	}
+
+	TrigonometricFunction* FindTrigonometricFunction(const std::u32string& name) const
+	{
+		typename map<std::u32string, TrigonometricFunction>::const_iterator iter = symbols->trigonometric_functions.find(name);
+		if (iter == symbols->trigonometric_functions.end())
+			return nullptr;
+		return (TrigonometricFunction*)&(*iter).second;
 	}
 
 	void AddBuildinVariable(const u_char* name, PrecisionVariable& var)

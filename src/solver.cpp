@@ -91,6 +91,26 @@ Real Solver<Real>::operator()(FunctionCallNode<Real> const& op) const
 		PopTempVariable(op.arguments.size());
 		return res;
 	}
+
+	TrigonometricFunction* t_func = FindTrigonometricFunction(op.name.name);
+	if (t_func)
+	{
+		try
+		{
+			UnaryFunction u = boost::get<UnaryFunction>(*t_func);
+			if (op.arguments.size() != 1)
+				throw SyntaxException(op.id, WrongArgumentsCount, U"Wrong arguments count in '" + op.name.name + U"'", op.pos, op.line);
+			
+			ExpressionNodesIter iter = op.arguments.begin();
+			Real arg = (*this)(*iter);
+			if (arg.angle_measure == AngleMeasure::None)
+				arg.angle_measure = default_angle_measure;
+			return (*u)(arg);
+		}
+		catch (boost::bad_get)
+		{
+		}
+	}
 	
 	//find in the build-in functions		
 	BuildinFunction* func = FindBuildinFunction(op.name.name);
@@ -104,8 +124,6 @@ Real Solver<Real>::operator()(FunctionCallNode<Real> const& op) const
 			
 			ExpressionNodesIter iter = op.arguments.begin();
 			Real arg = (*this)(*iter);
-			if (arg.angle_measure == AngleMeasure::None)
-				arg.angle_measure = default_angle_measure;
 			return (*u)(arg);
 		}
 		catch (boost::bad_get)
