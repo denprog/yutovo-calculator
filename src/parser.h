@@ -59,12 +59,17 @@ namespace yutovo_calculator
 		Number Parse(ElementId id, std::u32string expression)
 		{
 			Dependencies dependencies;
-			return Parse(id, expression, dependencies, AngleMeasure::Radian, AngleMeasure::Radian);
+			return Parse(id, expression, dependencies, AngleMeasure::Radian, AngleMeasure::None);
 		}
 
 		Number Parse(ElementId id, std::u32string expression, Dependencies& dependencies)
 		{
-			return Parse(id, expression, dependencies, AngleMeasure::Radian, AngleMeasure::Radian);
+			return Parse(id, expression, dependencies, AngleMeasure::Radian, AngleMeasure::None);
+		}
+
+		Number Parse(ElementId id, std::string expression, Dependencies& dependencies)
+		{
+			return Parse(id, ToUtfString(expression), dependencies, AngleMeasure::Radian, AngleMeasure::None);
 		}
 
 		bool RemoveIdentifier(ElementId id, const std::u32string& name)
@@ -75,11 +80,6 @@ namespace yutovo_calculator
 		bool RemoveIdentifier(ElementId id, const std::string& name)
 		{
 			return RemoveIdentifier(id, ToUtfString(name));
-		}
-
-		void SetPrecision(const int precision)
-		{
-			solver.SetPrecision(precision);
 		}
 		
 		Solver<Number> solver;
