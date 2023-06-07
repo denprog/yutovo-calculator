@@ -17,35 +17,34 @@ using namespace std;
 #define TRACE_OUTPUT
 #endif
 
-enum AngleMeasure
+enum class AngleMeasure
 {
-	NONE_ANGLE_MEASURE = -1, 
-	RADIAN = 0, 
-	DEGREE, 
-	GRAD
+	None = -1, 
+	Radian = 0, 
+	Degree, 
+	Grad
 };
 
 namespace yutovo_calculator
 {
-	class Real;
-	
-	/**
-	 * Mathematics helper.
-	 */
-	class MathHelper
-	{
-	public:
-		static int ToBitPrecision(const int precision);
-		static int ToDecimalPrecision(const int precision);
 
-		template<class TNumber>
-		static TNumber GetMisc(const TNumber& num);
-		
-	private:
-		static map<int, int> bitPrecisions; ///< The bit precisions cache
-		static map<int, int> decimalPrecisions; ///< The decimal precisions cache
-		static map<int, Real> realMiscs;	///< The real miscs cache
-	};
+class Real;
+
+class MathHelper
+{
+public:
+	static int ToBitPrecision(const int precision);
+	static int ToDecimalPrecision(const int precision);
+
+	template<class TNumber>
+	static TNumber GetMisc(const TNumber& num);
+	
+private:
+	static map<int, int> bit_precisions; //the bit precisions cache
+	static map<int, int> decimal_precisions; //the decimal precisions cache
+	static map<int, Real> real_miscs;	//the real miscs cache
+};
+
 }
 
 #endif

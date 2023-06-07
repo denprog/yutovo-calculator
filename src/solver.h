@@ -9,9 +9,9 @@ namespace yutovo_calculator
 {
 
 typedef Integer (*IntegerBinaryFunc)(const Integer& num1, const Integer& num2);
-typedef Real (*RealUnaryFunc)(const Real& num1);
+typedef Real (*RealUnaryFunc)(const Real& num);
 typedef Real (*RealBinaryFunc)(const Real& num1, const Real& num2);
-typedef Real (*RealTrigonometricFunc)(const Real& num1, const AngleMeasure angle_measure);
+typedef Real (*RealTrigonometricFunc)(const Real& num);
 
 typedef Integer (*IntegerVariable)();
 typedef Real (*RealPrecisionVariable)(const int precision);
@@ -27,7 +27,7 @@ struct SolverSymbols
 	//build-in functions' typedefs
 	typedef Number (*UnaryFunction)(const Number& num);
 	typedef Number (*BinaryFunction)(const Number& num1, const Number& num2);
-	typedef Number (*TrigonometricFunction)(const Number& num1, const AngleMeasure angle_measure);
+	typedef Number (*TrigonometricFunction)(const Number& num);
 	typedef boost::variant<UnaryFunction, BinaryFunction, TrigonometricFunction> BuildinFunction;
 	
 	//build-in variables' typedefs
@@ -61,21 +61,33 @@ struct Solver : public boost::static_visitor<Number>
 	
 	std::shared_ptr<SolverSymbols<Number>> symbols;
 	
-	Solver(int _precision, Number _left_value = Number(), std::shared_ptr<SolverSymbols<Number>> _symbols = nullptr);
-	
-	void SetPrecision(int prec)
+	Solver(int _precision, Number _left_value = Number(), std::shared_ptr<SolverSymbols<Number>> _symbols = nullptr) :
+		precision(_precision),
+		left_value(_left_value),
+		symbols(_symbols)
 	{
-		precision = prec;
+		if (!symbols)
+			symbols.reset(new SolverSymbols<Number>());
+	}
+
+	Solver(int _precision, AngleMeasure _default_angle_measure, AngleMeasure _result_angle_measure, Number _left_value = Number(), 
+		std::shared_ptr<SolverSymbols<Number>> _symbols = nullptr) :
+		precision(_precision),
+		default_angle_measure(_default_angle_measure),
+		result_angle_measure(_result_angle_measure),
+		left_value(_left_value),
+		symbols(_symbols)
+	{
+		if (!symbols)
+			symbols.reset(new SolverSymbols<Number>());
 	}
 	
-	//Visitor for Number.
 	Number operator()(Number n) const
 	{
 		n.SetPrecision(precision);
 		return n;
 	}
 
-	//Visitor for ExpressionNode.
 	Number operator()(ExpressionNode<Number> const& expr) const
 	{
 		//calculate all the expression's nodes
@@ -91,7 +103,6 @@ struct Solver : public boost::static_visitor<Number>
 		return res;
 	}
 	
-	//Visitor for DefinitionNode.
 	Number operator()(DefinitionNode<Number> const& op) const
 	{
 		//pass the definition to the special functor
@@ -99,7 +110,6 @@ struct Solver : public boost::static_visitor<Number>
 		return Number();
 	}
 
-	//Visitor for VariableNode.
 	Number operator()(VariableNode<Number> const& op) const
 	{
 		//store the variable
@@ -107,7 +117,6 @@ struct Solver : public boost::static_visitor<Number>
 		return Number();
 	}
 	
-	//Visitor for FunctionNode.
 	Number operator()(FunctionNode<Number> const& op) const
 	{
 		//store the function
@@ -115,7 +124,6 @@ struct Solver : public boost::static_visitor<Number>
 		return Number();
 	}
 
-	//Visitor for UnaryOperationNode.
 	Number operator()(UnaryOperationNode<Number> const& op) const
 	{
 		Number right = boost::apply_visitor(*this, op.operand);
@@ -130,7 +138,6 @@ struct Solver : public boost::static_visitor<Number>
 		return Number();
 	}
 
-	//Visitor for OperationNode.
 	Number operator()(OperationNode<Number> const& op) const
 	{
 		Number right = boost::apply_visitor(*this, op.operand);
@@ -175,40 +182,19 @@ struct Solver : public boost::static_visitor<Number>
 	Number operator()(IdentifierNode<Number> const& op) const;
 	
 	//The beginning of the solving.
-	Number operator()(ScriptNode<Number> const& script, ElementId _id, int _precision = -1) const
-	{
-		if (script.list.empty())
-			throw SyntaxException(_id, ParserExceptionCode::ExpressionExpected);
-		
-		id = _id;
+	Number operator()(ScriptNode<Number> const& script, ElementId _id, AngleMeasure _default_angle_measure, AngleMeasure _result_angle_measure, int _precision) const;
 
-		if (_precision != -1)
-			precision = _precision;
-		
-		Number res;
-		//calculate all the script nodes
-		BOOST_FOREACH(typename ScriptNode<Number>::Operand const& op, script.list)
-		{
-			res = boost::apply_visitor(*this, op);
-		}
-		
-		return res;
-	}
-
-	//Push a temporary variable.
 	void PushTempVariable(const std::u32string& name, Number& value) const
 	{
 		symbols->temp_variables.push_back(TempVariable(name, value));
 	}
 	
-	//Pop a number of the temporary variables.
 	void PopTempVariable(int count = 1) const
 	{
 		for (int i = 0; i < count; ++i)
 			symbols->temp_variables.pop_back();
 	}
 	
-	//Find a temporary variable.
 	TempVariable* FindTempVariable(const std::u32string& name) const
 	{
 		for (int i = symbols->temp_variables.size() - 1; i >= 0; --i)
@@ -276,7 +262,6 @@ struct Solver : public boost::static_visitor<Number>
 		return res;
 	}
 
-	//Add a function.
 	void AddFunction(FunctionNode<Number> const& func) const
 	{
 		for (int i = 0; i < symbols->functions.size(); ++i)
@@ -313,17 +298,6 @@ struct Solver : public boost::static_visitor<Number>
 		symbols->buildin_functions[ToUtfString(name)] = func;
 	}
 
-	void AddBuildinFunction(const u_char* name, TrigonometricFunction& func)
-	{
-		symbols->buildin_functions[std::u32string(name)] = func;
-	}
-
-	void AddBuildinFunction(const char* name, TrigonometricFunction& func)
-	{
-		symbols->buildin_functions[ToUtfString(name)] = func;
-	}
-
-	//Find a buildin function.
 	BuildinFunction* FindBuildinFunction(const std::u32string& name) const
 	{
 		typename map<std::u32string, BuildinFunction>::const_iterator iter = symbols->buildin_functions.find(name);
@@ -342,7 +316,6 @@ struct Solver : public boost::static_visitor<Number>
 		symbols->buildin_variables[ToUtfString(name)] = var;
 	}
 
-	//Find a buildin variable.
 	BuildinVariable* FindBuildinVariable(const std::u32string& name) const
 	{
 		typename map<std::u32string, BuildinVariable>::const_iterator iter = symbols->buildin_variables.find(name);
@@ -385,6 +358,8 @@ private:
 	
 	mutable ElementId id;
 	mutable int precision;
+	mutable AngleMeasure default_angle_measure;
+	mutable AngleMeasure result_angle_measure;
 	Number left_value; //left solved value
 	mutable Dependencies* dependencies = nullptr;
 };

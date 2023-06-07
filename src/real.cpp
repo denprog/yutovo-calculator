@@ -22,9 +22,18 @@ Real::Real()
 Real::Real(int precision)
 {
 	mpfr_init2(number, max((int)mpfr_get_default_prec(), precision));
-	//mpfr_init2(number, precision);
 	mpfr_set_si(number, 0, GMP_RNDN);
-	//addPrecision = 0;
+
+#ifdef TRACE_OUTPUT
+	UpdateNumberStr();
+#endif
+}
+
+Real::Real(int precision, AngleMeasure _angle_measure) :
+	angle_measure(_angle_measure)
+{
+	mpfr_init2(number, max((int)mpfr_get_default_prec(), precision));
+	mpfr_set_si(number, 0, GMP_RNDN);
 
 #ifdef TRACE_OUTPUT
 	UpdateNumberStr();
@@ -36,7 +45,7 @@ Real::Real(int precision, const char* num)
 	mpfr_init2(number, max((int)mpfr_get_default_prec(), precision));
 	//mpfr_init2(number, strlen(num) + 1);
 	mpfr_set_str(number, num, DEFAULT_BASE, MPFR_RNDZ);
-	stringNumber = ToUtfString(num);
+	string_number = ToUtfString(num);
 	//mpfr_prec_round(number, precision / 2, GMP_RNDN);
 	//addPrecision = (int)strchr(num, '.');
 	//if (!addPrecision)
@@ -54,7 +63,6 @@ Real::Real(int precision, int num)
 	mpfr_init2(number, max((int)mpfr_get_default_prec(), precision));
 	//mpfr_init2(number, precision);
 	mpfr_set_si(number, num, GMP_RNDN);
-	//addPrecision = 1;
 
 #ifdef TRACE_OUTPUT
 	UpdateNumberStr();
@@ -66,7 +74,6 @@ Real::Real(int precision, float num)
 	mpfr_init2(number, max((int)mpfr_get_default_prec(), precision));
 	//mpfr_init2(number, precision);
 	mpfr_set_d(number, num, GMP_RNDN);
-	//addPrecision = 1;
 
 #ifdef TRACE_OUTPUT
 	UpdateNumberStr();
@@ -75,7 +82,7 @@ Real::Real(int precision, float num)
 
 Real::Real(const std::u32string& num)
 {
-	stringNumber = num;
+	string_number = num;
 	mpfr_init2(number, max((int)mpfr_get_default_prec(), MathHelper::ToBitPrecision(num.length() * 2)) + 1);
 	mpfr_set_str(number, ToBasicString(num).c_str(), DEFAULT_BASE, MPFR_RNDA);
 	SetPrecision(GetPrecision() + GetExp());
@@ -89,8 +96,8 @@ Real::Real(const Real& source)
 {
 	mpfr_init2(number, source.GetBitPrecision());
 	mpfr_set(number, source.number, GMP_RNDN);
-	//addPrecision = source.addPrecision;
-	stringNumber = source.stringNumber;
+	string_number = source.string_number;
+	angle_measure = source.angle_measure;
 	
 #ifdef TRACE_OUTPUT
 	UpdateNumberStr();
@@ -110,8 +117,8 @@ Real& Real::operator=(const Real& source)
 	mpfr_clear(number);
 	mpfr_init2(number, source.GetBitPrecision());
 	mpfr_set(number, source.number, GMP_RNDN);
-	//addPrecision = source.addPrecision;
-	stringNumber = source.stringNumber;
+	string_number = source.string_number;
+	angle_measure = source.angle_measure;
 
 #ifdef TRACE_OUTPUT
 	UpdateNumberStr();
@@ -123,7 +130,6 @@ Real& Real::operator=(const Real& source)
 Real& Real::operator=(const int num)
 {
 	mpfr_set_si(number, num, GMP_RNDN);
-	//addPrecision = 1;
 
 #ifdef TRACE_OUTPUT
 	UpdateNumberStr();
@@ -135,7 +141,6 @@ Real& Real::operator=(const int num)
 Real& Real::operator=(const double num)
 {
 	mpfr_set_d(number, num, GMP_RNDN);
-	//addPrecision = 1;
 
 #ifdef TRACE_OUTPUT
 	UpdateNumberStr();
@@ -159,7 +164,7 @@ Real& Real::operator=(const char* num)
 		mpfr_clear(t);
 	}
 
-	stringNumber = ToUtfString(num);
+	string_number = ToUtfString(num);
 
 #ifdef TRACE_OUTPUT
 	UpdateNumberStr();
@@ -190,7 +195,7 @@ Real& Real::operator=(const std::u32string& num)
 		mpfr_clear(t);
 	}
 
-	stringNumber = num;
+	string_number = num;
 
 #ifdef TRACE_OUTPUT
 	UpdateNumberStr();
@@ -206,7 +211,7 @@ Real Real::operator+()
 
 Real Real::operator-()
 {
-	Real res(GetBitPrecision());
+	Real res(GetBitPrecision(), angle_measure);
 
 	mpfr_neg(res.number, number, GMP_RNDN);
 
@@ -229,9 +234,12 @@ Real Real::operator--()
 
 Real operator+(const Real& num1, const Real& num2)
 {
-	Real res(max(num1.GetBitPrecision() + 2, num2.GetBitPrecision()) + 2);
+	Real _num1 = num1;
+	Real _num2 = num2;
+	ToCommonAngleMeasure(_num1, _num2);
+	Real res(max(_num1.GetBitPrecision() + 2, _num2.GetBitPrecision()) + 2, AngleMeasure::Radian);
 
-	while (mpfr_add(res.number, num1.number, num2.number, DEFAULT_RND) != 0)
+	while (mpfr_add(res.number, _num1.number, _num2.number, DEFAULT_RND) != 0)
 	{
 		if (res.GetBitPrecision() + DEFAULT_INCREASE_PRECISION >= MPFR_PREC_MAX)
 			throw MathException(Overflow);
@@ -244,7 +252,7 @@ Real operator+(const Real& num1, const Real& num2)
 
 Real operator+(const Real& num1, const int num2)
 {
-	Real res(num1.GetBitPrecision());
+	Real res(num1.GetBitPrecision(), num1.angle_measure);
 
 	while (mpfr_add_si(res.number, num1.number, num2, DEFAULT_RND) != 0)
 	{
@@ -259,7 +267,7 @@ Real operator+(const Real& num1, const int num2)
 
 Real operator+(const int num1, const Real& num2)
 {
-	Real res(num2.GetBitPrecision());
+	Real res(num2.GetBitPrecision(), num2.angle_measure);
 
 	while (mpfr_add_si(res.number, num2.number, num1, DEFAULT_RND) != 0)
 	{
@@ -274,7 +282,7 @@ Real operator+(const int num1, const Real& num2)
 
 Real operator+(const Real& num1, const float num2)
 {
-	Real res(num1.GetBitPrecision());
+	Real res(num1.GetBitPrecision(), num1.angle_measure);
 
 	while (mpfr_add_d(res.number, num1.number, num2, DEFAULT_RND) != 0)
 	{
@@ -289,7 +297,7 @@ Real operator+(const Real& num1, const float num2)
 
 Real operator+(const float num1, const Real& num2)
 {
-	Real res(num2.GetBitPrecision());
+	Real res(num2.GetBitPrecision(), num2.angle_measure);
 
 	while (mpfr_add_d(res.number, num2.number, num1, DEFAULT_RND) != 0)
 	{
@@ -304,9 +312,12 @@ Real operator+(const float num1, const Real& num2)
 
 Real operator-(const Real& num1, const Real& num2)
 {
-	Real res(max(num1.GetBitPrecision(), num2.GetBitPrecision()) + 1);
+	Real _num1 = num1;
+	Real _num2 = num2;
+	ToCommonAngleMeasure(_num1, _num2);
+	Real res(max(_num1.GetBitPrecision(), _num2.GetBitPrecision()) + 1, AngleMeasure::Radian);
 
-	mpfr_sub(res.number, num1.number, num2.number, GMP_RNDN);
+	mpfr_sub(res.number, _num1.number, _num2.number, GMP_RNDN);
 
 #ifdef TRACE_OUTPUT
 	res.UpdateNumberStr();
@@ -317,7 +328,7 @@ Real operator-(const Real& num1, const Real& num2)
 
 Real operator-(const Real& num1, const int num2)
 {
-	Real res(num1.GetBitPrecision());
+	Real res(num1.GetBitPrecision(), num1.angle_measure);
 
 	mpfr_sub_si(res.number, num1.number, num2, DEFAULT_RND);
 
@@ -326,7 +337,7 @@ Real operator-(const Real& num1, const int num2)
 
 Real operator-(const int num1, const Real& num2)
 {
-	Real res(num2.GetBitPrecision());
+	Real res(num2.GetBitPrecision(), num2.angle_measure);
 
 	mpfr_si_sub(res.number, num1, num2.number, DEFAULT_RND);
 
@@ -335,7 +346,7 @@ Real operator-(const int num1, const Real& num2)
 
 Real operator-(const Real& num1, const float num2)
 {
-	Real res(num1.GetBitPrecision());
+	Real res(num1.GetBitPrecision(), num1.angle_measure);
 
 	mpfr_sub_d(res.number, num1.number, num2, DEFAULT_RND);
 
@@ -344,7 +355,7 @@ Real operator-(const Real& num1, const float num2)
 
 Real operator-(const float num1, const Real& num2)
 {
-	Real res(num2.GetBitPrecision());
+	Real res(num2.GetBitPrecision(), num2.angle_measure);
 
 	mpfr_d_sub(res.number, num1, num2.number, DEFAULT_RND);
 
@@ -353,7 +364,10 @@ Real operator-(const float num1, const Real& num2)
 
 Real operator*(const Real& num1, const Real& num2)
 {
-	Real res(max(num1.GetBitPrecision() * 2, num2.GetBitPrecision()) * 2);
+	Real _num1 = num1;
+	Real _num2 = num2;
+	ToCommonAngleMeasure(_num1, _num2);
+	Real res(max(_num1.GetBitPrecision() * 2, _num2.GetBitPrecision()) * 2, AngleMeasure::Radian);
 
 	while (mpfr_mul(res.number, num1.number, num2.number, DEFAULT_RND) != 0)
 	{
@@ -368,7 +382,7 @@ Real operator*(const Real& num1, const Real& num2)
 
 Real operator*(const Real& num1, const int num2)
 {
-	Real res(num1.GetBitPrecision());
+	Real res(num1.GetBitPrecision(), num1.angle_measure);
 
 	while (mpfr_mul_si(res.number, num1.number, num2, DEFAULT_RND) != 0)
 	{
@@ -378,12 +392,15 @@ Real operator*(const Real& num1, const int num2)
 		res.SetBitPrecision(res.GetBitPrecision() + DEFAULT_INCREASE_PRECISION);
 	}
 
+#ifdef TRACE_OUTPUT
+	res.UpdateNumberStr();
+#endif
 	return res;
 }
 
 Real operator*(const int num1, const Real& num2)
 {
-	Real res(num2.GetBitPrecision());
+	Real res(num2.GetBitPrecision(), num2.angle_measure);
 
 	while (mpfr_mul_si(res.number, num2.number, num1, DEFAULT_RND) != 0)
 	{
@@ -393,12 +410,15 @@ Real operator*(const int num1, const Real& num2)
 		res.SetBitPrecision(res.GetBitPrecision() + DEFAULT_INCREASE_PRECISION);
 	}
 
+#ifdef TRACE_OUTPUT
+	res.UpdateNumberStr();
+#endif
 	return res;
 }
 
 Real operator*(const Real& num1, const float num2)
 {
-	Real res(num1.GetBitPrecision());
+	Real res(num1.GetBitPrecision(), num1.angle_measure);
 
 	while (mpfr_mul_d(res.number, num1.number, num2, DEFAULT_RND) != 0)
 	{
@@ -408,12 +428,15 @@ Real operator*(const Real& num1, const float num2)
 		res.SetBitPrecision(res.GetBitPrecision() + DEFAULT_INCREASE_PRECISION);
 	}
 
+#ifdef TRACE_OUTPUT
+	res.UpdateNumberStr();
+#endif
 	return res;
 }
 
 Real operator*(const float num1, const Real& num2)
 {
-	Real res(num2.GetBitPrecision());
+	Real res(num2.GetBitPrecision(), num2.angle_measure);
 
 	while (mpfr_mul_d(res.number, num2.number, num1, DEFAULT_RND) != 0)
 	{
@@ -423,14 +446,20 @@ Real operator*(const float num1, const Real& num2)
 		res.SetBitPrecision(res.GetBitPrecision() + DEFAULT_INCREASE_PRECISION);
 	}
 
+#ifdef TRACE_OUTPUT
+	res.UpdateNumberStr();
+#endif
 	return res;
 }
 
 Real operator/(const Real& num1, const Real& num2)
 {
-	Real res(max(num1.GetBitPrecision() + 2, num2.GetBitPrecision() + 2));
+	Real _num1 = num1;
+	Real _num2 = num2;
+	ToCommonAngleMeasure(_num1, _num2);
+	Real res(max(_num1.GetBitPrecision() + 2, _num2.GetBitPrecision() + 2), AngleMeasure::Radian);
 
-	mpfr_div(res.number, num1.number, num2.number, GMP_RNDN);
+	mpfr_div(res.number, _num1.number, _num2.number, GMP_RNDN);
 
 	if (res.IsInfinity() || res.IsNaN())
 		throw MathException(DivisionByZero);
@@ -444,7 +473,7 @@ Real operator/(const Real& num1, const Real& num2)
 
 Real operator/(const Real& num1, const int num2)
 {
-	Real res(num1.GetBitPrecision());
+	Real res(num1.GetBitPrecision(), num1.angle_measure);
 
 	mpfr_div_si(res.number, num1.number, num2, DEFAULT_RND);
 
@@ -456,7 +485,7 @@ Real operator/(const Real& num1, const int num2)
 
 Real operator/(const int num1, const Real& num2)
 {
-	Real res(num2.GetBitPrecision());
+	Real res(num2.GetBitPrecision(), num2.angle_measure);
 
 	mpfr_si_div(res.number, num1, num2.number, DEFAULT_RND);
 
@@ -468,7 +497,7 @@ Real operator/(const int num1, const Real& num2)
 
 Real operator/(const Real& num1, const float num2)
 {
-	Real res(num1.GetBitPrecision());
+	Real res(num1.GetBitPrecision(), num1.angle_measure);
 
 	mpfr_div_d(res.number, num1.number, num2, DEFAULT_RND);
 
@@ -480,7 +509,7 @@ Real operator/(const Real& num1, const float num2)
 
 Real operator/(const float num1, const Real& num2)
 {
-	Real res(num2.GetBitPrecision());
+	Real res(num2.GetBitPrecision(), num2.angle_measure);
 
 	mpfr_d_div(res.number, num1, num2.number, DEFAULT_RND);
 
@@ -808,8 +837,6 @@ Real exp(const Real& num)
 		res.SetBitPrecision(res.GetBitPrecision() + DEFAULT_INCREASE_PRECISION);
 	}
 
-	//mpfr_exp(res.number, num.number, DEFAULT_RND);
-
 	return res;
 }
 
@@ -825,37 +852,28 @@ Real ln(const Real& num)
 		res.SetBitPrecision(res.GetBitPrecision() + DEFAULT_INCREASE_PRECISION);
 	}
 
-	//mpfr_log(res.number, num.number, DEFAULT_RND);
-
 	return res;
 }
 
 Real lg(const Real& num)
 {
-	Real res = ln(num) / ln(Real(num.GetBitPrecision(), 10));
-
-	return res;
+	return ln(num) / ln(Real(num.GetBitPrecision(), 10));
 }
 
 Real log(const Real& num1, const Real& num2)
 {
-	Real res = ln(num2) / ln(num1);
-
-	return res;
+	return ln(num2) / ln(num1);
 }
 
-Real sin(const Real& num, AngleMeasure angle_measure)
+Real sin(const Real& num)
 {
+	assert(num.angle_measure != AngleMeasure::None);
+
 	Real res(num.GetBitPrecision());
 
-	if (angle_measure != RADIAN)
+	if (num.angle_measure != AngleMeasure::Radian)
 	{
-		Real _num(num.GetBitPrecision());
-
-		if (angle_measure == DEGREE)
-			_num = num.DegreeToRadian();
-		else if (angle_measure == GRAD)
-			_num = num.GradToRadian();
+		Real _num = num.ToRadian();
 
 		while (mpfr_sin(res.number, _num.number, DEFAULT_RND) < 0)
 		{
@@ -900,18 +918,15 @@ Real sin(const Real& num, AngleMeasure angle_measure)
 	return res;
 }
 
-Real cos(const Real& num, AngleMeasure angle_measure)
+Real cos(const Real& num)
 {
+	assert(num.angle_measure != AngleMeasure::None);
+
 	Real res(num.GetBitPrecision());
 
-	if (angle_measure != RADIAN)
+	if (num.angle_measure != AngleMeasure::Radian)
 	{
-		Real _num(num.GetBitPrecision());
-
-		if (angle_measure == DEGREE)
-			_num = num.DegreeToRadian();
-		else if (angle_measure == GRAD)
-			_num = num.GradToRadian();
+		Real _num = num.ToRadian();
 
 		while (mpfr_cos(res.number, _num.number, DEFAULT_RND) < 0)
 		{
@@ -963,18 +978,15 @@ Real cos(const Real& num, AngleMeasure angle_measure)
 	return res;
 }
 
-Real tg(const Real& num, AngleMeasure angle_measure)
+Real tg(const Real& num)
 {
+	assert(num.angle_measure != AngleMeasure::None);
+
 	Real res(num.GetBitPrecision());
 
-	if (angle_measure != RADIAN)
+	if (num.angle_measure != AngleMeasure::Radian)
 	{
-		Real _num(num.GetBitPrecision());
-
-		if (angle_measure == DEGREE)
-			_num = num.DegreeToRadian();
-		else if (angle_measure == GRAD)
-			_num = num.GradToRadian();
+		Real _num = num.ToRadian();
 
 		while (mpfr_tan(res.number, _num.number, DEFAULT_RND) < 0)
 		{
@@ -1001,18 +1013,15 @@ Real tg(const Real& num, AngleMeasure angle_measure)
 	return res;
 }
 
-Real ctg(const Real& num, AngleMeasure angle_measure)
+Real ctg(const Real& num)
 {
+	assert(num.angle_measure != AngleMeasure::None);
+
 	Real res(num.GetBitPrecision());
 
-	if (angle_measure != RADIAN)
+	if (num.angle_measure != AngleMeasure::Radian)
 	{
-		Real _num(num.GetBitPrecision());
-
-		if (angle_measure == DEGREE)
-			_num = num.DegreeToRadian();
-		else if (angle_measure == GRAD)
-			_num = num.GradToRadian();
+		Real _num = num.ToRadian();
 
 		while (mpfr_cot(res.number, _num.number, DEFAULT_RND) < 0)
 		{
@@ -1039,18 +1048,13 @@ Real ctg(const Real& num, AngleMeasure angle_measure)
 	return res;
 }
 
-Real sec(const Real& num, AngleMeasure angle_measure)
+Real sec(const Real& num)
 {
 	Real res(num.GetBitPrecision());
 
-	if (angle_measure != RADIAN)
+	if (num.angle_measure != AngleMeasure::Radian)
 	{
-		Real _num(num.GetBitPrecision());
-
-		if (angle_measure == DEGREE)
-			_num = num.DegreeToRadian();
-		else if (angle_measure == GRAD)
-			_num = num.GradToRadian();
+		Real _num = num.ToRadian();
 
 		while (mpfr_sec(res.number, _num.number, DEFAULT_RND) < 0)
 		{
@@ -1074,18 +1078,13 @@ Real sec(const Real& num, AngleMeasure angle_measure)
 	return res;
 }
 
-Real cosec(const Real& num, AngleMeasure angle_measure)
+Real cosec(const Real& num)
 {
 	Real res(num.GetBitPrecision());
 
-	if (angle_measure != RADIAN)
+	if (num.angle_measure != AngleMeasure::Radian)
 	{
-		Real _num(num.GetBitPrecision());
-
-		if (angle_measure == DEGREE)
-			_num = num.DegreeToRadian();
-		else if (angle_measure == GRAD)
-			_num = num.GradToRadian();
+		Real _num = num.ToRadian();
 
 		while (mpfr_csc(res.number, _num.number, DEFAULT_RND) < 0)
 		{
@@ -1109,7 +1108,7 @@ Real cosec(const Real& num, AngleMeasure angle_measure)
 	return res;
 }
 
-Real arcsin(const Real& num, AngleMeasure angle_measure)
+Real arcsin(const Real& num)
 {
 	Real res(num.GetBitPrecision());
 
@@ -1124,15 +1123,11 @@ Real arcsin(const Real& num, AngleMeasure angle_measure)
 		res.SetBitPrecision(res.GetBitPrecision() + DEFAULT_INCREASE_PRECISION);
 	}
 
-	if (angle_measure == DEGREE)
-		res = res.RadianToDegree();
-	else if (angle_measure == GRAD)
-		res = res.RadianToGrad();
-
+	res.angle_measure = AngleMeasure::Radian;
 	return res;
 }
 
-Real arccos(const Real& num, AngleMeasure angle_measure)
+Real arccos(const Real& num)
 {
 	Real res(num.GetBitPrecision());
 
@@ -1147,15 +1142,11 @@ Real arccos(const Real& num, AngleMeasure angle_measure)
 		res.SetBitPrecision(res.GetBitPrecision() + DEFAULT_INCREASE_PRECISION);
 	}
 
-	if (angle_measure == DEGREE)
-		res = res.RadianToDegree();
-	else if (angle_measure == GRAD)
-		res = res.RadianToGrad();
-
+	res.angle_measure = AngleMeasure::Radian;
 	return res;
 }
 
-Real arctg(const Real& num, AngleMeasure angle_measure)
+Real arctg(const Real& num)
 {
 	Real res(num.GetBitPrecision());
 
@@ -1167,54 +1158,33 @@ Real arctg(const Real& num, AngleMeasure angle_measure)
 		res.SetBitPrecision(res.GetBitPrecision() + DEFAULT_INCREASE_PRECISION);
 	}
 
-	if (angle_measure == DEGREE)
-		res = res.RadianToDegree();
-	else if (angle_measure == GRAD)
-		res = res.RadianToGrad();
-
+	res.angle_measure = AngleMeasure::Radian;
 	return res;
 }
 
-Real arcctg(const Real& num, AngleMeasure angle_measure)
+Real arcctg(const Real& num)
 {
 	Real _pi = pi(num.GetBitPrecision());
-
-	if (angle_measure == DEGREE)
-		_pi = _pi.RadianToDegree();
-	else if (angle_measure == GRAD)
-		_pi = _pi.RadianToGrad();
-
-	Real res(_pi / 2 - arctg(num, angle_measure));
-
-	return res;
+	return _pi / 2 - arctg(num);
 }
 
-Real arcsec(const Real& num, AngleMeasure angle_measure)
+Real arcsec(const Real& num)
 {
-	Real res(arccos(1 / num, angle_measure));
-
-	return res;
+	return arccos(1 / num);
 }
 
-Real arccosec(const Real& num, AngleMeasure angle_measure)
+Real arccosec(const Real& num)
 {
-	Real res(arcsin(1 / num, angle_measure));
-
-	return res;
+	return arcsin(1 / num);
 }
 
-Real sh(const Real& num, AngleMeasure angle_measure)
+Real sh(const Real& num)
 {
 	Real res(num.GetBitPrecision());
 
-	if (angle_measure != RADIAN)
+	if (num.angle_measure != AngleMeasure::Radian)
 	{
-		Real _num(num.GetBitPrecision());
-
-		if (angle_measure == DEGREE)
-			_num = num.DegreeToRadian();
-		else if (angle_measure == GRAD)
-			_num = num.GradToRadian();
+		Real _num = num.ToRadian();
 
 		while (mpfr_sinh(res.number, _num.number, DEFAULT_RND) < 0)
 		{
@@ -1223,8 +1193,6 @@ Real sh(const Real& num, AngleMeasure angle_measure)
 
 			res.SetBitPrecision(res.GetBitPrecision() + DEFAULT_INCREASE_PRECISION);
 		}
-
-		//mpfr_sinh(res.number, _num.number, DEFAULT_RND);
 
 		return res;
 	}
@@ -1237,26 +1205,19 @@ Real sh(const Real& num, AngleMeasure angle_measure)
 		res.SetBitPrecision(res.GetBitPrecision() + DEFAULT_INCREASE_PRECISION);
 	}
 
-	//mpfr_sinh(res.number, num.number, DEFAULT_RND);
-
 	if (res.IsInfinity() || res.IsNaN())
 		throw MathException(Overflow);
 
 	return res;
 }
 
-Real ch(const Real& num, AngleMeasure angle_measure)
+Real ch(const Real& num)
 {
 	Real res(num.GetBitPrecision());
 
-	if (angle_measure != RADIAN)
+	if (num.angle_measure != AngleMeasure::Radian)
 	{
-		Real _num(num.GetBitPrecision());
-
-		if (angle_measure == DEGREE)
-			_num = num.DegreeToRadian();
-		else if (angle_measure == GRAD)
-			_num = num.GradToRadian();
+		Real _num = num.ToRadian();
 
 		while (mpfr_cosh(res.number, _num.number, DEFAULT_RND) < 0)
 		{
@@ -1265,8 +1226,6 @@ Real ch(const Real& num, AngleMeasure angle_measure)
 
 			res.SetBitPrecision(res.GetBitPrecision() + DEFAULT_INCREASE_PRECISION);
 		}
-
-		//mpfr_cosh(res.number, _num.number, DEFAULT_RND);
 
 		return res;
 	}
@@ -1279,26 +1238,19 @@ Real ch(const Real& num, AngleMeasure angle_measure)
 		res.SetBitPrecision(res.GetBitPrecision() + DEFAULT_INCREASE_PRECISION);
 	}
 
-	//mpfr_cosh(res.number, num.number, DEFAULT_RND);
-
 	if (res.IsInfinity() || res.IsNaN())
 		throw MathException(Overflow);
 
 	return res;
 }
 
-Real th(const Real& num, AngleMeasure angle_measure)
+Real th(const Real& num)
 {
 	Real res(num.GetBitPrecision());
 
-	if (angle_measure != RADIAN)
+	if (num.angle_measure != AngleMeasure::Radian)
 	{
-		Real _num(num.GetBitPrecision());
-
-		if (angle_measure == DEGREE)
-			_num = num.DegreeToRadian();
-		else if (angle_measure == GRAD)
-			_num = num.GradToRadian();
+		Real _num = num.ToRadian();
 
 		while (mpfr_tanh(res.number, _num.number, DEFAULT_RND) < 0)
 		{
@@ -1307,8 +1259,6 @@ Real th(const Real& num, AngleMeasure angle_measure)
 
 			res.SetBitPrecision(res.GetBitPrecision() + DEFAULT_INCREASE_PRECISION);
 		}
-
-		//mpfr_tanh(res.number, _num.number, DEFAULT_RND);
 
 		return res;
 	}
@@ -1324,23 +1274,16 @@ Real th(const Real& num, AngleMeasure angle_measure)
 	if (res.IsInfinity() || res.IsNaN())
 		throw MathException(Overflow);
 
-	//mpfr_tanh(res.number, num.number, DEFAULT_RND);
-
 	return res;
 }
 
-Real cth(const Real& num, AngleMeasure angle_measure)
+Real cth(const Real& num)
 {
 	Real res(num.GetBitPrecision());
 
-	if (angle_measure != RADIAN)
+	if (num.angle_measure != AngleMeasure::Radian)
 	{
-		Real _num(num.GetBitPrecision());
-
-		if (angle_measure == DEGREE)
-			_num = num.DegreeToRadian();
-		else if (angle_measure == GRAD)
-			_num = num.GradToRadian();
+		Real _num = num.ToRadian();
 
 		while (mpfr_coth(res.number, _num.number, DEFAULT_RND) < 0)
 		{
@@ -1349,8 +1292,6 @@ Real cth(const Real& num, AngleMeasure angle_measure)
 
 			res.SetBitPrecision(res.GetBitPrecision() + DEFAULT_INCREASE_PRECISION);
 		}
-
-		//mpfr_coth(res.number, _num.number, DEFAULT_RND);
 
 		return res;
 	}
@@ -1366,58 +1307,43 @@ Real cth(const Real& num, AngleMeasure angle_measure)
 	if (res.IsInfinity() || res.IsNaN())
 		throw MathException(Overflow);
 
-	//mpfr_coth(res.number, num.number, DEFAULT_RND);
-
 	return res;
 }
 
-Real sch(const Real& num, AngleMeasure angle_measure)
+Real sch(const Real& num)
 {
 	Real res(num.GetBitPrecision());
 
-	if (angle_measure != RADIAN)
+	if (num.angle_measure != AngleMeasure::Radian)
 	{
-		Real _num(num.GetBitPrecision());
-
-		if (angle_measure == DEGREE)
-			_num = num.DegreeToRadian();
-		else if (angle_measure == GRAD)
-			_num = num.GradToRadian();
-
+		Real _num = num.ToRadian();
+		
 		mpfr_sech(res.number, _num.number, DEFAULT_RND);
 
 		return res;
 	}
 
 	mpfr_sech(res.number, num.number, DEFAULT_RND);
-
 	return res;
 }
 
-Real csch(const Real& num, AngleMeasure angle_measure)
+Real csch(const Real& num)
 {
 	Real res(num.GetBitPrecision());
 
-	if (angle_measure != RADIAN)
+	if (num.angle_measure != AngleMeasure::Radian)
 	{
-		Real _num(num.GetBitPrecision());
-
-		if (angle_measure == DEGREE)
-			_num = num.DegreeToRadian();
-		else if (angle_measure == GRAD)
-			_num = num.GradToRadian();
+		Real _num = num.ToRadian();
 
 		mpfr_csch(res.number, _num.number, DEFAULT_RND);
-
 		return res;
 	}
 
 	mpfr_csch(res.number, num.number, DEFAULT_RND);
-
 	return res;
 }
 
-Real arsh(const Real& num, AngleMeasure angle_measure)
+Real arsh(const Real& num)
 {
 	Real res(num.GetBitPrecision());
 
@@ -1426,15 +1352,11 @@ Real arsh(const Real& num, AngleMeasure angle_measure)
 	if (res.IsInfinity() || res.IsNaN())
 		throw MathException(Overflow);
 
-	if (angle_measure == DEGREE)
-		res = res.RadianToDegree();
-	else if (angle_measure == GRAD)
-		res = res.RadianToGrad();
-
+	res.angle_measure = AngleMeasure::Radian;
 	return res;
 }
 
-Real arch(const Real& num, AngleMeasure angle_measure)
+Real arch(const Real& num)
 {
 	Real res(num.GetBitPrecision());
 
@@ -1443,15 +1365,11 @@ Real arch(const Real& num, AngleMeasure angle_measure)
 	if (res.IsInfinity() || res.IsNaN())
 		throw MathException(Overflow);
 
-	if (angle_measure == DEGREE)
-		res = res.RadianToDegree();
-	else if (angle_measure == GRAD)
-		res = res.RadianToGrad();
-
+	res.angle_measure = AngleMeasure::Radian;
 	return res;
 }
 
-Real arth(const Real& num, AngleMeasure angle_measure)
+Real arth(const Real& num)
 {
 	Real res(num.GetBitPrecision());
 
@@ -1460,56 +1378,40 @@ Real arth(const Real& num, AngleMeasure angle_measure)
 	if (res.IsInfinity() || res.IsNaN())
 		throw MathException(Overflow);
 
-	if (angle_measure == DEGREE)
-		res = res.RadianToDegree();
-	else if (angle_measure == GRAD)
-		res = res.RadianToGrad();
-
+	res.angle_measure = AngleMeasure::Radian;
 	return res;
 }
 
-Real arcth(const Real& num, AngleMeasure angle_measure)
+Real arcth(const Real& num)
 {
 	Real res(num.GetBitPrecision());
 
 	//res = (ln((num + 1) / (num - 1))) / 2;
-	res = arth(1 / num, angle_measure);
+	res = arth(1 / num);
 
-	if (angle_measure == DEGREE)
-		res = res.RadianToDegree();
-	else if (angle_measure == GRAD)
-		res = res.RadianToGrad();
-
+	res.angle_measure = AngleMeasure::Radian;
 	return res;
 }
 
-Real arsch(const Real& num, AngleMeasure angle_measure)
+Real arsch(const Real& num)
 {
 	Real res(num.GetBitPrecision());
 
 	//res = ln(sqrt((1 / num) - 1) * sqrt((1 / num) + 1) + (1 / num));
-	res = arch(1 / num, angle_measure);
+	res = arch(1 / num);
 
-	if (angle_measure == DEGREE)
-		res = res.RadianToDegree();
-	else if (angle_measure == GRAD)
-		res = res.RadianToGrad();
-
+	res.angle_measure = AngleMeasure::Radian;
 	return res;
 }
 
-Real arcsch(const Real& num, AngleMeasure angle_measure)
+Real arcsch(const Real& num)
 {
 	Real res(num.GetBitPrecision());
 
 	//res = ln(sqrt(1 + 1 / sqr(num)) + 1 / num);
-	res = arsh(1 / num, angle_measure);
+	res = arsh(1 / num);
 
-	if (angle_measure == DEGREE)
-		res = res.RadianToDegree();
-	else if (angle_measure == GRAD)
-		res = res.RadianToGrad();
-
+	res.angle_measure = AngleMeasure::Radian;
 	return res;
 }
 
@@ -1530,6 +1432,9 @@ Real pow(const Real& num1, const Real& num2)
 
 	res.Round(max(num1.GetBitPrecision(), num2.GetBitPrecision()));
 
+#ifdef TRACE_OUTPUT
+	res.UpdateNumberStr();
+#endif
 	return res;
 }
 
@@ -1545,6 +1450,9 @@ Real pow(const Real& num1, const int num2)
 		res.SetBitPrecision(res.GetBitPrecision() + DEFAULT_INCREASE_PRECISION);
 	}
 
+#ifdef TRACE_OUTPUT
+	res.UpdateNumberStr();
+#endif
 	return res;
 }
 
@@ -1560,6 +1468,9 @@ Real sqr(const Real& num)
 		res.SetBitPrecision(res.GetBitPrecision() + DEFAULT_INCREASE_PRECISION);
 	}
 
+#ifdef TRACE_OUTPUT
+	res.UpdateNumberStr();
+#endif
 	return res;
 }
 
@@ -1575,6 +1486,9 @@ Real sqrt(const Real& num)
 		res.SetBitPrecision(res.GetBitPrecision() + DEFAULT_INCREASE_PRECISION);
 	}
 
+#ifdef TRACE_OUTPUT
+	res.UpdateNumberStr();
+#endif
 	return res;
 }
 
@@ -1582,60 +1496,81 @@ Real root(const Real& num1, const Real& num2)
 {
 	Real res(pow(num1, 1 / num2));
 
+#ifdef TRACE_OUTPUT
+	res.UpdateNumberStr();
+#endif
 	return res;
 }
 
 Real abs(const Real& num)
 {
-	Real res(num.GetBitPrecision());
+	Real res(num.GetBitPrecision(), num.angle_measure);
 
 	mpfr_abs(res.number, num.number, DEFAULT_RND);
 
+#ifdef TRACE_OUTPUT
+	res.UpdateNumberStr();
+#endif
 	return res;
 }
 
 Real floor(const Real& num)
 {
-	Real res(num.GetBitPrecision());
+	Real res(num.GetBitPrecision(), num.angle_measure);
 
 	mpfr_floor(res.number, num.number);
 
+#ifdef TRACE_OUTPUT
+	res.UpdateNumberStr();
+#endif
 	return res;
 }
 
 Real fract(const Real& num)
 {
-	Real res(num.GetBitPrecision());
+	Real res(num.GetBitPrecision(), num.angle_measure);
 
 	mpfr_frac(res.number, num.number, DEFAULT_RND);
 
+#ifdef TRACE_OUTPUT
+	res.UpdateNumberStr();
+#endif
 	return res;
 }
 
 Real trunc(const Real& num)
 {
-	Real res(num.GetBitPrecision());
+	Real res(num.GetBitPrecision(), num.angle_measure);
 
 	mpfr_trunc(res.number, num.number);
 
+#ifdef TRACE_OUTPUT
+	res.UpdateNumberStr();
+#endif
 	return res;
 }
 
 Real ceil(const Real& num)
 {
-	Real res(num.GetBitPrecision());
+	Real res(num.GetBitPrecision(), num.angle_measure);
 
 	mpfr_ceil(res.number, num.number);
 
+#ifdef TRACE_OUTPUT
+	res.UpdateNumberStr();
+#endif
 	return res;
 }
 
 Real round(const Real& num)
 {
-	Real res(num.GetBitPrecision());
+	Real res(num.GetBitPrecision(), num.angle_measure);
 
 	mpfr_round(res.number, num.number);
 
+#ifdef TRACE_OUTPUT
+	res.UpdateNumberStr();
+#endif
 	return res;
 }
 
@@ -1651,22 +1586,28 @@ Real fraction(const Real& num)
 
 Real fact(const Real& num)
 {
-	Real res(num.GetBitPrecision());
+	Real res(num.GetBitPrecision(), num.angle_measure);
 
 	if (!num.IsInteger())
 		throw MathException(ArgumentIsOver);
 
 	mpfr_fac_ui(res.number, (int)num, DEFAULT_RND);
 
+#ifdef TRACE_OUTPUT
+	res.UpdateNumberStr();
+#endif
 	return res;
 }
 
 Real roundoff(const Real& num)
 {
-	Real res(num.GetBitPrecision());
+	Real res(num.GetBitPrecision(), num.angle_measure);
 
 	mpfr_round(res.number, num.number);
 
+#ifdef TRACE_OUTPUT
+	res.UpdateNumberStr();
+#endif
 	return res;
 }
 
@@ -1677,148 +1618,151 @@ Real exp(const int precision)
 
 Real pi(const int precision)
 {
-	Real res(precision);
+	Real res(precision, AngleMeasure::Radian);
 
 	mpfr_const_pi(res.number, DEFAULT_RND);
 
+#ifdef TRACE_OUTPUT
+	res.UpdateNumberStr();
+#endif
 	return res;
 }
 
-Real Real::DegreeToRadian() const
+Real Real::ToRadian() const
 {
-	Real res = pi(GetBitPrecision()) / 180 * *this;
-
-	return res;
-}
-
-Real Real::RadianToDegree() const
-{
-	Real res = 180 / pi(GetBitPrecision()) * *this;
-
-	return res;
-}
-
-Real Real::GradToRadian() const
-{
-	Real res = pi(GetBitPrecision()) / 180 * *this * (float)0.9;
-
-	return res;
-}
-
-Real Real::RadianToGrad() const
-{
-	Real res = 180 / pi(GetBitPrecision()) * *this * (float)0.9;
-
-	return res;
-}
-
-Real Real::DegreeToGrad() const
-{
-	Real res = *this / (float)0.9;
-
-	return res;
-}
-
-Real Real::GradToDegree() const
-{
-	Real res = *this * (float)0.9;
-
-	return res;
-}
-
-Real rad(const Real& num, AngleMeasure angle_measure)
-{
-	Real res(num);
+	Real res(GetBitPrecision());
 
 	switch (angle_measure)
 	{
-	case DEGREE:
-		res = res.RadianToDegree();
+	case AngleMeasure::Radian:
+		return *this;
+	case AngleMeasure::Degree:
+		res = *this;
+		res.angle_measure = AngleMeasure::None;
+		res *= pi(GetBitPrecision()) / 180;
 		break;
-	case GRAD:
-		res = res.RadianToGrad();
+	case AngleMeasure::Grad:
+		res = *this;
+		res.angle_measure = AngleMeasure::None;
+		res *= pi(GetBitPrecision()) / 180 * (float)0.9;
+		break;
+	default:
+		res = *this;
 		break;
 	}
 
+	res.angle_measure = AngleMeasure::Radian;
 	return res;
 }
 
-Real degree(const Real& num, AngleMeasure angle_measure)
+Real Real::ToDegree() const
 {
-	Real res = num;
+	Real res(GetBitPrecision());
 
 	switch (angle_measure)
 	{
-	case RADIAN:
-		res = res.DegreeToRadian();
+	case AngleMeasure::Radian:
+		res = *this;
+		res.angle_measure = AngleMeasure::None;
+		res *= 180 / pi(GetBitPrecision());
 		break;
-	case GRAD:
-		res = res.DegreeToGrad();
+	case AngleMeasure::Degree:
+		return *this;
+	case AngleMeasure::Grad:
+		res = *this;
+		res.angle_measure = AngleMeasure::None;
+		res *= (float)0.9;
+		break;
+	default:
+		res = *this;
 		break;
 	}
 
+	res.angle_measure = AngleMeasure::Degree;
 	return res;
 }
 
-Real minute(const Real& num, AngleMeasure angle_measure)
+Real Real::ToGrad() const
 {
-	Real res = num;
+	Real res(GetBitPrecision());
 
 	switch (angle_measure)
 	{
-	case RADIAN:
-		res /= 60;
-		res = res.DegreeToRadian();
+	case AngleMeasure::Radian:
+		res = *this;
+		res.angle_measure = AngleMeasure::None;
+		res *= 180 / pi(GetBitPrecision()) * (float)0.9;
 		break;
-	case DEGREE:
-		res /=60;
+	case AngleMeasure::Degree:
+		res = *this / (float)0.9;
 		break;
-	case GRAD:
-		res /= 60;
-		res = res.DegreeToGrad();
+	case AngleMeasure::Grad:
+		return *this;
+	default:
+		res = *this;
 		break;
 	}
 
+	res.angle_measure = AngleMeasure::Grad;
 	return res;
 }
 
-Real second(const Real& num, AngleMeasure angle_measure)
+void ToCommonAngleMeasure(Real& num1, Real& num2)
 {
-	Real res = num;
-
-	switch (angle_measure)
+	if (num1.angle_measure == num2.angle_measure)
+		return;
+	switch (num1.angle_measure)
 	{
-	case RADIAN:
-		res /= 3600;
-		res = res.DegreeToRadian();
+	case AngleMeasure::Radian:
+		num2 = num2.ToRadian();
 		break;
-	case DEGREE:
-		res /= 3600;
+	case AngleMeasure::Degree:
+		num2 = num2.ToDegree();
 		break;
-	case GRAD:
-		res /= 3600;
-		res = res.DegreeToGrad();
+	case AngleMeasure::Grad:
+		num2 = num2.ToGrad();
 		break;
+	case AngleMeasure::None:
+		{
+		switch (num2.angle_measure)
+		{
+		case AngleMeasure::Radian:
+			num1 = num1.ToRadian();
+			break;
+		case AngleMeasure::Degree:
+			num1 = num1.ToDegree();
+			break;
+		case AngleMeasure::Grad:
+			num1 = num1.ToGrad();
+			break;
+		}
+		}
 	}
-
-	return res;
 }
 
-Real grad(const Real& num, AngleMeasure angle_measure)
+Real rad(const Real& num)
 {
-	Real res = num;
+	return num.ToRadian();
+}
 
-	switch (angle_measure)
-	{
-	case RADIAN:
-		res = res.GradToRadian();
-		break;
-	case DEGREE:
-		res = res.GradToDegree();
-		break;
-	}
+Real degree(const Real& num)
+{
+	return num.ToDegree();
+}
 
-	return res;
+Real minute(const Real& num)
+{
+	return num / 60;
+}
+
+Real second(const Real& num)
+{
+	return num / 3600;
+}
+
+Real grad(const Real& num)
+{
+	return num.ToGrad();
 }
 
 int Real::GetPrecision() const
@@ -1828,13 +1772,13 @@ int Real::GetPrecision() const
 
 void Real::SetPrecision(int precision)
 {
-	if (stringNumber.empty())
+	if (string_number.empty())
 		SetBitPrecision(max((int)mpfr_get_default_prec(), MathHelper::ToBitPrecision(precision + 2)));
 	else
 	{
 		SetBitPrecision(max((int)mpfr_get_default_prec(), MathHelper::ToBitPrecision(precision + 2)));
 		//renew the number because of not being precios getting by std::u32string
-		mpfr_set_str(number, ToBasicString(stringNumber).c_str(), DEFAULT_BASE, MPFR_RNDA);
+		mpfr_set_str(number, ToBasicString(string_number).c_str(), DEFAULT_BASE, MPFR_RNDA);
 	}
 	//SetBitPrecision(MathHelper::ToBitPrecision(precision + addPrecision + 1));
 
@@ -1903,15 +1847,15 @@ std::u32string Real::ToString() const
 	return ToUtfString(s.str().c_str());
 }
 
-void Real::ToString(int exp, int accuracy, bool& mantissaSign, std::u32string& mantissa, bool& exponentSign, std::u32string& exponent) const
+void Real::ToString(int exp, int accuracy, bool& mantissa_sign, std::u32string& mantissa, bool& exponent_sign, std::u32string& exponent) const
 {
 	Real res(abs(*this));
 	char* numStr;
 	mp_exp_t numExp;
 	char buf[20];
 
-	mantissaSign = GetSign();
-	exponentSign = false;
+	mantissa_sign = GetSign();
+	exponent_sign = false;
 
 	assert(accuracy >= 1);
 
@@ -1934,7 +1878,7 @@ void Real::ToString(int exp, int accuracy, bool& mantissaSign, std::u32string& m
 	mantissa = ToUtfString(numStr);
 	mpfr_free_str(numStr);
 
-	if (mantissaSign)
+	if (mantissa_sign)
 		mantissa.erase(0, 1);
 
 	if (res >= 1)
@@ -1979,7 +1923,7 @@ void Real::ToString(int exp, int accuracy, bool& mantissaSign, std::u32string& m
 
 				--numExp;
 				if (numExp < 0)
-					exponentSign = true;
+					exponent_sign = true;
 
 				if (numExp != 0)
 				{
@@ -2010,7 +1954,7 @@ void Real::ToString(int exp, int accuracy, bool& mantissaSign, std::u32string& m
 
 			--numExp;
 			if (numExp < 0)
-				exponentSign = true;
+				exponent_sign = true;
 
 			if (numExp != 0)
 			{
@@ -2037,28 +1981,28 @@ void Real::ToString(int exp, int accuracy, bool& mantissaSign, std::u32string& m
 	}
 }
 
-void Real::ToString(int exp, int accuracy, bool& mantissaSign, std::string& mantissa, bool& exponentSign, std::string& exponent) const
+void Real::ToString(int exp, int accuracy, bool& mantissa_sign, std::string& mantissa, bool& exponent_sign, std::string& exponent) const
 {
 	std::u32string m, e;
-	ToString(exp, accuracy, mantissaSign, m, exponentSign, e);
+	ToString(exp, accuracy, mantissa_sign, m, exponent_sign, e);
 	mantissa = ToBasicString(m);
 	exponent = ToBasicString(e);
 }
 
 std::u32string Real::ToString(int exp, int accuracy) const
 {
-	bool mantissaSign;
+	bool mantissa_sign;
 	std::u32string mantissa;
-	bool exponentSign;
+	bool exponent_sign;
 	std::u32string exponent;
 	
-	ToString(exp, accuracy, mantissaSign, mantissa, exponentSign, exponent);
+	ToString(exp, accuracy, mantissa_sign, mantissa, exponent_sign, exponent);
 	
 	std::u32string res;
-	res += mantissaSign ? U"-" : U"";
+	res += mantissa_sign ? U"-" : U"";
 	res += mantissa;
 	res += U"E";
-	res += exponentSign ? U"-" : U"+";
+	res += exponent_sign ? U"-" : U"+";
 	res += exponent.empty() ? U"0" : exponent;
 	
 	return res;

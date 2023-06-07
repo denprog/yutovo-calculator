@@ -7,9 +7,9 @@
 
 namespace yutovo_calculator
 {
-	map<int, int> MathHelper::bitPrecisions;
-	map<int, int> MathHelper::decimalPrecisions;
-	map<int, Real> MathHelper::realMiscs;
+	map<int, int> MathHelper::bit_precisions;
+	map<int, int> MathHelper::decimal_precisions;
+	map<int, Real> MathHelper::real_miscs;
 
   struct Widen
   {
@@ -28,8 +28,8 @@ namespace yutovo_calculator
 	 */
 	int MathHelper::ToBitPrecision(const int precision)
 	{
-		if (bitPrecisions[precision] != 0)
-			return bitPrecisions[precision];
+		if (bit_precisions[precision] != 0)
+			return bit_precisions[precision];
 		
 		std::string str = "1";
 		for (int i = 0; i < precision; ++i)
@@ -39,7 +39,7 @@ namespace yutovo_calculator
 		mpz_init(number);
 		mpz_set_str(number, str.c_str(), 10);
 		int res = mpz_sizeinbase(number, 2);
-		bitPrecisions[precision] = res;
+		bit_precisions[precision] = res;
 		mpz_clear(number);
 		
 		return res;
@@ -52,8 +52,8 @@ namespace yutovo_calculator
 	 */
 	int MathHelper::ToDecimalPrecision(const int precision)
 	{
-		if (decimalPrecisions[precision] != 0)
-			return decimalPrecisions[precision];
+		if (decimal_precisions[precision] != 0)
+			return decimal_precisions[precision];
 		
 		std::string str = "1";
 		for (int i = 0; i < precision; ++i)
@@ -63,7 +63,7 @@ namespace yutovo_calculator
 		mpz_init(number);
 		mpz_set_str(number, str.c_str(), 2);
 		int res = mpz_sizeinbase(number, 10);
-		decimalPrecisions[precision] = res;
+		decimal_precisions[precision] = res;
 		mpz_clear(number);
 		
 		return res;
@@ -77,12 +77,12 @@ namespace yutovo_calculator
 	template<>
 	Real MathHelper::GetMisc(const Real& num)
 	{
-		map<int, Real>::iterator iter = realMiscs.find(num.GetBitPrecision());
+		map<int, Real>::iterator iter = real_miscs.find(num.GetBitPrecision());
 
-		if (iter == realMiscs.end())
+		if (iter == real_miscs.end())
 		{
 			Real misc = pow(Real(num.GetBitPrecision(), (float)0.1), Real(num.GetBitPrecision(), (int)(num.GetPrecision() - 2)));
-			realMiscs[num.GetBitPrecision()] = misc;
+			real_miscs[num.GetBitPrecision()] = misc;
 
 			return misc;
 		}

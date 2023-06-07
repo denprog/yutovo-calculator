@@ -25,7 +25,8 @@ namespace yutovo_calculator
 	{
 		Parser(const int precision);
 		
-		Number Parse(ElementId id, std::u32string expression, Dependencies& dependencies, const int precision = -1)
+		Number Parse(ElementId id, std::u32string expression, Dependencies& dependencies, AngleMeasure default_angle_measure, AngleMeasure result_angle_measure, 
+			const int precision = -1)
 		{
 			if (expression.empty() || expression == U";")
 				throw SyntaxException(id, ExpressionExpected, 0, 0);
@@ -40,18 +41,30 @@ namespace yutovo_calculator
 
 			phrase_parse(iter, end, script, space, script_node);
 			solver.SetDependencies(&dependencies);
-			return solver(script_node, id, precision);
+			return solver(script_node, id, default_angle_measure, result_angle_measure, precision);
 		}
 
-		Number Parse(ElementId id, std::u32string expression, const int precision = -1)
+		Number Parse(ElementId id, std::u32string expression, AngleMeasure default_angle_measure, AngleMeasure result_angle_measure, const int precision = -1)
 		{
 			Dependencies dependencies;
-			return Parse(id, expression, dependencies, precision);
+			return Parse(id, expression, dependencies, default_angle_measure, result_angle_measure, precision);
 		}
 
-		Number Parse(ElementId id, std::string expression, Dependencies& dependencies, const int precision = -1)
+		Number Parse(ElementId id, std::string expression, Dependencies& dependencies, AngleMeasure default_angle_measure, AngleMeasure result_angle_measure, 
+			const int precision = -1)
 		{
-			return Parse(id, ToUtfString(expression), dependencies, precision);
+			return Parse(id, ToUtfString(expression), dependencies, default_angle_measure, result_angle_measure, precision);
+		}
+
+		Number Parse(ElementId id, std::u32string expression)
+		{
+			Dependencies dependencies;
+			return Parse(id, expression, dependencies, AngleMeasure::Radian, AngleMeasure::Radian);
+		}
+
+		Number Parse(ElementId id, std::u32string expression, Dependencies& dependencies)
+		{
+			return Parse(id, expression, dependencies, AngleMeasure::Radian, AngleMeasure::Radian);
 		}
 
 		bool RemoveIdentifier(ElementId id, const std::u32string& name)
@@ -69,7 +82,7 @@ namespace yutovo_calculator
 			solver.SetPrecision(precision);
 		}
 		
-		Solver<Number> solver;	///< The solver
+		Solver<Number> solver;
 	};
 };
 

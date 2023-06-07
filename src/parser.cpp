@@ -8,30 +8,30 @@ Integer pow(const Integer& num1, const Integer& num2);
 
 Real pow(const Real& num1, const Real& num2);
 
-Real sin(const Real& num, AngleMeasure angle_measure);
-Real cos(const Real& num, AngleMeasure angle_measure);
-Real tg(const Real& num, AngleMeasure angle_measure);
-Real ctg(const Real& num, AngleMeasure angle_measure);
-Real sec(const Real& num, AngleMeasure angle_measure);
-Real cosec(const Real& num, AngleMeasure angle_measure);
-Real arcsin(const Real& num, AngleMeasure angle_measure);
-Real arccos(const Real& num, AngleMeasure angle_measure);
-Real arctg(const Real& num, AngleMeasure angle_measure);
-Real arcctg(const Real& num, AngleMeasure angle_measure);
-Real arcsec(const Real& num, AngleMeasure angle_measure);
-Real arccosec(const Real& num, AngleMeasure angle_measure);
-Real sh(const Real& num, AngleMeasure angle_measure);
-Real ch(const Real& num, AngleMeasure angle_measure);
-Real th(const Real& num, AngleMeasure angle_measure);
-Real cth(const Real& num, AngleMeasure angle_measure);
-Real sch(const Real& num, AngleMeasure angle_measure);
-Real csch(const Real& num, AngleMeasure angle_measure);
-Real arsh(const Real& num, AngleMeasure angle_measure);
-Real arch(const Real& num, AngleMeasure angle_measure);
-Real arth(const Real& num, AngleMeasure angle_measure);
-Real arcth(const Real& num, AngleMeasure angle_measure);
-Real arsch(const Real& num, AngleMeasure angle_measure);
-Real arcsch(const Real& num, AngleMeasure angle_measure);
+Real sin(const Real& num);
+Real cos(const Real& num);
+Real tg(const Real& num);
+Real ctg(const Real& num);
+Real sec(const Real& num);
+Real cosec(const Real& num);
+Real arcsin(const Real& num);
+Real arccos(const Real& num);
+Real arctg(const Real& num);
+Real arcctg(const Real& num);
+Real arcsec(const Real& num);
+Real arccosec(const Real& num);
+Real sh(const Real& num);
+Real ch(const Real& num);
+Real th(const Real& num);
+Real cth(const Real& num);
+Real sch(const Real& num);
+Real csch(const Real& num);
+Real arsh(const Real& num);
+Real arch(const Real& num);
+Real arth(const Real& num);
+Real arcth(const Real& num);
+Real arsch(const Real& num);
+Real arcsch(const Real& num);
 
 Real pi(const int precision);
 Real exp(const int precision);
@@ -45,14 +45,16 @@ Real sqrt(const Real& num);
 Real root(const Real& num1, const Real& num2);
 
 template<>
-Parser<yutovo_calculator::Integer>::Parser(const int precision) : solver(precision)
+Parser<yutovo_calculator::Integer>::Parser(const int precision) : 
+	solver(precision)
 {
 	IntegerBinaryFunc binary_func = &pow;
 	solver.AddBuildinFunction("pow", binary_func);
 }
 
 template<>
-Parser<yutovo_calculator::Real>::Parser(const int precision) : solver(precision)
+Parser<yutovo_calculator::Real>::Parser(const int precision) : 
+	solver(precision)
 {
 	RealPrecisionVariable var;
 	var = &pi;
@@ -129,7 +131,8 @@ Parser<yutovo_calculator::Real>::Parser(const int precision) : solver(precision)
 }
 
 template<>
-Parser<yutovo_calculator::Rational>::Parser(const int precision) : solver(precision)
+Parser<yutovo_calculator::Rational>::Parser(const int precision) : 
+	solver(precision)
 {
 }
 

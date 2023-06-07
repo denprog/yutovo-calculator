@@ -205,4 +205,26 @@ TEST_F(CalcTestReal, errors5)
     ASSERT_FALSE(true);
 }
 
+TEST_F(CalcTestReal, trigonometric1)
+{
+    Real res = parser.Parse(ElementId{0, 0, 1}, U"sin(0);");
+    ASSERT_TRUE(res.angle_measure == AngleMeasure::None && res.ToStdString(3, 3) == parser.Parse(ElementId{0, 0, 1}, U"0;").ToStdString(3, 3)) << 
+        res.ToStdString(3, 3) << "\n" << (int)res.angle_measure;
+    
+    res = parser.Parse(ElementId{0, 0, 1}, U"arcsin(0);");
+    ASSERT_TRUE(res.angle_measure == AngleMeasure::Radian && res.ToStdString(3, 3) == parser.Parse(ElementId{0, 0, 1}, U"0;").ToStdString(3, 3)) << 
+        res.ToStdString(3, 3) << "\n" << (int)res.angle_measure;
+}
+
+TEST_F(CalcTestReal, trigonometric2)
+{
+    Real res = parser.Parse(ElementId{0, 0, 1}, U"sin(90);", AngleMeasure::Degree, AngleMeasure::Degree);
+    ASSERT_TRUE(res.angle_measure == AngleMeasure::None && res.ToStdString(3, 3) == parser.Parse(ElementId{0, 0, 1}, U"1;").ToStdString(3, 3)) << 
+        res.ToStdString(3, 3);
+
+    res = parser.Parse(ElementId{0, 0, 1}, U"arcsin(1);", AngleMeasure::Degree, AngleMeasure::Degree);
+    ASSERT_TRUE(res.angle_measure == AngleMeasure::Degree && res.ToStdString(3, 3) == parser.Parse(ElementId{0, 0, 1}, U"90;").ToStdString(3, 3)) << 
+        res.ToStdString(3, 3) << "\n" << (int)res.angle_measure;
+}
+
 }

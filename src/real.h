@@ -16,6 +16,7 @@ class Real
 public:
 	Real();
 	explicit Real(int precision);
+	explicit Real(int precision, AngleMeasure _angle_measure);
 	explicit Real(int precision, const char* num);
 	explicit Real(int precision, int num);
 	explicit Real(int precision, float num);
@@ -129,53 +130,53 @@ public:
 	friend Real lg(const Real& num);
 	friend Real log(const Real& num1, const Real& num2);
 
-	friend Real sin(const Real& num, AngleMeasure angle_measure);
+	friend Real sin(const Real& num);
 
-	friend Real cos(const Real& num, AngleMeasure angle_measure);
+	friend Real cos(const Real& num);
 
-	friend Real tg(const Real& num, AngleMeasure angle_measure);
+	friend Real tg(const Real& num);
 
-	friend Real ctg(const Real& num, AngleMeasure angle_measure);
+	friend Real ctg(const Real& num);
 
-	friend Real sec(const Real& num, AngleMeasure angle_measure);
+	friend Real sec(const Real& num);
 
-	friend Real cosec(const Real& num, AngleMeasure angle_measure);
+	friend Real cosec(const Real& num);
 
-	friend Real arcsin(const Real& num, AngleMeasure angle_measure);
+	friend Real arcsin(const Real& num);
 
-	friend Real arccos(const Real& num, AngleMeasure angle_measure);
+	friend Real arccos(const Real& num);
 
-	friend Real arctg(const Real& num, AngleMeasure angle_measure);
+	friend Real arctg(const Real& num);
 
-	friend Real arcctg(const Real& num, AngleMeasure angle_measure);
+	friend Real arcctg(const Real& num);
 
-	friend Real arcsec(const Real& num, AngleMeasure angle_measure);
+	friend Real arcsec(const Real& num);
 
-	friend Real arccosec(const Real& num, AngleMeasure angle_measure);
+	friend Real arccosec(const Real& num);
 
-	friend Real sh(const Real& num, AngleMeasure angle_measure);
+	friend Real sh(const Real& num);
 
-	friend Real ch(const Real& num, AngleMeasure angle_measure);
+	friend Real ch(const Real& num);
 
-	friend Real th(const Real& num, AngleMeasure angle_measure);
+	friend Real th(const Real& num);
 
-	friend Real cth(const Real& num, AngleMeasure angle_measure);
+	friend Real cth(const Real& num);
 
-	friend Real sch(const Real& num, AngleMeasure angle_measure);
+	friend Real sch(const Real& num);
 
-	friend Real csch(const Real& num, AngleMeasure angle_measure);
+	friend Real csch(const Real& num);
 
-	friend Real arsh(const Real& num, AngleMeasure angle_measure);
+	friend Real arsh(const Real& num);
 
-	friend Real arch(const Real& num, AngleMeasure angle_measure);
+	friend Real arch(const Real& num);
 
-	friend Real arth(const Real& num, AngleMeasure angle_measure);
+	friend Real arth(const Real& num);
 
-	friend Real arcth(const Real& num, AngleMeasure angle_measure);
+	friend Real arcth(const Real& num);
 
-	friend Real arsch(const Real& num, AngleMeasure angle_measure);
+	friend Real arsch(const Real& num);
 
-	friend Real arcsch(const Real& num, AngleMeasure angle_measure);
+	friend Real arcsch(const Real& num);
 
 	friend Real pow(const Real& num1, const Real& num2);
 
@@ -214,20 +215,17 @@ public:
 	friend Real pi(const int precision);
 
 public:
-	Real DegreeToRadian() const;
-	Real RadianToDegree() const;
+	Real ToRadian() const;
+	Real ToDegree() const;
+	Real ToGrad() const;
 
-	Real GradToRadian() const;
-	Real RadianToGrad() const;
+	friend void ToCommonAngleMeasure(Real& num1, Real& num2);
 
-	Real DegreeToGrad() const;
-	Real GradToDegree() const;
-
-	friend Real rad(const Real& num, AngleMeasure angle_measure);
-	friend Real degree(const Real& num, AngleMeasure angle_measure);
-	friend Real minute(const Real& num, AngleMeasure angle_measure);
-	friend Real second(const Real& num, AngleMeasure angle_measure);
-	friend Real grad(const Real& num, AngleMeasure angle_measure);
+	friend Real rad(const Real& num);
+	friend Real degree(const Real& num);
+	friend Real minute(const Real& num);
+	friend Real second(const Real& num);
+	friend Real grad(const Real& num);
 
 public:
 	bool IsNumber() const
@@ -316,23 +314,24 @@ public:
 #ifdef TRACE_OUTPUT
 		UpdateNumberStr();
 #endif
-
 		return *this;
 	}
 
 public:
 	std::u32string ToString() const;
-	void ToString(int exp, int accuracy, bool& mantissaSign, std::u32string& mantissa, bool& exponentSign, std::u32string& exponent) const;
-	void ToString(int exp, int accuracy, bool& mantissaSign, std::string& mantissa, bool& exponentSign, std::string& exponent) const;
+	void ToString(int exp, int accuracy, bool& mantissa_sign, std::u32string& mantissa, bool& exponent_sign, std::u32string& exponent) const;
+	void ToString(int exp, int accuracy, bool& mantissa_sign, std::string& mantissa, bool& exponent_sign, std::string& exponent) const;
 	std::u32string ToString(int exp, int accuracy) const;
 	std::string ToStdString(int exp, int accuracy) const;
 
 	Real GetNumber();
 
+public:
+	AngleMeasure angle_measure = AngleMeasure::None;
+
 private:
 	mpfr_t number;
-	//int addPrecision;
-	std::u32string stringNumber;
+	std::u32string string_number;
 
 #ifdef TRACE_OUTPUT
 void UpdateNumberStr();

@@ -7,37 +7,6 @@ namespace yutovo_calculator
 //Solver
 
 template<>
-Solver<Integer>::Solver(int _precision, Integer _left_value, std::shared_ptr<SolverSymbols<Integer>> _symbols) : 
-	precision(_precision),
-	left_value(_left_value),
-	symbols(_symbols)
-{
-	if (!symbols)
-		symbols.reset(new SolverSymbols<Integer>());
-}
-
-template<>
-Solver<Real>::Solver(int _precision, Real _left_value, std::shared_ptr<SolverSymbols<Real>> _symbols) : 
-	precision(_precision),
-	left_value(_left_value),
-	symbols(_symbols)
-{
-	if (!symbols)
-		symbols.reset(new SolverSymbols<Real>());
-}
-
-template<>
-Solver<Rational>::Solver(int _precision, Rational _left_value, std::shared_ptr<SolverSymbols<Rational>> _symbols) : 
-	precision(_precision),
-	left_value(_left_value),
-	symbols(_symbols)
-{
-	if (!symbols)
-		symbols.reset(new SolverSymbols<Rational>());
-}
-
-//Visitor for FunctionCallNode<Integer>
-template<>
 Integer Solver<Integer>::operator()(FunctionCallNode<Integer> const& op) const
 {
 	AddDependency(op.name.name);
@@ -49,9 +18,9 @@ Integer Solver<Integer>::operator()(FunctionCallNode<Integer> const& op) const
 	if (user_func)
 	{
 		IdentifierNodesIter funcIter = user_func->arguments.begin();
-		for (ExpressionNodesIter callIter = op.arguments.begin(); callIter != op.arguments.end(); ++callIter, ++funcIter)
+		for (ExpressionNodesIter iter = op.arguments.begin(); iter != op.arguments.end(); ++iter, ++funcIter)
 		{
-			Integer arg = (*this)(*callIter);
+			Integer arg = (*this)(*iter);
 			PushTempVariable(funcIter->name, arg);
 		}
 
@@ -70,8 +39,8 @@ Integer Solver<Integer>::operator()(FunctionCallNode<Integer> const& op) const
 			if (op.arguments.size() != 1)
 				throw SyntaxException(op.id, WrongArgumentsCount, U"Wrong arguments count in '" + op.name.name + U"'", op.pos, op.line);
 			
-			ExpressionNodesIter callIter = op.arguments.begin();
-			Integer arg = (*this)(*callIter);
+			ExpressionNodesIter iter = op.arguments.begin();
+			Integer arg = (*this)(*iter);
 			return (*u)(arg);
 		}
 		catch (boost::bad_get)
@@ -84,9 +53,9 @@ Integer Solver<Integer>::operator()(FunctionCallNode<Integer> const& op) const
 			if (op.arguments.size() != 2)
 				throw SyntaxException(op.id, WrongArgumentsCount, U"Wrong arguments count in '" + op.name.name + U"'", op.pos, op.line);
 			
-			ExpressionNodesIter callIter = op.arguments.begin();
-			Integer arg1 = (*this)(*callIter++);
-			Integer arg2 = (*this)(*callIter);
+			ExpressionNodesIter iter = op.arguments.begin();
+			Integer arg1 = (*this)(*iter++);
+			Integer arg2 = (*this)(*iter);
 			return (*b)(arg1, arg2);
 		}
 		catch (boost::bad_get)
@@ -100,7 +69,6 @@ Integer Solver<Integer>::operator()(FunctionCallNode<Integer> const& op) const
 	return res;
 }
 
-//Visitor for FunctionCallNode<Real>
 template<>
 Real Solver<Real>::operator()(FunctionCallNode<Real> const& op) const
 {
@@ -113,9 +81,9 @@ Real Solver<Real>::operator()(FunctionCallNode<Real> const& op) const
 	if (user_func)
 	{
 		IdentifierNodesIter funcIter = user_func->arguments.begin();
-		for (ExpressionNodesIter callIter = op.arguments.begin(); callIter != op.arguments.end(); ++callIter, ++funcIter)
+		for (ExpressionNodesIter iter = op.arguments.begin(); iter != op.arguments.end(); ++iter, ++funcIter)
 		{
-			Real arg = (*this)(*callIter);
+			Real arg = (*this)(*iter);
 			PushTempVariable(funcIter->name, arg);
 		}
 
@@ -134,8 +102,10 @@ Real Solver<Real>::operator()(FunctionCallNode<Real> const& op) const
 			if (op.arguments.size() != 1)
 				throw SyntaxException(op.id, WrongArgumentsCount, U"Wrong arguments count in '" + op.name.name + U"'", op.pos, op.line);
 			
-			ExpressionNodesIter callIter = op.arguments.begin();
-			Real arg = (*this)(*callIter);
+			ExpressionNodesIter iter = op.arguments.begin();
+			Real arg = (*this)(*iter);
+			if (arg.angle_measure == AngleMeasure::None)
+				arg.angle_measure = default_angle_measure;
 			return (*u)(arg);
 		}
 		catch (boost::bad_get)
@@ -148,24 +118,10 @@ Real Solver<Real>::operator()(FunctionCallNode<Real> const& op) const
 			if (op.arguments.size() != 2)
 				throw SyntaxException(op.id, WrongArgumentsCount, U"Wrong arguments count in '" + op.name.name + U"'", op.pos, op.line);
 			
-			ExpressionNodesIter callIter = op.arguments.begin();
-			Real arg1 = (*this)(*callIter++);
-			Real arg2 = (*this)(*callIter);
+			ExpressionNodesIter iter = op.arguments.begin();
+			Real arg1 = (*this)(*iter++);
+			Real arg2 = (*this)(*iter);
 			return (*b)(arg1, arg2);
-		}
-		catch (boost::bad_get)
-		{
-		}
-		
-		try
-		{
-			RealTrigonometricFunc t = boost::get<RealTrigonometricFunc>(*func);
-			if (op.arguments.size() != 1)
-				throw SyntaxException(op.id, WrongArgumentsCount, U"Wrong arguments count in '" + op.name.name + U"'", op.pos, op.line);
-			
-			ExpressionNodesIter callIter = op.arguments.begin();
-			Real arg = (*this)(*callIter);
-			return (*t)(arg, RADIAN);
 		}
 		catch (boost::bad_get)
 		{
@@ -178,7 +134,6 @@ Real Solver<Real>::operator()(FunctionCallNode<Real> const& op) const
 	return res;
 }
 
-//Visitor for FunctionCallNode<Rational>
 template<>
 Rational Solver<Rational>::operator()(FunctionCallNode<Rational> const& op) const
 {
@@ -191,9 +146,9 @@ Rational Solver<Rational>::operator()(FunctionCallNode<Rational> const& op) cons
 	if (user_func)
 	{
 		IdentifierNodesIter funcIter = user_func->arguments.begin();
-		for (ExpressionNodesIter callIter = op.arguments.begin(); callIter != op.arguments.end(); ++callIter, ++funcIter)
+		for (ExpressionNodesIter iter = op.arguments.begin(); iter != op.arguments.end(); ++iter, ++funcIter)
 		{
-			Rational arg = (*this)(*callIter);
+			Rational arg = (*this)(*iter);
 			PushTempVariable(funcIter->name, arg);
 		}
 
@@ -212,8 +167,8 @@ Rational Solver<Rational>::operator()(FunctionCallNode<Rational> const& op) cons
 			if (op.arguments.size() != 1)
 				throw SyntaxException(op.id, WrongArgumentsCount, U"Wrong arguments count in '" + op.name.name + U"'", op.pos, op.line);
 			
-			ExpressionNodesIter callIter = op.arguments.begin();
-			Rational arg = (*this)(*callIter);
+			ExpressionNodesIter iter = op.arguments.begin();
+			Rational arg = (*this)(*iter);
 			return (*u)(arg);
 		}
 		catch (boost::bad_get)
@@ -226,9 +181,9 @@ Rational Solver<Rational>::operator()(FunctionCallNode<Rational> const& op) cons
 			if (op.arguments.size() != 2)
 				throw SyntaxException(op.id, WrongArgumentsCount, U"Wrong arguments count in '" + op.name.name + U"'", op.pos, op.line);
 			
-			ExpressionNodesIter callIter = op.arguments.begin();
-			Rational arg1 = (*this)(*callIter++);
-			Rational arg2 = (*this)(*callIter);
+			ExpressionNodesIter iter = op.arguments.begin();
+			Rational arg1 = (*this)(*iter++);
+			Rational arg2 = (*this)(*iter);
 			return (*b)(arg1, arg2);
 		}
 		catch (boost::bad_get)
@@ -268,8 +223,8 @@ Real Solver<Real>::operator()(NoFencesFunctionCallNode<Real> const& op) const
 			if (op.arguments.size() != 1)
 				throw SyntaxException(op.id, WrongArgumentsCount, U"Wrong arguments count in '" + op.name.name + U"'", op.pos, op.line);
 			
-			ExpressionNodesIter callIter = op.arguments.begin();
-			Real arg1 = (*this)(*callIter++);
+			ExpressionNodesIter iter = op.arguments.begin();
+			Real arg1 = (*this)(*iter++);
 			Real arg2 = (*this)(op.last_argument);
 			return (*b)(arg1, arg2);
 		}
@@ -293,7 +248,6 @@ Rational Solver<Rational>::operator()(NoFencesFunctionCallNode<Rational> const& 
 	return res;
 }
 
-//Visitor for IdentifierNode<Integer>
 template<>
 Integer Solver<Integer>::operator()(IdentifierNode<Integer> const& op) const
 {
@@ -333,7 +287,6 @@ Integer Solver<Integer>::operator()(IdentifierNode<Integer> const& op) const
 	return 0;
 }
 
-//Visitor for IdentifierNode<Real>
 template<>
 Real Solver<Real>::operator()(IdentifierNode<Real> const& op) const
 {
@@ -374,7 +327,6 @@ Real Solver<Real>::operator()(IdentifierNode<Real> const& op) const
 	return Real();
 }
 
-//Visitor for IdentifierNode<Rational>
 template<>
 Rational Solver<Rational>::operator()(IdentifierNode<Rational> const& op) const
 {
@@ -412,6 +364,81 @@ Rational Solver<Rational>::operator()(IdentifierNode<Rational> const& op) const
 	throw SyntaxException(op.id, UnknownIdentifier, U"Identifier '" + op.name + U"' not found", op.pos, op.line);
 	
 	return 0;
+}
+
+template<>
+Real Solver<Real>::operator()(ScriptNode<Real> const& script, ElementId _id, AngleMeasure _default_angle_measure, 
+	AngleMeasure _result_angle_measure, int _precision) const
+{
+	if (script.list.empty())
+		throw SyntaxException(_id, ParserExceptionCode::ExpressionExpected);
+	
+	id = _id;
+
+	default_angle_measure = _default_angle_measure;
+	result_angle_measure = _result_angle_measure;
+	precision = _precision;
+	
+	Real res;
+	//calculate all the script nodes
+	BOOST_FOREACH(typename ScriptNode<Real>::Operand const& op, script.list)
+	{
+		res = boost::apply_visitor(*this, op);
+	}
+	
+	if (res.angle_measure != AngleMeasure::None)
+	{
+		switch (result_angle_measure)
+		{
+		case AngleMeasure::Radian:
+			return res.ToRadian();
+		case AngleMeasure::Degree:
+			return res.ToDegree();
+		case AngleMeasure::Grad:
+			return res.ToGrad();
+		}
+	}
+	return res;
+}
+
+template<>
+Integer Solver<Integer>::operator()(ScriptNode<Integer> const& script, ElementId _id, AngleMeasure _default_angle_measure, 
+	AngleMeasure _result_angle_measure, int _precision) const
+{
+	if (script.list.empty())
+		throw SyntaxException(_id, ParserExceptionCode::ExpressionExpected);
+	
+	id = _id;
+	
+	Integer res;
+
+	//calculate all the script nodes
+	BOOST_FOREACH(typename ScriptNode<Integer>::Operand const& op, script.list)
+	{
+		res = boost::apply_visitor(*this, op);
+	}
+
+	return res;
+}
+
+template<>
+Rational Solver<Rational>::operator()(ScriptNode<Rational> const& script, ElementId _id, AngleMeasure _default_angle_measure, 
+	AngleMeasure _result_angle_measure, int _precision) const
+{
+	if (script.list.empty())
+		throw SyntaxException(_id, ParserExceptionCode::ExpressionExpected);
+	
+	id = _id;
+	
+	Rational res;
+
+	//calculate all the script nodes
+	BOOST_FOREACH(typename ScriptNode<Rational>::Operand const& op, script.list)
+	{
+		res = boost::apply_visitor(*this, op);
+	}
+
+	return res;
 }
 
 }
