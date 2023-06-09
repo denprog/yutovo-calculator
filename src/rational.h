@@ -82,8 +82,8 @@ public:
 	friend bool operator<=(const int num1, const Rational& num2);
 
 public:
-	Integer GetNumerator();
-	Integer GetDenomerator();
+	Integer GetNumerator() const;
+	Integer GetDenomerator() const;
 
 	std::u32string ToString() const;
 
@@ -101,6 +101,8 @@ public:
 	}
 
 	std::string ToStdString() const;
+
+	void ToProper(Integer& integer, Integer& numerator, Integer& denomerator) const;
 
 	private:
 	#ifdef TRACE_OUTPUT

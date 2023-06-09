@@ -25,6 +25,20 @@ enum class AngleMeasure
 	Grad
 };
 
+enum class Notation
+{
+	Binary = 0,
+	Octal,
+	Decimal,
+	Hexadecimal
+};
+
+enum class FractionForm
+{
+    Proper = 0,
+    Improper
+};
+
 namespace yutovo_calculator
 {
 

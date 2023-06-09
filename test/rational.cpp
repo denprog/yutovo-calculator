@@ -55,4 +55,84 @@ TEST_F(CalcTestRational, rationals2)
         parser.Parse(ElementId{0, 0, 0, 0, 1}, U"3*22(3/5);").ToStdString();
 }
 
+TEST_F(CalcTestRational, proper1)
+{
+    auto res = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"(5/4);");
+    Integer i, n, d;
+    res.ToProper(i, n, d);
+    ASSERT_TRUE(i.ToStdString() == "1");
+    ASSERT_TRUE(n.ToStdString() == "1");
+    ASSERT_TRUE(d.ToStdString() == "4");
+}
+
+TEST_F(CalcTestRational, proper2)
+{
+    auto res = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"(3/4);");
+    Integer i, n, d;
+    res.ToProper(i, n, d);
+    ASSERT_TRUE(i.ToStdString() == "0");
+    ASSERT_TRUE(n.ToStdString() == "3");
+    ASSERT_TRUE(d.ToStdString() == "4");
+}
+
+TEST_F(CalcTestRational, proper3)
+{
+    auto res = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"-(2/3);");
+    Integer i, n, d;
+    res.ToProper(i, n, d);
+    ASSERT_TRUE(i.ToStdString() == "0") << i.ToStdString();
+    ASSERT_TRUE(n.ToStdString() == "-2") << n.ToStdString();
+    ASSERT_TRUE(d.ToStdString() == "3") << d.ToStdString();
+}
+
+TEST_F(CalcTestRational, proper4)
+{
+    auto res = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"-(2/(-3));");
+    Integer i, n, d;
+    res.ToProper(i, n, d);
+    ASSERT_TRUE(i.ToStdString() == "0") << i.ToStdString();
+    ASSERT_TRUE(n.ToStdString() == "2") << n.ToStdString();
+    ASSERT_TRUE(d.ToStdString() == "3") << d.ToStdString();
+}
+
+TEST_F(CalcTestRational, proper5)
+{
+    auto res = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"((-2)/(-3));");
+    Integer i, n, d;
+    res.ToProper(i, n, d);
+    ASSERT_TRUE(i.ToStdString() == "0") << i.ToStdString();
+    ASSERT_TRUE(n.ToStdString() == "2") << n.ToStdString();
+    ASSERT_TRUE(d.ToStdString() == "3") << d.ToStdString();
+}
+
+TEST_F(CalcTestRational, proper6)
+{
+    auto res = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"((-7)/3);");
+    Integer i, n, d;
+    res.ToProper(i, n, d);
+    ASSERT_TRUE(i.ToStdString() == "-2") << i.ToStdString();
+    ASSERT_TRUE(n.ToStdString() == "1") << n.ToStdString();
+    ASSERT_TRUE(d.ToStdString() == "3") << d.ToStdString();
+}
+
+TEST_F(CalcTestRational, proper7)
+{
+    auto res = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"(7/(-3));");
+    Integer i, n, d;
+    res.ToProper(i, n, d);
+    ASSERT_TRUE(i.ToStdString() == "-2") << i.ToStdString();
+    ASSERT_TRUE(n.ToStdString() == "1") << n.ToStdString();
+    ASSERT_TRUE(d.ToStdString() == "3") << d.ToStdString();
+}
+
+TEST_F(CalcTestRational, proper8)
+{
+    auto res = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"(2/(-3));");
+    Integer i, n, d;
+    res.ToProper(i, n, d);
+    ASSERT_TRUE(i.ToStdString() == "0") << i.ToStdString();
+    ASSERT_TRUE(n.ToStdString() == "-2") << n.ToStdString();
+    ASSERT_TRUE(d.ToStdString() == "3") << d.ToStdString();
+}
+
 }

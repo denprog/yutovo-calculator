@@ -25,6 +25,25 @@ TEST_F(CalcTestReal, numbers2)
         parser.Parse(ElementId{0, 0, 0, 0, 1}, U"2(3/4);").ToStdString(3, 3);
 }
 
+TEST_F(CalcTestReal, numbers3)
+{
+    auto res = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"(1+2);");
+    ASSERT_TRUE(res.angle_measure == AngleMeasure::None);
+    ASSERT_TRUE(res.ToStdString(3, 3) == parser.Parse(ElementId{0, 0, 0, 0, 1}, U"3;").ToStdString(3, 3));
+
+    res = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"(1-2);");
+    ASSERT_TRUE(res.angle_measure == AngleMeasure::None);
+    ASSERT_TRUE(res.ToStdString(3, 3) == parser.Parse(ElementId{0, 0, 0, 0, 1}, U"-1;").ToStdString(3, 3));
+
+    res = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"(1*2);");
+    ASSERT_TRUE(res.angle_measure == AngleMeasure::None);
+    ASSERT_TRUE(res.ToStdString(3, 3) == parser.Parse(ElementId{0, 0, 0, 0, 1}, U"2;").ToStdString(3, 3));
+
+    res = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"(1/2);");
+    ASSERT_TRUE(res.angle_measure == AngleMeasure::None);
+    ASSERT_TRUE(res.ToStdString(3, 3) == parser.Parse(ElementId{0, 0, 0, 0, 1}, U".5;").ToStdString(3, 3));
+}
+
 TEST_F(CalcTestReal, functions1)
 {
     ASSERT_TRUE(parser.Parse(ElementId{0, 0, 1}, U"sin(1);").ToStdString(3, 3) == parser.Parse(ElementId{0, 0, 1}, U"0.841E+0;").ToStdString(3, 3)) << 

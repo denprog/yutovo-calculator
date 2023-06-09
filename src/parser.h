@@ -19,71 +19,73 @@ namespace fusion = boost::fusion;
 
 namespace yutovo_calculator
 {
-	//Big numbers parser
-	template<typename Number>
-	struct Parser
+
+//Big numbers parser
+template<typename Number>
+struct Parser
+{
+	Parser(const int precision);
+	
+	Number Parse(ElementId id, std::u32string expression, Dependencies& dependencies, AngleMeasure default_angle_measure, AngleMeasure result_angle_measure, 
+		const int precision = -1)
 	{
-		Parser(const int precision);
+		if (expression.empty() || expression == U";")
+			throw SyntaxException(id, ExpressionExpected, 0, 0);
 		
-		Number Parse(ElementId id, std::u32string expression, Dependencies& dependencies, AngleMeasure default_angle_measure, AngleMeasure result_angle_measure, 
-			const int precision = -1)
-		{
-			if (expression.empty() || expression == U";")
-				throw SyntaxException(id, ExpressionExpected, 0, 0);
-			
-			Number res;
-			std::u32string::iterator iter = expression.begin();
-			std::u32string::iterator end = expression.end();
-			unicode::space_type space;
+		Number res;
+		std::u32string::iterator iter = expression.begin();
+		std::u32string::iterator end = expression.end();
+		unicode::space_type space;
 
-			Script<Number> script(id, expression);
-			ScriptNode<Number> script_node;
+		Script<Number> script(id, expression);
+		ScriptNode<Number> script_node;
 
-			phrase_parse(iter, end, script, space, script_node);
-			solver.SetDependencies(&dependencies);
-			return solver(script_node, id, default_angle_measure, result_angle_measure, precision);
-		}
+		phrase_parse(iter, end, script, space, script_node);
+		solver.SetDependencies(&dependencies);
+		return solver(script_node, id, default_angle_measure, result_angle_measure, precision);
+	}
 
-		Number Parse(ElementId id, std::u32string expression, AngleMeasure default_angle_measure, AngleMeasure result_angle_measure, const int precision = -1)
-		{
-			Dependencies dependencies;
-			return Parse(id, expression, dependencies, default_angle_measure, result_angle_measure, precision);
-		}
+	Number Parse(ElementId id, std::u32string expression, AngleMeasure default_angle_measure, AngleMeasure result_angle_measure, const int precision = -1)
+	{
+		Dependencies dependencies;
+		return Parse(id, expression, dependencies, default_angle_measure, result_angle_measure, precision);
+	}
 
-		Number Parse(ElementId id, std::string expression, Dependencies& dependencies, AngleMeasure default_angle_measure, AngleMeasure result_angle_measure, 
-			const int precision = -1)
-		{
-			return Parse(id, ToUtfString(expression), dependencies, default_angle_measure, result_angle_measure, precision);
-		}
+	Number Parse(ElementId id, std::string expression, Dependencies& dependencies, AngleMeasure default_angle_measure, AngleMeasure result_angle_measure, 
+		const int precision = -1)
+	{
+		return Parse(id, ToUtfString(expression), dependencies, default_angle_measure, result_angle_measure, precision);
+	}
 
-		Number Parse(ElementId id, std::u32string expression)
-		{
-			Dependencies dependencies;
-			return Parse(id, expression, dependencies, AngleMeasure::Radian, AngleMeasure::None);
-		}
+	Number Parse(ElementId id, std::u32string expression)
+	{
+		Dependencies dependencies;
+		return Parse(id, expression, dependencies, AngleMeasure::Radian, AngleMeasure::None);
+	}
 
-		Number Parse(ElementId id, std::u32string expression, Dependencies& dependencies)
-		{
-			return Parse(id, expression, dependencies, AngleMeasure::Radian, AngleMeasure::None);
-		}
+	Number Parse(ElementId id, std::u32string expression, Dependencies& dependencies)
+	{
+		return Parse(id, expression, dependencies, AngleMeasure::Radian, AngleMeasure::None);
+	}
 
-		Number Parse(ElementId id, std::string expression, Dependencies& dependencies)
-		{
-			return Parse(id, ToUtfString(expression), dependencies, AngleMeasure::Radian, AngleMeasure::None);
-		}
+	Number Parse(ElementId id, std::string expression, Dependencies& dependencies)
+	{
+		return Parse(id, ToUtfString(expression), dependencies, AngleMeasure::Radian, AngleMeasure::None);
+	}
 
-		bool RemoveIdentifier(ElementId id, const std::u32string& name)
-		{
-			return solver.RemoveIdentifier(id, name);
-		}
+	bool RemoveIdentifier(ElementId id, const std::u32string& name)
+	{
+		return solver.RemoveIdentifier(id, name);
+	}
 
-		bool RemoveIdentifier(ElementId id, const std::string& name)
-		{
-			return RemoveIdentifier(id, ToUtfString(name));
-		}
-		
-		Solver<Number> solver;
-	};
+	bool RemoveIdentifier(ElementId id, const std::string& name)
+	{
+		return RemoveIdentifier(id, ToUtfString(name));
+	}
+	
+	Solver<Number> solver;
+};
+
 };
 
 #endif

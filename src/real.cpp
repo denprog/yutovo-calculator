@@ -237,7 +237,7 @@ Real operator+(const Real& num1, const Real& num2)
 	Real _num1 = num1;
 	Real _num2 = num2;
 	ToCommonAngleMeasure(_num1, _num2);
-	Real res(max(_num1.GetBitPrecision() + 2, _num2.GetBitPrecision()) + 2, AngleMeasure::Radian);
+	Real res(max(_num1.GetBitPrecision() + 2, _num2.GetBitPrecision()) + 2, _num1.angle_measure);
 
 	while (mpfr_add(res.number, _num1.number, _num2.number, DEFAULT_RND) != 0)
 	{
@@ -315,7 +315,7 @@ Real operator-(const Real& num1, const Real& num2)
 	Real _num1 = num1;
 	Real _num2 = num2;
 	ToCommonAngleMeasure(_num1, _num2);
-	Real res(max(_num1.GetBitPrecision(), _num2.GetBitPrecision()) + 1, AngleMeasure::Radian);
+	Real res(max(_num1.GetBitPrecision(), _num2.GetBitPrecision()) + 1, _num1.angle_measure);
 
 	mpfr_sub(res.number, _num1.number, _num2.number, GMP_RNDN);
 
@@ -367,7 +367,7 @@ Real operator*(const Real& num1, const Real& num2)
 	Real _num1 = num1;
 	Real _num2 = num2;
 	ToCommonAngleMeasure(_num1, _num2);
-	Real res(max(_num1.GetBitPrecision() * 2, _num2.GetBitPrecision()) * 2, AngleMeasure::Radian);
+	Real res(max(_num1.GetBitPrecision() * 2, _num2.GetBitPrecision()) * 2, _num1.angle_measure);
 
 	while (mpfr_mul(res.number, num1.number, num2.number, DEFAULT_RND) != 0)
 	{
@@ -457,7 +457,7 @@ Real operator/(const Real& num1, const Real& num2)
 	Real _num1 = num1;
 	Real _num2 = num2;
 	ToCommonAngleMeasure(_num1, _num2);
-	Real res(max(_num1.GetBitPrecision() + 2, _num2.GetBitPrecision() + 2), AngleMeasure::Radian);
+	Real res(max(_num1.GetBitPrecision() + 2, _num2.GetBitPrecision() + 2), _num1.angle_measure);
 
 	mpfr_div(res.number, _num1.number, _num2.number, GMP_RNDN);
 

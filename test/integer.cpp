@@ -13,6 +13,54 @@ TEST_F(CalcTestInteger, integers1)
     ASSERT_TRUE(parser.Parse(ElementId{0, 0, 0, 0, 1}, U"1+1;") == parser.Parse(ElementId{0, 0, 0, 0, 1}, U"2;"));
 }
 
+TEST_F(CalcTestInteger, integers2)
+{
+    ASSERT_TRUE(parser.Parse(ElementId{0, 0, 0, 0, 1}, U"2/3;") == parser.Parse(ElementId{0, 0, 0, 0, 1}, U"0;")) << 
+        parser.Parse(ElementId{0, 0, 0, 0, 1}, U"2/3;");
+    ASSERT_TRUE(parser.Parse(ElementId{0, 0, 0, 0, 1}, U"-(2/3);") == parser.Parse(ElementId{0, 0, 0, 0, 1}, U"0;")) << 
+        parser.Parse(ElementId{0, 0, 0, 0, 1}, U"-(2/3);");
+    ASSERT_TRUE(parser.Parse(ElementId{0, 0, 0, 0, 1}, U"-1/3;") == parser.Parse(ElementId{0, 0, 0, 0, 1}, U"0;")) << 
+        parser.Parse(ElementId{0, 0, 0, 0, 1}, U"-1/3;");
+    ASSERT_TRUE(parser.Parse(ElementId{0, 0, 0, 0, 1}, U"(-1)/3;") == parser.Parse(ElementId{0, 0, 0, 0, 1}, U"0;")) << 
+        parser.Parse(ElementId{0, 0, 0, 0, 1}, U"(-1)/3;");
+    ASSERT_TRUE(parser.Parse(ElementId{0, 0, 0, 0, 1}, U"(-1)/(-3);") == parser.Parse(ElementId{0, 0, 0, 0, 1}, U"0;")) << 
+        parser.Parse(ElementId{0, 0, 0, 0, 1}, U"(-1)/(-3);");
+    ASSERT_TRUE(parser.Parse(ElementId{0, 0, 0, 0, 1}, U"1/(-3);") == parser.Parse(ElementId{0, 0, 0, 0, 1}, U"0;")) << 
+        parser.Parse(ElementId{0, 0, 0, 0, 1}, U"1/(-3);");
+    ASSERT_TRUE(parser.Parse(ElementId{0, 0, 0, 0, 1}, U"-2/3;") == parser.Parse(ElementId{0, 0, 0, 0, 1}, U"0;")) << 
+        parser.Parse(ElementId{0, 0, 0, 0, 1}, U"-2/3;");
+    ASSERT_TRUE(parser.Parse(ElementId{0, 0, 0, 0, 1}, U"-2/(-3);") == parser.Parse(ElementId{0, 0, 0, 0, 1}, U"0;")) << 
+        parser.Parse(ElementId{0, 0, 0, 0, 1}, U"-2/(-3);");
+    ASSERT_TRUE(parser.Parse(ElementId{0, 0, 0, 0, 1}, U"(-2)/3;") == parser.Parse(ElementId{0, 0, 0, 0, 1}, U"0;")) << 
+        parser.Parse(ElementId{0, 0, 0, 0, 1}, U"(-2)/3;");
+    ASSERT_TRUE(parser.Parse(ElementId{0, 0, 0, 0, 1}, U"(-2)/(-3);") == parser.Parse(ElementId{0, 0, 0, 0, 1}, U"0;")) << 
+        parser.Parse(ElementId{0, 0, 0, 0, 1}, U"(-2)/(-3);");
+}
+
+TEST_F(CalcTestInteger, integers3)
+{
+    ASSERT_TRUE(parser.Parse(ElementId{0, 0, 0, 0, 1}, U"4/3;") == parser.Parse(ElementId{0, 0, 0, 0, 1}, U"1;")) << 
+        parser.Parse(ElementId{0, 0, 0, 0, 1}, U"4/3;");
+    ASSERT_TRUE(parser.Parse(ElementId{0, 0, 0, 0, 1}, U"-(4/3);") == parser.Parse(ElementId{0, 0, 0, 0, 1}, U"-1;")) << 
+        parser.Parse(ElementId{0, 0, 0, 0, 1}, U"-(4/3);");
+    ASSERT_TRUE(parser.Parse(ElementId{0, 0, 0, 0, 1}, U"-4/3;") == parser.Parse(ElementId{0, 0, 0, 0, 1}, U"-1;")) << 
+        parser.Parse(ElementId{0, 0, 0, 0, 1}, U"-4/3;");
+    ASSERT_TRUE(parser.Parse(ElementId{0, 0, 0, 0, 1}, U"(-4)/3;") == parser.Parse(ElementId{0, 0, 0, 0, 1}, U"-1;")) << 
+        parser.Parse(ElementId{0, 0, 0, 0, 1}, U"(-4)/3;");
+    ASSERT_TRUE(parser.Parse(ElementId{0, 0, 0, 0, 1}, U"(-4)/(-3);") == parser.Parse(ElementId{0, 0, 0, 0, 1}, U"1;")) << 
+        parser.Parse(ElementId{0, 0, 0, 0, 1}, U"(-4)/(-3);");
+    ASSERT_TRUE(parser.Parse(ElementId{0, 0, 0, 0, 1}, U"4/(-3);") == parser.Parse(ElementId{0, 0, 0, 0, 1}, U"-1;")) << 
+        parser.Parse(ElementId{0, 0, 0, 0, 1}, U"4/(-3);");
+    ASSERT_TRUE(parser.Parse(ElementId{0, 0, 0, 0, 1}, U"-7/3;") == parser.Parse(ElementId{0, 0, 0, 0, 1}, U"-2;")) << 
+        parser.Parse(ElementId{0, 0, 0, 0, 1}, U"-7/3;");
+    ASSERT_TRUE(parser.Parse(ElementId{0, 0, 0, 0, 1}, U"-7/(-3);") == parser.Parse(ElementId{0, 0, 0, 0, 1}, U"2;")) << 
+        parser.Parse(ElementId{0, 0, 0, 0, 1}, U"-7/(-3);");
+    ASSERT_TRUE(parser.Parse(ElementId{0, 0, 0, 0, 1}, U"(-7)/3;") == parser.Parse(ElementId{0, 0, 0, 0, 1}, U"-2;")) << 
+        parser.Parse(ElementId{0, 0, 0, 0, 1}, U"(-7)/3;");
+    ASSERT_TRUE(parser.Parse(ElementId{0, 0, 0, 0, 1}, U"(-7)/(-3);") == parser.Parse(ElementId{0, 0, 0, 0, 1}, U"2;")) << 
+        parser.Parse(ElementId{0, 0, 0, 0, 1}, U"(-7)/(-3);");
+}
+
 TEST_F(CalcTestInteger, variables1)
 {
     parser.Parse(ElementId{0, 0, 0, 0, 1}, U"a=5;");
@@ -61,6 +109,15 @@ TEST_F(CalcTestInteger, error1)
     EXPECT_THROW(parser.Parse(ElementId{0, 0, 0, 0, 1}, U"123"), yutovo_calculator::SyntaxException);
     EXPECT_THROW(parser.Parse(ElementId{0, 0, 0, 0, 2}, U"123+(24/2)"), yutovo_calculator::SyntaxException);
     EXPECT_THROW(parser.Parse(ElementId{0, 0, 0, 0, 3}, U"123+3;45"), yutovo_calculator::SyntaxException);
+}
+
+TEST_F(CalcTestInteger, notation1)
+{
+    Integer res = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"123;");
+    ASSERT_TRUE(res.ToString(2) == U"1111011") << res.ToStdString(2);
+    ASSERT_TRUE(res.ToString(8) == U"173") << res.ToStdString(8);
+    ASSERT_TRUE(res.ToString(10) == U"123") << res.ToStdString(10);
+    ASSERT_TRUE(res.ToString(16) == U"7b") << res.ToStdString(16);
 }
 
 }
