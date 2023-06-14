@@ -334,9 +334,9 @@ private:
 	std::u32string string_number;
 
 #ifdef TRACE_OUTPUT
-void UpdateNumberStr();
+	void UpdateNumberStr();
 
-std::u32string number_str;
+	std::u32string number_str;
 #endif
 };
 

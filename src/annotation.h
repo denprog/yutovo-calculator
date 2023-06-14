@@ -15,6 +15,8 @@ namespace yutovo_calculator
 			boost::recursive_wrapper<UnaryOperationNode<Number>>, 
 			boost::recursive_wrapper<OperationNode<Number>>, 
 			boost::recursive_wrapper<MixedDivivsionNode<Number>>, 
+			boost::recursive_wrapper<ImplicitStringMulNode<Number>>, 
+			boost::recursive_wrapper<ImplicitDivMulNode<Number>>, 
 			boost::recursive_wrapper<FunctionCallNode<Number>>, 
 			boost::recursive_wrapper<NoFencesFunctionCallNode<Number>>, 
 			boost::recursive_wrapper<ExpressionNode<Number>>>
@@ -84,6 +86,16 @@ namespace yutovo_calculator
 			UpdatePosition(pos, op);
 		}
 
+		void operator()(ImplicitStringMulNode<Number>& op, std::u32string::iterator pos) const
+		{
+			UpdatePosition(pos, op);
+		}
+
+		void operator()(ImplicitDivMulNode<Number>& op, std::u32string::iterator pos) const
+		{
+			UpdatePosition(pos, op);
+		}
+
 		void operator()(FunctionCallNode<Number>& op, std::u32string::iterator pos) const
 		{
 			UpdatePosition(pos, op);
@@ -94,9 +106,6 @@ namespace yutovo_calculator
 			UpdatePosition(pos, op);
 		}
 
-		/**
-		 * Operand visitor.
-		 */
 		template<typename Num>
 		struct OperandVisitor
 		{
@@ -110,7 +119,6 @@ namespace yutovo_calculator
 				annotation->UpdatePosition(iter, op);
 			}
 
-			//The visitor's functor for UnaryOperationNode.
 			void operator()(UnaryOperationNode<Num> const& op) const
 			{
 			}
@@ -119,13 +127,19 @@ namespace yutovo_calculator
 			{
 			}
 
-			//The visitor's functor for IdentifierNode.
+			void operator()(ImplicitStringMulNode<Number>& op) const
+			{
+			}
+
+			void operator()(ImplicitDivMulNode<Number>& op) const
+			{
+			}
+
 			void operator()(IdentifierNode<Num> const& op) const
 			{
 				annotation->UpdatePosition(iter, op);
 			}
 
-			//The visitor's functor for FunctionCallNode.
 			void operator()(FunctionCallNode<Num> const& op) const
 			{
 				annotation->UpdatePosition(iter, op);
@@ -136,12 +150,10 @@ namespace yutovo_calculator
 				annotation->UpdatePosition(iter, op);
 			}
 
-			//The visitor's functor for ExpressionNode.
 			void operator()(ExpressionNode<Num> const& op) const
 			{
 			}
 
-			//The visitor's functor for Number.
 			void operator()(Num const& op) const
 			{
 				//((Number)op).SetPrecision(10);

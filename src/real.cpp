@@ -377,6 +377,9 @@ Real operator*(const Real& num1, const Real& num2)
 		res.SetBitPrecision(res.GetBitPrecision() + DEFAULT_INCREASE_PRECISION);
 	}
 
+#ifdef TRACE_OUTPUT
+	res.UpdateNumberStr();
+#endif
 	return res;
 }
 

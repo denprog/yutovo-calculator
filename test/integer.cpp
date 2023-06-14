@@ -82,6 +82,21 @@ TEST_F(CalcTestInteger, variables2)
         parser.Parse(ElementId{0, 0, 0, 0, 4}, U"fп+5;").ToStdString();
 }
 
+TEST_F(CalcTestInteger, variables3)
+{
+    parser.Parse(ElementId{0, 0, 0, 0, 1}, U"a=5;");
+    ASSERT_TRUE(parser.Parse(ElementId{0, 0, 1, 1, 0}, U"3a;") == parser.Parse(ElementId{0, 0, 1, 1, 0}, U"15;")) << 
+        parser.Parse(ElementId{0, 0, 1, 1, 0}, U"3a;").ToStdString();
+}
+
+TEST_F(CalcTestInteger, variables4)
+{
+    parser.Parse(ElementId{0, 0, 0, 0, 1}, U"a=5;");
+    parser.Parse(ElementId{0, 0, 0, 1, 1}, U"b=6;");
+    ASSERT_TRUE(parser.Parse(ElementId{0, 0, 2, 1, 0}, U"3a+4b+3;") == parser.Parse(ElementId{0, 0, 2, 1, 0}, U"42;")) << 
+        parser.Parse(ElementId{0, 0, 2, 1, 0}, U"3a+4b+3;").ToStdString();
+}
+
 TEST_F(CalcTestInteger, functions1)
 {
     parser.Parse(ElementId{0, 0, 0, 0, 1}, U"f(x)=x+5;");

@@ -385,6 +385,226 @@ Rational Solver<Rational>::operator()(IdentifierNode<Rational> const& op) const
 }
 
 template<>
+Integer Solver<Integer>::operator()(ImplicitStringMulNode<Integer> const& op) const
+{
+	AddDependency(op.identifier.name);
+
+	TempVariable* t = FindTempVariable(op.identifier.name);
+	if (t)
+		return op.left * t->second;
+	
+	//find in user defined variables
+	VariableNode<Integer>* v = FindVariable(op.identifier.name);
+	if (v)
+	{
+		ElementId _id = id;
+		id = v->id;
+		Integer res = (*this)(v->expression);
+		id = _id;
+		return op.left * res;
+	}
+	
+	BuildinVariable* var = FindBuildinVariable(op.identifier.name);
+	if (var)
+	{
+		try
+		{
+			IntegerVariable v = boost::get<Variable>(*var);
+			return op.left * (*v)();
+		}
+		catch (boost::bad_get)
+		{
+		}
+	}
+	
+	//there is no such an identifier
+	throw SyntaxException(op.id, UnknownIdentifier, U"Identifier '" + op.identifier.name + U"' not found", op.pos, op.line);
+	
+	return 0;
+}
+
+template<>
+Real Solver<Real>::operator()(ImplicitStringMulNode<Real> const& op) const
+{
+	AddDependency(op.identifier.name);
+
+	TempVariable* t = FindTempVariable(op.identifier.name);
+	if (t)
+		return op.left * t->second;
+	
+	//find in the user defined variables
+	VariableNode<Real>* v = FindVariable(op.identifier.name);
+	if (v)
+	{
+		ElementId _id = id;
+		id = v->id;
+		Real res = (*this)(v->expression);
+		id = _id;
+		return op.left * res;
+	}
+	
+	//find in the build-in variables
+	BuildinVariable* var = FindBuildinVariable(op.identifier.name);
+	if (var)
+	{
+		try
+		{
+			RealPrecisionVariable v = boost::get<PrecisionVariable>(*var);
+			return op.left * (*v)(precision);
+		}
+		catch (boost::bad_get)
+		{
+		}
+	}
+	
+	//there is no such an identifier
+	throw SyntaxException(op.id, UnknownIdentifier, U"Identifier '" + op.identifier.name + U"' not found", op.pos, op.line);
+	
+	return Real();
+}
+
+template<>
+Rational Solver<Rational>::operator()(ImplicitStringMulNode<Rational> const& op) const
+{
+	AddDependency(op.identifier.name);
+
+	TempVariable* t = FindTempVariable(op.identifier.name);
+	if (t)
+		return op.left * t->second;
+	
+	//find in user defined variables
+	VariableNode<Rational>* v = FindVariable(op.identifier.name);
+	if (v)
+	{
+		ElementId _id = id;
+		id = v->id;
+		Rational res = (*this)(v->expression);
+		id = _id;
+		return op.left * res;
+	}
+	
+	BuildinVariable* var = FindBuildinVariable(op.identifier.name);
+	if (var)
+	{
+		try
+		{
+			RationalVariable v = boost::get<Variable>(*var);
+			return op.left * (*v)();
+		}
+		catch (boost::bad_get)
+		{
+		}
+	}
+	
+	//there is no such an identifier
+	throw SyntaxException(op.id, UnknownIdentifier, U"Identifier '" + op.identifier.name + U"' not found", op.pos, op.line);
+
+	return Rational();
+}
+
+template<>
+Integer Solver<Integer>::operator()(ImplicitDivMulNode<Integer> const& op) const
+{
+	throw SyntaxException(op.id, SyntaxError, op.pos, op.line);
+}
+
+template<>
+Real Solver<Real>::operator()(ImplicitDivMulNode<Real> const& op) const
+{
+	AddDependency(op.identifier.name);
+
+	TempVariable* t = FindTempVariable(op.identifier.name);
+	if (t)
+	{
+		Real arg1 = (*this)(op.upper);
+		Real arg2 = (*this)(op.lower);
+		return (arg1 / arg2) * t->second;
+	}
+	
+	//find in the user defined variables
+	VariableNode<Real>* v = FindVariable(op.identifier.name);
+	if (v)
+	{
+		ElementId _id = id;
+		id = v->id;
+		Real res = (*this)(v->expression);
+		id = _id;
+		Real arg1 = (*this)(op.upper);
+		Real arg2 = (*this)(op.lower);
+		return (arg1 / arg2) * res;
+	}
+	
+	//find in the build-in variables
+	BuildinVariable* var = FindBuildinVariable(op.identifier.name);
+	if (var)
+	{
+		try
+		{
+			RealPrecisionVariable v = boost::get<PrecisionVariable>(*var);
+			Real arg1 = (*this)(op.upper);
+			Real arg2 = (*this)(op.lower);
+			return (arg1 / arg2) * (*v)(precision);
+		}
+		catch (boost::bad_get)
+		{
+		}
+	}
+	
+	//there is no such an identifier
+	throw SyntaxException(op.id, UnknownIdentifier, U"Identifier '" + op.identifier.name + U"' not found", op.pos, op.line);
+	
+	return Real();
+}
+
+template<>
+Rational Solver<Rational>::operator()(ImplicitDivMulNode<Rational> const& op) const
+{
+	AddDependency(op.identifier.name);
+
+	TempVariable* t = FindTempVariable(op.identifier.name);
+	if (t)
+	{
+		Rational arg1 = (*this)(op.upper);
+		Rational arg2 = (*this)(op.lower);
+		return (arg1 / arg2) * t->second;
+	}
+	
+	//find in the user defined variables
+	VariableNode<Rational>* v = FindVariable(op.identifier.name);
+	if (v)
+	{
+		ElementId _id = id;
+		id = v->id;
+		Rational res = (*this)(v->expression);
+		id = _id;
+		Rational arg1 = (*this)(op.upper);
+		Rational arg2 = (*this)(op.lower);
+		return (arg1 / arg2) * res;
+	}
+	
+	//find in the build-in variables
+	BuildinVariable* var = FindBuildinVariable(op.identifier.name);
+	if (var)
+	{
+		try
+		{
+			RationalVariable v = boost::get<Variable>(*var);
+			Rational arg1 = (*this)(op.upper);
+			Rational arg2 = (*this)(op.lower);
+			return (arg1 / arg2) * (*v)();
+		}
+		catch (boost::bad_get)
+		{
+		}
+	}
+	
+	//there is no such an identifier
+	throw SyntaxException(op.id, UnknownIdentifier, U"Identifier '" + op.identifier.name + U"' not found", op.pos, op.line);
+	
+	return Rational();
+}
+
+template<>
 Real Solver<Real>::operator()(ScriptNode<Real> const& script, ElementId _id, AngleMeasure _default_angle_measure, 
 	AngleMeasure _result_angle_measure, int _precision) const
 {

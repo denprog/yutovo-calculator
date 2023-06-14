@@ -181,7 +181,11 @@ struct Solver : public boost::static_visitor<Number>
 	Number operator()(NoFencesFunctionCallNode<Number> const& op) const;
 
 	Number operator()(IdentifierNode<Number> const& op) const;
-	
+
+	Number operator()(ImplicitStringMulNode<Number> const& op) const;
+
+	Number operator()(ImplicitDivMulNode<Number> const& op) const;
+
 	//The beginning of the solving.
 	Number operator()(ScriptNode<Number> const& script, ElementId _id, AngleMeasure _default_angle_measure, AngleMeasure _result_angle_measure, int _precision) const;
 

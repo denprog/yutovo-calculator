@@ -44,6 +44,12 @@ TEST_F(CalcTestReal, numbers3)
     ASSERT_TRUE(res.ToStdString(3, 3) == parser.Parse(ElementId{0, 0, 0, 0, 1}, U".5;").ToStdString(3, 3));
 }
 
+TEST_F(CalcTestReal, numbers4)
+{
+    ASSERT_TRUE(parser.Parse(ElementId{0, 0, 2}, U"21.2;").ToStdString(3, 3) == "21.2E+0");
+    ASSERT_TRUE(parser.Parse(ElementId{0, 0, 2}, U"21.2E+0;").ToStdString(3, 3) == "21.2E+0");
+}
+
 TEST_F(CalcTestReal, functions1)
 {
     ASSERT_TRUE(parser.Parse(ElementId{0, 0, 1}, U"sin(1);").ToStdString(3, 3) == parser.Parse(ElementId{0, 0, 1}, U"0.841E+0;").ToStdString(3, 3)) << 
@@ -166,6 +172,69 @@ TEST_F(CalcTestReal, variables5)
     ASSERT_TRUE(parser.Parse(ElementId{0, 0, 2}, U"d+5;") == parser.Parse(ElementId{0, 0, 2}, U"9;")) << parser.Parse(ElementId{0, 0, 2}, U"d+5;").ToStdString(3, 3);
     parser.Parse(ElementId{0, 0, 3}, U"d=45+d;");
     ASSERT_TRUE(parser.Parse(ElementId{0, 0, 4}, U"d+5;") == parser.Parse(ElementId{0, 0, 4}, U"54;")) << parser.Parse(ElementId{0, 0, 4}, U"d+5;").ToStdString(3, 3);
+}
+
+TEST_F(CalcTestReal, variables6)
+{
+    parser.Parse(ElementId{0, 0, 1}, U"d=4;");
+    ASSERT_TRUE(parser.Parse(ElementId{0, 0, 2}, U"5d;").ToStdString(3, 3) == parser.Parse(ElementId{0, 0, 2}, U"20;").ToStdString(3, 3)) << 
+        parser.Parse(ElementId{0, 0, 2}, U"5d;").ToStdString(3, 3);
+    parser.Parse(ElementId{0, 0, 1}, U"d=5;");
+    ASSERT_TRUE(parser.Parse(ElementId{0, 0, 2}, U"5.1d;").ToStdString(3, 3) == parser.Parse(ElementId{0, 0, 2}, U"25.5;").ToStdString(3, 3)) << 
+        parser.Parse(ElementId{0, 0, 2}, U"5.1d;").ToStdString(3, 3);
+}
+
+TEST_F(CalcTestReal, variables7)
+{
+    parser.Parse(ElementId{0, 0, 1}, U"d=4;");
+    ASSERT_TRUE(parser.Parse(ElementId{0, 0, 2}, U"d*5;").ToStdString(3, 3) == parser.Parse(ElementId{0, 0, 2}, U"20;").ToStdString(3, 3)) << 
+        parser.Parse(ElementId{0, 0, 2}, U"d+5;").ToStdString(3, 3);
+    ASSERT_TRUE(parser.Parse(ElementId{0, 0, 2}, U"5.1*d;").ToStdString(3, 3) == parser.Parse(ElementId{0, 0, 2}, U"20.4;").ToStdString(3, 3)) << 
+        parser.Parse(ElementId{0, 0, 2}, U"5.1*d;").ToStdString(3, 3);
+    parser.Parse(ElementId{0, 0, 1}, U"d=5;");
+    ASSERT_TRUE(parser.Parse(ElementId{0, 0, 2}, U"5.1*d;").ToStdString(3, 3) == parser.Parse(ElementId{0, 0, 2}, U"25.5;").ToStdString(3, 3)) << 
+        parser.Parse(ElementId{0, 0, 2}, U"5.1*d;").ToStdString(3, 3);
+    parser.Parse(ElementId{0, 0, 3}, U"d=4.1*d;");
+    ASSERT_TRUE(parser.Parse(ElementId{0, 0, 4}, U"d+5;").ToStdString(3, 3) == parser.Parse(ElementId{0, 0, 4}, U"25.5;").ToStdString(3, 3)) << 
+        parser.Parse(ElementId{0, 0, 4}, U"d+5;").ToStdString(3, 3);
+}
+
+TEST_F(CalcTestReal, variables8)
+{
+    parser.Parse(ElementId{0, 0, 1}, U"a2=2.3;");
+    ASSERT_TRUE(parser.Parse(ElementId{0, 0, 2}, U"2a2;").ToStdString(3, 3) == parser.Parse(ElementId{0, 0, 2}, U"4.6;").ToStdString(3, 3)) << 
+        parser.Parse(ElementId{0, 0, 2}, U"2a2;").ToStdString(3, 3);
+    ASSERT_TRUE(parser.Parse(ElementId{0, 0, 2}, U"2.3a2;").ToStdString(3, 3) == parser.Parse(ElementId{0, 0, 2}, U"5.29;").ToStdString(3, 3)) << 
+        parser.Parse(ElementId{0, 0, 2}, U"2.3a2;").ToStdString(3, 3);
+    parser.Parse(ElementId{0, 0, 3}, U"a2_=3.3;");
+    ASSERT_TRUE(parser.Parse(ElementId{0, 1, 4}, U"2a2+1.2a2_;").ToStdString(3, 3) == parser.Parse(ElementId{0, 1, 4}, U"8.56;").ToStdString(3, 3)) << 
+        parser.Parse(ElementId{0, 1, 4}, U"2a2+1.2a2_;").ToStdString(3, 3);
+}
+
+TEST_F(CalcTestReal, variables9)
+{
+    parser.Parse(ElementId{0, 0, 1}, U"a2=2.3;");
+    ASSERT_TRUE(parser.Parse(ElementId{0, 0, 2}, U"2*a2;").ToStdString(3, 3) == parser.Parse(ElementId{0, 0, 2}, U"4.6;").ToStdString(3, 3)) << 
+        parser.Parse(ElementId{0, 0, 2}, U"2*a2;").ToStdString(3, 3);
+}
+
+TEST_F(CalcTestReal, variables10)
+{
+    parser.Parse(ElementId{0, 0, 1}, U"a2=2.3;");
+    ASSERT_TRUE(parser.Parse(ElementId{0, 0, 2}, U"2a2;").ToStdString(3, 3) == parser.Parse(ElementId{0, 0, 2}, U"4.6;").ToStdString(3, 3)) << 
+        parser.Parse(ElementId{0, 0, 2}, U"2a2;").ToStdString(3, 3);
+    ASSERT_TRUE(parser.Parse(ElementId{0, 0, 2}, U"2.3a2;").ToStdString(3, 3) == parser.Parse(ElementId{0, 0, 2}, U"5.29;").ToStdString(3, 3)) << 
+        parser.Parse(ElementId{0, 0, 2}, U"2.3a2;").ToStdString(3, 3);
+    parser.Parse(ElementId{0, 0, 3}, U"a22=3.3;");
+    ASSERT_TRUE(parser.Parse(ElementId{0, 1, 4}, U"2a2+1.2a22;").ToStdString(3, 3) == parser.Parse(ElementId{0, 1, 4}, U"8.56;").ToStdString(3, 3)) << 
+        parser.Parse(ElementId{0, 1, 4}, U"2a2+1.2a22;").ToStdString(3, 3);
+}
+
+TEST_F(CalcTestReal, variables11)
+{
+    parser.Parse(ElementId{0, 0, 1}, U"a=5;");
+    ASSERT_TRUE(parser.Parse(ElementId{0, 0, 2}, U"(3)/(4)a;").ToStdString(3, 3) == parser.Parse(ElementId{0, 0, 2}, U"3.75;").ToStdString(3, 3)) << 
+        parser.Parse(ElementId{0, 0, 2}, U"(3)/(4)a;").ToStdString(3, 3);
 }
 
 TEST_F(CalcTestReal, symbols1)

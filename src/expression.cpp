@@ -28,7 +28,7 @@ namespace yutovo_calculator
 
 		multiply = char_('*') > unary | char_('/') > unary;
 		
-		unary = number | function_call | no_fences_function_call | identifier | unary_operation | '(' > expression > ')';
+		unary = implicit_string_mul | number | function_call | no_fences_function_call | identifier | unary_operation | '(' > expression > ')';
 		
 		number = digits_number;
 		
@@ -39,6 +39,8 @@ namespace yutovo_calculator
 		name = raw[lexeme[(alpha | '_') >> *(alnum | '_')]];
 
 		unary_operation = (qi::char_('+') > unary) | (qi::char_('-') > unary);
+
+		implicit_string_mul = (number >> identifier);
 		
 		function_call = identifier >> '(' >> -(expression % ',') > ')';
 
@@ -56,6 +58,8 @@ namespace yutovo_calculator
 		on_success(multiply, 
 			boost::phoenix::function<Annotation<yutovo_calculator::Integer>>(Annotation<yutovo_calculator::Integer>(expr.begin(), expr.end(), id))(qi::_val, _1));
 		on_success(identifier, 
+			boost::phoenix::function<Annotation<yutovo_calculator::Integer>>(Annotation<yutovo_calculator::Integer>(expr.begin(), expr.end(), id))(qi::_val, _1));
+		on_success(implicit_string_mul, 
 			boost::phoenix::function<Annotation<yutovo_calculator::Integer>>(Annotation<yutovo_calculator::Integer>(expr.begin(), expr.end(), id))(qi::_val, _1));
 		
 		//work out the exceptions
@@ -95,7 +99,8 @@ namespace yutovo_calculator
 
 		multiply = char_('*') > unary | char_('/') > unary;
 		
-		unary = mixed_division | number | function_call | no_fences_function_call | identifier | unary_operation | '(' > expression > ')';
+		unary = implicit_div_mul | implicit_string_mul | mixed_division | number | function_call | no_fences_function_call | identifier | 
+			unary_operation | '(' > expression > ')';
 		
 		number = exp_number | digits_number;
 		
@@ -104,12 +109,18 @@ namespace yutovo_calculator
 		integer_number = +char_("0-9");
 
 		mixed_division = (integer_number >> '(' > integer_number > '/' > integer_number > ')');
-		
+
+		real_number = digits_number;
+
 		exp_number = +char_("0-9.") >> raw[lexeme[(no_case[char_("E")] > (char_('+') | char_('-')))]] > +(char_("0-9"));
 
 		identifier = name;
+
+		implicit_div_mul = ('(' >> expression >> ')' >> '/' >> '(' >> expression >> ')' >> identifier);
+
+		implicit_string_mul = (real_number >> identifier);
 		
-		name = raw[lexeme[(alpha | '_') >> *(alnum | '_')]];
+		name = raw[lexeme[(alpha | '_') >> *(alnum | '_')] - no_case[char_('E')]];
 
 		unary_operation = (qi::char_('+') > unary) | (qi::char_('-') > unary);
 		
@@ -135,6 +146,10 @@ namespace yutovo_calculator
 		on_success(identifier, 
 			boost::phoenix::function<Annotation<yutovo_calculator::Real>>(Annotation<yutovo_calculator::Real>(expr.begin(), expr.end(), id))(qi::_val, _1));
 		on_success(mixed_division, 
+			boost::phoenix::function<Annotation<yutovo_calculator::Real>>(Annotation<yutovo_calculator::Real>(expr.begin(), expr.end(), id))(qi::_val, _1));
+		on_success(implicit_string_mul, 
+			boost::phoenix::function<Annotation<yutovo_calculator::Real>>(Annotation<yutovo_calculator::Real>(expr.begin(), expr.end(), id))(qi::_val, _1));
+		on_success(implicit_div_mul, 
 			boost::phoenix::function<Annotation<yutovo_calculator::Real>>(Annotation<yutovo_calculator::Real>(expr.begin(), expr.end(), id))(qi::_val, _1));
 		
 		on_error<fail>(expression, 
@@ -173,11 +188,16 @@ namespace yutovo_calculator
 
 		multiply = (char_('*') > unary) | (char_('/') > unary);
 		
-		unary = mixed_division | number | function_call | no_fences_function_call | identifier | unary_operation | '(' > expression > ')';
+		unary = implicit_div_mul | implicit_string_mul | mixed_division | number | function_call | no_fences_function_call | identifier | 
+			unary_operation | '(' > expression > ')';
 		
 		number = digits_number;
 
 		mixed_division = (number >> '(' > number > '/' > number > ')');
+
+		implicit_div_mul = ('(' >> expression >> ')' >> '/' >> '(' >> expression >> ')' >> identifier);
+
+		implicit_string_mul = (number >> identifier);
 		
 		digits_number = +char_("0-9");
 
@@ -205,6 +225,10 @@ namespace yutovo_calculator
 		on_success(identifier, boost::phoenix::function<Annotation<yutovo_calculator::Rational>>(Annotation<yutovo_calculator::Rational>(expr.begin(), 
 			expr.end(), id))(qi::_val, _1));
 		on_success(mixed_division, boost::phoenix::function<Annotation<yutovo_calculator::Rational>>(Annotation<yutovo_calculator::Rational>(expr.begin(), 
+			expr.end(), id))(qi::_val, _1));
+		on_success(implicit_string_mul, boost::phoenix::function<Annotation<yutovo_calculator::Rational>>(Annotation<yutovo_calculator::Rational>(expr.begin(), 
+			expr.end(), id))(qi::_val, _1));
+		on_success(implicit_div_mul, boost::phoenix::function<Annotation<yutovo_calculator::Rational>>(Annotation<yutovo_calculator::Rational>(expr.begin(), 
 			expr.end(), id))(qi::_val, _1));
 		
 		//work out the exceptions
