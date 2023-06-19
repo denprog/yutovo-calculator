@@ -9,15 +9,78 @@ namespace yutovo_calculator
 {
 
 typedef Integer (*IntegerBinaryFunc)(const Integer& num1, const Integer& num2);
+typedef Integer (*IntegerVariable)();
+
 typedef Real (*RealUnaryFunc)(const Real& num);
 typedef Real (*RealBinaryFunc)(const Real& num1, const Real& num2);
 typedef Real (*RealTrigonometricFunc)(const Real& num);
-
-typedef Integer (*IntegerVariable)();
 typedef Real (*RealPrecisionVariable)(const int precision);
+
+typedef Rational (*RationalBinaryFunc)(const Rational& num1, const Rational& num2);
 typedef Rational (*RationalVariable)();
 
 typedef std::vector<std::u32string> Dependencies;
+
+template<typename Number>
+struct CustomUnit
+{
+	bool Cast(Number& val) const
+	{
+		Unit res_unit = value.unit;
+		int power = 0;
+		bool f = true;
+		while (f)
+		{
+			for (auto& u : res_unit.unit)
+			{
+		        auto it = std::find_if(val.unit.unit.begin(), val.unit.unit.end(), 
+		            [u](const auto& p)
+		            {
+		                if (p.first != u.first)
+		                    return false;
+		                if (p.second > 0 && u.second > 0)
+		                    return p.second >= u.second;
+		                if (p.second < 0 && u.second < 0)
+		                    return p.second <= u.second;
+		                return false;
+		            });
+		        if (it == val.unit.unit.end())
+				{
+					if (power == 0)
+		            	return false;
+					else
+					{
+						f = false;
+						break;
+					}
+				}
+
+		        it->second -= u.second;
+			}
+
+			if (f)
+			{
+				++power;
+			    for (size_t i = 0; i < val.unit.unit.size(); ++i)
+			    {
+			        auto& p = val.unit.unit[i];
+			        if (p.second == 0)
+			            val.unit.unit.erase(val.unit.unit.begin() + i--);
+			    }
+			}
+		}
+
+		val.unit.unit.insert(val.unit.unit.begin(), std::make_pair(name, power));
+		auto u = val.unit;
+		val = val / value;
+		val.unit = u;
+		return true;
+	}
+
+	ElementId id;
+	std::u32string name;
+	Number value;
+};
 
 template<typename Number>
 struct SolverSymbols
@@ -42,6 +105,8 @@ struct SolverSymbols
 	map<std::u32string, BuildinFunction> buildin_functions;
 	map<std::u32string, TrigonometricFunction> trigonometric_functions;
 	map<std::u32string, BuildinVariable> buildin_variables;
+	std::vector<Unit> buildin_units;
+	std::vector<CustomUnit<Number>> units;
 };
 	
 template<typename Number>
@@ -117,7 +182,9 @@ struct Solver : public boost::static_visitor<Number>
 		AddVariable(op);
 		return Number();
 	}
-	
+
+	Number operator()(UnitNode<Number> const& op) const;
+
 	Number operator()(FunctionNode<Number> const& op) const
 	{
 		//store the function
@@ -186,6 +253,8 @@ struct Solver : public boost::static_visitor<Number>
 
 	Number operator()(ImplicitDivMulNode<Number> const& op) const;
 
+	Number operator()(ImplicitMulDivNode<Number> const& op) const;
+
 	//The beginning of the solving.
 	Number operator()(ScriptNode<Number> const& script, ElementId _id, AngleMeasure _default_angle_measure, AngleMeasure _result_angle_measure, int _precision) const;
 
@@ -213,9 +282,8 @@ struct Solver : public boost::static_visitor<Number>
 
 	void AddVariable(VariableNode<Number> const& var) const
 	{
-		for (int i = 0; i < symbols->variables.size(); ++i)
+		for (auto& v : symbols->variables)
 		{
-			auto& v = symbols->variables[i];
 			if (v.id == id)
 			{
 				v = var;
@@ -225,6 +293,20 @@ struct Solver : public boost::static_visitor<Number>
 		}
 		var.id = id;
 		symbols->variables.push_back(var);
+	}
+
+	void AddUnit(UnitNode<Number> const& unit) const
+	{
+		auto it = std::find_if(symbols->units.begin(), symbols->units.end(), 
+			[id = id](const CustomUnit<Number>& u)
+			{
+				return u.id == id;
+			});
+		if (it != symbols->units.end())
+			symbols->units.erase(it);
+
+		Number res = (*this)(unit.expression);
+		symbols->units.push_back(CustomUnit<Number>{id, unit.name.name, res});
 	}
 
 	VariableNode<Number>* FindVariable(const std::u32string& name) const
@@ -361,6 +443,37 @@ struct Solver : public boost::static_visitor<Number>
 			symbols->functions.end());
 		return func_it != symbols->functions.end();
 	}
+
+	void AddBuildinUnit(const Unit& unit)
+	{
+		symbols->buildin_units.push_back(unit);
+	}
+
+	Unit* FindBuildinUnit(const std::u32string& name) const
+	{
+		auto iter = std::find_if(symbols->buildin_units.begin(), symbols->buildin_units.end(), 
+			[name](Unit& unit)
+			{
+				return unit == name;
+			});
+		if (iter == symbols->buildin_units.end())
+			return nullptr;
+		return &(*iter);
+	}
+
+	CustomUnit<Number>* FindUnit(const std::u32string& name) const
+	{
+		auto iter = std::find_if(symbols->units.begin(), symbols->units.end(), 
+			[name](CustomUnit<Number>& unit)
+			{
+				return unit.name == name;
+			});
+		if (iter == symbols->units.end())
+			return nullptr;
+		return &(*iter);
+	}
+
+	Number GetSuitableUnit(const ElementId _id, const Number& val) const;
 
 	void SetDependencies(Dependencies* _dependencies)
 	{

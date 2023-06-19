@@ -23,33 +23,26 @@ namespace yutovo_calculator
 			qi::_1_type _1;
 			qi::_3_type _3;
 			
-			//definition is a variable or a function
-			definition = 
-				variable | 
-				function;
+			//definition is a variable or a function or a unit
+			definition = variable | unit | function;
 			
 			//function definition
-			function = 
-				identifier >> 
-				'(' >> argument_list >> ')' >> 
-				('=' > expression);
+			function = identifier >> '(' >> argument_list >> ')' >> ('=' > expression);
 			
 			//function's argument list
-			argument_list = 
-				-(identifier % ',');
+			argument_list = -(identifier % ',');
 			
 			//variable definition
-			variable = 
-				identifier >> 
-				('=' > expression);
-			
+			variable = identifier >> ('=' > expression);
+
+			//unit definition
+			unit = identifier >> ('~' > expression);
+
 			//identifier is a name
-			identifier = 
-				name;
+			identifier = name;
 			
 			//name is a letter-numeric std::u32string with an letter in the beginning
-			name = 
-				raw[lexeme[(alpha | '_') >> *(alnum | '_')]];
+			name = raw[lexeme[(alpha | '_') >> *(alnum | '_')]];
 
 			// BOOST_SPIRIT_DEBUG_NODE(definition);
 			// BOOST_SPIRIT_DEBUG_NODE(argument_list);
@@ -64,6 +57,7 @@ namespace yutovo_calculator
 		qi::rule<std::u32string::iterator, DefinitionNode<Number>(), unicode::space_type> definition;
 		qi::rule<std::u32string::iterator, FunctionNode<Number>(), unicode::space_type> function;
 		qi::rule<std::u32string::iterator, VariableNode<Number>(), unicode::space_type> variable;
+		qi::rule<std::u32string::iterator, UnitNode<Number>(), unicode::space_type> unit;
 		qi::rule<std::u32string::iterator, std::u32string(), unicode::space_type> name;
 		qi::rule<std::u32string::iterator, IdentifierNode<Number>(), unicode::space_type> identifier;
 		qi::rule<std::u32string::iterator, std::list<IdentifierNode<Number> >(), unicode::space_type> argument_list;

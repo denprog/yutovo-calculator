@@ -20,6 +20,7 @@ Rational::Rational(const Rational& source)
 {
 	mpq_init(number);
 	mpq_set(number, source.number);
+	unit = source.unit;
 
 #ifdef TRACE_OUTPUT
 	UpdateNumberStr();
@@ -56,6 +57,17 @@ Rational::Rational(const int precision, const int num)
 #endif
 }
 
+Rational::Rational(Unit& _unit)
+{
+	mpq_init(number);
+	mpq_set_si(number, 1, 1);
+	unit = _unit;
+
+#ifdef TRACE_OUTPUT
+	UpdateNumberStr();
+#endif
+}
+
 Rational::Rational(const std::u32string& num)
 {
 	mpq_init(number);
@@ -80,6 +92,8 @@ Rational& Rational::operator=(const Rational& source)
 	mpq_init(number);
 
 	mpq_set(number, source.number);
+
+	unit = source.unit;
 
 #ifdef TRACE_OUTPUT
 	UpdateNumberStr();
@@ -154,6 +168,8 @@ Rational operator+(const Rational& num1, const Rational& num2)
 
 	mpq_add(res.number, num1.number, num2.number);
 
+	res.unit = num1.unit + num2.unit;
+
 	return res;
 }
 
@@ -163,6 +179,8 @@ Rational operator+(const Rational& num1, const int num2)
 	Rational _num2(num2);
 
 	mpq_add(res.number, num1.number, _num2.number);
+
+	res.unit = num1.unit + num2;
 
 	return res;
 }
@@ -174,6 +192,8 @@ Rational operator+(const int num1, const Rational& num2)
 
 	mpq_add(res.number, _num1.number, num2.number);
 
+	res.unit = num1 + num2.unit;
+
 	return res;
 }
 
@@ -182,6 +202,8 @@ Rational operator-(const Rational& num1, const Rational& num2)
 	Rational res;
 
 	mpq_sub(res.number, num1.number, num2.number);
+
+	res.unit = num1.unit - num2.unit;
 
 	return res;
 }
@@ -193,6 +215,8 @@ Rational operator-(const Rational& num1, const int num2)
 
 	mpq_sub(res.number, num1.number, _num2.number);
 
+	res.unit = num1.unit - num2;
+
 	return res;
 }
 
@@ -203,6 +227,8 @@ Rational operator-(const int num1, const Rational& num2)
 
 	mpq_sub(res.number, _num1.number, num2.number);
 
+	res.unit = num1 - num2.unit;
+
 	return res;
 }
 
@@ -211,6 +237,8 @@ Rational operator*(const Rational& num1, const Rational& num2)
 	Rational res;
 
 	mpq_mul(res.number, num1.number, num2.number);
+
+	res.unit = num1.unit * num2.unit;
 
 	return res;
 }
@@ -222,6 +250,8 @@ Rational operator*(const Rational& num1, const int num2)
 
 	mpq_mul(res.number, num1.number, _num2.number);
 
+	res.unit = num1.unit * num2;
+
 	return res;
 }
 
@@ -231,6 +261,8 @@ Rational operator*(const int num1, const Rational& num2)
 	Rational _num1(num1);
 
 	mpq_mul(res.number, _num1.number, num2.number);
+
+	res.unit = num1 * num2.unit;
 
 	return res;
 }
@@ -243,6 +275,8 @@ Rational operator/(const Rational& num1, const Rational& num2)
 		throw MathException(DivisionByZero);
 
 	mpq_div(res.number, num1.number, num2.number);
+
+	res.unit = num1.unit / num2.unit;
 
 	return res;
 }
@@ -257,6 +291,8 @@ Rational operator/(const Rational& num1, const int num2)
 
 	mpq_div(res.number, num1.number, _num2.number);
 
+	res.unit = num1.unit / num2;
+
 	return res;
 }
 
@@ -269,6 +305,8 @@ Rational operator/(const int num1, const Rational& num2)
 		throw MathException(DivisionByZero);
 
 	mpq_div(res.number, _num1.number, num2.number);
+
+	res.unit = num1 / num2.unit;
 
 	return res;
 }
@@ -381,6 +419,23 @@ bool operator<=(const int num1, const Rational& num2)
 	return mpq_cmp_si(num2.number, num1, 1) >= 0;
 }
 
+Rational pow(const Rational& num1, const Rational& num2)
+{
+	if (!num2.GetDenomerator())
+		throw MathException(ArgumentIsOver);
+	Rational res(num1);
+	Integer n = num2.GetNumerator();
+	if (n < 1)
+		throw MathException(ArgumentIsOver);
+	Integer i = 1;
+	while (i < n)
+	{
+		res = res * num1;
+		i += 1;
+	}
+	return res;
+}
+
 Integer Rational::GetNumerator() const
 {
 	Integer numerator;
@@ -405,7 +460,7 @@ Integer Rational::GetDenomerator() const
 	return denomerator;
 }
 
-std::u32string Rational::ToString() const
+std::u32string Rational::ToString(bool with_unit) const
 {
 	char* tmp = (char*)malloc(mpz_sizeinbase(mpq_numref(number), 10) + 
 		mpz_sizeinbase(mpq_denref(number), 10) + 3);
@@ -413,6 +468,9 @@ std::u32string Rational::ToString() const
 	char* str = mpq_get_str(tmp, 10, number);
 	std::u32string res(ToUtfString(str));
 	free(str);
+
+	if (with_unit)
+		res += unit.ToString();
 
 	return res;
 }

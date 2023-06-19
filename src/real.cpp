@@ -29,6 +29,17 @@ Real::Real(int precision)
 #endif
 }
 
+Real::Real(int precision, Unit& _unit) :
+	unit(_unit)
+{
+	mpfr_init2(number, max((int)mpfr_get_default_prec(), precision));
+	mpfr_set_si(number, 1, GMP_RNDN);
+
+#ifdef TRACE_OUTPUT
+	UpdateNumberStr();
+#endif
+}
+
 Real::Real(int precision, AngleMeasure _angle_measure) :
 	angle_measure(_angle_measure)
 {
@@ -80,6 +91,20 @@ Real::Real(int precision, float num)
 #endif
 }
 
+Real::Real(int precision, const Real& source, const Unit& _unit) :
+	string_number(source.string_number),
+	angle_measure(source.angle_measure),
+	unit(source.unit)
+{
+	mpfr_init2(number, precision);
+	mpfr_set(number, source.number, GMP_RNDN);
+	unit = _unit;
+	
+#ifdef TRACE_OUTPUT
+	UpdateNumberStr();
+#endif
+}
+
 Real::Real(const std::u32string& num)
 {
 	string_number = num;
@@ -92,12 +117,13 @@ Real::Real(const std::u32string& num)
 #endif
 }
 
-Real::Real(const Real& source)
+Real::Real(const Real& source) :
+	string_number(source.string_number),
+	angle_measure(source.angle_measure),
+	unit(source.unit)
 {
 	mpfr_init2(number, source.GetBitPrecision());
 	mpfr_set(number, source.number, GMP_RNDN);
-	string_number = source.string_number;
-	angle_measure = source.angle_measure;
 	
 #ifdef TRACE_OUTPUT
 	UpdateNumberStr();
@@ -119,6 +145,7 @@ Real& Real::operator=(const Real& source)
 	mpfr_set(number, source.number, GMP_RNDN);
 	string_number = source.string_number;
 	angle_measure = source.angle_measure;
+	unit = source.unit;
 
 #ifdef TRACE_OUTPUT
 	UpdateNumberStr();
@@ -247,6 +274,8 @@ Real operator+(const Real& num1, const Real& num2)
 		res.SetBitPrecision(res.GetBitPrecision() + DEFAULT_INCREASE_PRECISION);
 	}
 
+	res.unit = num1.unit + num2.unit;
+
 	return res;
 }
 
@@ -261,6 +290,8 @@ Real operator+(const Real& num1, const int num2)
 
 		res.SetBitPrecision(res.GetBitPrecision() + DEFAULT_INCREASE_PRECISION);
 	}
+
+	res.unit = num1.unit + num2;
 
 	return res;
 }
@@ -277,6 +308,8 @@ Real operator+(const int num1, const Real& num2)
 		res.SetBitPrecision(res.GetBitPrecision() + DEFAULT_INCREASE_PRECISION);
 	}
 
+	res.unit = num1 + num2.unit;
+
 	return res;
 }
 
@@ -291,6 +324,8 @@ Real operator+(const Real& num1, const float num2)
 
 		res.SetBitPrecision(res.GetBitPrecision() + DEFAULT_INCREASE_PRECISION);
 	}
+
+	res.unit = num1.unit + num2;
 
 	return res;
 }
@@ -307,6 +342,8 @@ Real operator+(const float num1, const Real& num2)
 		res.SetBitPrecision(res.GetBitPrecision() + DEFAULT_INCREASE_PRECISION);
 	}
 
+	res.unit = num1 + num2.unit;
+
 	return res;
 }
 
@@ -318,6 +355,8 @@ Real operator-(const Real& num1, const Real& num2)
 	Real res(max(_num1.GetBitPrecision(), _num2.GetBitPrecision()) + 1, _num1.angle_measure);
 
 	mpfr_sub(res.number, _num1.number, _num2.number, GMP_RNDN);
+
+	res.unit = num1.unit - num2.unit;
 
 #ifdef TRACE_OUTPUT
 	res.UpdateNumberStr();
@@ -332,6 +371,8 @@ Real operator-(const Real& num1, const int num2)
 
 	mpfr_sub_si(res.number, num1.number, num2, DEFAULT_RND);
 
+	res.unit = num1.unit - num2;
+
 	return res;
 }
 
@@ -340,6 +381,8 @@ Real operator-(const int num1, const Real& num2)
 	Real res(num2.GetBitPrecision(), num2.angle_measure);
 
 	mpfr_si_sub(res.number, num1, num2.number, DEFAULT_RND);
+
+	res.unit = num1 - num2.unit;
 
 	return res;
 }
@@ -350,6 +393,8 @@ Real operator-(const Real& num1, const float num2)
 
 	mpfr_sub_d(res.number, num1.number, num2, DEFAULT_RND);
 
+	res.unit = num1.unit - num2;
+
 	return res;
 }
 
@@ -358,6 +403,8 @@ Real operator-(const float num1, const Real& num2)
 	Real res(num2.GetBitPrecision(), num2.angle_measure);
 
 	mpfr_d_sub(res.number, num1, num2.number, DEFAULT_RND);
+
+	res.unit = num1 - num2.unit;
 
 	return res;
 }
@@ -377,6 +424,8 @@ Real operator*(const Real& num1, const Real& num2)
 		res.SetBitPrecision(res.GetBitPrecision() + DEFAULT_INCREASE_PRECISION);
 	}
 
+	res.unit = num1.unit * num2.unit;
+
 #ifdef TRACE_OUTPUT
 	res.UpdateNumberStr();
 #endif
@@ -394,6 +443,8 @@ Real operator*(const Real& num1, const int num2)
 
 		res.SetBitPrecision(res.GetBitPrecision() + DEFAULT_INCREASE_PRECISION);
 	}
+
+	res.unit = num1.unit * num2;
 
 #ifdef TRACE_OUTPUT
 	res.UpdateNumberStr();
@@ -413,6 +464,8 @@ Real operator*(const int num1, const Real& num2)
 		res.SetBitPrecision(res.GetBitPrecision() + DEFAULT_INCREASE_PRECISION);
 	}
 
+	res.unit = num1 * num2.unit;
+
 #ifdef TRACE_OUTPUT
 	res.UpdateNumberStr();
 #endif
@@ -430,6 +483,8 @@ Real operator*(const Real& num1, const float num2)
 
 		res.SetBitPrecision(res.GetBitPrecision() + DEFAULT_INCREASE_PRECISION);
 	}
+
+	res.unit = num1.unit * num2;
 
 #ifdef TRACE_OUTPUT
 	res.UpdateNumberStr();
@@ -449,6 +504,8 @@ Real operator*(const float num1, const Real& num2)
 		res.SetBitPrecision(res.GetBitPrecision() + DEFAULT_INCREASE_PRECISION);
 	}
 
+	res.unit = num1 * num2.unit;
+
 #ifdef TRACE_OUTPUT
 	res.UpdateNumberStr();
 #endif
@@ -467,6 +524,8 @@ Real operator/(const Real& num1, const Real& num2)
 	if (res.IsInfinity() || res.IsNaN())
 		throw MathException(DivisionByZero);
 
+	res.unit = num1.unit / num2.unit;
+
 #ifdef TRACE_OUTPUT
 	res.UpdateNumberStr();
 #endif
@@ -483,6 +542,8 @@ Real operator/(const Real& num1, const int num2)
 	if (res.IsInfinity() || res.IsNaN())
 		throw MathException(Overflow);
 
+	res.unit = num1.unit / num2;
+
 	return res;
 }
 
@@ -494,6 +555,8 @@ Real operator/(const int num1, const Real& num2)
 
 	if (res.IsInfinity() || res.IsNaN())
 		throw MathException(Overflow);
+	
+	res.unit = num1 / num2.unit;
 
 	return res;
 }
@@ -506,6 +569,8 @@ Real operator/(const Real& num1, const float num2)
 
 	if (res.IsInfinity() || res.IsNaN())
 		throw MathException(Overflow);
+	
+	res.unit = num1.unit / num2;
 
 	return res;
 }
@@ -518,6 +583,8 @@ Real operator/(const float num1, const Real& num2)
 
 	if (res.IsInfinity() || res.IsNaN())
 		throw MathException(Overflow);
+	
+	res.unit = num1 / num2.unit;
 
 	return res;
 }
@@ -1435,6 +1502,8 @@ Real pow(const Real& num1, const Real& num2)
 
 	res.Round(max(num1.GetBitPrecision(), num2.GetBitPrecision()));
 
+	res.unit = pow(num1.unit, num2);
+
 #ifdef TRACE_OUTPUT
 	res.UpdateNumberStr();
 #endif
@@ -1452,6 +1521,8 @@ Real pow(const Real& num1, const int num2)
 
 		res.SetBitPrecision(res.GetBitPrecision() + DEFAULT_INCREASE_PRECISION);
 	}
+
+	res.unit = pow(num1.unit, num2);
 
 #ifdef TRACE_OUTPUT
 	res.UpdateNumberStr();
@@ -1726,7 +1797,7 @@ void ToCommonAngleMeasure(Real& num1, Real& num2)
 		num2 = num2.ToGrad();
 		break;
 	case AngleMeasure::None:
-		{
+	{
 		switch (num2.angle_measure)
 		{
 		case AngleMeasure::Radian:
@@ -1739,7 +1810,7 @@ void ToCommonAngleMeasure(Real& num1, Real& num2)
 			num1 = num1.ToGrad();
 			break;
 		}
-		}
+	}
 	}
 }
 
@@ -1852,7 +1923,7 @@ std::u32string Real::ToString() const
 
 void Real::ToString(int exp, int accuracy, bool& mantissa_sign, std::u32string& mantissa, bool& exponent_sign, std::u32string& exponent) const
 {
-	Real res(abs(*this));
+	//Real res(abs(*this));
 	char* numStr;
 	mp_exp_t numExp;
 	char buf[20];
@@ -1884,7 +1955,8 @@ void Real::ToString(int exp, int accuracy, bool& mantissa_sign, std::u32string& 
 	if (mantissa_sign)
 		mantissa.erase(0, 1);
 
-	if (res >= 1)
+	//if (res >= 1)
+	if (*this >= 1 || *this <= -1)
 	{
 		if (numExp > exp)
 		{
@@ -1992,7 +2064,7 @@ void Real::ToString(int exp, int accuracy, bool& mantissa_sign, std::string& man
 	exponent = ToBasicString(e);
 }
 
-std::u32string Real::ToString(int exp, int accuracy) const
+std::u32string Real::ToString(int exp, int accuracy, bool with_unit) const
 {
 	bool mantissa_sign;
 	std::u32string mantissa;
@@ -2007,6 +2079,8 @@ std::u32string Real::ToString(int exp, int accuracy) const
 	res += U"E";
 	res += exponent_sign ? U"-" : U"+";
 	res += exponent.empty() ? U"0" : exponent;
+	if (with_unit)
+		res += unit.ToString();
 	
 	return res;
 }
@@ -2093,7 +2167,7 @@ Real Real::GetNumber()
 #ifdef TRACE_OUTPUT
 void Real::UpdateNumberStr()
 {
-	number_str = ToString();
+	number_str = ToString(3, 3);
 }
 #endif
 

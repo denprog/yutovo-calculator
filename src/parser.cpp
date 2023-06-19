@@ -8,6 +8,8 @@ Integer pow(const Integer& num1, const Integer& num2);
 
 Real pow(const Real& num1, const Real& num2);
 
+Rational pow(const Rational& num1, const Rational& num2);
+
 Real sin(const Real& num);
 Real cos(const Real& num);
 Real tg(const Real& num);
@@ -145,12 +147,18 @@ Parser<yutovo_calculator::Real>::Parser(const int precision) :
 	solver.AddBuildinFunction("log", binary_func);
 	binary_func = &root;
 	solver.AddBuildinFunction("root", binary_func);
+
+	AddUnits();
 }
 
 template<>
 Parser<yutovo_calculator::Rational>::Parser(const int precision) : 
 	solver(precision)
 {
+	RationalBinaryFunc binary_func = &pow;
+	solver.AddBuildinFunction("pow", binary_func);
+
+	AddUnits();
 }
 
 };

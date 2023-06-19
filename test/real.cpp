@@ -341,4 +341,104 @@ TEST_F(CalcTestReal, trigonometric3)
         res.ToStdString(3, 3) << "\n" << (int)res.angle_measure;
 }
 
+TEST_F(CalcTestReal, units1)
+{
+    ASSERT_TRUE(parser.Parse(ElementId{0, 0, 0, 0, 1}, U"1m;").ToStdString(3, 3) == "1.E+0(m)") << parser.Parse(ElementId{0, 0, 0, 0, 1}, U"1m;").ToStdString(3, 3);
+    ASSERT_TRUE(parser.Parse(ElementId{0, 0, 0, 0, 1}, U"2.3*m;").ToStdString(3, 3) == "2.3E+0(m)") << parser.Parse(ElementId{0, 0, 0, 0, 1}, U"2.3*m;").ToStdString(3, 3);
+    ASSERT_TRUE(parser.Parse(ElementId{0, 0, 0, 0, 1}, U"2.3m*2m;").ToStdString(3, 3) == "4.6E+0(m^2)") << 
+        parser.Parse(ElementId{0, 0, 0, 0, 1}, U"2.3m*2m;").ToStdString(3, 3);
+}
+
+TEST_F(CalcTestReal, units2)
+{
+    ASSERT_TRUE(parser.Parse(ElementId{0, 0, 0, 0, 1}, U"2/m;").ToStdString(3, 3) == "2.E+0(1/(m))") << parser.Parse(ElementId{0, 0, 0, 0, 1}, U"2/m;").ToStdString(3, 3);
+    ASSERT_TRUE(parser.Parse(ElementId{0, 0, 0, 0, 1}, U"2*(1/m);").ToStdString(3, 3) == "2.E+0(1/(m))") << 
+        parser.Parse(ElementId{0, 0, 0, 0, 1}, U"2*(1/m);").ToStdString(3, 3);
+    ASSERT_TRUE(parser.Parse(ElementId{0, 0, 0, 0, 1}, U"2m*3*(1/m);").ToStdString(3, 3) == "6.E+0") << 
+        parser.Parse(ElementId{0, 0, 0, 0, 1}, U"2m*3*(1/m);").ToStdString(3, 3);
+}
+
+TEST_F(CalcTestReal, units3)
+{
+    ASSERT_TRUE(parser.Parse(ElementId{0, 0, 0, 0, 1}, U"3(2)/(m);").ToStdString(3, 3) == "6.E+0(1/(m))") << 
+        parser.Parse(ElementId{0, 0, 0, 0, 1}, U"3(2)/(m);").ToStdString(3, 3);
+    ASSERT_TRUE(parser.Parse(ElementId{0, 0, 0, 0, 1}, U"3(6m)/(3s);").ToStdString(3, 3) == "6.E+0((m)/(s))") << 
+        parser.Parse(ElementId{0, 0, 0, 0, 1}, U"3(6m)/(3s);").ToStdString(3, 3);
+}
+
+TEST_F(CalcTestReal, units4)
+{
+    ASSERT_TRUE(parser.Parse(ElementId{0, 0, 0, 0, 1}, U"2.3m+3m;").ToStdString(3, 3) == "5.3E+0(m)") << 
+        parser.Parse(ElementId{0, 0, 0, 0, 1}, U"2.3m+3m;").ToStdString(3, 3);
+    EXPECT_THROW(parser.Parse(ElementId{0, 0, 1}, U"3m+4;"), yutovo_calculator::MathException);
+    EXPECT_THROW(parser.Parse(ElementId{0, 0, 1}, U"4.5+3m+4;"), yutovo_calculator::MathException);
+}
+
+TEST_F(CalcTestReal, units5)
+{
+    ASSERT_TRUE(parser.Parse(ElementId{0, 0, 0, 0, 1}, U"5.3m-3m;").ToStdString(3, 3) == "2.3E+0(m)") << 
+        parser.Parse(ElementId{0, 0, 0, 0, 1}, U"5.3m-3m;").ToStdString(3, 3);
+    EXPECT_THROW(parser.Parse(ElementId{0, 0, 1}, U"3m-4;"), yutovo_calculator::MathException);
+    EXPECT_THROW(parser.Parse(ElementId{0, 0, 1}, U"4.5-3m-4;"), yutovo_calculator::MathException);
+}
+
+TEST_F(CalcTestReal, units6)
+{
+    ASSERT_TRUE(parser.Parse(ElementId{0, 0, 0, 0, 1}, U"pow(3m,2);").ToStdString(3, 3) == "9.E+0(m^2)") << 
+        parser.Parse(ElementId{0, 0, 0, 0, 1}, U"pow(3m,2);").ToStdString(3, 3);
+    ASSERT_TRUE(parser.Parse(ElementId{0, 0, 0, 0, 1}, U"pow(3m/s,2);").ToStdString(3, 3) == "9.E+0((m^2)/(s^2))") << 
+        parser.Parse(ElementId{0, 0, 0, 0, 1}, U"pow(3m/s,2);").ToStdString(3, 3);
+    ASSERT_TRUE(parser.Parse(ElementId{0, 0, 0, 0, 1}, U"5m/pow(s,2);").ToStdString(3, 3) == "5.E+0((m)/(s^2))") << 
+        parser.Parse(ElementId{0, 0, 0, 0, 1}, U"5m/pow(s,2);").ToStdString(3, 3);
+}
+
+TEST_F(CalcTestReal, units7)
+{
+    parser.Parse(ElementId{0, 0, 0, 0, 0, 1}, U"km~1000m;");
+    ASSERT_TRUE(parser.Parse(ElementId{0, 0, 0, 0, 2}, U"1km;").ToStdString(3, 3) == "1.E+0(km)") << 
+        parser.Parse(ElementId{0, 0, 0, 0, 2}, U"1km;").ToStdString(3, 3);
+}
+
+TEST_F(CalcTestReal, units8)
+{
+    ASSERT_TRUE(parser.Parse(ElementId{0, 0, 0, 0, 2}, U"0.2m;").ToStdString(3, 3) == "0.2E+0(m)") << 
+        parser.Parse(ElementId{0, 0, 0, 0, 2}, U"0.2m;").ToStdString(3, 3);
+    ASSERT_TRUE(parser.Parse(ElementId{0, 0, 0, 0, 2}, U"0.02m;").ToStdString(3, 3) == "2.E+0(cm)") << 
+        parser.Parse(ElementId{0, 0, 0, 0, 2}, U"0.02m;").ToStdString(3, 3);
+    ASSERT_TRUE(parser.Parse(ElementId{0, 0, 0, 0, 2}, U"0.002m;").ToStdString(3, 3) == "2.E+0(mm)") << 
+        parser.Parse(ElementId{0, 0, 0, 0, 2}, U"0.002m;").ToStdString(3, 3);
+    ASSERT_TRUE(parser.Parse(ElementId{0, 0, 0, 0, 2}, U"200m;").ToStdString(3, 3) == "0.2E+0(km)") << 
+        parser.Parse(ElementId{0, 0, 0, 0, 2}, U"200m;").ToStdString(3, 3);
+    ASSERT_TRUE(parser.Parse(ElementId{0, 0, 0, 0, 2}, U"2200m;").ToStdString(3, 3) == "2.2E+0(km)") << 
+        parser.Parse(ElementId{0, 0, 0, 0, 2}, U"2200m;").ToStdString(3, 3);
+}
+
+TEST_F(CalcTestReal, units9)
+{
+    ASSERT_TRUE(parser.Parse(ElementId{0, 0, 0, 0, 2}, U"0.2m/s;").ToStdString(3, 3) == "0.2E+0((m)/(s))") << 
+        parser.Parse(ElementId{0, 0, 0, 0, 2}, U"0.2m/s;").ToStdString(3, 3);
+    ASSERT_TRUE(parser.Parse(ElementId{0, 0, 0, 0, 2}, U"5000m/s;").ToStdString(3, 3) == "5.E+0((km)/(s))") << 
+        parser.Parse(ElementId{0, 0, 0, 0, 2}, U"5000m/s;").ToStdString(3, 3);
+}
+
+TEST_F(CalcTestReal, units10)
+{
+    ASSERT_TRUE(parser.Parse(ElementId{0, 0, 0, 0, 2}, U"1Hz;").ToStdString(3, 3) == "1.E+0(Hz)") << 
+        parser.Parse(ElementId{0, 0, 0, 0, 2}, U"1Hz;").ToStdString(3, 3);
+    ASSERT_TRUE(parser.Parse(ElementId{0, 0, 0, 0, 2}, U"2000Hz;").ToStdString(3, 3) == "2.E+0(kHz)") << 
+        parser.Parse(ElementId{0, 0, 0, 0, 2}, U"2000Hz;").ToStdString(3, 3);
+    ASSERT_TRUE(parser.Parse(ElementId{0, 0, 0, 0, 2}, U"50*(1/s);").ToStdString(3, 3) == "50.E+0(Hz)") << 
+        parser.Parse(ElementId{0, 0, 0, 0, 2}, U"50*(1/s);").ToStdString(3, 3);
+    ASSERT_TRUE(parser.Parse(ElementId{0, 0, 0, 0, 2}, U"50(1)/(s);").ToStdString(3, 3) == "50.E+0(Hz)") << 
+        parser.Parse(ElementId{0, 0, 0, 0, 2}, U"50(1)/(s);").ToStdString(3, 3);
+}
+
+TEST_F(CalcTestReal, units11)
+{
+    ASSERT_TRUE(parser.Parse(ElementId{0, 0, 0, 0, 2}, U"10kg*10m/(2*pow(s,2));").ToStdString(3, 3) == "50.E+0(N)") << 
+        parser.Parse(ElementId{0, 0, 0, 0, 2}, U"10kg*10m/(2*pow(s,2));").ToStdString(3, 3);
+    ASSERT_TRUE(parser.Parse(ElementId{0, 0, 0, 0, 2}, U"1000kg*10m/(2*pow(s,2));").ToStdString(3, 3) == "5.E+0(kN)") << 
+        parser.Parse(ElementId{0, 0, 0, 0, 2}, U"1000kg*10m/(2*pow(s,2));").ToStdString(3, 3);
+}
+
 }

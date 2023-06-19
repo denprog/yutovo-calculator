@@ -7,6 +7,27 @@ namespace yutovo_calculator
 //Solver
 
 template<>
+Real Solver<Real>::operator()(UnitNode<Real> const& op) const
+{
+	//store the unit
+	AddUnit(op);
+	return Real();
+}
+
+template<>
+Rational Solver<Rational>::operator()(UnitNode<Rational> const& op) const
+{
+	AddUnit(op);
+	return Rational();
+}
+
+template<>
+Integer Solver<Integer>::operator()(UnitNode<Integer> const& op) const
+{
+	throw SyntaxException(op.id, SyntaxError, U"Identifier '" + op.name.name + U"' not found", op.pos, op.line);
+}
+
+template<>
 Integer Solver<Integer>::operator()(FunctionCallNode<Integer> const& op) const
 {
 	AddDependency(op.name.name);
@@ -338,7 +359,19 @@ Real Solver<Real>::operator()(IdentifierNode<Real> const& op) const
 		{
 		}
 	}
-	
+
+	Unit* unit = FindBuildinUnit(op.name);
+	if (unit)
+	{
+		return Real(precision, *unit);
+	}
+
+	auto* custom_unit = FindUnit(op.name);
+	if (custom_unit)
+	{
+		return Real(precision, custom_unit->value);
+	}
+
 	//there is no such an identifier
 	throw SyntaxException(op.id, UnknownIdentifier, U"Identifier '" + op.name + U"' not found", op.pos, op.line);
 	
@@ -377,7 +410,19 @@ Rational Solver<Rational>::operator()(IdentifierNode<Rational> const& op) const
 		{
 		}
 	}
-	
+
+	Unit* unit = FindBuildinUnit(op.name);
+	if (unit)
+	{
+		return Rational(*unit);
+	}
+
+	auto* custom_unit = FindUnit(op.name);
+	if (custom_unit)
+	{
+		return Rational(custom_unit->value);
+	}
+
 	//there is no such an identifier
 	throw SyntaxException(op.id, UnknownIdentifier, U"Identifier '" + op.name + U"' not found", op.pos, op.line);
 	
@@ -456,7 +501,19 @@ Real Solver<Real>::operator()(ImplicitStringMulNode<Real> const& op) const
 		{
 		}
 	}
-	
+
+	Unit* unit = FindBuildinUnit(op.identifier.name);
+	if (unit)
+	{
+		return op.left * Real(precision, *unit);
+	}
+
+	auto* custom_unit = FindUnit(op.identifier.name);
+	if (custom_unit)
+	{
+		return op.left * custom_unit->value;
+	}
+
 	//there is no such an identifier
 	throw SyntaxException(op.id, UnknownIdentifier, U"Identifier '" + op.identifier.name + U"' not found", op.pos, op.line);
 	
@@ -495,7 +552,19 @@ Rational Solver<Rational>::operator()(ImplicitStringMulNode<Rational> const& op)
 		{
 		}
 	}
-	
+
+	Unit* unit = FindBuildinUnit(op.identifier.name);
+	if (unit)
+	{
+		return op.left * Rational(*unit);
+	}
+
+	auto* custom_unit = FindUnit(op.identifier.name);
+	if (custom_unit)
+	{
+		return op.left * custom_unit->value;
+	}
+
 	//there is no such an identifier
 	throw SyntaxException(op.id, UnknownIdentifier, U"Identifier '" + op.identifier.name + U"' not found", op.pos, op.line);
 
@@ -549,7 +618,23 @@ Real Solver<Real>::operator()(ImplicitDivMulNode<Real> const& op) const
 		{
 		}
 	}
-	
+
+	Unit* unit = FindBuildinUnit(op.identifier.name);
+	if (unit)
+	{
+		Real arg1 = (*this)(op.upper);
+		Real arg2 = (*this)(op.lower);
+		return (arg1 / arg2) * Real(precision, *unit);
+	}
+
+	auto* custom_unit = FindUnit(op.identifier.name);
+	if (custom_unit)
+	{
+		Real arg1 = (*this)(op.upper);
+		Real arg2 = (*this)(op.lower);
+		return (arg1 / arg2) * custom_unit->value;
+	}
+
 	//there is no such an identifier
 	throw SyntaxException(op.id, UnknownIdentifier, U"Identifier '" + op.identifier.name + U"' not found", op.pos, op.line);
 	
@@ -597,11 +682,51 @@ Rational Solver<Rational>::operator()(ImplicitDivMulNode<Rational> const& op) co
 		{
 		}
 	}
-	
+
+	Unit* unit = FindBuildinUnit(op.identifier.name);
+	if (unit)
+	{
+		Rational arg1 = (*this)(op.upper);
+		Rational arg2 = (*this)(op.lower);
+		return (arg1 / arg2) * Rational(*unit);
+	}
+
+	auto* custom_unit = FindUnit(op.identifier.name);
+	if (custom_unit)
+	{
+		Rational arg1 = (*this)(op.upper);
+		Rational arg2 = (*this)(op.lower);
+		return (arg1 / arg2) * custom_unit->value;
+	}
+
 	//there is no such an identifier
 	throw SyntaxException(op.id, UnknownIdentifier, U"Identifier '" + op.identifier.name + U"' not found", op.pos, op.line);
 	
 	return Rational();
+}
+
+template<>
+Integer Solver<Integer>::operator()(ImplicitMulDivNode<Integer> const& op) const
+{
+	throw SyntaxException(op.id, SyntaxError, op.pos, op.line);
+}
+
+template<>
+Real Solver<Real>::operator()(ImplicitMulDivNode<Real> const& op) const
+{
+	Real arg1 = (*this)(op.before);
+	Real arg2 = (*this)(op.upper);
+	Real arg3 = (*this)(op.lower);
+	return arg1 * arg2 / arg3;
+}
+
+template<>
+Rational Solver<Rational>::operator()(ImplicitMulDivNode<Rational> const& op) const
+{
+	Rational arg1 = (*this)(op.before);
+	Rational arg2 = (*this)(op.upper);
+	Rational arg3 = (*this)(op.lower);
+	return arg1 * arg2 / arg3;
 }
 
 template<>
@@ -677,6 +802,84 @@ Rational Solver<Rational>::operator()(ScriptNode<Rational> const& script, Elemen
 	}
 
 	return res;
+}
+
+template<>
+Real Solver<Real>::GetSuitableUnit(const ElementId _id, const Real& val) const
+{
+	if (val.unit.IsEmpty())
+		return val;
+	
+	//check all the custom units to be suitable for the current one
+	Real res = val;
+	int m = val.ToString(10, 10, false).length();
+	int s = val.unit.unit.size();
+	int p1 = val.unit.GetPower();
+	for (size_t i = 0; i < symbols->units.size(); ++i)
+	{
+		CustomUnit<Real>& custom_unit = symbols->units[i];
+		if (IsLess(custom_unit.id, _id))
+		{
+			Real t = val;
+			if (custom_unit.Cast(t))
+			{
+				if (t.unit.unit.size() <= s) //a unit should have minimal size
+				{
+					size_t m2 = t.ToString(10, 10, false).length();
+					if (m2 < m || (m2 == m && ((p1 < 0 && t.unit.GetPower() > 0) || (t.unit.unit.size() < s)))) //result string should have minimal length
+					{
+						res = t;
+						m = m2;
+						s = t.unit.unit.size();
+					}
+				}
+			}
+		}
+	}
+
+	return res;
+}
+
+template<>
+Rational Solver<Rational>::GetSuitableUnit(const ElementId _id, const Rational& val) const
+{
+	if (val.unit.IsEmpty())
+		return val;
+	
+	//check all the custom units to be suitable for the current
+	Rational res = val;
+	int m = val.ToString(false).length();
+	int s = val.unit.unit.size();
+	int p1 = val.unit.GetPower();
+	for (size_t i = 0; i < symbols->units.size(); ++i)
+	{
+		CustomUnit<Rational>& custom_unit = symbols->units[i];
+		if (IsLess(custom_unit.id, _id))
+		{
+			Rational t = val;
+			if (custom_unit.Cast(t))
+			{
+				if (t.unit.unit.size() <= s) //a unit should have minimal size
+				{
+					size_t m2 = t.ToString(false).length();
+					if (m2 < m || (m2 == m && ((p1 < 0 && t.unit.GetPower() > 0) || (t.unit.unit.size() < s)))) //result string should have minimal length
+					{
+						res = t;
+						m = m2;
+						s = t.unit.unit.size();
+					}
+				}
+			}
+		}
+	}
+
+	return res;
+}
+
+template<>
+Integer Solver<Integer>::GetSuitableUnit(const ElementId _id, const Integer& val) const
+{
+	return val;
 }
 
 }

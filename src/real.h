@@ -5,6 +5,7 @@
 #include <mpfr.h>
 #include "math_helper.h"
 #include "parser_exception.h"
+#include "unit.h"
 
 using namespace std;
 
@@ -16,10 +17,12 @@ class Real
 public:
 	Real();
 	explicit Real(int precision);
+	explicit Real(int precision, Unit& _unit);
 	explicit Real(int precision, AngleMeasure _angle_measure);
 	explicit Real(int precision, const char* num);
 	explicit Real(int precision, int num);
 	explicit Real(int precision, float num);
+	explicit Real(int precision, const Real& source, const Unit& _unit);
 	Real(const std::u32string& num);
 	Real(const Real& source);
 	~Real();
@@ -321,13 +324,15 @@ public:
 	std::u32string ToString() const;
 	void ToString(int exp, int accuracy, bool& mantissa_sign, std::u32string& mantissa, bool& exponent_sign, std::u32string& exponent) const;
 	void ToString(int exp, int accuracy, bool& mantissa_sign, std::string& mantissa, bool& exponent_sign, std::string& exponent) const;
-	std::u32string ToString(int exp, int accuracy) const;
+	std::u32string ToString(int exp, int accuracy, bool with_unit = true) const;
 	std::string ToStdString(int exp, int accuracy) const;
 
 	Real GetNumber();
 
 public:
 	AngleMeasure angle_measure = AngleMeasure::None;
+
+	Unit unit;
 
 private:
 	mpfr_t number;

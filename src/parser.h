@@ -32,7 +32,6 @@ struct Parser
 		if (expression.empty() || expression == U";")
 			throw SyntaxException(id, ExpressionExpected, 0, 0);
 		
-		Number res;
 		std::u32string::iterator iter = expression.begin();
 		std::u32string::iterator end = expression.end();
 		unicode::space_type space;
@@ -42,7 +41,8 @@ struct Parser
 
 		phrase_parse(iter, end, script, space, script_node);
 		solver.SetDependencies(&dependencies);
-		return solver(script_node, id, default_angle_measure, result_angle_measure, precision);
+		Number res = solver(script_node, id, default_angle_measure, result_angle_measure, precision);
+		return solver.GetSuitableUnit(id, res);
 	}
 
 	Number Parse(ElementId id, std::u32string expression, AngleMeasure default_angle_measure, AngleMeasure result_angle_measure, const int precision = -1)
@@ -82,7 +82,31 @@ struct Parser
 	{
 		return RemoveIdentifier(id, ToUtfString(name));
 	}
-	
+
+	void AddUnits()
+	{
+		solver.AddBuildinUnit(Unit(U"m")); //meter (length)
+		solver.AddBuildinUnit(Unit(U"kg")); //kilogram (mass)
+		solver.AddBuildinUnit(Unit(U"s")); //second (time)
+		solver.AddBuildinUnit(Unit(U"mol")); //mole (amount of matter)
+		solver.AddBuildinUnit(Unit(U"A")); //ampere (electric current)
+		solver.AddBuildinUnit(Unit(U"Cd")); //candella (luminosity)
+		solver.AddBuildinUnit(Unit(U"k")); //kelvin (temperature)
+
+		//derived units
+	    Parse(ElementId{0, 0, 0, 0, 0, 0, 1}, U"mm~(1)/(1000)m;");
+	    Parse(ElementId{0, 0, 0, 0, 0, 0, 2}, U"cm~10mm;");
+	    Parse(ElementId{0, 0, 0, 0, 0, 0, 3}, U"km~1000m;");
+
+		Parse(ElementId{0, 0, 0, 0, 0, 0, 4}, U"Hz~1/s;");
+	    Parse(ElementId{0, 0, 0, 0, 0, 0, 5}, U"kHz~1000Hz;");
+	    Parse(ElementId{0, 0, 0, 0, 0, 0, 6}, U"MHz~1000kHz;");
+
+	    Parse(ElementId{0, 0, 0, 0, 0, 0, 7}, U"N~kg*m/pow(s,2);");
+	    Parse(ElementId{0, 0, 0, 0, 0, 0, 8}, U"kN~1000N;");
+	    Parse(ElementId{0, 0, 0, 0, 0, 0, 9}, U"MN~1000kN;");
+	}	
+
 	Solver<Number> solver;
 };
 

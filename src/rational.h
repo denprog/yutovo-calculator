@@ -5,6 +5,7 @@
 #include <mpir.h>
 #include "math_helper.h"
 #include "integer.h"
+#include "unit.h"
 
 using namespace std;
 
@@ -20,6 +21,7 @@ public:
 	Rational(const int num);
 	Rational(const int precision, const double num);
 	Rational(const int precision, const int num);
+	Rational(Unit& _unit);
 	Rational(const std::u32string& num);
 	~Rational();
 	
@@ -82,10 +84,13 @@ public:
 	friend bool operator<=(const int num1, const Rational& num2);
 
 public:
+	friend Rational pow(const Rational& num1, const Rational& num2);
+
+public:
 	Integer GetNumerator() const;
 	Integer GetDenomerator() const;
 
-	std::u32string ToString() const;
+	std::u32string ToString(bool with_unit = true) const;
 
 	int GetPrecision() const
 	{
@@ -104,17 +109,20 @@ public:
 
 	void ToProper(Integer& integer, Integer& numerator, Integer& denomerator) const;
 
-	private:
-	#ifdef TRACE_OUTPUT
-		void UpdateNumberStr();
-	#endif
-		
-	private:
-		mpq_t number;
+public:
+	Unit unit;
 
-	#ifdef TRACE_OUTPUT
-		std::u32string number_str; //the std::u32string representation of the number for debug purposes
-	#endif
+private:
+#ifdef TRACE_OUTPUT
+	void UpdateNumberStr();
+#endif
+
+private:
+	mpq_t number;
+
+#ifdef TRACE_OUTPUT
+	std::u32string number_str; //the std::u32string representation of the number for debug purposes
+#endif
 };
 
 }

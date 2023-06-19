@@ -16,7 +16,8 @@ namespace yutovo_calculator
 		DivisionByZero = 100, 
 		Overflow = 101, 
 		ArgumentIsOver = 102, 
-		ConversionDoesNotFit = 103
+		ConversionDoesNotFit = 103,
+		UnitsAreIncompatible = 201
 	};
 	
 	struct ParserException

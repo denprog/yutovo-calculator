@@ -20,6 +20,7 @@ add_library(${PROJECT_NAME}
     script.cpp
     solver.cpp
     utils.cpp
+    unit.cpp
 )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE 
