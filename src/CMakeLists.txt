@@ -63,6 +63,7 @@ install(
         solver.h
         stdafx.h
         utils.h
+        unit.h
     DESTINATION ${INSTALL_PATH}/include/${PROJECT_NAME}
     COMPONENT ${PROJECT_NAME}
 )
