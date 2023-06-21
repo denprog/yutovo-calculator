@@ -38,16 +38,19 @@ namespace yutovo_calculator
 			//unit definition
 			unit = identifier >> ('~' > expression);
 
-			//identifier is a name
-			identifier = name;
+			//identifier is a name with on optional subscript
+			identifier = name >> -('{' > (+char_("0-9") | name) > '}');
 			
 			//name is a letter-numeric std::u32string with an letter in the beginning
 			name = raw[lexeme[(alpha | '_') >> *(alnum | '_')]];
 
 			// BOOST_SPIRIT_DEBUG_NODE(definition);
-			// BOOST_SPIRIT_DEBUG_NODE(argument_list);
-			// BOOST_SPIRIT_DEBUG_NODE(identifier);
+			// BOOST_SPIRIT_DEBUG_NODE(function);
+			// BOOST_SPIRIT_DEBUG_NODE(variable);
+			// BOOST_SPIRIT_DEBUG_NODE(unit);
 			// BOOST_SPIRIT_DEBUG_NODE(name);
+			// BOOST_SPIRIT_DEBUG_NODE(identifier);
+			// BOOST_SPIRIT_DEBUG_NODE(argument_list);
 
 			//work out the exceptions
 			on_error<fail>(definition, 

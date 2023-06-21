@@ -309,14 +309,14 @@ struct Solver : public boost::static_visitor<Number>
 		symbols->units.push_back(CustomUnit<Number>{id, unit.name.name, res});
 	}
 
-	VariableNode<Number>* FindVariable(const std::u32string& name) const
+	VariableNode<Number>* FindVariable(const std::u32string& name, const std::u32string& subscript) const
 	{
 		VariableNode<Number>* res = nullptr;
 		ElementId var_id;
 		for (int i = symbols->variables.size() - 1; i >= 0; --i)
 		{
 			auto& var = symbols->variables[i];
-			if (var.name.name == name && IsLess(var.id, id))
+			if (var.name.name == name && var.name.subscript == subscript && IsLess(var.id, id))
 			{
 				if (!var_id.empty() && IsLess(var.id, var_id))
 					continue;

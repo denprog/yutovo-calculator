@@ -34,7 +34,7 @@ namespace yutovo_calculator
 		
 		digits_number = +char_("0-9");
 
-		identifier = name;
+		identifier = name >> -('{' > (digits_number | name) > '}');
 		
 		name = raw[lexeme[(alpha | '_') >> *(alnum | '_')]];
 
@@ -114,7 +114,7 @@ namespace yutovo_calculator
 
 		exp_number = +char_("0-9.") >> raw[lexeme[(no_case[char_("E")] > (char_('+') | char_('-')))]] > +(char_("0-9"));
 
-		identifier = name;
+		identifier = name >> -('{' > (integer_number | name) > '}');
 
 		implicit_div_mul = ('(' >> expression >> ')' >> '/' >> '(' >> expression >> ')' >> identifier);
 
@@ -207,7 +207,7 @@ namespace yutovo_calculator
 		
 		digits_number = +char_("0-9");
 
-		identifier = name;
+		identifier = name >> -('{' > (digits_number | name) > '}');
 		
 		name = raw[lexeme[(alpha | '_') >> *(alnum | '_')]];
 

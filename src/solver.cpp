@@ -297,7 +297,7 @@ Integer Solver<Integer>::operator()(IdentifierNode<Integer> const& op) const
 		return t->second;
 	
 	//find in user defined variables
-	VariableNode<Integer>* v = FindVariable(op.name);
+	VariableNode<Integer>* v = FindVariable(op.name, op.subscript);
 	if (v)
 	{
 		ElementId _id = id;
@@ -336,7 +336,7 @@ Real Solver<Real>::operator()(IdentifierNode<Real> const& op) const
 		return t->second;
 	
 	//find in the user defined variables
-	VariableNode<Real>* v = FindVariable(op.name);
+	VariableNode<Real>* v = FindVariable(op.name, op.subscript);
 	if (v)
 	{
 		ElementId _id = id;
@@ -388,7 +388,7 @@ Rational Solver<Rational>::operator()(IdentifierNode<Rational> const& op) const
 		return t->second;
 	
 	//find in user defined variables
-	VariableNode<Rational>* v = FindVariable(op.name);
+	VariableNode<Rational>* v = FindVariable(op.name, op.subscript);
 	if (v)
 	{
 		ElementId _id = id;
@@ -439,7 +439,7 @@ Integer Solver<Integer>::operator()(ImplicitStringMulNode<Integer> const& op) co
 		return op.left * t->second;
 	
 	//find in user defined variables
-	VariableNode<Integer>* v = FindVariable(op.identifier.name);
+	VariableNode<Integer>* v = FindVariable(op.identifier.name, op.identifier.subscript);
 	if (v)
 	{
 		ElementId _id = id;
@@ -478,7 +478,7 @@ Real Solver<Real>::operator()(ImplicitStringMulNode<Real> const& op) const
 		return op.left * t->second;
 	
 	//find in the user defined variables
-	VariableNode<Real>* v = FindVariable(op.identifier.name);
+	VariableNode<Real>* v = FindVariable(op.identifier.name, op.identifier.subscript);
 	if (v)
 	{
 		ElementId _id = id;
@@ -530,7 +530,7 @@ Rational Solver<Rational>::operator()(ImplicitStringMulNode<Rational> const& op)
 		return op.left * t->second;
 	
 	//find in user defined variables
-	VariableNode<Rational>* v = FindVariable(op.identifier.name);
+	VariableNode<Rational>* v = FindVariable(op.identifier.name, op.identifier.subscript);
 	if (v)
 	{
 		ElementId _id = id;
@@ -591,7 +591,7 @@ Real Solver<Real>::operator()(ImplicitDivMulNode<Real> const& op) const
 	}
 	
 	//find in the user defined variables
-	VariableNode<Real>* v = FindVariable(op.identifier.name);
+	VariableNode<Real>* v = FindVariable(op.identifier.name, op.identifier.subscript);
 	if (v)
 	{
 		ElementId _id = id;
@@ -655,7 +655,7 @@ Rational Solver<Rational>::operator()(ImplicitDivMulNode<Rational> const& op) co
 	}
 	
 	//find in the user defined variables
-	VariableNode<Rational>* v = FindVariable(op.identifier.name);
+	VariableNode<Rational>* v = FindVariable(op.identifier.name, op.identifier.subscript);
 	if (v)
 	{
 		ElementId _id = id;

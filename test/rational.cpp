@@ -36,6 +36,17 @@ TEST_F(CalcTestRational, variables3)
         parser.Parse(ElementId{0, 0, 4}, U"5d+3d2;");
 }
 
+TEST_F(CalcTestRational, variables4)
+{
+    parser.Parse(ElementId{0, 0, 1}, U"d=1/4;");
+    parser.Parse(ElementId{0, 0, 2}, U"d{2}=3/4;");
+    ASSERT_TRUE(parser.Parse(ElementId{0, 0, 3}, U"d+d{2};") == parser.Parse(ElementId{0, 0, 3}, U"1;")) << 
+        parser.Parse(ElementId{0, 0, 3}, U"d+d{2};");
+    parser.Parse(ElementId{0, 0, 4}, U"d{2}=5/2;");
+    ASSERT_TRUE(parser.Parse(ElementId{0, 0, 5}, U"5d{2}+3d;") == parser.Parse(ElementId{0, 0, 5}, U"13(1/4);")) << 
+        parser.Parse(ElementId{0, 0, 5}, U"5d{2}+3d;");
+}
+
 TEST_F(CalcTestRational, functions1)
 {
     parser.Parse(ElementId{0, 0, 0, 0, 2}, U"f(x)=2*x/3;");

@@ -237,6 +237,16 @@ TEST_F(CalcTestReal, variables11)
         parser.Parse(ElementId{0, 0, 2}, U"(3)/(4)a;").ToStdString(3, 3);
 }
 
+TEST_F(CalcTestReal, variables12)
+{
+    parser.Parse(ElementId{0, 0, 1}, U"a{1}=5;");
+    ASSERT_TRUE(parser.Parse(ElementId{0, 0, 2}, U"a{1};").ToStdString(3, 3) == parser.Parse(ElementId{0, 0, 2}, U"5;").ToStdString(3, 3)) << 
+        parser.Parse(ElementId{0, 0, 2}, U"a{1};").ToStdString(3, 3);
+    parser.Parse(ElementId{0, 0, 3}, U"a=7;");
+    ASSERT_TRUE(parser.Parse(ElementId{0, 0, 4}, U"a{1}+a;").ToStdString(3, 3) == parser.Parse(ElementId{0, 0, 4}, U"12;").ToStdString(3, 3)) << 
+        parser.Parse(ElementId{0, 0, 4}, U"a{1}+a;").ToStdString(3, 3);
+}
+
 TEST_F(CalcTestReal, symbols1)
 {
     EXPECT_THROW(parser.Parse(ElementId{0, 0, 1}, U"•;"), yutovo_calculator::SyntaxException) << parser.Parse(ElementId{0, 0, 1}, U"•;").ToStdString(3, 3);

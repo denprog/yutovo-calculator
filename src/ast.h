@@ -56,6 +56,7 @@ template<typename Number>
 struct IdentifierNode : public ExpressionPosition
 {
 	std::u32string name;
+	std::u32string subscript;
 };
 
 //Unary operation node.
@@ -244,7 +245,8 @@ BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::OperationNode<yutovo_calculator::In
 	(char, op)(yutovo_calculator::OperationNode<yutovo_calculator::Integer>::Operand, operand))
 
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::VariableNode<yutovo_calculator::Integer>, 
-	(yutovo_calculator::IdentifierNode<yutovo_calculator::Integer>, name)(yutovo_calculator::ExpressionNode<yutovo_calculator::Integer>, expression))
+	(yutovo_calculator::IdentifierNode<yutovo_calculator::Integer>, name)
+	(yutovo_calculator::ExpressionNode<yutovo_calculator::Integer>, expression))
 
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::UnitNode<yutovo_calculator::Integer>, 
 	(yutovo_calculator::IdentifierNode<yutovo_calculator::Integer>, name)
@@ -259,7 +261,8 @@ BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::DefinitionNode<yutovo_calculator::I
 	(yutovo_calculator::DefinitionNode<yutovo_calculator::Integer>::Definition, definition))
 
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::IdentifierNode<yutovo_calculator::Integer>, 
-	(std::u32string, name))
+	(std::u32string, name)
+	(std::u32string, subscript))
 
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::FunctionCallNode<yutovo_calculator::Integer>, 
 	(yutovo_calculator::IdentifierNode<yutovo_calculator::Integer>, name)
@@ -328,7 +331,8 @@ BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::DefinitionNode<yutovo_calculator::R
 	(yutovo_calculator::DefinitionNode<yutovo_calculator::Real>::Definition, definition))
 
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::IdentifierNode<yutovo_calculator::Real>, 
-	(std::u32string, name))
+	(std::u32string, name)
+	(std::u32string, subscript))
 
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::FunctionCallNode<yutovo_calculator::Real>, 
 	(yutovo_calculator::IdentifierNode<yutovo_calculator::Real>, name)
@@ -393,7 +397,8 @@ BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::DefinitionNode<yutovo_calculator::R
 	(yutovo_calculator::DefinitionNode<yutovo_calculator::Rational>::Definition, definition))
 
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::IdentifierNode<yutovo_calculator::Rational>, 
-	(std::u32string, name))
+	(std::u32string, name)
+	(std::u32string, subscript))
 
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::FunctionCallNode<yutovo_calculator::Rational>, 
 	(yutovo_calculator::IdentifierNode<yutovo_calculator::Rational>, name)
