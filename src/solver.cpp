@@ -360,16 +360,21 @@ Real Solver<Real>::operator()(IdentifierNode<Real> const& op) const
 		}
 	}
 
-	Unit* unit = FindBuildinUnit(op.name);
-	if (unit)
+	if (op.subscript.empty() || op.subscript == U"SI")
 	{
-		return Real(precision, *unit);
+		Unit* unit = FindBuildinUnit(op.name);
+		if (unit)
+		{
+			symbols->last_unit_system = U"SI";
+			return Real(precision, *unit);
+		}
 	}
 
-	auto* custom_unit = FindUnit(op.name);
+	auto* custom_unit = FindUnit(op.name, op.subscript);
 	if (custom_unit)
 	{
-		return Real(precision, custom_unit->value);
+		symbols->last_unit_system = custom_unit->system;
+		return custom_unit->value;
 	}
 
 	//there is no such an identifier
@@ -411,16 +416,21 @@ Rational Solver<Rational>::operator()(IdentifierNode<Rational> const& op) const
 		}
 	}
 
-	Unit* unit = FindBuildinUnit(op.name);
-	if (unit)
+	if (op.subscript.empty() || op.subscript == U"SI")
 	{
-		return Rational(*unit);
+		Unit* unit = FindBuildinUnit(op.name);
+		if (unit)
+		{
+			symbols->last_unit_system = U"SI";
+			return Rational(*unit);
+		}
 	}
 
-	auto* custom_unit = FindUnit(op.name);
+	auto* custom_unit = FindUnit(op.name, op.subscript);
 	if (custom_unit)
 	{
-		return Rational(custom_unit->value);
+		symbols->last_unit_system = custom_unit->system;
+		return custom_unit->value;
 	}
 
 	//there is no such an identifier
@@ -502,15 +512,20 @@ Real Solver<Real>::operator()(ImplicitStringMulNode<Real> const& op) const
 		}
 	}
 
-	Unit* unit = FindBuildinUnit(op.identifier.name);
-	if (unit)
+	if (op.identifier.subscript.empty() || op.identifier.subscript == U"SI")
 	{
-		return op.left * Real(precision, *unit);
+		Unit* unit = FindBuildinUnit(op.identifier.name);
+		if (unit)
+		{
+			symbols->last_unit_system = U"SI";
+			return op.left * Real(precision, *unit);
+		}
 	}
 
-	auto* custom_unit = FindUnit(op.identifier.name);
+	auto* custom_unit = FindUnit(op.identifier.name, op.identifier.subscript);
 	if (custom_unit)
 	{
+		symbols->last_unit_system = custom_unit->system;
 		return op.left * custom_unit->value;
 	}
 
@@ -553,15 +568,20 @@ Rational Solver<Rational>::operator()(ImplicitStringMulNode<Rational> const& op)
 		}
 	}
 
-	Unit* unit = FindBuildinUnit(op.identifier.name);
-	if (unit)
+	if (op.identifier.subscript.empty() || op.identifier.subscript == U"SI")
 	{
-		return op.left * Rational(*unit);
+		Unit* unit = FindBuildinUnit(op.identifier.name);
+		if (unit)
+		{
+			symbols->last_unit_system = U"SI";
+			return op.left * Rational(*unit);
+		}
 	}
 
-	auto* custom_unit = FindUnit(op.identifier.name);
+	auto* custom_unit = FindUnit(op.identifier.name, op.identifier.subscript);
 	if (custom_unit)
 	{
+		symbols->last_unit_system = custom_unit->system;
 		return op.left * custom_unit->value;
 	}
 
@@ -619,17 +639,22 @@ Real Solver<Real>::operator()(ImplicitDivMulNode<Real> const& op) const
 		}
 	}
 
-	Unit* unit = FindBuildinUnit(op.identifier.name);
-	if (unit)
+	if (op.identifier.subscript.empty() || op.identifier.subscript == U"SI")
 	{
-		Real arg1 = (*this)(op.upper);
-		Real arg2 = (*this)(op.lower);
-		return (arg1 / arg2) * Real(precision, *unit);
+		Unit* unit = FindBuildinUnit(op.identifier.name);
+		if (unit)
+		{
+			symbols->last_unit_system = U"SI";
+			Real arg1 = (*this)(op.upper);
+			Real arg2 = (*this)(op.lower);
+			return (arg1 / arg2) * Real(precision, *unit);
+		}
 	}
 
-	auto* custom_unit = FindUnit(op.identifier.name);
+	auto* custom_unit = FindUnit(op.identifier.name, op.identifier.subscript);
 	if (custom_unit)
 	{
+		symbols->last_unit_system = custom_unit->system;
 		Real arg1 = (*this)(op.upper);
 		Real arg2 = (*this)(op.lower);
 		return (arg1 / arg2) * custom_unit->value;
@@ -683,17 +708,22 @@ Rational Solver<Rational>::operator()(ImplicitDivMulNode<Rational> const& op) co
 		}
 	}
 
-	Unit* unit = FindBuildinUnit(op.identifier.name);
-	if (unit)
+	if (op.identifier.subscript.empty() || op.identifier.subscript == U"SI")
 	{
-		Rational arg1 = (*this)(op.upper);
-		Rational arg2 = (*this)(op.lower);
-		return (arg1 / arg2) * Rational(*unit);
+		Unit* unit = FindBuildinUnit(op.identifier.name);
+		if (unit)
+		{
+			symbols->last_unit_system = U"SI";
+			Rational arg1 = (*this)(op.upper);
+			Rational arg2 = (*this)(op.lower);
+			return (arg1 / arg2) * Rational(*unit);
+		}
 	}
 
-	auto* custom_unit = FindUnit(op.identifier.name);
+	auto* custom_unit = FindUnit(op.identifier.name, op.identifier.subscript);
 	if (custom_unit)
 	{
+		symbols->last_unit_system = custom_unit->system;
 		Rational arg1 = (*this)(op.upper);
 		Rational arg2 = (*this)(op.lower);
 		return (arg1 / arg2) * custom_unit->value;
@@ -805,7 +835,7 @@ Rational Solver<Rational>::operator()(ScriptNode<Rational> const& script, Elemen
 }
 
 template<>
-Real Solver<Real>::GetSuitableUnit(const ElementId _id, const Real& val) const
+Real Solver<Real>::GetSuitableUnit(const ElementId _id, const Real& val, const std::u32string& system) const
 {
 	if (val.unit.IsEmpty())
 		return val;
@@ -818,7 +848,7 @@ Real Solver<Real>::GetSuitableUnit(const ElementId _id, const Real& val) const
 	for (size_t i = 0; i < symbols->units.size(); ++i)
 	{
 		CustomUnit<Real>& custom_unit = symbols->units[i];
-		if (IsLess(custom_unit.id, _id))
+		if (custom_unit.system == system && IsLess(custom_unit.id, _id))
 		{
 			Real t = val;
 			if (custom_unit.Cast(t))
@@ -826,7 +856,8 @@ Real Solver<Real>::GetSuitableUnit(const ElementId _id, const Real& val) const
 				if (t.unit.unit.size() <= s) //a unit should have minimal size
 				{
 					size_t m2 = t.ToString(10, 10, false).length();
-					if (m2 < m || (m2 == m && ((p1 < 0 && t.unit.GetPower() > 0) || (t.unit.unit.size() < s)))) //result string should have minimal length
+					//result string should have minimal length
+					if (m2 < m || (m2 == m && ((p1 < 0 && t.unit.GetPower() > 0) || (t.unit.unit.size() < s) || (t < res))))
 					{
 						res = t;
 						m = m2;
@@ -837,11 +868,12 @@ Real Solver<Real>::GetSuitableUnit(const ElementId _id, const Real& val) const
 		}
 	}
 
+	res.unit_system = system;
 	return res;
 }
 
 template<>
-Rational Solver<Rational>::GetSuitableUnit(const ElementId _id, const Rational& val) const
+Rational Solver<Rational>::GetSuitableUnit(const ElementId _id, const Rational& val, const std::u32string& system) const
 {
 	if (val.unit.IsEmpty())
 		return val;
@@ -862,7 +894,8 @@ Rational Solver<Rational>::GetSuitableUnit(const ElementId _id, const Rational& 
 				if (t.unit.unit.size() <= s) //a unit should have minimal size
 				{
 					size_t m2 = t.ToString(false).length();
-					if (m2 < m || (m2 == m && ((p1 < 0 && t.unit.GetPower() > 0) || (t.unit.unit.size() < s)))) //result string should have minimal length
+					//result string should have minimal length
+					if (m2 < m || (m2 == m && ((p1 < 0 && t.unit.GetPower() > 0) || (t.unit.unit.size() < s) || (t < res))))
 					{
 						res = t;
 						m = m2;
@@ -873,11 +906,12 @@ Rational Solver<Rational>::GetSuitableUnit(const ElementId _id, const Rational& 
 		}
 	}
 
+	res.unit_system = system;
 	return res;
 }
 
 template<>
-Integer Solver<Integer>::GetSuitableUnit(const ElementId _id, const Integer& val) const
+Integer Solver<Integer>::GetSuitableUnit(const ElementId _id, const Integer& val, const std::u32string& system) const
 {
 	return val;
 }

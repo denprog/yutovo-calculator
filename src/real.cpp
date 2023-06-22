@@ -91,20 +91,6 @@ Real::Real(int precision, float num)
 #endif
 }
 
-Real::Real(int precision, const Real& source, const Unit& _unit) :
-	string_number(source.string_number),
-	angle_measure(source.angle_measure),
-	unit(source.unit)
-{
-	mpfr_init2(number, precision);
-	mpfr_set(number, source.number, GMP_RNDN);
-	unit = _unit;
-	
-#ifdef TRACE_OUTPUT
-	UpdateNumberStr();
-#endif
-}
-
 Real::Real(const std::u32string& num)
 {
 	string_number = num;
@@ -120,7 +106,8 @@ Real::Real(const std::u32string& num)
 Real::Real(const Real& source) :
 	string_number(source.string_number),
 	angle_measure(source.angle_measure),
-	unit(source.unit)
+	unit(source.unit),
+	unit_system(source.unit_system)
 {
 	mpfr_init2(number, source.GetBitPrecision());
 	mpfr_set(number, source.number, GMP_RNDN);
@@ -146,6 +133,7 @@ Real& Real::operator=(const Real& source)
 	string_number = source.string_number;
 	angle_measure = source.angle_measure;
 	unit = source.unit;
+	unit_system = source.unit_system;
 
 #ifdef TRACE_OUTPUT
 	UpdateNumberStr();
@@ -1955,7 +1943,6 @@ void Real::ToString(int exp, int accuracy, bool& mantissa_sign, std::u32string& 
 	if (mantissa_sign)
 		mantissa.erase(0, 1);
 
-	//if (res >= 1)
 	if (*this >= 1 || *this <= -1)
 	{
 		if (numExp > exp)
@@ -2080,7 +2067,7 @@ std::u32string Real::ToString(int exp, int accuracy, bool with_unit) const
 	res += exponent_sign ? U"-" : U"+";
 	res += exponent.empty() ? U"0" : exponent;
 	if (with_unit)
-		res += unit.ToString();
+		res += unit.ToString(unit_system);
 	
 	return res;
 }

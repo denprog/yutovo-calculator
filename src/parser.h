@@ -42,7 +42,7 @@ struct Parser
 		phrase_parse(iter, end, script, space, script_node);
 		solver.SetDependencies(&dependencies);
 		Number res = solver(script_node, id, default_angle_measure, result_angle_measure, precision);
-		return solver.GetSuitableUnit(id, res);
+		return solver.GetSuitableUnit(id, res, solver.symbols->last_unit_system);
 	}
 
 	Number Parse(ElementId id, std::u32string expression, AngleMeasure default_angle_measure, AngleMeasure result_angle_measure, const int precision = -1)
@@ -93,7 +93,7 @@ struct Parser
 		solver.AddBuildinUnit(Unit(U"Cd")); //candella (luminosity)
 		solver.AddBuildinUnit(Unit(U"k")); //kelvin (temperature)
 
-		//derived units
+		//derived SI units
 	    Parse(ElementId{0, 0, 0, 0, 0, 0, 1}, U"mm~(1)/(1000)m;");
 	    Parse(ElementId{0, 0, 0, 0, 0, 0, 2}, U"cm~10mm;");
 	    Parse(ElementId{0, 0, 0, 0, 0, 0, 3}, U"km~1000m;");
@@ -105,6 +105,18 @@ struct Parser
 	    Parse(ElementId{0, 0, 0, 0, 0, 0, 7}, U"N~kg*m/pow(s,2);");
 	    Parse(ElementId{0, 0, 0, 0, 0, 0, 8}, U"kN~1000N;");
 	    Parse(ElementId{0, 0, 0, 0, 0, 0, 9}, U"MN~1000kN;");
+
+		//derived russian units
+		Parse(ElementId{0, 0, 0, 0, 0, 0, 10}, U"tochka{rus}~(254)/(1000)mm;");
+		Parse(ElementId{0, 0, 0, 0, 0, 0, 12}, U"liniya{rus}~10tochka{rus};");
+		Parse(ElementId{0, 0, 0, 0, 0, 0, 13}, U"sotka{rus}~84tochka{rus};");
+		Parse(ElementId{0, 0, 0, 0, 0, 0, 14}, U"dyum{rus}~10liniya{rus};");
+		Parse(ElementId{0, 0, 0, 0, 0, 0, 15}, U"vershok{rus}~(7)/(4)dyum{rus};");
+		Parse(ElementId{0, 0, 0, 0, 0, 0, 16}, U"chetvert{rus}~7dyum{rus};");
+		Parse(ElementId{0, 0, 0, 0, 0, 0, 17}, U"fut{rus}~12dyum{rus};");
+		Parse(ElementId{0, 0, 0, 0, 0, 0, 18}, U"arshin{rus}~28dyum{rus};");
+		Parse(ElementId{0, 0, 0, 0, 0, 0, 19}, U"sazhen{rus}~7fut{rus};");
+		Parse(ElementId{0, 0, 0, 0, 0, 0, 20}, U"versta{rus}~500sazhen{rus};");
 	}	
 
 	Solver<Number> solver;

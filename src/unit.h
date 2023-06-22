@@ -52,7 +52,7 @@ public:
 
     bool IsEmpty() const;
 
-    std::u32string ToString() const;
+    std::u32string ToString(const std::u32string& system) const;
 
 public:
     std::vector<std::pair<std::u32string, int>> unit; //unit names with their powers

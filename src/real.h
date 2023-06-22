@@ -22,7 +22,6 @@ public:
 	explicit Real(int precision, const char* num);
 	explicit Real(int precision, int num);
 	explicit Real(int precision, float num);
-	explicit Real(int precision, const Real& source, const Unit& _unit);
 	Real(const std::u32string& num);
 	Real(const Real& source);
 	~Real();
@@ -333,6 +332,7 @@ public:
 	AngleMeasure angle_measure = AngleMeasure::None;
 
 	Unit unit;
+	std::u32string unit_system;
 
 private:
 	mpfr_t number;

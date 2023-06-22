@@ -230,7 +230,7 @@ TEST_F(CalcTestRational, units8)
         parser.Parse(ElementId{0, 0, 0, 0, 2}, U"2/100*m;").ToStdString();
     ASSERT_TRUE(parser.Parse(ElementId{0, 0, 0, 0, 2}, U"(2)/(1000)m;").ToStdString() == "2(mm)") << 
         parser.Parse(ElementId{0, 0, 0, 0, 2}, U"(2)/(1000)m;").ToStdString();
-    ASSERT_TRUE(parser.Parse(ElementId{0, 0, 0, 0, 2}, U"200m;").ToStdString() == "200(m)") << 
+    ASSERT_TRUE(parser.Parse(ElementId{0, 0, 0, 0, 2}, U"200m;").ToStdString() == "1/5(km)") << 
         parser.Parse(ElementId{0, 0, 0, 0, 2}, U"200m;").ToStdString();
     ASSERT_TRUE(parser.Parse(ElementId{0, 0, 0, 0, 2}, U"(3000)/(2)m;").ToStdString() == "3/2(km)") << 
         parser.Parse(ElementId{0, 0, 0, 0, 2}, U"(3000)/(2)m;").ToStdString();
@@ -262,6 +262,24 @@ TEST_F(CalcTestRational, units11)
         parser.Parse(ElementId{0, 0, 0, 0, 2}, U"10kg*10m/(2*pow(s,2));").ToStdString();
     ASSERT_TRUE(parser.Parse(ElementId{0, 0, 0, 0, 2}, U"1000kg*10m/(2*pow(s,2));").ToStdString() == "5(kN)") << 
         parser.Parse(ElementId{0, 0, 0, 0, 2}, U"1000kg*10m/(2*pow(s,2));").ToStdString();
+}
+
+TEST_F(CalcTestRational, units12)
+{
+    std::string t = parser.Parse(ElementId{0, 0, 0, 0, 2}, U"liniya{rus};").ToStdString();
+    ASSERT_TRUE(t == "1(liniya){rus}") << t;
+}
+
+TEST_F(CalcTestRational, units13)
+{
+    std::string t = parser.Parse(ElementId{0, 0, 0, 0, 2}, U"2*km;").ToStdString();
+    ASSERT_TRUE(t == "2(km)") << t;
+}
+
+TEST_F(CalcTestRational, units14)
+{
+    std::string t = parser.Parse(ElementId{0, 0, 0, 0, 2}, U"7fut{rus};").ToStdString();
+    ASSERT_TRUE(t == "1(sazhen){rus}") << t;
 }
 
 }

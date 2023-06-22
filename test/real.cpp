@@ -451,4 +451,46 @@ TEST_F(CalcTestReal, units11)
         parser.Parse(ElementId{0, 0, 0, 0, 2}, U"1000kg*10m/(2*pow(s,2));").ToStdString(3, 3);
 }
 
+TEST_F(CalcTestReal, units12)
+{
+    std::string t = parser.Parse(ElementId{0, 0, 0, 0, 2}, U"liniya{rus};").ToStdString(3, 3);
+    ASSERT_TRUE(t == "1.E+0(liniya){rus}") << t;
+}
+
+TEST_F(CalcTestReal, units13)
+{
+    std::string t = parser.Parse(ElementId{0, 0, 0, 0, 2}, U"2*km;").ToStdString(3, 3);
+    ASSERT_TRUE(t == "2.E+0(km)") << t;
+}
+
+TEST_F(CalcTestReal, units14)
+{
+    std::string t = parser.Parse(ElementId{0, 0, 0, 0, 2}, U"400sazhen{rus};").ToStdString(3, 3);
+    ASSERT_TRUE(t == "0.8E+0(versta){rus}") << t;
+}
+
+TEST_F(CalcTestReal, units15)
+{
+    std::string t = parser.Parse(ElementId{0, 0, 0, 0, 2}, U"7fut{rus};").ToStdString(3, 3);
+    ASSERT_TRUE(t == "1.E+0(sazhen){rus}") << t;
+}
+
+TEST_F(CalcTestReal, units16)
+{
+    std::string t = parser.Parse(ElementId{0, 0, 0, 0, 2}, U"1fut{rus}*1fut{rus};").ToStdString(3, 3);
+    ASSERT_TRUE(t == "1.E+0(fut^2){rus}") << t;
+}
+
+TEST_F(CalcTestReal, units17)
+{
+    std::string t = parser.Parse(ElementId{0, 0, 0, 0, 2}, U"2m*2m;").ToStdString(3, 3);
+    ASSERT_TRUE(t == "4.E+0(m^2)") << t;
+}
+
+TEST_F(CalcTestReal, units18)
+{
+    std::string t = parser.Parse(ElementId{0, 0, 0, 0, 2}, U"2km*2km;").ToStdString(3, 3);
+    ASSERT_TRUE(t == "4.E+0(km^2)") << t;
+}
+
 }

@@ -257,7 +257,7 @@ bool Unit::IsEmpty() const
     return unit.empty();
 }
 
-std::u32string Unit::ToString() const
+std::u32string Unit::ToString(const std::u32string& system) const
 {
     if (unit.empty())
         return U"";
@@ -294,7 +294,10 @@ std::u32string Unit::ToString() const
         lower = U"(" + lower + U")";
     }
 
-    return U"(" + upper + lower + U")";
+    auto r = U"(" + upper + lower + U")";
+    if (system.empty() || system == U"SI")
+        return r;
+    return r + U"{" + system + U"}";
 }
 
 }

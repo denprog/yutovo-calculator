@@ -24,6 +24,16 @@ typedef std::vector<std::u32string> Dependencies;
 template<typename Number>
 struct CustomUnit
 {
+	CustomUnit(const ElementId _id, const std::u32string _name, const std::u32string _system, Number _value) :
+		id(_id),
+		name(_name),
+		system(_system),
+		value(_value)
+	{
+		if (system.empty())
+			system = U"SI";
+	}
+
 	bool Cast(Number& val) const
 	{
 		Unit res_unit = value.unit;
@@ -72,13 +82,14 @@ struct CustomUnit
 
 		val.unit.unit.insert(val.unit.unit.begin(), std::make_pair(name, power));
 		auto u = val.unit;
-		val = val / value;
+		val = val / pow(value, power);
 		val.unit = u;
 		return true;
 	}
 
 	ElementId id;
 	std::u32string name;
+	std::u32string system;
 	Number value;
 };
 
@@ -107,6 +118,8 @@ struct SolverSymbols
 	map<std::u32string, BuildinVariable> buildin_variables;
 	std::vector<Unit> buildin_units;
 	std::vector<CustomUnit<Number>> units;
+
+	std::u32string last_unit_system;
 };
 	
 template<typename Number>
@@ -306,7 +319,7 @@ struct Solver : public boost::static_visitor<Number>
 			symbols->units.erase(it);
 
 		Number res = (*this)(unit.expression);
-		symbols->units.push_back(CustomUnit<Number>{id, unit.name.name, res});
+		symbols->units.push_back(CustomUnit<Number>(id, unit.name.name, unit.name.subscript, res));
 	}
 
 	VariableNode<Number>* FindVariable(const std::u32string& name, const std::u32string& subscript) const
@@ -461,19 +474,21 @@ struct Solver : public boost::static_visitor<Number>
 		return &(*iter);
 	}
 
-	CustomUnit<Number>* FindUnit(const std::u32string& name) const
+	CustomUnit<Number>* FindUnit(const std::u32string& name, const std::u32string& system) const
 	{
 		auto iter = std::find_if(symbols->units.begin(), symbols->units.end(), 
-			[name](CustomUnit<Number>& unit)
+			[name, system](CustomUnit<Number>& unit)
 			{
-				return unit.name == name;
+				if (system.empty())
+					return unit.name == name && unit.system == U"SI";
+				return unit.name == name && unit.system == system;
 			});
 		if (iter == symbols->units.end())
 			return nullptr;
 		return &(*iter);
 	}
 
-	Number GetSuitableUnit(const ElementId _id, const Number& val) const;
+	Number GetSuitableUnit(const ElementId _id, const Number& val, const std::u32string& system) const;
 
 	void SetDependencies(Dependencies* _dependencies)
 	{
@@ -486,7 +501,7 @@ private:
 		if (std::find(dependencies->begin(), dependencies->end(), name) == dependencies->end())
 			dependencies->push_back(name);
 	}
-	
+
 	mutable ElementId id;
 	mutable int precision;
 	mutable AngleMeasure default_angle_measure;

@@ -85,6 +85,7 @@ public:
 
 public:
 	friend Rational pow(const Rational& num1, const Rational& num2);
+	friend Rational pow(const Rational& num1, const int num2);
 
 public:
 	Integer GetNumerator() const;
@@ -111,6 +112,7 @@ public:
 
 public:
 	Unit unit;
+	std::u32string unit_system;
 
 private:
 #ifdef TRACE_OUTPUT
