@@ -50,7 +50,10 @@ public:
 
     int GetPower() const;
 
-    bool IsEmpty() const;
+    bool IsEmpty() const
+    {
+        return unit.empty();
+    }
 
     std::u32string ToString(const std::u32string& system) const;
 

@@ -252,11 +252,6 @@ int Unit::GetPower() const
 	return p;
 }
 
-bool Unit::IsEmpty() const
-{
-    return unit.empty();
-}
-
 std::u32string Unit::ToString(const std::u32string& system) const
 {
     if (unit.empty())
