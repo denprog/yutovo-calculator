@@ -835,7 +835,7 @@ Rational Solver<Rational>::operator()(ScriptNode<Rational> const& script, Elemen
 }
 
 template<>
-Real Solver<Real>::GetSuitableUnit(const ElementId _id, const Real& val, const std::u32string& system) const
+Real Solver<Real>::GetSuitableUnit(const ElementId _id, const Real& val, const std::u32string& system, const bool buildin) const
 {
 	if (val.unit.IsEmpty())
 		return val;
@@ -848,7 +848,13 @@ Real Solver<Real>::GetSuitableUnit(const ElementId _id, const Real& val, const s
 	for (size_t i = 0; i < symbols->units.size(); ++i)
 	{
 		CustomUnit<Real>& custom_unit = symbols->units[i];
-		if (custom_unit.system == system && IsLess(custom_unit.id, _id))
+		if (custom_unit.buildin && buildin && !IsLess(custom_unit.id, _id))
+			continue;
+		if (!custom_unit.buildin && !buildin && !IsLess(custom_unit.id, _id))
+			continue;
+		if (!custom_unit.buildin && buildin)
+			continue;
+		if (custom_unit.system == system)
 		{
 			Real t = val;
 			if (custom_unit.Cast(t))
@@ -873,7 +879,7 @@ Real Solver<Real>::GetSuitableUnit(const ElementId _id, const Real& val, const s
 }
 
 template<>
-Rational Solver<Rational>::GetSuitableUnit(const ElementId _id, const Rational& val, const std::u32string& system) const
+Rational Solver<Rational>::GetSuitableUnit(const ElementId _id, const Rational& val, const std::u32string& system, const bool buildin) const
 {
 	if (val.unit.IsEmpty())
 		return val;
@@ -886,7 +892,13 @@ Rational Solver<Rational>::GetSuitableUnit(const ElementId _id, const Rational& 
 	for (size_t i = 0; i < symbols->units.size(); ++i)
 	{
 		CustomUnit<Rational>& custom_unit = symbols->units[i];
-		if (IsLess(custom_unit.id, _id))
+		if (custom_unit.buildin && buildin && !IsLess(custom_unit.id, _id))
+			continue;
+		if (!custom_unit.buildin && !buildin && !IsLess(custom_unit.id, _id))
+			continue;
+		if (!custom_unit.buildin && buildin)
+			continue;
+		if (custom_unit.system == system)
 		{
 			Rational t = val;
 			if (custom_unit.Cast(t))
@@ -911,7 +923,7 @@ Rational Solver<Rational>::GetSuitableUnit(const ElementId _id, const Rational& 
 }
 
 template<>
-Integer Solver<Integer>::GetSuitableUnit(const ElementId _id, const Integer& val, const std::u32string& system) const
+Integer Solver<Integer>::GetSuitableUnit(const ElementId _id, const Integer& val, const std::u32string& system, const bool buildin) const
 {
 	return val;
 }

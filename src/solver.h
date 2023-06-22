@@ -24,11 +24,12 @@ typedef std::vector<std::u32string> Dependencies;
 template<typename Number>
 struct CustomUnit
 {
-	CustomUnit(const ElementId _id, const std::u32string _name, const std::u32string _system, Number _value) :
+	CustomUnit(const ElementId _id, const std::u32string _name, const std::u32string _system, Number _value, bool _buildin) :
 		id(_id),
 		name(_name),
 		system(_system),
-		value(_value)
+		value(_value),
+		buildin(_buildin)
 	{
 		if (system.empty())
 			system = U"SI";
@@ -91,6 +92,7 @@ struct CustomUnit
 	std::u32string name;
 	std::u32string system;
 	Number value;
+	bool buildin;
 };
 
 template<typename Number>
@@ -120,6 +122,7 @@ struct SolverSymbols
 	std::vector<CustomUnit<Number>> units;
 
 	std::u32string last_unit_system;
+	bool buildin_elements = false;
 };
 	
 template<typename Number>
@@ -319,7 +322,7 @@ struct Solver : public boost::static_visitor<Number>
 			symbols->units.erase(it);
 
 		Number res = (*this)(unit.expression);
-		symbols->units.push_back(CustomUnit<Number>(id, unit.name.name, unit.name.subscript, res));
+		symbols->units.push_back(CustomUnit<Number>(id, unit.name.name, unit.name.subscript, res, symbols->buildin_elements));
 	}
 
 	VariableNode<Number>* FindVariable(const std::u32string& name, const std::u32string& subscript) const
@@ -476,19 +479,31 @@ struct Solver : public boost::static_visitor<Number>
 
 	CustomUnit<Number>* FindUnit(const std::u32string& name, const std::u32string& system) const
 	{
-		auto iter = std::find_if(symbols->units.begin(), symbols->units.end(), 
-			[name, system](CustomUnit<Number>& unit)
+		CustomUnit<Number>* res = nullptr;
+		ElementId unit_id;
+		for (int i = symbols->units.size() - 1; i >= 0; --i)
+		{
+			CustomUnit<Number>& unit = symbols->units[i];
+			if (system.empty() && unit.system != U"SI")
+				continue;
+			if (unit.buildin && symbols->buildin_elements && !IsLess(unit.id, id))
+				continue;
+			if (!unit.buildin && !symbols->buildin_elements && !IsLess(unit.id, id))
+				continue;
+			if (!unit.buildin && symbols->buildin_elements)
+				continue;
+			if (unit.name == name)
 			{
-				if (system.empty())
-					return unit.name == name && unit.system == U"SI";
-				return unit.name == name && unit.system == system;
-			});
-		if (iter == symbols->units.end())
-			return nullptr;
-		return &(*iter);
+				if (!unit_id.empty() && IsLess(unit.id, unit_id))
+					continue;
+				res = &unit;
+				unit_id = unit.id;
+			}
+		}
+		return res;
 	}
 
-	Number GetSuitableUnit(const ElementId _id, const Number& val, const std::u32string& system) const;
+	Number GetSuitableUnit(const ElementId _id, const Number& val, const std::u32string& system, const bool buildin) const;
 
 	void SetDependencies(Dependencies* _dependencies)
 	{

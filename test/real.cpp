@@ -493,4 +493,10 @@ TEST_F(CalcTestReal, units18)
     ASSERT_TRUE(t == "4.E+0(km^2)") << t;
 }
 
+TEST_F(CalcTestReal, units19)
+{
+    std::string t = parser.Parse(ElementId{0, 0, 0, 0, 0, 0, 0, 2, 0}, U"2cm*3cm;").ToStdString(3, 3);
+    ASSERT_TRUE(t == "6.E+0(cm^2)") << t;
+}
+
 }
