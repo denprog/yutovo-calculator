@@ -503,4 +503,11 @@ TEST_F(CalcTestReal, units19)
     ASSERT_TRUE(t == "6.E+0(cm^2)") << t;
 }
 
+TEST_F(CalcTestReal, units20)
+{
+    auto val = parser.Parse(ElementId{0, 0, 0, 0, 0, 0, 0, 2, 0}, U"700fut{rus};");
+    std::string t = parser.GetSuitableUnit(ElementId{0, 0, 0, 0, 0, 0, 0, 2, 0}, val).ToStdString(3, 3);
+    ASSERT_TRUE(t == "0.2E+0(versta){rus}") << t;
+}
+
 }
