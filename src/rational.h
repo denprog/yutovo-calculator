@@ -112,7 +112,6 @@ public:
 
 public:
 	Unit unit;
-	std::u32string unit_system;
 
 private:
 #ifdef TRACE_OUTPUT

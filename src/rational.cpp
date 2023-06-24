@@ -21,7 +21,6 @@ Rational::Rational(const Rational& source)
 	mpq_init(number);
 	mpq_set(number, source.number);
 	unit = source.unit;
-	unit_system = source.unit_system;
 
 #ifdef TRACE_OUTPUT
 	UpdateNumberStr();
@@ -95,7 +94,6 @@ Rational& Rational::operator=(const Rational& source)
 	mpq_set(number, source.number);
 
 	unit = source.unit;
-	unit_system = source.unit_system;
 
 #ifdef TRACE_OUTPUT
 	UpdateNumberStr();
@@ -486,7 +484,7 @@ std::u32string Rational::ToString(bool with_unit) const
 	free(str);
 
 	if (with_unit)
-		res += unit.ToString(unit_system);
+		res += unit.ToString();
 
 	return res;
 }

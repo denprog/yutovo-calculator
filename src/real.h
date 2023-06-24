@@ -330,9 +330,7 @@ public:
 
 public:
 	AngleMeasure angle_measure = AngleMeasure::None;
-
 	Unit unit;
-	std::u32string unit_system;
 
 private:
 	mpfr_t number;

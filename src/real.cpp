@@ -106,8 +106,7 @@ Real::Real(const std::u32string& num)
 Real::Real(const Real& source) :
 	string_number(source.string_number),
 	angle_measure(source.angle_measure),
-	unit(source.unit),
-	unit_system(source.unit_system)
+	unit(source.unit)
 {
 	mpfr_init2(number, source.GetBitPrecision());
 	mpfr_set(number, source.number, GMP_RNDN);
@@ -133,7 +132,6 @@ Real& Real::operator=(const Real& source)
 	string_number = source.string_number;
 	angle_measure = source.angle_measure;
 	unit = source.unit;
-	unit_system = source.unit_system;
 
 #ifdef TRACE_OUTPUT
 	UpdateNumberStr();
@@ -2067,7 +2065,7 @@ std::u32string Real::ToString(int exp, int accuracy, bool with_unit) const
 	res += exponent_sign ? U"-" : U"+";
 	res += exponent.empty() ? U"0" : exponent;
 	if (with_unit)
-		res += unit.ToString(unit_system);
+		res += unit.ToString();
 	
 	return res;
 }

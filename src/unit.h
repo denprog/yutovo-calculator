@@ -45,8 +45,16 @@ public:
     friend Unit pow(const Unit& unit1, const float);
 
     bool operator==(const std::u32string& name) const;
-    bool operator==(const Unit& other) const;
-    bool operator!=(const Unit& other) const;
+
+    bool operator==(const Unit& other) const
+    {
+        return unit == other.unit;
+    }
+
+    bool operator!=(const Unit& other) const
+    {
+        return unit != other.unit;
+    }
 
     int GetPower() const;
 
@@ -55,10 +63,11 @@ public:
         return unit.empty();
     }
 
-    std::u32string ToString(const std::u32string& system) const;
+    std::u32string ToString() const;
 
 public:
     std::vector<std::pair<std::u32string, int>> unit; //unit names with their powers
+    std::u32string system;
 };
 
 }

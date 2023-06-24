@@ -217,16 +217,6 @@ bool Unit::operator==(const std::u32string& name) const
     return unit.size() == 1 && unit[0].first == name && unit[0].second == 1;
 }
 
-bool Unit::operator==(const Unit& other) const
-{
-    return unit == other.unit;
-}
-
-bool Unit::operator!=(const Unit& other) const
-{
-    return unit != other.unit;
-}
-
 int Unit::GetPower() const
 {
     if (unit.empty())
@@ -252,7 +242,7 @@ int Unit::GetPower() const
 	return p;
 }
 
-std::u32string Unit::ToString(const std::u32string& system) const
+std::u32string Unit::ToString() const
 {
     if (unit.empty())
         return U"";

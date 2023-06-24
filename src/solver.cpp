@@ -874,7 +874,6 @@ Real Solver<Real>::GetSuitableUnit(const ElementId _id, const Real& val, const s
 		}
 	}
 
-	res.unit_system = system;
 	return res;
 }
 
@@ -918,7 +917,6 @@ Rational Solver<Rational>::GetSuitableUnit(const ElementId _id, const Rational& 
 		}
 	}
 
-	res.unit_system = system;
 	return res;
 }
 

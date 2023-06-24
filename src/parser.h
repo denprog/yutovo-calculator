@@ -41,8 +41,7 @@ struct Parser
 
 		phrase_parse(iter, end, script, space, script_node);
 		solver.SetDependencies(&dependencies);
-		Number res = solver(script_node, id, default_angle_measure, result_angle_measure, precision);
-		return solver.GetSuitableUnit(id, res, solver.symbols->last_unit_system, solver.symbols->buildin_elements);
+		return solver(script_node, id, default_angle_measure, result_angle_measure, precision);
 	}
 
 	Number Parse(ElementId id, std::u32string expression, AngleMeasure default_angle_measure, AngleMeasure result_angle_measure, const int precision = -1)
@@ -81,6 +80,16 @@ struct Parser
 	bool RemoveIdentifier(ElementId id, const std::string& name)
 	{
 		return RemoveIdentifier(id, ToUtfString(name));
+	}
+
+	Number GetSuitableUnit(ElementId id, const Number& val)
+	{
+		return solver.GetSuitableUnit(id, val, solver.symbols->last_unit_system, solver.symbols->buildin_elements);
+	}
+
+	void GetCastUnits(const ElementId id, const Number& val, std::vector<Unit>& cast_units)
+	{
+		solver.GetCastUnits(id, val, cast_units);
 	}
 
 	void AddUnits()

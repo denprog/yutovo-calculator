@@ -85,6 +85,7 @@ struct CustomUnit
 		auto u = val.unit;
 		val = val / pow(value, power);
 		val.unit = u;
+		val.unit.system = system;
 		return true;
 	}
 
@@ -501,6 +502,23 @@ struct Solver : public boost::static_visitor<Number>
 			}
 		}
 		return res;
+	}
+
+	void GetCastUnits(const ElementId _id, const Number& val, std::vector<Unit>& cast_units)
+	{
+		if (val.unit.IsEmpty())
+			return;
+
+		cast_units.push_back(val.unit);
+		for (size_t i = 0; i < symbols->units.size(); ++i)
+		{
+			CustomUnit<Number>& custom_unit = symbols->units[i];
+			if (!custom_unit.buildin && !IsLess(custom_unit.id, _id))
+				continue;
+			Number t = val;
+			if (custom_unit.Cast(t))
+				cast_units.push_back(t.unit);
+		}
 	}
 
 	Number GetSuitableUnit(const ElementId _id, const Number& val, const std::u32string& system, const bool buildin) const;
