@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <string>
+#include <algorithm>
 
 namespace yutovo_calculator
 {
@@ -13,8 +14,22 @@ class Unit
 {
 public:
     Unit() = default;
-    Unit(const std::u32string& name);
-    Unit(const std::u32string& name, const int power);
+
+    Unit(const std::u32string& name)
+    {
+        unit.push_back(std::make_pair(name, 1));
+    }
+
+    Unit(const std::u32string& name, const int power)
+    {
+        unit.push_back(std::make_pair(name, power));
+    }
+
+    Unit(const std::u32string& numerator, const std::u32string& denomerator)
+    {
+        unit.push_back(std::make_pair(numerator, 1));
+        unit.push_back(std::make_pair(denomerator, -1));
+    }
 
     friend Unit operator+(const Unit& unit1, const Unit& unit2);
     friend Unit operator+(const Unit& unit1, const int);
@@ -48,12 +63,24 @@ public:
 
     bool operator==(const Unit& other) const
     {
-        return unit == other.unit;
+        if (unit.size() != other.unit.size())
+            return false;
+        for (auto& u : other.unit)
+        {
+            auto it = std::find_if(unit.begin(), unit.end(), 
+                [u](auto& p)
+                {
+                    return p.first == u.first && p.second == u.second;
+                });
+            if (it == unit.end())
+                return false;
+        }
+        return true;
     }
 
     bool operator!=(const Unit& other) const
     {
-        return unit != other.unit;
+        return !operator==(other);
     }
 
     int GetPower() const;

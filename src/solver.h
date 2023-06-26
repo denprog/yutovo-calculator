@@ -42,6 +42,7 @@ struct CustomUnit
 		bool f = true;
 		while (f)
 		{
+			//try to find the right variant of the unit
 			for (auto& u : res_unit.unit)
 			{
 		        auto it = std::find_if(val.unit.unit.begin(), val.unit.unit.end(), 
@@ -57,21 +58,48 @@ struct CustomUnit
 		            });
 		        if (it == val.unit.unit.end())
 				{
-					if (power == 0)
-		            	return false;
-					else
-					{
-						f = false;
-						break;
-					}
+					f = false;
+					break;
 				}
 
 		        it->second -= u.second;
 			}
 
 			if (f)
-			{
 				++power;
+			
+			if (!f)
+			{
+				f = true;
+				//try to find the backward variant of the unit
+				for (auto& u : res_unit.unit)
+				{
+			        auto it = std::find_if(val.unit.unit.begin(), val.unit.unit.end(), 
+			            [u](const auto& p)
+			            {
+			                if (p.first != u.first)
+			                    return false;
+			                if (p.second < 0 && u.second > 0)
+			                    return abs(p.second) >= u.second;
+			                if (p.second > 0 && u.second < 0)
+			                    return p.second <= abs(u.second);
+			                return false;
+			            });
+			        if (it == val.unit.unit.end())
+					{
+						f = false;
+						break;
+					}
+
+			        it->second += u.second;
+				}
+
+				if (f)
+					--power;
+			}
+
+			if (f)
+			{
 			    for (size_t i = 0; i < val.unit.unit.size(); ++i)
 			    {
 			        auto& p = val.unit.unit[i];
@@ -81,9 +109,15 @@ struct CustomUnit
 			}
 		}
 
+		if (power == 0)
+			return false;
+
 		val.unit.unit.insert(val.unit.unit.begin(), std::make_pair(name, power));
 		auto u = val.unit;
-		val = val / pow(value, power);
+		if (power > 0)
+			val = val / pow(value, power);
+		else
+			val = val * pow(value, -power);
 		val.unit = u;
 		val.unit.system = system;
 		return true;
@@ -517,11 +551,34 @@ struct Solver : public boost::static_visitor<Number>
 				continue;
 			Number t = val;
 			if (custom_unit.Cast(t))
-				cast_units.push_back(t.unit);
+				GetCastUnits(_id, t, cast_units);
+		}
+	}
+
+	void GetCastUnits(const ElementId _id, const Number& val, const std::u32string& system, std::vector<Number>& cast_units) const
+	{
+		if (val.unit.IsEmpty())
+			return;
+
+		if (val.unit.system == system || (val.unit.system == U"" && system == U"SI"))
+			cast_units.push_back(val);
+		for (size_t i = 0; i < symbols->units.size(); ++i)
+		{
+			CustomUnit<Number>& custom_unit = symbols->units[i];
+			if (!custom_unit.buildin && !IsLess(custom_unit.id, _id))
+				continue;
+			if (custom_unit.system == system || (custom_unit.system == U"" && system == U"SI"))
+			{
+				Number t = val;
+				if (custom_unit.Cast(t))
+					GetCastUnits(_id, t, system, cast_units);
+			}
 		}
 	}
 
 	Number GetSuitableUnit(const ElementId _id, const Number& val, const std::u32string& system, const bool buildin) const;
+
+	Number CastToUnit(const ElementId id, const Number& val, const Unit& unit) const;
 
 	void SetDependencies(Dependencies* _dependencies)
 	{
@@ -529,6 +586,121 @@ struct Solver : public boost::static_visitor<Number>
 	}
 
 private:
+	Number GetSuitableUnitImpl(const ElementId _id, const Number& val, const std::u32string& system, const bool buildin) const
+	{
+		if (val.unit.IsEmpty())
+			return val;
+		
+		//check all the custom units to be suitable for the current one
+		Number res = val;
+		int m = val.ToString(10, 10, false).length();
+		int s = val.unit.unit.size();
+		int p1 = val.unit.GetPower();
+
+		std::vector<Number> cast_units;
+		GetCastUnits(_id, val, system, cast_units);
+
+		for (Number& c : cast_units)
+		{
+			if (c.unit.unit.size() <= s) //a unit should have minimal size
+			{
+				//result string should have minimal length and should have the simpliest unit
+				size_t m2 = c.ToString(10, 10, false).length();
+				if (m2 > m)
+					continue;
+				if (m2 == m)
+				{
+					if (p1 < 0 && c.unit.GetPower() < 0)
+						continue;
+					if (c.unit.unit.size() > s)
+						continue;
+					int base_units1 = 0, base_units2 = 0;
+					for (auto& u : res.unit.unit)
+					{
+						if (FindBuildinUnit(u.first))
+							++base_units1;
+					}
+					for (auto& u : c.unit.unit)
+					{
+						if (FindBuildinUnit(u.first))
+							++base_units2;
+					}
+					if (res.unit.unit.size() == c.unit.unit.size())
+					{
+						if (base_units1 > base_units2)
+						{
+							if (c.unit.unit.size() == 1 && res.unit.unit[0].second < 0)
+							{
+								res = c;
+								m = m2;
+								s = c.unit.unit.size();
+							}
+							continue;
+						}
+						if ((res < 1 || c < 1) && 1 / res < 1 / c)
+							continue;
+					}
+				}
+				else
+				{
+					if (res.unit.unit.size() == c.unit.unit.size())
+					{
+						if (res.unit.GetPower() > c.unit.GetPower())
+							continue;
+					}
+				}
+
+				res = c;
+				m = m2;
+				s = c.unit.unit.size();
+			}
+		}
+
+		return res;
+	}
+
+	Number CastToUnitImpl(const ElementId id, const Number& val, const Unit& unit) const
+	{
+		if (val.unit == unit)
+			return val;
+
+		//cast to base units
+		Number u(precision, 1);
+		for (auto& p : unit.unit)
+		{
+			Number unit_val;
+			if (unit.system == U"SI" || unit.system == U"")
+			{
+				Unit* base_unit = FindBuildinUnit(p.first);
+				if (base_unit)
+					unit_val = Number(precision, *base_unit);
+			}
+			if (unit_val.unit.IsEmpty())
+			{
+				CustomUnit<Number>* custom_unit = FindUnit(p.first, unit.system);
+				if (!custom_unit)
+					throw MathException(id, ParserExceptionCode::UnknownIdentifier);
+				unit_val = custom_unit->value;
+			}
+
+			if (p.second == 1)
+				u *= unit_val;
+			else if (p.second == -1)
+				u /= unit_val;
+			else if (p.second > 1)
+				u *= pow(unit_val, p.second);
+			else
+				u /= pow(unit_val, -p.second);
+		}
+
+		if (u.unit != val.unit)
+			throw MathException(id, ParserExceptionCode::CannotCastToUnit);
+
+		Number res = val / u;
+		res.unit = unit;
+		return res;
+	}
+
 	void AddDependency(const std::u32string& name) const
 	{
 		if (std::find(dependencies->begin(), dependencies->end(), name) == dependencies->end())

@@ -837,93 +837,37 @@ Rational Solver<Rational>::operator()(ScriptNode<Rational> const& script, Elemen
 template<>
 Real Solver<Real>::GetSuitableUnit(const ElementId _id, const Real& val, const std::u32string& system, const bool buildin) const
 {
-	if (val.unit.IsEmpty())
-		return val;
-	
-	//check all the custom units to be suitable for the current one
-	Real res = val;
-	int m = val.ToString(10, 10, false).length();
-	int s = val.unit.unit.size();
-	int p1 = val.unit.GetPower();
-	for (size_t i = 0; i < symbols->units.size(); ++i)
-	{
-		CustomUnit<Real>& custom_unit = symbols->units[i];
-		if (custom_unit.buildin && buildin && !IsLess(custom_unit.id, _id))
-			continue;
-		if (!custom_unit.buildin && !buildin && !IsLess(custom_unit.id, _id))
-			continue;
-		if (!custom_unit.buildin && buildin)
-			continue;
-		if (custom_unit.system == system)
-		{
-			Real t = val;
-			if (custom_unit.Cast(t))
-			{
-				if (t.unit.unit.size() <= s) //a unit should have minimal size
-				{
-					size_t m2 = t.ToString(10, 10, false).length();
-					//result string should have minimal length
-					if (m2 < m || (m2 == m && ((p1 < 0 && t.unit.GetPower() > 0) || (t.unit.unit.size() < s) || (t < res))))
-					{
-						res = t;
-						m = m2;
-						s = t.unit.unit.size();
-					}
-				}
-			}
-		}
-	}
-
-	return res;
+	return GetSuitableUnitImpl(_id, val, system, buildin);
 }
 
 template<>
 Rational Solver<Rational>::GetSuitableUnit(const ElementId _id, const Rational& val, const std::u32string& system, const bool buildin) const
 {
-	if (val.unit.IsEmpty())
-		return val;
-	
-	//check all the custom units to be suitable for the current
-	Rational res = val;
-	int m = val.ToString(false).length();
-	int s = val.unit.unit.size();
-	int p1 = val.unit.GetPower();
-	for (size_t i = 0; i < symbols->units.size(); ++i)
-	{
-		CustomUnit<Rational>& custom_unit = symbols->units[i];
-		if (custom_unit.buildin && buildin && !IsLess(custom_unit.id, _id))
-			continue;
-		if (!custom_unit.buildin && !buildin && !IsLess(custom_unit.id, _id))
-			continue;
-		if (!custom_unit.buildin && buildin)
-			continue;
-		if (custom_unit.system == system)
-		{
-			Rational t = val;
-			if (custom_unit.Cast(t))
-			{
-				if (t.unit.unit.size() <= s) //a unit should have minimal size
-				{
-					size_t m2 = t.ToString(false).length();
-					//result string should have minimal length
-					if (m2 < m || (m2 == m && ((p1 < 0 && t.unit.GetPower() > 0) || (t.unit.unit.size() < s) || (t < res))))
-					{
-						res = t;
-						m = m2;
-						s = t.unit.unit.size();
-					}
-				}
-			}
-		}
-	}
-
-	return res;
+	return GetSuitableUnitImpl(_id, val, system, buildin);
 }
 
 template<>
 Integer Solver<Integer>::GetSuitableUnit(const ElementId _id, const Integer& val, const std::u32string& system, const bool buildin) const
 {
 	return val;
+}
+
+template<>
+Real Solver<Real>::CastToUnit(const ElementId id, const Real& val, const Unit& unit) const
+{
+	return CastToUnitImpl(id, val, unit);
+}
+
+template<>
+Rational Solver<Rational>::CastToUnit(const ElementId id, const Rational& val, const Unit& unit) const
+{
+	return CastToUnitImpl(id, val, unit);
+}
+
+template<>
+Integer Solver<Integer>::CastToUnit(const ElementId id, const Integer& val, const Unit& unit) const
+{
+	throw MathException(id, ParserExceptionCode::CannotCastToUnit);
 }
 
 }

@@ -233,7 +233,7 @@ TEST_F(CalcTestRational, units8)
     s = parser.GetSuitableUnit(ElementId{0, 0, 0, 0, 1}, parser.Parse(ElementId{0, 0, 0, 0, 2}, U"(2)/(1000)m;")).ToStdString();
     ASSERT_TRUE(s == "2(mm)") << s;
     s = parser.GetSuitableUnit(ElementId{0, 0, 0, 0, 1}, parser.Parse(ElementId{0, 0, 0, 0, 2}, U"200m;")).ToStdString();
-    ASSERT_TRUE(s == "1/5(km)") << s;
+    ASSERT_TRUE(s == "200(m)") << s;
     s = parser.GetSuitableUnit(ElementId{0, 0, 0, 0, 1}, parser.Parse(ElementId{0, 0, 0, 0, 2}, U"(3000)/(2)m;")).ToStdString();
     ASSERT_TRUE(s == "3/2(km)") << s;
 }
@@ -241,9 +241,9 @@ TEST_F(CalcTestRational, units8)
 TEST_F(CalcTestRational, units9)
 {
     std::string s = parser.GetSuitableUnit(ElementId{0, 0, 0, 0, 1}, parser.Parse(ElementId{0, 0, 0, 0, 2}, U"(1)/(5)m/s;")).ToStdString();
-    ASSERT_TRUE(s == "20((cm)/(s))") << s;
+    ASSERT_TRUE(s == "12((m)/(min))") << s;
     s = parser.GetSuitableUnit(ElementId{0, 0, 0, 0, 1}, parser.Parse(ElementId{0, 0, 0, 0, 2}, U"5000m/s;")).ToStdString();
-    ASSERT_TRUE(s == "5((km)/(s))") << s;
+    ASSERT_TRUE(s == "5((m)/(ms))") << s;
 }
 
 TEST_F(CalcTestRational, units10)
@@ -282,6 +282,31 @@ TEST_F(CalcTestRational, units14)
 {
     std::string t = parser.GetSuitableUnit(ElementId{0, 0, 0, 0, 1}, parser.Parse(ElementId{0, 0, 0, 0, 2}, U"7fut{rus};")).ToStdString();
     ASSERT_TRUE(t == "1(sazhen){rus}") << t;
+}
+
+TEST_F(CalcTestRational, units15)
+{
+    ElementId id{0, 0, 0, 0, 0, 0, 0, 2, 0};
+    auto val = parser.Parse(id, U"5*(km/hour);");
+    std::vector<Unit> cast_units;
+    parser.GetCastUnits(id, val, cast_units);
+    ASSERT_TRUE(FindUnit(cast_units, Unit(U"km", U"hour")));
+    std::string t = parser.GetSuitableUnit(id, val).ToStdString();
+    ASSERT_TRUE(t == "5((km)/(hour))") << t;
+}
+
+TEST_F(CalcTestRational, units16)
+{
+    std::string t = parser.GetSuitableUnit(ElementId{0, 0, 0, 0, 1}, parser.Parse(ElementId{0, 0, 0, 0, 2}, U"(10)/(4s);")).ToStdString();
+    ASSERT_TRUE(t == "5/2(Hz)") << t;
+    t = parser.GetSuitableUnit(ElementId{0, 0, 0, 0, 1}, parser.Parse(ElementId{0, 0, 0, 0, 2}, U"(50)/(4s);")).ToStdString();
+    ASSERT_TRUE(t == "25/2(Hz)") << t;
+}
+
+TEST_F(CalcTestRational, units17)
+{
+    std::string t = parser.GetSuitableUnit(ElementId{0, 0, 0, 0, 1}, parser.Parse(ElementId{0, 0, 0, 0, 2}, U"(1m)/(3s);")).ToStdString();
+    ASSERT_TRUE(t == "20((m)/(min))") << t;
 }
 
 }

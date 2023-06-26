@@ -26,6 +26,11 @@ struct CalcTestReal : public testing::Test
     {
     }
 
+    bool FindUnit(const std::vector<Unit>& units, const Unit& unit)
+    {
+        return std::find(units.begin(), units.end(), unit) != units.end();
+    }
+
     Parser<Real> parser;
 };
 
@@ -34,6 +39,11 @@ struct CalcTestRational : public testing::Test
     CalcTestRational() :
         parser(0)
     {
+    }
+
+    bool FindUnit(const std::vector<Unit>& units, const Unit& unit)
+    {
+        return std::find(units.begin(), units.end(), unit) != units.end();
     }
 
     Parser<Rational> parser;

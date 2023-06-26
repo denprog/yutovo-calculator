@@ -8,16 +8,6 @@ namespace yutovo_calculator
 
 //Unit
 
-Unit::Unit(const std::u32string& name)
-{
-    unit.push_back(std::make_pair(name, 1));
-}
-
-Unit::Unit(const std::u32string& name, const int power)
-{
-    unit.push_back(std::make_pair(name, power));
-}
-
 Unit operator+(const Unit& unit1, const Unit& unit2)
 {
     if (unit1 != unit2)

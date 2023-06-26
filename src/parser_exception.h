@@ -17,7 +17,8 @@ namespace yutovo_calculator
 		Overflow = 101, 
 		ArgumentIsOver = 102, 
 		ConversionDoesNotFit = 103,
-		UnitsAreIncompatible = 201
+		UnitsAreIncompatible = 201,
+		CannotCastToUnit = 202
 	};
 	
 	struct ParserException
@@ -29,6 +30,12 @@ namespace yutovo_calculator
 			ex_id(_ex_id),
 			pos(_pos),
 			line(_line)
+		{
+		}
+
+		ParserException(ElementId _id, ParserExceptionCode _ex_id) :
+			id(_id),
+			ex_id(_ex_id)
 		{
 		}
 
@@ -69,6 +76,10 @@ namespace yutovo_calculator
 	struct MathException : public ParserException
 	{
 		MathException(ParserExceptionCode _id) : ParserException(ElementId{}, _id, -1, -1)
+		{
+		}
+
+		MathException(ElementId _id, ParserExceptionCode _ex_id) : ParserException(_id, _ex_id)
 		{
 		}
 

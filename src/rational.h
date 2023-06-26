@@ -21,6 +21,7 @@ public:
 	Rational(const int num);
 	Rational(const int precision, const double num);
 	Rational(const int precision, const int num);
+	Rational(const int precision, Unit& _unit);
 	Rational(Unit& _unit);
 	Rational(const std::u32string& num);
 	~Rational();
@@ -50,8 +51,13 @@ public:
 	friend Rational operator/(const Rational& num1, const int num2);
 	friend Rational operator/(const int num1, const Rational& num2);
 
-public:
 	void operator+=(const Rational& num);
+
+	void operator-=(const Rational& num);
+
+	void operator*=(const Rational& num);
+
+	void operator/=(const Rational& num);
 
 public:
 	void operator=(const int num);
@@ -92,6 +98,7 @@ public:
 	Integer GetDenomerator() const;
 
 	std::u32string ToString(bool with_unit = true) const;
+	std::u32string ToString(int, int, bool with_unit = true) const;
 
 	int GetPrecision() const
 	{

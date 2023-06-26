@@ -57,6 +57,17 @@ Rational::Rational(const int precision, const int num)
 #endif
 }
 
+Rational::Rational(const int precision, Unit& _unit) :
+	unit(_unit)
+{
+	mpq_init(number);
+	mpq_set_si(number, 1, 1);
+
+#ifdef TRACE_OUTPUT
+	UpdateNumberStr();
+#endif
+}
+
 Rational::Rational(Unit& _unit)
 {
 	mpq_init(number);
@@ -316,6 +327,21 @@ void Rational::operator+=(const Rational& num)
 	*this = *this + num;
 }
 
+void Rational::operator-=(const Rational& num)
+{
+	*this = *this - num;
+}
+
+void Rational::operator*=(const Rational& num)
+{
+	*this = *this * num;
+}
+
+void Rational::operator/=(const Rational& num)
+{
+	*this = *this / num;
+}
+
 void Rational::operator=(const int num)
 {
 	*this = num;
@@ -487,6 +513,11 @@ std::u32string Rational::ToString(bool with_unit) const
 		res += unit.ToString();
 
 	return res;
+}
+
+std::u32string Rational::ToString(int, int, bool with_unit) const
+{
+	return ToString(with_unit);
 }
 
 std::string Rational::ToStdString() const

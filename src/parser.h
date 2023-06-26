@@ -92,6 +92,11 @@ struct Parser
 		solver.GetCastUnits(id, val, cast_units);
 	}
 
+	Number CastToUnit(const ElementId id, const Number& val, const Unit& unit)
+	{
+		return solver.CastToUnit(id, val, unit);
+	}
+
 	void AddUnits()
 	{
 		solver.AddBuildinUnit(Unit(U"m")); //meter (length)
@@ -105,29 +110,36 @@ struct Parser
 		solver.symbols->buildin_elements = true;
 
 		//derived SI units
-	    Parse(ElementId{0, 1}, U"mm~(1)/(1000)m;");
-	    Parse(ElementId{0, 2}, U"cm~10mm;");
-	    Parse(ElementId{0, 3}, U"km~1000m;");
+	    Parse(ElementId{0, 0, 1}, U"mm~(1)/(1000)m;");
+	    Parse(ElementId{0, 0, 2}, U"cm~10mm;");
+	    Parse(ElementId{0, 0, 3}, U"km~1000m;");
 
-		Parse(ElementId{0, 4}, U"Hz~1/s;");
-	    Parse(ElementId{0, 5}, U"kHz~1000Hz;");
-	    Parse(ElementId{0, 6}, U"MHz~1000kHz;");
+		Parse(ElementId{0, 0, 4}, U"Hz~1/s;");
+	    Parse(ElementId{0, 0, 5}, U"kHz~1000Hz;");
+	    Parse(ElementId{0, 0, 6}, U"MHz~1000kHz;");
 
-	    Parse(ElementId{0, 7}, U"N~kg*m/pow(s,2);");
-	    Parse(ElementId{0, 8}, U"kN~1000N;");
-	    Parse(ElementId{0, 9}, U"MN~1000kN;");
+	    Parse(ElementId{0, 0, 7}, U"N~kg*m/pow(s,2);");
+	    Parse(ElementId{0, 0, 8}, U"kN~1000N;");
+	    Parse(ElementId{0, 0, 9}, U"MN~1000kN;");
+
+		Parse(ElementId{0, 0, 10}, U"mcs~(1)/(1000000)s;");
+		Parse(ElementId{0, 0, 11}, U"ms~(1)/(1000)s;");
+		Parse(ElementId{0, 0, 12}, U"min~60s;");
+		Parse(ElementId{0, 0, 13}, U"hour~60min;");
+		Parse(ElementId{0, 0, 14}, U"day~24hour;");
+		Parse(ElementId{0, 0, 15}, U"week~7day;");
 
 		//derived russian units
-		Parse(ElementId{0, 10}, U"tochka{rus}~(254)/(1000)mm;");
-		Parse(ElementId{0, 12}, U"liniya{rus}~10tochka{rus};");
-		Parse(ElementId{0, 13}, U"sotka{rus}~84tochka{rus};");
-		Parse(ElementId{0, 14}, U"dyum{rus}~10liniya{rus};");
-		Parse(ElementId{0, 15}, U"vershok{rus}~(7)/(4)dyum{rus};");
-		Parse(ElementId{0, 16}, U"chetvert{rus}~7dyum{rus};");
-		Parse(ElementId{0, 17}, U"fut{rus}~12dyum{rus};");
-		Parse(ElementId{0, 18}, U"arshin{rus}~28dyum{rus};");
-		Parse(ElementId{0, 19}, U"sazhen{rus}~7fut{rus};");
-		Parse(ElementId{0, 20}, U"versta{rus}~500sazhen{rus};");
+		Parse(ElementId{0, 1, 0}, U"tochka{rus}~(254)/(1000)mm;");
+		Parse(ElementId{0, 1, 1}, U"liniya{rus}~10tochka{rus};");
+		Parse(ElementId{0, 1, 2}, U"sotka{rus}~84tochka{rus};");
+		Parse(ElementId{0, 1, 3}, U"dyum{rus}~10liniya{rus};");
+		Parse(ElementId{0, 1, 4}, U"vershok{rus}~(7)/(4)dyum{rus};");
+		Parse(ElementId{0, 1, 5}, U"chetvert{rus}~7dyum{rus};");
+		Parse(ElementId{0, 1, 6}, U"fut{rus}~12dyum{rus};");
+		Parse(ElementId{0, 1, 7}, U"arshin{rus}~28dyum{rus};");
+		Parse(ElementId{0, 1, 8}, U"sazhen{rus}~7fut{rus};");
+		Parse(ElementId{0, 1, 9}, U"versta{rus}~500sazhen{rus};");
 
 		solver.symbols->buildin_elements = false;
 	}	
