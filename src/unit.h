@@ -63,6 +63,13 @@ public:
 
     bool operator==(const Unit& other) const
     {
+        std::u32string s1 = system, s2 = other.system;
+        if (s1 == U"")
+            s1 = U"SI";
+        if (s2 == U"")
+            s2 = U"SI";
+        if (s1 != s2)
+            return false;
         if (unit.size() != other.unit.size())
             return false;
         for (auto& u : other.unit)

@@ -541,6 +541,7 @@ TEST_F(CalcTestReal, units24)
     auto val = parser.Parse(id, U"5*(km/hour);");
     std::vector<Unit> cast_units;
     parser.GetCastUnits(id, val, cast_units);
+    ASSERT_TRUE(FindUnit(cast_units, Unit(U"m", U"s")));
     ASSERT_TRUE(FindUnit(cast_units, Unit(U"km", U"hour")));
     std::string t = parser.GetSuitableUnit(id, val).ToStdString(3, 3);
     ASSERT_TRUE(t == "5.E+0((km)/(hour))") << t;
