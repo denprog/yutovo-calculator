@@ -243,7 +243,7 @@ TEST_F(CalcTestRational, units9)
     std::string s = parser.GetSuitableUnit(ElementId{0, 0, 0, 0, 1}, parser.Parse(ElementId{0, 0, 0, 0, 2}, U"(1)/(5)m/s;")).ToStdString();
     ASSERT_TRUE(s == "12((m)/(min))") << s;
     s = parser.GetSuitableUnit(ElementId{0, 0, 0, 0, 1}, parser.Parse(ElementId{0, 0, 0, 0, 2}, U"5000m/s;")).ToStdString();
-    ASSERT_TRUE(s == "5((m)/(ms))") << s;
+    ASSERT_TRUE(s == "5((km)/(s))") << s;
 }
 
 TEST_F(CalcTestRational, units10)

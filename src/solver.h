@@ -519,10 +519,16 @@ struct Solver : public boost::static_visitor<Number>
 	{
 		CustomUnit<Number>* res = nullptr;
 		ElementId unit_id;
+		auto _system = system;
+		if (_system.empty())
+			_system = U"SI";
 		for (int i = symbols->units.size() - 1; i >= 0; --i)
 		{
 			CustomUnit<Number>& unit = symbols->units[i];
-			if (system.empty() && unit.system != U"SI")
+			auto s = unit.system;
+			if (s.empty())
+				s = U"SI";
+			if (_system != s)
 				continue;
 			if (unit.buildin && symbols->buildin_elements && !IsLess(unit.id, id))
 				continue;
@@ -673,6 +679,28 @@ private:
 					if (res.unit.unit.size() == c.unit.unit.size())
 					{
 						if (res.unit.GetPower() > c.unit.GetPower())
+							continue;
+					}
+				}
+
+				if (res.unit.unit.size() == c.unit.unit.size())
+				{
+					auto res_str = res.ToString(10, 10, false);
+					auto c_str = c.ToString(10, 10, false);
+					if (res_str == c_str)
+					{
+						//choose more convinient unit, which has to be before the current one
+						size_t i;
+						for (i = 0; i < c.unit.unit.size(); ++i)
+						{
+							auto& u1 = c.unit.unit[i];
+							auto& u2 = res.unit.unit[i];
+							auto* unit1 = FindUnit(u1.first, c.unit.system);
+							auto* unit2 = FindUnit(u2.first, res.unit.system);
+							if (unit1 && unit2 && IsLess(unit2->id, unit1->id))
+								break;
+						}
+						if (i < c.unit.unit.size())
 							continue;
 					}
 				}

@@ -431,7 +431,7 @@ TEST_F(CalcTestReal, units9)
     std::string s = parser.GetSuitableUnit(ElementId{0, 0, 0, 0, 2}, parser.Parse(ElementId{0, 0, 0, 0, 2}, U"0.2m/s;")).ToStdString(3, 3);
     ASSERT_TRUE(s == "0.2E+0((m)/(s))") << s;
     s = parser.GetSuitableUnit(ElementId{0, 0, 0, 0, 2}, parser.Parse(ElementId{0, 0, 0, 0, 2}, U"5000m/s;")).ToStdString(3, 3);
-    ASSERT_TRUE(s == "5.E+0((m)/(ms))") << s;
+    ASSERT_TRUE(s == "5.E+0((km)/(s))") << s;
 }
 
 TEST_F(CalcTestReal, units10)
