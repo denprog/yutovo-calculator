@@ -141,10 +141,6 @@ struct Parser
 		Parse(ElementId{0, 1, 8}, U"sazhen{rus}~7fut{rus};");
 		Parse(ElementId{0, 1, 9}, U"versta{rus}~500sazhen{rus};");
 
-		Parse(ElementId{0, 1, 10}, U"s{rus}~1s;");
-		Parse(ElementId{0, 1, 11}, U"min{rus}~1min;");
-		Parse(ElementId{0, 1, 12}, U"hour{rus}~1hour;");
-
 		solver.symbols->buildin_elements = false;
 	}	
 
