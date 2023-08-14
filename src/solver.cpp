@@ -40,7 +40,7 @@ Integer Solver<Integer>::operator()(UnaryOperationNode<Integer> const& op) const
 	case '!':
 		return !right;
 	}
-	return Integer();
+	throw SyntaxException(op.id, SyntaxError, op.pos, op.line);
 }
 
 template<>
@@ -54,7 +54,7 @@ Real Solver<Real>::operator()(UnaryOperationNode<Real> const& op) const
 	case '-':
 		return -right;
 	}
-	return Real();
+	throw SyntaxException(op.id, SyntaxError, op.pos, op.line);
 }
 
 template<>
@@ -68,7 +68,7 @@ Rational Solver<Rational>::operator()(UnaryOperationNode<Rational> const& op) co
 	case '-':
 		return -right;
 	}
-	return Rational();
+	throw SyntaxException(op.id, SyntaxError, op.pos, op.line);
 }
 
 template<>
@@ -102,7 +102,7 @@ Integer Solver<Integer>::operator()(OperationNode<Integer> const& op) const
 		throw MathException(e.id, e.ex_id, op.pos, op.line);
 	}
 	
-	return Integer();
+	throw SyntaxException(op.id, SyntaxError, op.pos, op.line);
 }
 
 template<>
@@ -130,7 +130,7 @@ Real Solver<Real>::operator()(OperationNode<Real> const& op) const
 		throw MathException(e.id, e.ex_id, op.pos, op.line);
 	}
 	
-	return Real();
+	throw SyntaxException(op.id, SyntaxError, op.pos, op.line);
 }
 
 template<>
@@ -158,7 +158,37 @@ Rational Solver<Rational>::operator()(OperationNode<Rational> const& op) const
 		throw MathException(e.id, e.ex_id, op.pos, op.line);
 	}
 	
-	return Rational();
+	throw SyntaxException(op.id, SyntaxError, op.pos, op.line);
+}
+
+template<>
+Integer Solver<Integer>::operator()(PostfixOperationNode<Integer> const& op) const
+{
+	Integer left = boost::apply_visitor(*this, op.operand);
+	switch (op.op)
+	{
+	case '!':
+		return fact(left);
+	}
+	throw SyntaxException(op.id, SyntaxError, op.pos, op.line);
+}
+
+template<>
+Real Solver<Real>::operator()(PostfixOperationNode<Real> const& op) const
+{
+	Real left = boost::apply_visitor(*this, op.operand);
+	switch (op.op)
+	{
+	case '!':
+		return fact(left);
+	}
+	throw SyntaxException(op.id, SyntaxError, op.pos, op.line);
+}
+
+template<>
+Rational Solver<Rational>::operator()(PostfixOperationNode<Rational> const& op) const
+{
+	throw SyntaxException(op.id, SyntaxError, op.pos, op.line);
 }
 
 template<>

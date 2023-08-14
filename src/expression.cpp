@@ -28,7 +28,7 @@ namespace yutovo_calculator
 
 		multiply = char_('*') > unary | char_('/') > unary | char_('&') > unary | char_('|') > unary | char_('^') > unary;
 		
-		unary = implicit_string_mul | number | function_call | no_fences_function_call | identifier | unary_operation | '(' > expression > ')';
+		unary = postfix_operation | implicit_string_mul | number | function_call | no_fences_function_call | identifier | unary_operation | '(' > expression > ')';
 		
 		number = digits_number;
 		
@@ -39,6 +39,8 @@ namespace yutovo_calculator
 		name = raw[lexeme[(alpha | '_') >> *(alnum | '_')]];
 
 		unary_operation = (char_('+') > unary) | (char_('-') > unary) | (char_('!') > unary);
+
+		postfix_operation = ((number | '(' > expression > ')') >> char_('!'));
 
 		implicit_string_mul = (number >> identifier);
 		
@@ -61,6 +63,8 @@ namespace yutovo_calculator
 			boost::phoenix::function<Annotation<yutovo_calculator::Integer>>(Annotation<yutovo_calculator::Integer>(expr.begin(), expr.end(), id))(qi::_val, _1));
 		on_success(implicit_string_mul, 
 			boost::phoenix::function<Annotation<yutovo_calculator::Integer>>(Annotation<yutovo_calculator::Integer>(expr.begin(), expr.end(), id))(qi::_val, _1));
+		on_success(postfix_operation, 
+			boost::phoenix::function<Annotation<yutovo_calculator::Integer>>(Annotation<yutovo_calculator::Integer>(expr.begin(), expr.end(), id))(qi::_val, _1));
 		
 		//work out the exceptions
 		on_error<fail>(expression, 
@@ -72,6 +76,8 @@ namespace yutovo_calculator
 		// BOOST_SPIRIT_DEBUG_NODE(number);
 		// BOOST_SPIRIT_DEBUG_NODE(function_call);
 		// BOOST_SPIRIT_DEBUG_NODE(identifier);
+		// BOOST_SPIRIT_DEBUG_NODE(unary);
+		// BOOST_SPIRIT_DEBUG_NODE(postfix_operation);
 	}
 
 	template<>
@@ -99,8 +105,8 @@ namespace yutovo_calculator
 
 		multiply = char_('*') > unary | char_('/') > unary;
 		
-		unary = implicit_div_mul | implicit_string_mul | mixed_division | implicit_mul_div | number | function_call | no_fences_function_call | identifier | 
-			unary_operation | '(' > expression > ')';
+		unary = postfix_operation | implicit_div_mul | implicit_string_mul | mixed_division | implicit_mul_div | number | function_call | 
+			no_fences_function_call | identifier | unary_operation | '(' > expression > ')';
 		
 		number = exp_number | digits_number;
 		
@@ -125,6 +131,8 @@ namespace yutovo_calculator
 		name = raw[lexeme[(alpha | '_') >> *(alnum | '_')] - no_case[char_('E')]];
 
 		unary_operation = (char_('+') > unary) | (char_('-') > unary);
+
+		postfix_operation = ((number | '(' > expression > ')') >> char_('!'));
 		
 		function_call = identifier >> '(' >> -(expression % ',') > ')';
 		

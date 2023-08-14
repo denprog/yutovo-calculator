@@ -19,6 +19,7 @@ namespace yutovo_calculator
 			boost::recursive_wrapper<IdentifierNode<Number>>, 
 			boost::recursive_wrapper<UnaryOperationNode<Number>>, 
 			boost::recursive_wrapper<OperationNode<Number>>, 
+			boost::recursive_wrapper<PostfixOperationNode<Number>>, 
 			boost::recursive_wrapper<MixedDivivsionNode<Number>>, 
 			boost::recursive_wrapper<ImplicitStringMulNode<Number>>, 
 			boost::recursive_wrapper<ImplicitDivMulNode<Number>>, 
@@ -32,6 +33,7 @@ namespace yutovo_calculator
 		qi::rule<std::u32string::iterator, Operand(), unicode::space_type> unary;
 		qi::rule<std::u32string::iterator, OperationNode<Number>(), unicode::space_type> multiply;
 		qi::rule<std::u32string::iterator, UnaryOperationNode<Number>(), unicode::space_type> unary_operation;
+		qi::rule<std::u32string::iterator, PostfixOperationNode<Number>(), unicode::space_type> postfix_operation;
 		qi::rule<std::u32string::iterator, MixedDivivsionNode<Number>(), unicode::space_type> mixed_division;
 		qi::rule<std::u32string::iterator, ImplicitStringMulNode<Number>(), unicode::space_type> implicit_string_mul;
 		qi::rule<std::u32string::iterator, ImplicitDivMulNode<Number>(), unicode::space_type> implicit_div_mul;

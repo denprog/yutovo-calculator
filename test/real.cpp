@@ -96,6 +96,16 @@ TEST_F(CalcTestReal, functions2)
         res.ToStdString(3, 3);
 }
 
+TEST_F(CalcTestReal, functions3)
+{
+    Real res = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"1!;");
+    ASSERT_TRUE(res.ToString(3, 3) == U"1.E+0") << res.ToStdString(3, 3);
+    res = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"5.!;");
+    ASSERT_TRUE(res.ToString(3, 3) == U"120.E+0") << res.ToStdString(3, 3);
+    res = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"(5+2)!;");
+    ASSERT_TRUE(res.ToString(3, 3) == U"5.04E+3") << res.ToStdString(3, 3);
+}
+
 TEST_F(CalcTestReal, user_functions1)
 {
     parser.Parse(ElementId{0, 0, 1}, U"f(x)=5;");

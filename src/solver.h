@@ -250,6 +250,8 @@ struct Solver : public boost::static_visitor<Number>
 
 	Number operator()(OperationNode<Number> const& op) const;
 
+	Number operator()(PostfixOperationNode<Number> const& op) const;
+
 	Number operator()(MixedDivivsionNode<Number> const& op) const
 	{
 		return op.left + op.numerator / op.denominator;

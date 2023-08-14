@@ -178,4 +178,14 @@ TEST_F(CalcTestInteger, notation1)
     ASSERT_TRUE(res.ToString(16) == U"7b") << res.ToStdString(16);
 }
 
+TEST_F(CalcTestInteger, builtin_functions1)
+{
+    Integer res = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"1!;");
+    ASSERT_TRUE(res.ToString(10) == U"1") << res.ToStdString(10);
+    res = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"5!;");
+    ASSERT_TRUE(res.ToString(10) == U"120") << res.ToStdString(10);
+    res = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"(5+2)!;");
+    ASSERT_TRUE(res.ToString(10) == U"5040") << res.ToStdString(10);
+}
+
 }
