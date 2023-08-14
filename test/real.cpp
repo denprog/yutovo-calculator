@@ -50,6 +50,14 @@ TEST_F(CalcTestReal, numbers4)
     ASSERT_TRUE(parser.Parse(ElementId{0, 0, 2}, U"21.2E+0;").ToStdString(3, 3) == "21.2E+0");
 }
 
+TEST_F(CalcTestReal, numbers5)
+{
+    Real res = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"+5.46;");
+    ASSERT_TRUE(res.ToString(3, 3) == U"5.46E+0") << res.ToStdString(3, 3);
+    res = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"-5.55;");
+    ASSERT_TRUE(res.ToString(3, 3) == U"-5.55E+0") << res.ToStdString(3, 3);
+}
+
 TEST_F(CalcTestReal, functions1)
 {
     ASSERT_TRUE(parser.Parse(ElementId{0, 0, 1}, U"sin(1);").ToStdString(3, 3) == parser.Parse(ElementId{0, 0, 1}, U"0.841E+0;").ToStdString(3, 3)) << 

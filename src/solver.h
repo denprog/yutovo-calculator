@@ -246,46 +246,9 @@ struct Solver : public boost::static_visitor<Number>
 		return Number();
 	}
 
-	Number operator()(UnaryOperationNode<Number> const& op) const
-	{
-		Number right = boost::apply_visitor(*this, op.operand);
-		switch (op.op)
-		{
-		case '+':
-			return right;
-		case '-':
-			return -right;
-		}
-		
-		return Number();
-	}
+	Number operator()(UnaryOperationNode<Number> const& op) const;
 
-	Number operator()(OperationNode<Number> const& op) const
-	{
-		Number right = boost::apply_visitor(*this, op.operand);
-		
-		try
-		{
-			//calculate the operation
-			switch (op.op)
-			{
-			case '+':
-				return left_value + right;
-			case '-':
-				return left_value - right;
-			case '*':
-				return left_value * right;
-			case '/':
-				return left_value / right;
-			}
-		}
-		catch (MathException e)
-		{
-			throw MathException(e.id, e.ex_id, op.pos, op.line);
-		}
-		
-		return Number();
-	}
+	Number operator()(OperationNode<Number> const& op) const;
 
 	Number operator()(MixedDivivsionNode<Number> const& op) const
 	{

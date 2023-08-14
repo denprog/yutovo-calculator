@@ -83,6 +83,14 @@ TEST_F(CalcTestRational, rationals2)
         parser.Parse(ElementId{0, 0, 0, 0, 1}, U"3*22(3/5);").ToStdString();
 }
 
+TEST_F(CalcTestRational, rationals3)
+{
+    Rational res = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"+3/4;");
+    ASSERT_TRUE(res.ToStdString() == "3/4") << res.ToStdString();
+    res = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"-3/4;");
+    ASSERT_TRUE(res.ToStdString() == "-3/4") << res.ToStdString();
+}
+
 TEST_F(CalcTestRational, proper1)
 {
     auto res = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"(5/4);");

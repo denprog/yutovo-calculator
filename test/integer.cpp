@@ -61,6 +61,38 @@ TEST_F(CalcTestInteger, integers3)
         parser.Parse(ElementId{0, 0, 0, 0, 1}, U"(-7)/(-3);");
 }
 
+TEST_F(CalcTestInteger, integers4)
+{
+    Integer res = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"+5;");
+    ASSERT_TRUE(res.ToString(10) == U"5") << res.ToStdString(10);
+    res = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"-5;");
+    ASSERT_TRUE(res.ToString(10) == U"-5") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestInteger, logical1)
+{
+    Integer res = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"!5;");
+    ASSERT_TRUE(res.ToString(10) == U"2") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestInteger, logical2)
+{
+    Integer res = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"10&12;");
+    ASSERT_TRUE(res.ToString(10) == U"8") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestInteger, logical3)
+{
+    Integer res = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"10|12;");
+    ASSERT_TRUE(res.ToString(10) == U"14") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestInteger, logical4)
+{
+    Integer res = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"10^12;");
+    ASSERT_TRUE(res.ToString(10) == U"6") << res.ToStdString(10);
+}
+
 TEST_F(CalcTestInteger, variables1)
 {
     parser.Parse(ElementId{0, 0, 0, 0, 1}, U"a=5;");

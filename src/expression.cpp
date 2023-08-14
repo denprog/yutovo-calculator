@@ -26,7 +26,7 @@ namespace yutovo_calculator
 		
 		multiplication = unary >> *(multiply);
 
-		multiply = char_('*') > unary | char_('/') > unary;
+		multiply = char_('*') > unary | char_('/') > unary | char_('&') > unary | char_('|') > unary | char_('^') > unary;
 		
 		unary = implicit_string_mul | number | function_call | no_fences_function_call | identifier | unary_operation | '(' > expression > ')';
 		
@@ -38,7 +38,7 @@ namespace yutovo_calculator
 		
 		name = raw[lexeme[(alpha | '_') >> *(alnum | '_')]];
 
-		unary_operation = (qi::char_('+') > unary) | (qi::char_('-') > unary);
+		unary_operation = (char_('+') > unary) | (char_('-') > unary) | (char_('!') > unary);
 
 		implicit_string_mul = (number >> identifier);
 		
@@ -124,7 +124,7 @@ namespace yutovo_calculator
 		
 		name = raw[lexeme[(alpha | '_') >> *(alnum | '_')] - no_case[char_('E')]];
 
-		unary_operation = (qi::char_('+') > unary) | (qi::char_('-') > unary);
+		unary_operation = (char_('+') > unary) | (char_('-') > unary);
 		
 		function_call = identifier >> '(' >> -(expression % ',') > ')';
 		
@@ -211,7 +211,7 @@ namespace yutovo_calculator
 		
 		name = raw[lexeme[(alpha | '_') >> *(alnum | '_')]];
 
-		unary_operation = (qi::char_('+') > unary) | (qi::char_('-') > unary);
+		unary_operation = (char_('+') > unary) | (char_('-') > unary);
 		
 		function_call = (identifier >> '(' >> -(expression % ',') > ')');
 

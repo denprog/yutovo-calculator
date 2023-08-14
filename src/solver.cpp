@@ -28,6 +28,140 @@ Integer Solver<Integer>::operator()(UnitNode<Integer> const& op) const
 }
 
 template<>
+Integer Solver<Integer>::operator()(UnaryOperationNode<Integer> const& op) const
+{
+	Integer right = boost::apply_visitor(*this, op.operand);
+	switch (op.op)
+	{
+	case '+':
+		return right;
+	case '-':
+		return -right;
+	case '!':
+		return !right;
+	}
+	return Integer();
+}
+
+template<>
+Real Solver<Real>::operator()(UnaryOperationNode<Real> const& op) const
+{
+	Real right = boost::apply_visitor(*this, op.operand);
+	switch (op.op)
+	{
+	case '+':
+		return right;
+	case '-':
+		return -right;
+	}
+	return Real();
+}
+
+template<>
+Rational Solver<Rational>::operator()(UnaryOperationNode<Rational> const& op) const
+{
+	Rational right = boost::apply_visitor(*this, op.operand);
+	switch (op.op)
+	{
+	case '+':
+		return right;
+	case '-':
+		return -right;
+	}
+	return Rational();
+}
+
+template<>
+Integer Solver<Integer>::operator()(OperationNode<Integer> const& op) const
+{
+	Integer right = boost::apply_visitor(*this, op.operand);
+	
+	try
+	{
+		//calculate the operation
+		switch (op.op)
+		{
+		case '+':
+			return left_value + right;
+		case '-':
+			return left_value - right;
+		case '*':
+			return left_value * right;
+		case '/':
+			return left_value / right;
+		case '&':
+			return left_value & right;
+		case '|':
+			return left_value | right;
+		case '^':
+			return left_value ^ right;
+		}
+	}
+	catch (MathException e)
+	{
+		throw MathException(e.id, e.ex_id, op.pos, op.line);
+	}
+	
+	return Integer();
+}
+
+template<>
+Real Solver<Real>::operator()(OperationNode<Real> const& op) const
+{
+	Real right = boost::apply_visitor(*this, op.operand);
+	
+	try
+	{
+		//calculate the operation
+		switch (op.op)
+		{
+		case '+':
+			return left_value + right;
+		case '-':
+			return left_value - right;
+		case '*':
+			return left_value * right;
+		case '/':
+			return left_value / right;
+		}
+	}
+	catch (MathException e)
+	{
+		throw MathException(e.id, e.ex_id, op.pos, op.line);
+	}
+	
+	return Real();
+}
+
+template<>
+Rational Solver<Rational>::operator()(OperationNode<Rational> const& op) const
+{
+	Rational right = boost::apply_visitor(*this, op.operand);
+	
+	try
+	{
+		//calculate the operation
+		switch (op.op)
+		{
+		case '+':
+			return left_value + right;
+		case '-':
+			return left_value - right;
+		case '*':
+			return left_value * right;
+		case '/':
+			return left_value / right;
+		}
+	}
+	catch (MathException e)
+	{
+		throw MathException(e.id, e.ex_id, op.pos, op.line);
+	}
+	
+	return Rational();
+}
+
+template<>
 Integer Solver<Integer>::operator()(FunctionCallNode<Integer> const& op) const
 {
 	AddDependency(op.name.name);

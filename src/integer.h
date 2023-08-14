@@ -20,7 +20,7 @@ public:
 	Integer(const int num);
 	Integer(const int precision, const double num);
 	Integer(const Integer& source);
-	Integer(const std::u32string& num);
+	Integer(const std::u32string& num, const int base = 10);
 	~Integer();
 
 public:
@@ -52,6 +52,14 @@ public:
 	friend Integer operator%(const Integer& num1, const Integer& num2);
 	friend Integer operator%(const Integer& num1, const int num2);
 	friend Integer operator%(const int num1, const Integer& num2);
+
+	friend Integer operator&(const Integer& num1, const Integer& num2);
+
+	friend Integer operator|(const Integer& num1, const Integer& num2);
+
+	friend Integer operator^(const Integer& num1, const Integer& num2);
+
+	friend Integer operator!(const Integer& num);
 	
 public:
 	void operator+=(const Integer& num);
@@ -108,7 +116,7 @@ public:
 public:
 	bool IsNan();
 	std::u32string ToString(const int base) const;
-	static Integer FromString(const std::u32string& str);
+	static Integer FromString(const std::u32string& str, const int base = 10);
 	std::u32string ToString(int exp, int accuracy) const;
 	std::string ToStdString(const int base = 10) const;
 

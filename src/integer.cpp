@@ -56,10 +56,10 @@ Integer::Integer(const Integer& source)
 #endif
 }
 
-Integer::Integer(const std::u32string& num)
+Integer::Integer(const std::u32string& num, const int base)
 {
 	mpz_init(number);
-	mpz_set_str(number, (ToBasicString(num)).c_str(), 10);
+	mpz_set_str(number, (ToBasicString(num)).c_str(), base);
 
 #ifdef TRACE_OUTPUT
 	UpdateNumberStr();
@@ -290,6 +290,47 @@ Integer operator%(const int num1, const Integer& num2)
 	return res;
 }
 
+Integer operator&(const Integer& num1, const Integer& num2)
+{
+	Integer res;
+
+	mpz_and(res.number, num1.number, num2.number);
+
+	return res;
+}
+
+Integer operator|(const Integer& num1, const Integer& num2)
+{
+	Integer res;
+
+	mpz_ior(res.number, num1.number, num2.number);
+
+	return res;
+}
+
+Integer operator^(const Integer& num1, const Integer& num2)
+{
+	Integer res;
+
+	mpz_xor(res.number, num1.number, num2.number);
+
+	return res;
+}
+
+Integer operator!(const Integer& num)
+{
+	auto s = num.ToString(2);
+	std::u32string r;
+	for (auto ch : s)
+	{
+		if (ch == U'1')
+			r += U'0';
+		else
+			r += U'1';
+	}
+	return Integer::FromString(r, 2);
+}
+
 void Integer::operator+=(const Integer& num)
 {
 	*this = *this + num;
@@ -481,9 +522,9 @@ std::string Integer::ToStdString(const int base) const
 	return ToBasicString(ToString(base));
 }
 
-Integer Integer::FromString(const std::u32string& str)
+Integer Integer::FromString(const std::u32string& str, const int base)
 {
-	return Integer(str);
+	return Integer(str, base);
 }
 
 #ifdef TRACE_OUTPUT
