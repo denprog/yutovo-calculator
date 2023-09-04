@@ -1,6 +1,8 @@
 #ifndef PARSEREXCEPTION_H
 #define PARSEREXCEPTION_H
 
+#include <string>
+
 namespace yutovo_calculator
 {
 	typedef unsigned int uint;
