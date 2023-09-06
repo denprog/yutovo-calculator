@@ -215,7 +215,7 @@ Integer Solver<Integer>::operator()(FunctionCallNode<Integer> const& op) const
 	}
 
 	//find in the build-in functions		
-	BuildinFunction* func = FindBuildinFunction(op.name.name);
+	BuiltinFunction* func = FindBuiltinFunction(op.name.name);
 	if (func)
 	{
 		try
@@ -298,7 +298,7 @@ Real Solver<Real>::operator()(FunctionCallNode<Real> const& op) const
 	}
 	
 	//find in the build-in functions		
-	BuildinFunction* func = FindBuildinFunction(op.name.name);
+	BuiltinFunction* func = FindBuiltinFunction(op.name.name);
 	if (func)
 	{
 		try
@@ -361,7 +361,7 @@ Rational Solver<Rational>::operator()(FunctionCallNode<Rational> const& op) cons
 	}
 
 	//find in the build-in functions		
-	BuildinFunction* func = FindBuildinFunction(op.name.name);
+	BuiltinFunction* func = FindBuiltinFunction(op.name.name);
 	if (func)
 	{
 		try
@@ -417,7 +417,7 @@ Real Solver<Real>::operator()(NoFencesFunctionCallNode<Real> const& op) const
 	Real res;
 	
 	//find in the build-in functions		
-	BuildinFunction* func = FindBuildinFunction(op.name.name);
+	BuiltinFunction* func = FindBuiltinFunction(op.name.name);
 	if (func)
 	{
 		try
@@ -471,7 +471,7 @@ Integer Solver<Integer>::operator()(IdentifierNode<Integer> const& op) const
 		return res;
 	}
 	
-	BuildinVariable* var = FindBuildinVariable(op.name);
+	BuiltinVariable* var = FindBuiltinVariable(op.name);
 	if (var)
 	{
 		try
@@ -511,7 +511,7 @@ Real Solver<Real>::operator()(IdentifierNode<Real> const& op) const
 	}
 	
 	//find in the build-in variables
-	BuildinVariable* var = FindBuildinVariable(op.name);
+	BuiltinVariable* var = FindBuiltinVariable(op.name);
 	if (var)
 	{
 		try
@@ -526,7 +526,7 @@ Real Solver<Real>::operator()(IdentifierNode<Real> const& op) const
 
 	if (op.subscript.empty() || op.subscript == U"SI")
 	{
-		Unit* unit = FindBuildinUnit(op.name);
+		Unit* unit = FindBuiltinUnit(op.name);
 		if (unit)
 		{
 			symbols->last_unit_system = U"SI";
@@ -567,7 +567,7 @@ Rational Solver<Rational>::operator()(IdentifierNode<Rational> const& op) const
 		return res;
 	}
 	
-	BuildinVariable* var = FindBuildinVariable(op.name);
+	BuiltinVariable* var = FindBuiltinVariable(op.name);
 	if (var)
 	{
 		try
@@ -582,7 +582,7 @@ Rational Solver<Rational>::operator()(IdentifierNode<Rational> const& op) const
 
 	if (op.subscript.empty() || op.subscript == U"SI")
 	{
-		Unit* unit = FindBuildinUnit(op.name);
+		Unit* unit = FindBuiltinUnit(op.name);
 		if (unit)
 		{
 			symbols->last_unit_system = U"SI";
@@ -623,7 +623,7 @@ Integer Solver<Integer>::operator()(ImplicitStringMulNode<Integer> const& op) co
 		return op.left * res;
 	}
 	
-	BuildinVariable* var = FindBuildinVariable(op.identifier.name);
+	BuiltinVariable* var = FindBuiltinVariable(op.identifier.name);
 	if (var)
 	{
 		try
@@ -663,7 +663,7 @@ Real Solver<Real>::operator()(ImplicitStringMulNode<Real> const& op) const
 	}
 	
 	//find in the build-in variables
-	BuildinVariable* var = FindBuildinVariable(op.identifier.name);
+	BuiltinVariable* var = FindBuiltinVariable(op.identifier.name);
 	if (var)
 	{
 		try
@@ -678,7 +678,7 @@ Real Solver<Real>::operator()(ImplicitStringMulNode<Real> const& op) const
 
 	if (op.identifier.subscript.empty() || op.identifier.subscript == U"SI")
 	{
-		Unit* unit = FindBuildinUnit(op.identifier.name);
+		Unit* unit = FindBuiltinUnit(op.identifier.name);
 		if (unit)
 		{
 			symbols->last_unit_system = U"SI";
@@ -719,7 +719,7 @@ Rational Solver<Rational>::operator()(ImplicitStringMulNode<Rational> const& op)
 		return op.left * res;
 	}
 	
-	BuildinVariable* var = FindBuildinVariable(op.identifier.name);
+	BuiltinVariable* var = FindBuiltinVariable(op.identifier.name);
 	if (var)
 	{
 		try
@@ -734,7 +734,7 @@ Rational Solver<Rational>::operator()(ImplicitStringMulNode<Rational> const& op)
 
 	if (op.identifier.subscript.empty() || op.identifier.subscript == U"SI")
 	{
-		Unit* unit = FindBuildinUnit(op.identifier.name);
+		Unit* unit = FindBuiltinUnit(op.identifier.name);
 		if (unit)
 		{
 			symbols->last_unit_system = U"SI";
@@ -788,7 +788,7 @@ Real Solver<Real>::operator()(ImplicitDivMulNode<Real> const& op) const
 	}
 	
 	//find in the build-in variables
-	BuildinVariable* var = FindBuildinVariable(op.identifier.name);
+	BuiltinVariable* var = FindBuiltinVariable(op.identifier.name);
 	if (var)
 	{
 		try
@@ -805,7 +805,7 @@ Real Solver<Real>::operator()(ImplicitDivMulNode<Real> const& op) const
 
 	if (op.identifier.subscript.empty() || op.identifier.subscript == U"SI")
 	{
-		Unit* unit = FindBuildinUnit(op.identifier.name);
+		Unit* unit = FindBuiltinUnit(op.identifier.name);
 		if (unit)
 		{
 			symbols->last_unit_system = U"SI";
@@ -857,7 +857,7 @@ Rational Solver<Rational>::operator()(ImplicitDivMulNode<Rational> const& op) co
 	}
 	
 	//find in the build-in variables
-	BuildinVariable* var = FindBuildinVariable(op.identifier.name);
+	BuiltinVariable* var = FindBuiltinVariable(op.identifier.name);
 	if (var)
 	{
 		try
@@ -874,7 +874,7 @@ Rational Solver<Rational>::operator()(ImplicitDivMulNode<Rational> const& op) co
 
 	if (op.identifier.subscript.empty() || op.identifier.subscript == U"SI")
 	{
-		Unit* unit = FindBuildinUnit(op.identifier.name);
+		Unit* unit = FindBuiltinUnit(op.identifier.name);
 		if (unit)
 		{
 			symbols->last_unit_system = U"SI";

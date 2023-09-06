@@ -142,20 +142,20 @@ struct SolverSymbols
 	typedef Number (*UnaryFunction)(const Number& num);
 	typedef Number (*BinaryFunction)(const Number& num1, const Number& num2);
 	typedef Number (*TrigonometricFunction)(const Number& num);
-	typedef boost::variant<UnaryFunction, BinaryFunction> BuildinFunction;
+	typedef boost::variant<UnaryFunction, BinaryFunction> BuiltinFunction;
 	
 	//build-in variables' typedefs
 	typedef Number (*Variable)();
 	typedef Number (*PrecisionVariable)(const int precision);
-	typedef boost::variant<Variable, PrecisionVariable> BuildinVariable;
+	typedef boost::variant<Variable, PrecisionVariable> BuiltinVariable;
 
 	mutable deque<TempVariable> temp_variables;
 	mutable deque<VariableNode<Number>> variables; //user variables
 	mutable vector<FunctionNode<Number>> functions; //user functions
 
-	map<std::u32string, BuildinFunction> buildin_functions;
+	map<std::u32string, BuiltinFunction> buildin_functions;
 	map<std::u32string, TrigonometricFunction> trigonometric_functions;
-	map<std::u32string, BuildinVariable> buildin_variables;
+	map<std::u32string, BuiltinVariable> buildin_variables;
 	std::vector<Unit> buildin_units;
 	std::vector<CustomUnit<Number>> units;
 
@@ -173,10 +173,10 @@ struct Solver : public boost::static_visitor<Number>
 	typedef typename SolverSymbols<Number>::UnaryFunction UnaryFunction;
 	typedef typename SolverSymbols<Number>::BinaryFunction BinaryFunction;
 	typedef typename SolverSymbols<Number>::TrigonometricFunction TrigonometricFunction;
-	typedef typename SolverSymbols<Number>::BuildinFunction BuildinFunction;
+	typedef typename SolverSymbols<Number>::BuiltinFunction BuiltinFunction;
 	
 	typedef typename SolverSymbols<Number>::PrecisionVariable PrecisionVariable;
-	typedef typename SolverSymbols<Number>::BuildinVariable BuildinVariable;
+	typedef typename SolverSymbols<Number>::BuiltinVariable BuiltinVariable;
 	typedef typename SolverSymbols<Number>::Variable Variable;
 	
 	std::shared_ptr<SolverSymbols<Number>> symbols;
@@ -384,22 +384,22 @@ struct Solver : public boost::static_visitor<Number>
 		symbols->functions.push_back((FunctionNode<Number>&)func);
 	}
 	
-	void AddBuildinFunction(const u_char* name, UnaryFunction& func)
+	void AddBuiltinFunction(const u_char* name, UnaryFunction& func)
 	{
 		symbols->buildin_functions[std::u32string(name)] = func;
 	}
 
-	void AddBuildinFunction(const char* name, UnaryFunction& func)
+	void AddBuiltinFunction(const char* name, UnaryFunction& func)
 	{
 		symbols->buildin_functions[ToUtfString(name)] = func;
 	}
 
-	void AddBuildinFunction(const u_char* name, BinaryFunction& func)
+	void AddBuiltinFunction(const u_char* name, BinaryFunction& func)
 	{
 		symbols->buildin_functions[std::u32string(name)] = func;
 	}
 
-	void AddBuildinFunction(const char* name, BinaryFunction& func)
+	void AddBuiltinFunction(const char* name, BinaryFunction& func)
 	{
 		symbols->buildin_functions[ToUtfString(name)] = func;
 	}
@@ -409,12 +409,12 @@ struct Solver : public boost::static_visitor<Number>
 		symbols->trigonometric_functions[ToUtfString(name)] = func;
 	}
 
-	BuildinFunction* FindBuildinFunction(const std::u32string& name) const
+	BuiltinFunction* FindBuiltinFunction(const std::u32string& name) const
 	{
-		typename map<std::u32string, BuildinFunction>::const_iterator iter = symbols->buildin_functions.find(name);
+		typename map<std::u32string, BuiltinFunction>::const_iterator iter = symbols->buildin_functions.find(name);
 		if (iter == symbols->buildin_functions.end())
 			return nullptr;
-		return (BuildinFunction*)&(*iter).second;
+		return (BuiltinFunction*)&(*iter).second;
 	}
 
 	TrigonometricFunction* FindTrigonometricFunction(const std::u32string& name) const
@@ -425,22 +425,22 @@ struct Solver : public boost::static_visitor<Number>
 		return (TrigonometricFunction*)&(*iter).second;
 	}
 
-	void AddBuildinVariable(const u_char* name, PrecisionVariable& var)
+	void AddBuiltinVariable(const u_char* name, PrecisionVariable& var)
 	{
 		symbols->buildin_variables[std::u32string(name)] = var;
 	}
 
-	void AddBuildinVariable(const char* name, PrecisionVariable& var)
+	void AddBuiltinVariable(const char* name, PrecisionVariable& var)
 	{
 		symbols->buildin_variables[ToUtfString(name)] = var;
 	}
 
-	BuildinVariable* FindBuildinVariable(const std::u32string& name) const
+	BuiltinVariable* FindBuiltinVariable(const std::u32string& name) const
 	{
-		typename map<std::u32string, BuildinVariable>::const_iterator iter = symbols->buildin_variables.find(name);
+		typename map<std::u32string, BuiltinVariable>::const_iterator iter = symbols->buildin_variables.find(name);
 		if (iter == symbols->buildin_variables.end())
 			return nullptr;
-		return (BuildinVariable*)&(*iter).second;
+		return (BuiltinVariable*)&(*iter).second;
 	}
 
 	bool RemoveIdentifier(ElementId id, const std::u32string& name)
@@ -463,12 +463,12 @@ struct Solver : public boost::static_visitor<Number>
 		return func_it != symbols->functions.end();
 	}
 
-	void AddBuildinUnit(const Unit& unit)
+	void AddBuiltinUnit(const Unit& unit)
 	{
 		symbols->buildin_units.push_back(unit);
 	}
 
-	Unit* FindBuildinUnit(const std::u32string& name) const
+	Unit* FindBuiltinUnit(const std::u32string& name) const
 	{
 		auto iter = std::find_if(symbols->buildin_units.begin(), symbols->buildin_units.end(), 
 			[name](Unit& unit)
@@ -531,7 +531,7 @@ struct Solver : public boost::static_visitor<Number>
 		for (; i < val.unit.unit.size(); ++i)
 		{
 			auto& u = val.unit.unit[i];
-			if (system == U"SI" && FindBuildinUnit(u.first))
+			if (system == U"SI" && FindBuiltinUnit(u.first))
 				continue;
 			if (FindUnit(u.first, system) == nullptr)
 				break;
@@ -578,6 +578,44 @@ struct Solver : public boost::static_visitor<Number>
 
 	Number CastToUnit(const ElementId id, const Number& val, const Unit& unit) const;
 
+	void ListBuiltinVariables(std::vector<std::u32string>& variables)
+	{
+		for (auto& v : symbols->buildin_variables)
+			variables.push_back(v.first);
+	}
+
+	void ListBuiltinFunctions(std::vector<std::u32string>& functions)
+	{
+		for (auto& p : symbols->buildin_functions)
+			functions.push_back(p.first);
+		for (auto& p : symbols->trigonometric_functions)
+			functions.push_back(p.first);
+	}
+
+	void ListUserVariables(std::vector<std::u32string>& variables)
+	{
+		for (auto& var : symbols->variables)
+			variables.push_back(var.name.name);
+	}
+
+	void ListUserFunctions(std::vector<std::u32string>& functions)
+	{
+		for (auto& func : symbols->functions)
+			functions.push_back(func.name.name);
+	}
+
+	void ListBuiltinUnits(std::vector<std::u32string>& units)
+	{
+		for (auto& u : symbols->buildin_units)
+			units.push_back(u);
+	}
+
+	void ListUserUnits(std::vector<std::u32string>& units)
+	{
+		for (auto& u : symbols->units)
+			units.push_back(u.name);
+	}
+
 	void SetDependencies(Dependencies* _dependencies)
 	{
 		dependencies = _dependencies;
@@ -615,12 +653,12 @@ private:
 					int base_units1 = 0, base_units2 = 0;
 					for (auto& u : res.unit.unit)
 					{
-						if (FindBuildinUnit(u.first))
+						if (FindBuiltinUnit(u.first))
 							++base_units1;
 					}
 					for (auto& u : c.unit.unit)
 					{
-						if (FindBuildinUnit(u.first))
+						if (FindBuiltinUnit(u.first))
 							++base_units2;
 					}
 					if (res.unit.unit.size() == c.unit.unit.size())
@@ -691,7 +729,7 @@ private:
 			Number unit_val;
 			if (unit.system == U"SI" || unit.system == U"")
 			{
-				Unit* base_unit = FindBuildinUnit(p.first);
+				Unit* base_unit = FindBuiltinUnit(p.first);
 				if (base_unit)
 					unit_val = Number(precision, *base_unit);
 			}

@@ -99,13 +99,13 @@ struct Parser
 
 	void AddUnits()
 	{
-		solver.AddBuildinUnit(Unit(U"m")); //meter (length)
-		solver.AddBuildinUnit(Unit(U"kg")); //kilogram (mass)
-		solver.AddBuildinUnit(Unit(U"s")); //second (time)
-		solver.AddBuildinUnit(Unit(U"mol")); //mole (amount of matter)
-		solver.AddBuildinUnit(Unit(U"A")); //ampere (electric current)
-		solver.AddBuildinUnit(Unit(U"Cd")); //candella (luminosity)
-		solver.AddBuildinUnit(Unit(U"k")); //kelvin (temperature)
+		solver.AddBuiltinUnit(Unit(U"m")); //meter (length)
+		solver.AddBuiltinUnit(Unit(U"kg")); //kilogram (mass)
+		solver.AddBuiltinUnit(Unit(U"s")); //second (time)
+		solver.AddBuiltinUnit(Unit(U"mol")); //mole (amount of matter)
+		solver.AddBuiltinUnit(Unit(U"A")); //ampere (electric current)
+		solver.AddBuiltinUnit(Unit(U"Cd")); //candella (luminosity)
+		solver.AddBuiltinUnit(Unit(U"k")); //kelvin (temperature)
 
 		solver.symbols->buildin_elements = true;
 
@@ -143,6 +143,36 @@ struct Parser
 
 		solver.symbols->buildin_elements = false;
 	}	
+
+	void ListBuiltinVariables(std::vector<std::u32string>& variables)
+	{
+		solver.ListBuiltinVariables(variables);
+	}
+
+	void ListBuiltinFunctions(std::vector<std::u32string>& functions)
+	{
+		solver.ListBuiltinFunctions(functions);
+	}
+
+	void ListUserVariables(std::vector<std::u32string>& variables)
+	{
+		solver.ListUserVariables(variables);
+	}
+
+	void ListUserFunctions(std::vector<std::u32string>& functions)
+	{
+		solver.ListUserFunctions(functions);
+	}
+
+	void ListBuiltinUnits(std::vector<std::u32string>& units)
+	{
+		solver.ListBuiltinUnits(units);
+	}
+
+	void ListUserUnits(std::vector<std::u32string>& units)
+	{
+		solver.ListUserUnits(units);
+	}
 
 	Solver<Number> solver;
 };

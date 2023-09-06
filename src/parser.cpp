@@ -57,7 +57,7 @@ Parser<yutovo_calculator::Integer>::Parser(const int precision) :
 	solver(precision)
 {
 	IntegerBinaryFunc binary_func = &pow;
-	solver.AddBuildinFunction("pow", binary_func);
+	solver.AddBuiltinFunction("pow", binary_func);
 }
 
 template<>
@@ -66,30 +66,30 @@ Parser<yutovo_calculator::Real>::Parser(const int precision) :
 {
 	RealPrecisionVariable var;
 	var = &pi;
-	solver.AddBuildinVariable("pi", var);
+	solver.AddBuiltinVariable("pi", var);
 	var = &exp;
-	solver.AddBuildinVariable("e", var);
+	solver.AddBuiltinVariable("e", var);
 	
 	RealUnaryFunc unary_func;
 	unary_func = &exp;
-	solver.AddBuildinFunction("exp", unary_func);
+	solver.AddBuiltinFunction("exp", unary_func);
 	unary_func = &ln;
-	solver.AddBuildinFunction("ln", unary_func);
+	solver.AddBuiltinFunction("ln", unary_func);
 	unary_func = &lg;
-	solver.AddBuildinFunction("lg", unary_func);
+	solver.AddBuiltinFunction("lg", unary_func);
 	unary_func = &sqrt;
-	solver.AddBuildinFunction("sqrt", unary_func);
+	solver.AddBuiltinFunction("sqrt", unary_func);
 
 	unary_func = &rad;
-	solver.AddBuildinFunction("rad", unary_func);
+	solver.AddBuiltinFunction("rad", unary_func);
 	unary_func = &deg;
-	solver.AddBuildinFunction("deg", unary_func);
+	solver.AddBuiltinFunction("deg", unary_func);
 	unary_func = &minute;
-	solver.AddBuildinFunction("minute", unary_func);
+	solver.AddBuiltinFunction("minute", unary_func);
 	unary_func = &second;
-	solver.AddBuildinFunction("second", unary_func);
+	solver.AddBuiltinFunction("second", unary_func);
 	unary_func = &grad;
-	solver.AddBuildinFunction("grad", unary_func);
+	solver.AddBuiltinFunction("grad", unary_func);
 
 	RealTrigonometricFunc trigonometric_func;
 	trigonometric_func = &sin;
@@ -105,17 +105,17 @@ Parser<yutovo_calculator::Real>::Parser(const int precision) :
 	trigonometric_func = &cosec;
 	solver.AddTrigonometricFunction("cosec", trigonometric_func);
 	trigonometric_func = &arcsin;
-	solver.AddBuildinFunction("arcsin", trigonometric_func);
+	solver.AddBuiltinFunction("arcsin", trigonometric_func);
 	trigonometric_func = &arccos;
-	solver.AddBuildinFunction("arccos", trigonometric_func);
+	solver.AddBuiltinFunction("arccos", trigonometric_func);
 	trigonometric_func = &arctg;
-	solver.AddBuildinFunction("arctg", trigonometric_func);
+	solver.AddBuiltinFunction("arctg", trigonometric_func);
 	trigonometric_func = &arcctg;
-	solver.AddBuildinFunction("arcctg", trigonometric_func);
+	solver.AddBuiltinFunction("arcctg", trigonometric_func);
 	trigonometric_func = &arcsec;
-	solver.AddBuildinFunction("arcsec", trigonometric_func);
+	solver.AddBuiltinFunction("arcsec", trigonometric_func);
 	trigonometric_func = &arccosec;
-	solver.AddBuildinFunction("arccosec", trigonometric_func);
+	solver.AddBuiltinFunction("arccosec", trigonometric_func);
 	trigonometric_func = &sh;
 	solver.AddTrigonometricFunction("sh", trigonometric_func);
 	trigonometric_func = &ch;
@@ -129,24 +129,24 @@ Parser<yutovo_calculator::Real>::Parser(const int precision) :
 	trigonometric_func = &csch;
 	solver.AddTrigonometricFunction("csch", trigonometric_func);
 	trigonometric_func = &arsh;
-	solver.AddBuildinFunction("arsh", trigonometric_func);
+	solver.AddBuiltinFunction("arsh", trigonometric_func);
 	trigonometric_func = &arch;
-	solver.AddBuildinFunction("arch", trigonometric_func);
+	solver.AddBuiltinFunction("arch", trigonometric_func);
 	trigonometric_func = &arth;
-	solver.AddBuildinFunction("arth", trigonometric_func);
+	solver.AddBuiltinFunction("arth", trigonometric_func);
 	trigonometric_func = &arcth;
-	solver.AddBuildinFunction("arcth", trigonometric_func);
+	solver.AddBuiltinFunction("arcth", trigonometric_func);
 	trigonometric_func = &arsch;
-	solver.AddBuildinFunction("arsch", trigonometric_func);
+	solver.AddBuiltinFunction("arsch", trigonometric_func);
 	trigonometric_func = &arcsch;
-	solver.AddBuildinFunction("arcsch", trigonometric_func);
+	solver.AddBuiltinFunction("arcsch", trigonometric_func);
 
 	RealBinaryFunc binary_func = &pow;
-	solver.AddBuildinFunction("pow", binary_func);
+	solver.AddBuiltinFunction("pow", binary_func);
 	binary_func = &log;
-	solver.AddBuildinFunction("log", binary_func);
+	solver.AddBuiltinFunction("log", binary_func);
 	binary_func = &root;
-	solver.AddBuildinFunction("root", binary_func);
+	solver.AddBuiltinFunction("root", binary_func);
 
 	AddUnits();
 }
@@ -156,7 +156,7 @@ Parser<yutovo_calculator::Rational>::Parser(const int precision) :
 	solver(precision)
 {
 	RationalBinaryFunc binary_func = &pow;
-	solver.AddBuildinFunction("pow", binary_func);
+	solver.AddBuiltinFunction("pow", binary_func);
 
 	AddUnits();
 }
