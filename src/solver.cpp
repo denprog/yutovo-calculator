@@ -900,27 +900,27 @@ Rational Solver<Rational>::operator()(ImplicitDivMulNode<Rational> const& op) co
 }
 
 template<>
-Integer Solver<Integer>::operator()(ImplicitMulDivNode<Integer> const& op) const
+Integer Solver<Integer>::operator()(ImplicitMulNode<Integer> const& op) const
 {
-	throw SyntaxException(op.id, SyntaxError, op.pos, op.line);
+	Integer arg1 = (*this)(op.before);
+	Integer arg2 = (*this)(op.inside_braces);
+	return arg1 * arg2;
 }
 
 template<>
-Real Solver<Real>::operator()(ImplicitMulDivNode<Real> const& op) const
+Real Solver<Real>::operator()(ImplicitMulNode<Real> const& op) const
 {
 	Real arg1 = (*this)(op.before);
-	Real arg2 = (*this)(op.upper);
-	Real arg3 = (*this)(op.lower);
-	return arg1 * arg2 / arg3;
+	Real arg2 = (*this)(op.inside_braces);
+	return arg1 * arg2;
 }
 
 template<>
-Rational Solver<Rational>::operator()(ImplicitMulDivNode<Rational> const& op) const
+Rational Solver<Rational>::operator()(ImplicitMulNode<Rational> const& op) const
 {
 	Rational arg1 = (*this)(op.before);
-	Rational arg2 = (*this)(op.upper);
-	Rational arg3 = (*this)(op.lower);
-	return arg1 * arg2 / arg3;
+	Rational arg2 = (*this)(op.inside_braces);
+	return arg1 * arg2;
 }
 
 template<>

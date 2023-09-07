@@ -69,6 +69,12 @@ TEST_F(CalcTestInteger, integers4)
     ASSERT_TRUE(res.ToString(10) == U"-5") << res.ToStdString(10);
 }
 
+TEST_F(CalcTestInteger, integers5)
+{
+    Integer res = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"5(4*2);");
+    ASSERT_TRUE(res.ToString(10) == U"40") << res.ToStdString(10);
+}
+
 TEST_F(CalcTestInteger, logical1)
 {
     Integer res = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"!5;");

@@ -91,6 +91,12 @@ TEST_F(CalcTestRational, rationals3)
     ASSERT_TRUE(res.ToStdString() == "-3/4") << res.ToStdString();
 }
 
+TEST_F(CalcTestRational, rationals4)
+{
+    Rational res = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"2(5/(4*2));");
+    ASSERT_TRUE(res.ToStdString() == "5/4") << res.ToStdString();
+}
+
 TEST_F(CalcTestRational, proper1)
 {
     auto res = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"(5/4);");

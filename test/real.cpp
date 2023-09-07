@@ -58,6 +58,12 @@ TEST_F(CalcTestReal, numbers5)
     ASSERT_TRUE(res.ToString(3, 3) == U"-5.55E+0") << res.ToStdString(3, 3);
 }
 
+TEST_F(CalcTestReal, numbers6)
+{
+    std::string s = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"2(4+5);").ToStdString(3, 3);
+    ASSERT_TRUE(s == "18.E+0") << s;
+}
+
 TEST_F(CalcTestReal, functions1)
 {
     ASSERT_TRUE(parser.Parse(ElementId{0, 0, 1}, U"sin(1);").ToStdString(3, 3) == parser.Parse(ElementId{0, 0, 1}, U"0.841E+0;").ToStdString(3, 3)) << 
@@ -577,6 +583,18 @@ TEST_F(CalcTestReal, units26)
     auto val = parser.Parse(ElementId{0, 0, 0, 0, 0, 0, 0, 2, 0}, U"1/(1000m);");
     std::string t = parser.GetSuitableUnit(ElementId{0, 0, 0, 0, 0, 0, 0, 2, 0}, val).ToStdString(3, 3);
     ASSERT_TRUE(t == "1.E+0(1/(km))") << t;
+}
+
+TEST_F(CalcTestReal, units27)
+{
+    std::string s = parser.Parse(ElementId{0, 0, 0, 0, 0, 0, 0, 2, 0}, U"2(m/s);").ToStdString(3, 3);
+    ASSERT_TRUE(s == "2.E+0((m)/(s))") << s;
+}
+
+TEST_F(CalcTestReal, units28)
+{
+    std::string s = parser.Parse(ElementId{0, 0, 0, 0, 0, 0, 0, 2, 0}, U"2*(m/s);").ToStdString(3, 3);
+    ASSERT_TRUE(s == "2.E+0((m)/(s))") << s;
 }
 
 }
