@@ -109,6 +109,11 @@ public:
 
 	friend Integer fact(const Integer& num);
 
+	friend Integer bin(const std::u32string& str);
+	friend Integer oct(const std::u32string& str);
+	friend Integer dec(const std::u32string& str);
+	friend Integer hex(const std::u32string& str);
+
 public:
 	int GetPrecision() const;
 	void SetPrecision(int precision);

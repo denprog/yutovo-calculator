@@ -4,6 +4,11 @@
 namespace yutovo_calculator
 {
 
+Integer bin(const std::u32string& str);
+Integer oct(const std::u32string& str);
+Integer dec(const std::u32string& str);
+Integer hex(const std::u32string& str);
+
 Integer pow(const Integer& num1, const Integer& num2);
 
 Real pow(const Real& num1, const Real& num2);
@@ -58,6 +63,15 @@ Parser<yutovo_calculator::Integer>::Parser(const int precision) :
 {
 	IntegerBinaryFunc binary_func = &pow;
 	solver.AddBuiltinFunction("pow", binary_func);
+
+	IntegerStringFunc string_func = &bin;
+	solver.AddBuiltinFunction("bin", string_func);
+	string_func = &oct;
+	solver.AddBuiltinFunction("oct", string_func);
+	string_func = &dec;
+	solver.AddBuiltinFunction("dec", string_func);
+	string_func = &hex;
+	solver.AddBuiltinFunction("hex", string_func);
 }
 
 template<>

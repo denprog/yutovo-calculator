@@ -25,6 +25,7 @@ namespace yutovo_calculator
 			boost::recursive_wrapper<ImplicitDivMulNode<Number>>, 
 			boost::recursive_wrapper<ImplicitMulNode<Number>>, 
 			boost::recursive_wrapper<FunctionCallNode<Number>>, 
+			boost::recursive_wrapper<FunctionCallStringNode<Number>>, 
 			boost::recursive_wrapper<NoFencesFunctionCallNode<Number>>, 
 			boost::recursive_wrapper<ExpressionNode<Number>>>
 			Operand;
@@ -40,6 +41,7 @@ namespace yutovo_calculator
 		qi::rule<std::u32string::iterator, ImplicitMulNode<Number>(), unicode::space_type> implicit_mul;
 		qi::rule<std::u32string::iterator, IdentifierNode<Number>(), unicode::space_type> identifier;
 		qi::rule<std::u32string::iterator, FunctionCallNode<Number>(), unicode::space_type> function_call;
+		qi::rule<std::u32string::iterator, FunctionCallStringNode<Number>(), unicode::space_type> function_call_string;
 		qi::rule<std::u32string::iterator, NoFencesFunctionCallNode<Number>(), unicode::space_type> no_fences_function_call;
 		qi::rule<std::u32string::iterator, FunctionParamNode<Number>(), unicode::space_type> function_param;
 		qi::rule<std::u32string::iterator, std::u32string(), unicode::space_type> digits_number, exp_number, integer_number;

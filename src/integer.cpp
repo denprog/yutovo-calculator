@@ -59,7 +59,8 @@ Integer::Integer(const Integer& source)
 Integer::Integer(const std::u32string& num, const int base)
 {
 	mpz_init(number);
-	mpz_set_str(number, (ToBasicString(num)).c_str(), base);
+	if (mpz_set_str(number, (ToBasicString(num)).c_str(), base) == -1)
+		throw MathException(ArgumentIsOver);
 
 #ifdef TRACE_OUTPUT
 	UpdateNumberStr();
@@ -484,6 +485,26 @@ Integer fact(const Integer& num)
 	mpz_fac_ui(res.number, (int)num);
 
 	return res;
+}
+
+Integer bin(const std::u32string& str)
+{
+	return Integer::FromString(str, 2);
+}
+
+Integer oct(const std::u32string& str)
+{
+	return Integer::FromString(str, 8);
+}
+
+Integer dec(const std::u32string& str)
+{
+	return Integer::FromString(str, 10);
+}
+
+Integer hex(const std::u32string& str)
+{
+	return Integer::FromString(str, 16);
 }
 
 int Integer::GetPrecision() const

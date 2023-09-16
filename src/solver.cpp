@@ -401,6 +401,46 @@ Rational Solver<Rational>::operator()(FunctionCallNode<Rational> const& op) cons
 }
 
 template<>
+Integer Solver<Integer>::operator()(FunctionCallStringNode<Integer> const& op) const
+{
+	AddDependency(op.name.name);
+
+	Integer res;
+
+	BuiltinFunction* func = FindBuiltinFunction(op.name.name);
+	if (func)
+	{
+		try
+		{
+			StringFunction u = boost::get<StringFunction>(*func);
+			return (*u)(op.argument);
+		}
+		catch (boost::bad_get)
+		{
+		}
+	}
+
+	//there is no such a function		
+	throw SyntaxException(op.id, UnknownIdentifier, op.pos, op.line);
+	
+	return res;
+}
+
+template<>
+Real Solver<Real>::operator()(FunctionCallStringNode<Real> const& op) const
+{
+	//there is no such a function		
+	throw SyntaxException(op.id, UnknownIdentifier, op.pos, op.line);
+}
+
+template<>
+Rational Solver<Rational>::operator()(FunctionCallStringNode<Rational> const& op) const
+{
+	//there is no such a function		
+	throw SyntaxException(op.id, UnknownIdentifier, op.pos, op.line);
+}
+
+template<>
 Integer Solver<Integer>::operator()(NoFencesFunctionCallNode<Integer> const& op) const
 {
 	AddDependency(op.name.name);

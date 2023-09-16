@@ -9,6 +9,7 @@ namespace yutovo_calculator
 {
 
 typedef Integer (*IntegerBinaryFunc)(const Integer& num1, const Integer& num2);
+typedef Integer (*IntegerStringFunc)(const std::u32string& str);
 typedef Integer (*IntegerVariable)();
 
 typedef Real (*RealUnaryFunc)(const Real& num);
@@ -141,8 +142,9 @@ struct SolverSymbols
 	//build-in functions' typedefs
 	typedef Number (*UnaryFunction)(const Number& num);
 	typedef Number (*BinaryFunction)(const Number& num1, const Number& num2);
+	typedef Number (*StringFunction)(const std::u32string& str);
 	typedef Number (*TrigonometricFunction)(const Number& num);
-	typedef boost::variant<UnaryFunction, BinaryFunction> BuiltinFunction;
+	typedef boost::variant<UnaryFunction, BinaryFunction, StringFunction> BuiltinFunction;
 	
 	//build-in variables' typedefs
 	typedef Number (*Variable)();
@@ -172,6 +174,7 @@ struct Solver : public boost::static_visitor<Number>
 	typedef typename SolverSymbols<Number>::TempVariable TempVariable;
 	typedef typename SolverSymbols<Number>::UnaryFunction UnaryFunction;
 	typedef typename SolverSymbols<Number>::BinaryFunction BinaryFunction;
+	typedef typename SolverSymbols<Number>::StringFunction StringFunction;
 	typedef typename SolverSymbols<Number>::TrigonometricFunction TrigonometricFunction;
 	typedef typename SolverSymbols<Number>::BuiltinFunction BuiltinFunction;
 	
@@ -258,6 +261,8 @@ struct Solver : public boost::static_visitor<Number>
 	}
 
 	Number operator()(FunctionCallNode<Number> const& op) const;
+
+	Number operator()(FunctionCallStringNode<Number> const& op) const;
 
 	Number operator()(FunctionParamNode<Number> const& expr) const
 	{
@@ -400,6 +405,11 @@ struct Solver : public boost::static_visitor<Number>
 	}
 
 	void AddBuiltinFunction(const char* name, BinaryFunction& func)
+	{
+		symbols->buildin_functions[ToUtfString(name)] = func;
+	}
+
+	void AddBuiltinFunction(const char* name, StringFunction& func)
 	{
 		symbols->buildin_functions[ToUtfString(name)] = func;
 	}

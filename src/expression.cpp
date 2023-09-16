@@ -28,7 +28,7 @@ namespace yutovo_calculator
 
 		multiply = char_('*') > unary | char_('/') > unary | char_('&') > unary | char_('|') > unary | char_('^') > unary;
 		
-		unary = postfix_operation | implicit_string_mul | implicit_mul | number | function_call | no_fences_function_call | identifier | 
+		unary = postfix_operation | implicit_string_mul | implicit_mul | number | function_call | function_call_string | no_fences_function_call | identifier | 
 			unary_operation | '(' > expression > ')';
 		
 		number = digits_number;
@@ -48,6 +48,8 @@ namespace yutovo_calculator
 		implicit_mul = number >> '(' > expression > ')';
 
 		function_call = identifier >> '(' >> -(expression % ',') > ')';
+
+		function_call_string = identifier >> '[' >> +(alnum | '_') > ']';
 
 		no_fences_function_call = (identifier >> '%' >> *(expression >> omit[',']) >> function_param);
 		
