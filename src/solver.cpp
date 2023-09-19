@@ -216,54 +216,61 @@ Integer Solver<Integer>::operator()(FunctionCallNode<Integer> const& op) const
 
 	Integer res;
 	
-	//find in the user defined functions
-	FunctionNode<Integer>* user_func = FindFunction(op);
-	if (user_func)
+	try
 	{
-		IdentifierNodesIter funcIter = user_func->arguments.begin();
-		for (ExpressionNodesIter iter = op.arguments.begin(); iter != op.arguments.end(); ++iter, ++funcIter)
+		//find in the user defined functions
+		FunctionNode<Integer>* user_func = FindFunction(op);
+		if (user_func)
 		{
-			Integer arg = (*this)(*iter);
-			PushTempVariable(funcIter->name, arg);
+			IdentifierNodesIter funcIter = user_func->arguments.begin();
+			for (ExpressionNodesIter iter = op.arguments.begin(); iter != op.arguments.end(); ++iter, ++funcIter)
+			{
+				Integer arg = (*this)(*iter);
+				PushTempVariable(funcIter->name, arg);
+			}
+
+			res = (*this)(user_func->return_expression);
+			PopTempVariable(op.arguments.size());
+			return res;
 		}
 
-		res = (*this)(user_func->return_expression);
-		PopTempVariable(op.arguments.size());
-		return res;
+		//find in the build-in functions		
+		BuiltinFunction* func = FindBuiltinFunction(op.name.name);
+		if (func)
+		{
+			try
+			{
+				UnaryFunction u = boost::get<UnaryFunction>(*func);
+				if (op.arguments.size() != 1)
+					throw SyntaxException(op.id, WrongArgumentsCount, U"Wrong arguments count in '" + op.name.name + U"'", op.pos, op.line);
+				
+				ExpressionNodesIter iter = op.arguments.begin();
+				Integer arg = (*this)(*iter);
+				return (*u)(arg);
+			}
+			catch (boost::bad_get)
+			{
+			}
+			
+			try
+			{
+				BinaryFunction b = boost::get<BinaryFunction>(*func);
+				if (op.arguments.size() != 2)
+					throw SyntaxException(op.id, WrongArgumentsCount, U"Wrong arguments count in '" + op.name.name + U"'", op.pos, op.line);
+				
+				ExpressionNodesIter iter = op.arguments.begin();
+				Integer arg1 = (*this)(*iter++);
+				Integer arg2 = (*this)(*iter);
+				return (*b)(arg1, arg2);
+			}
+			catch (boost::bad_get)
+			{
+			}
+		}
 	}
-
-	//find in the build-in functions		
-	BuiltinFunction* func = FindBuiltinFunction(op.name.name);
-	if (func)
+	catch (const MathException& e)
 	{
-		try
-		{
-			UnaryFunction u = boost::get<UnaryFunction>(*func);
-			if (op.arguments.size() != 1)
-				throw SyntaxException(op.id, WrongArgumentsCount, U"Wrong arguments count in '" + op.name.name + U"'", op.pos, op.line);
-			
-			ExpressionNodesIter iter = op.arguments.begin();
-			Integer arg = (*this)(*iter);
-			return (*u)(arg);
-		}
-		catch (boost::bad_get)
-		{
-		}
-		
-		try
-		{
-			BinaryFunction b = boost::get<BinaryFunction>(*func);
-			if (op.arguments.size() != 2)
-				throw SyntaxException(op.id, WrongArgumentsCount, U"Wrong arguments count in '" + op.name.name + U"'", op.pos, op.line);
-			
-			ExpressionNodesIter iter = op.arguments.begin();
-			Integer arg1 = (*this)(*iter++);
-			Integer arg2 = (*this)(*iter);
-			return (*b)(arg1, arg2);
-		}
-		catch (boost::bad_get)
-		{
-		}
+		throw MathException(op.id, e.ex_id, op.pos, op.line);
 	}
 
 	//there is no such a function		
@@ -279,74 +286,81 @@ Real Solver<Real>::operator()(FunctionCallNode<Real> const& op) const
 
 	Real res;
 	
-	//find in the user defined functions
-	FunctionNode<Real>* user_func = FindFunction(op);
-	if (user_func)
+	try
 	{
-		IdentifierNodesIter funcIter = user_func->arguments.begin();
-		for (ExpressionNodesIter iter = op.arguments.begin(); iter != op.arguments.end(); ++iter, ++funcIter)
+		//find in the user defined functions
+		FunctionNode<Real>* user_func = FindFunction(op);
+		if (user_func)
 		{
-			Real arg = (*this)(*iter);
-			PushTempVariable(funcIter->name, arg);
+			IdentifierNodesIter funcIter = user_func->arguments.begin();
+			for (ExpressionNodesIter iter = op.arguments.begin(); iter != op.arguments.end(); ++iter, ++funcIter)
+			{
+				Real arg = (*this)(*iter);
+				PushTempVariable(funcIter->name, arg);
+			}
+
+			res = (*this)(user_func->return_expression);
+			PopTempVariable(op.arguments.size());
+			return res;
 		}
 
-		res = (*this)(user_func->return_expression);
-		PopTempVariable(op.arguments.size());
-		return res;
-	}
-
-	TrigonometricFunction* t_func = FindTrigonometricFunction(op.name.name);
-	if (t_func)
-	{
-		try
+		TrigonometricFunction* t_func = FindTrigonometricFunction(op.name.name);
+		if (t_func)
 		{
-			UnaryFunction u = boost::get<UnaryFunction>(*t_func);
-			if (op.arguments.size() != 1)
-				throw SyntaxException(op.id, WrongArgumentsCount, U"Wrong arguments count in '" + op.name.name + U"'", op.pos, op.line);
-			
-			ExpressionNodesIter iter = op.arguments.begin();
-			Real arg = (*this)(*iter);
-			if (arg.angle_measure == AngleMeasure::None)
-				arg.angle_measure = default_angle_measure;
-			return (*u)(arg);
-		}
-		catch (boost::bad_get)
-		{
-		}
-	}
-	
-	//find in the build-in functions		
-	BuiltinFunction* func = FindBuiltinFunction(op.name.name);
-	if (func)
-	{
-		try
-		{
-			UnaryFunction u = boost::get<UnaryFunction>(*func);
-			if (op.arguments.size() != 1)
-				throw SyntaxException(op.id, WrongArgumentsCount, U"Wrong arguments count in '" + op.name.name + U"'", op.pos, op.line);
-			
-			ExpressionNodesIter iter = op.arguments.begin();
-			Real arg = (*this)(*iter);
-			return (*u)(arg);
-		}
-		catch (boost::bad_get)
-		{
+			try
+			{
+				UnaryFunction u = boost::get<UnaryFunction>(*t_func);
+				if (op.arguments.size() != 1)
+					throw SyntaxException(op.id, WrongArgumentsCount, U"Wrong arguments count in '" + op.name.name + U"'", op.pos, op.line);
+				
+				ExpressionNodesIter iter = op.arguments.begin();
+				Real arg = (*this)(*iter);
+				if (arg.angle_measure == AngleMeasure::None)
+					arg.angle_measure = default_angle_measure;
+				return (*u)(arg);
+			}
+			catch (boost::bad_get)
+			{
+			}
 		}
 		
-		try
+		//find in the build-in functions		
+		BuiltinFunction* func = FindBuiltinFunction(op.name.name);
+		if (func)
 		{
-			BinaryFunction b = boost::get<BinaryFunction>(*func);
-			if (op.arguments.size() != 2)
-				throw SyntaxException(op.id, WrongArgumentsCount, U"Wrong arguments count in '" + op.name.name + U"'", op.pos, op.line);
+			try
+			{
+				UnaryFunction u = boost::get<UnaryFunction>(*func);
+				if (op.arguments.size() != 1)
+					throw SyntaxException(op.id, WrongArgumentsCount, U"Wrong arguments count in '" + op.name.name + U"'", op.pos, op.line);
+				
+				ExpressionNodesIter iter = op.arguments.begin();
+				Real arg = (*this)(*iter);
+				return (*u)(arg);
+			}
+			catch (boost::bad_get)
+			{
+			}
 			
-			ExpressionNodesIter iter = op.arguments.begin();
-			Real arg1 = (*this)(*iter++);
-			Real arg2 = (*this)(*iter);
-			return (*b)(arg1, arg2);
+			try
+			{
+				BinaryFunction b = boost::get<BinaryFunction>(*func);
+				if (op.arguments.size() != 2)
+					throw SyntaxException(op.id, WrongArgumentsCount, U"Wrong arguments count in '" + op.name.name + U"'", op.pos, op.line);
+				
+				ExpressionNodesIter iter = op.arguments.begin();
+				Real arg1 = (*this)(*iter++);
+				Real arg2 = (*this)(*iter);
+				return (*b)(arg1, arg2);
+			}
+			catch (boost::bad_get)
+			{
+			}
 		}
-		catch (boost::bad_get)
-		{
-		}
+	}
+	catch (const MathException& e)
+	{
+		throw MathException(op.id, e.ex_id, op.pos, op.line);
 	}
 
 	//there is no such a function		
@@ -362,54 +376,61 @@ Rational Solver<Rational>::operator()(FunctionCallNode<Rational> const& op) cons
 
 	Rational res;
 	
-	//find in the user defined functions
-	FunctionNode<Rational>* user_func = FindFunction(op);
-	if (user_func)
+	try
 	{
-		IdentifierNodesIter funcIter = user_func->arguments.begin();
-		for (ExpressionNodesIter iter = op.arguments.begin(); iter != op.arguments.end(); ++iter, ++funcIter)
+		//find in the user defined functions
+		FunctionNode<Rational>* user_func = FindFunction(op);
+		if (user_func)
 		{
-			Rational arg = (*this)(*iter);
-			PushTempVariable(funcIter->name, arg);
+			IdentifierNodesIter funcIter = user_func->arguments.begin();
+			for (ExpressionNodesIter iter = op.arguments.begin(); iter != op.arguments.end(); ++iter, ++funcIter)
+			{
+				Rational arg = (*this)(*iter);
+				PushTempVariable(funcIter->name, arg);
+			}
+
+			res = (*this)(user_func->return_expression);
+			PopTempVariable(op.arguments.size());
+			return res;
 		}
 
-		res = (*this)(user_func->return_expression);
-		PopTempVariable(op.arguments.size());
-		return res;
+		//find in the build-in functions		
+		BuiltinFunction* func = FindBuiltinFunction(op.name.name);
+		if (func)
+		{
+			try
+			{
+				UnaryFunction u = boost::get<UnaryFunction>(*func);
+				if (op.arguments.size() != 1)
+					throw SyntaxException(op.id, WrongArgumentsCount, U"Wrong arguments count in '" + op.name.name + U"'", op.pos, op.line);
+				
+				ExpressionNodesIter iter = op.arguments.begin();
+				Rational arg = (*this)(*iter);
+				return (*u)(arg);
+			}
+			catch (boost::bad_get)
+			{
+			}
+			
+			try
+			{
+				BinaryFunction b = boost::get<BinaryFunction>(*func);
+				if (op.arguments.size() != 2)
+					throw SyntaxException(op.id, WrongArgumentsCount, U"Wrong arguments count in '" + op.name.name + U"'", op.pos, op.line);
+				
+				ExpressionNodesIter iter = op.arguments.begin();
+				Rational arg1 = (*this)(*iter++);
+				Rational arg2 = (*this)(*iter);
+				return (*b)(arg1, arg2);
+			}
+			catch (boost::bad_get)
+			{
+			}
+		}
 	}
-
-	//find in the build-in functions		
-	BuiltinFunction* func = FindBuiltinFunction(op.name.name);
-	if (func)
+	catch (const MathException& e)
 	{
-		try
-		{
-			UnaryFunction u = boost::get<UnaryFunction>(*func);
-			if (op.arguments.size() != 1)
-				throw SyntaxException(op.id, WrongArgumentsCount, U"Wrong arguments count in '" + op.name.name + U"'", op.pos, op.line);
-			
-			ExpressionNodesIter iter = op.arguments.begin();
-			Rational arg = (*this)(*iter);
-			return (*u)(arg);
-		}
-		catch (boost::bad_get)
-		{
-		}
-		
-		try
-		{
-			BinaryFunction b = boost::get<BinaryFunction>(*func);
-			if (op.arguments.size() != 2)
-				throw SyntaxException(op.id, WrongArgumentsCount, U"Wrong arguments count in '" + op.name.name + U"'", op.pos, op.line);
-			
-			ExpressionNodesIter iter = op.arguments.begin();
-			Rational arg1 = (*this)(*iter++);
-			Rational arg2 = (*this)(*iter);
-			return (*b)(arg1, arg2);
-		}
-		catch (boost::bad_get)
-		{
-		}
+		throw MathException(op.id, e.ex_id, op.pos, op.line);
 	}
 
 	//there is no such a function		

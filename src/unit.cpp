@@ -176,7 +176,9 @@ Unit operator/(const Unit& unit1, const float)
 
 Unit pow(const Unit& unit1, const Real& val)
 {
-    if (!val.unit.IsEmpty() || !val.IsInteger())
+    if (unit1.IsEmpty())
+        return Unit();
+    if (!val.IsInteger())
         throw MathException(UnitsAreIncompatible);
     int p = (int)val;
     Unit res(unit1);
