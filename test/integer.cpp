@@ -113,11 +113,11 @@ TEST_F(CalcTestInteger, variables2)
     ASSERT_TRUE(parser.Parse(ElementId{0, 0, 0, 0, 2}, U"п;") == parser.Parse(ElementId{0, 0, 0, 0, 1}, U"55;")) << 
         parser.Parse(ElementId{0, 0, 0, 0, 1}, U"п;").ToStdString();
     parser.Parse(ElementId{0, 0, 0, 0, 1}, U"пр=55;");
-    ASSERT_TRUE(parser.Parse(ElementId{0, 0, 0, 0, 2}, U"пр+5;") == parser.Parse(ElementId{0, 0, 0, 0, 2}, U"60;")) << 
-        parser.Parse(ElementId{0, 0, 0, 0, 2}, U"п+5;").ToStdString();
+    Integer r = parser.Parse(ElementId{0, 0, 0, 0, 2}, U"пр+5;");
+    ASSERT_TRUE(r == parser.Parse(ElementId{0, 0, 0, 0, 2}, U"60;")) << r.ToStdString();
     parser.Parse(ElementId{0, 0, 0, 0, 3}, U"fп=55;");
-    ASSERT_TRUE(parser.Parse(ElementId{0, 0, 0, 0, 4}, U"fп+5;") == parser.Parse(ElementId{0, 0, 0, 0, 3}, U"60;")) << 
-        parser.Parse(ElementId{0, 0, 0, 0, 4}, U"fп+5;").ToStdString();
+    r = parser.Parse(ElementId{0, 0, 0, 0, 4}, U"fп+5;");
+    ASSERT_TRUE(r == parser.Parse(ElementId{0, 0, 0, 0, 3}, U"60;")) << r.ToStdString();
 }
 
 TEST_F(CalcTestInteger, variables3)
@@ -215,6 +215,41 @@ TEST_F(CalcTestInteger, notation5)
     ASSERT_TRUE(res.ToString(10) == U"22270") << res.ToStdString(10);
     EXPECT_THROW(parser.Parse(ElementId{0, 0, 0, 0, 1}, U"hex[dt45];"), yutovo_calculator::MathException);
     EXPECT_THROW(parser.Parse(ElementId{0, 0, 0, 0, 1}, U"hex[101+f1];"), yutovo_calculator::SyntaxException);
+}
+
+TEST_F(CalcTestInteger, notation6)
+{
+    Integer res = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"1010;", Notation::Binary);
+    ASSERT_TRUE(res.ToString(10) == U"10") << res.ToStdString(10);
+    EXPECT_THROW(parser.Parse(ElementId{0, 0, 0, 0, 1}, U"123;", Notation::Binary), yutovo_calculator::MathException);
+}
+
+TEST_F(CalcTestInteger, notation7)
+{
+    Integer res = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"2345;", Notation::Octal);
+    ASSERT_TRUE(res.ToString(10) == U"1253") << res.ToStdString(10);
+    EXPECT_THROW(parser.Parse(ElementId{0, 0, 0, 0, 1}, U"128;", Notation::Octal), yutovo_calculator::MathException);
+}
+
+TEST_F(CalcTestInteger, notation8)
+{
+    Integer res = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"1010;", Notation::Decimal);
+    ASSERT_TRUE(res.ToString(10) == U"1010") << res.ToStdString(10);
+    EXPECT_THROW(parser.Parse(ElementId{0, 0, 0, 0, 1}, U"123f;", Notation::Decimal), yutovo_calculator::SyntaxException);
+}
+
+TEST_F(CalcTestInteger, notation9)
+{
+    Integer res = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"56fe;", Notation::Hexadecimal);
+    ASSERT_TRUE(res.ToString(10) == U"22270") << res.ToStdString(10);
+    res = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"56FE;", Notation::Hexadecimal);
+    ASSERT_TRUE(res.ToString(10) == U"22270") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestInteger, notation10)
+{
+    Integer res = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"56fe+dec[10];", Notation::Hexadecimal);
+    ASSERT_TRUE(res.ToString(10) == U"22280") << res.ToStdString(10);
 }
 
 TEST_F(CalcTestInteger, builtin_functions1)

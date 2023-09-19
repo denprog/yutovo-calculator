@@ -193,7 +193,7 @@ struct Solver : public boost::static_visitor<Number>
 			symbols.reset(new SolverSymbols<Number>());
 	}
 
-	Solver(int _precision, AngleMeasure _default_angle_measure, AngleMeasure _result_angle_measure, Number _left_value = Number(), 
+	Solver(int _precision, AngleMeasure _default_angle_measure, AngleMeasure _result_angle_measure, int _default_notation, Number _left_value = Number(), 
 		std::shared_ptr<SolverSymbols<Number>> _symbols = nullptr) :
 		precision(_precision),
 		default_angle_measure(_default_angle_measure),
@@ -210,6 +210,8 @@ struct Solver : public boost::static_visitor<Number>
 		n.SetPrecision(precision);
 		return n;
 	}
+
+	Number operator()(NumberNode<Number> const& op) const;
 
 	Number operator()(ExpressionNode<Number> const& expr) const
 	{
@@ -257,7 +259,7 @@ struct Solver : public boost::static_visitor<Number>
 
 	Number operator()(MixedDivivsionNode<Number> const& op) const
 	{
-		return op.left + op.numerator / op.denominator;
+		return (*this)(op.left) + (*this)(op.numerator) / (*this)(op.denominator);
 	}
 
 	Number operator()(FunctionCallNode<Number> const& op) const;
@@ -631,6 +633,27 @@ struct Solver : public boost::static_visitor<Number>
 		dependencies = _dependencies;
 	}
 
+	void SetDefaultNotation(Notation notation)
+	{
+		switch (notation)
+		{
+		case Notation::Binary:
+			default_notation = 2;
+			break;
+		case Notation::Octal:
+			default_notation = 8;
+			break;
+		case Notation::Decimal:
+			default_notation = 10;
+			break;
+		case Notation::Hexadecimal:
+			default_notation = 16;
+			break;
+		default:
+			throw MathException(ParserExceptionCode::ArgumentIsOver);
+		}
+	}
+
 private:
 	Number GetSuitableUnitImpl(const ElementId _id, const Number& val, const std::u32string& system, const bool buildin) const
 	{
@@ -775,10 +798,13 @@ private:
 			dependencies->push_back(name);
 	}
 
+	friend class Expression<Number>;
+	
 	mutable ElementId id;
 	mutable int precision;
 	mutable AngleMeasure default_angle_measure;
 	mutable AngleMeasure result_angle_measure;
+	mutable int default_notation = 10;
 	Number left_value; //left solved value
 	mutable Dependencies* dependencies = nullptr;
 };

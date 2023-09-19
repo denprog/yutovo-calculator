@@ -8,47 +8,52 @@
 
 namespace yutovo_calculator
 {
-	//Spirit grammar for expression.
-	template<typename Number>
-	struct Expression : qi::grammar<std::u32string::iterator, ExpressionNode<Number>(), unicode::space_type>
-	{
-		Expression(ElementId id, std::u32string& expr);
 
-		typedef boost::variant<
-			Number, 
-			boost::recursive_wrapper<IdentifierNode<Number>>, 
-			boost::recursive_wrapper<UnaryOperationNode<Number>>, 
-			boost::recursive_wrapper<OperationNode<Number>>, 
-			boost::recursive_wrapper<PostfixOperationNode<Number>>, 
-			boost::recursive_wrapper<MixedDivivsionNode<Number>>, 
-			boost::recursive_wrapper<ImplicitStringMulNode<Number>>, 
-			boost::recursive_wrapper<ImplicitDivMulNode<Number>>, 
-			boost::recursive_wrapper<ImplicitMulNode<Number>>, 
-			boost::recursive_wrapper<FunctionCallNode<Number>>, 
-			boost::recursive_wrapper<FunctionCallStringNode<Number>>, 
-			boost::recursive_wrapper<NoFencesFunctionCallNode<Number>>, 
-			boost::recursive_wrapper<ExpressionNode<Number>>>
-			Operand;
-		
-		qi::rule<std::u32string::iterator, ExpressionNode<Number>(), unicode::space_type> expression, term, addition, multiplication;
-		qi::rule<std::u32string::iterator, Operand(), unicode::space_type> unary;
-		qi::rule<std::u32string::iterator, OperationNode<Number>(), unicode::space_type> multiply;
-		qi::rule<std::u32string::iterator, UnaryOperationNode<Number>(), unicode::space_type> unary_operation;
-		qi::rule<std::u32string::iterator, PostfixOperationNode<Number>(), unicode::space_type> postfix_operation;
-		qi::rule<std::u32string::iterator, MixedDivivsionNode<Number>(), unicode::space_type> mixed_division;
-		qi::rule<std::u32string::iterator, ImplicitStringMulNode<Number>(), unicode::space_type> implicit_string_mul;
-		qi::rule<std::u32string::iterator, ImplicitDivMulNode<Number>(), unicode::space_type> implicit_div_mul;
-		qi::rule<std::u32string::iterator, ImplicitMulNode<Number>(), unicode::space_type> implicit_mul;
-		qi::rule<std::u32string::iterator, IdentifierNode<Number>(), unicode::space_type> identifier;
-		qi::rule<std::u32string::iterator, FunctionCallNode<Number>(), unicode::space_type> function_call;
-		qi::rule<std::u32string::iterator, FunctionCallStringNode<Number>(), unicode::space_type> function_call_string;
-		qi::rule<std::u32string::iterator, NoFencesFunctionCallNode<Number>(), unicode::space_type> no_fences_function_call;
-		qi::rule<std::u32string::iterator, FunctionParamNode<Number>(), unicode::space_type> function_param;
-		qi::rule<std::u32string::iterator, std::u32string(), unicode::space_type> digits_number, exp_number, integer_number;
-		qi::rule<std::u32string::iterator, std::u32string(), unicode::space_type> name;
-		qi::rule<std::u32string::iterator, Number(), unicode::space_type> number;
-		qi::rule<std::u32string::iterator, Number(), unicode::space_type> real_number;
-	};
+template<typename Number> struct Solver;
+
+//Spirit grammar for expression.
+template<typename Number>
+struct Expression : qi::grammar<std::u32string::iterator, ExpressionNode<Number>(), unicode::space_type>
+{
+	Expression(ElementId id, std::u32string& expr, Solver<Number>* _solver);
+
+	typedef boost::variant<
+		boost::recursive_wrapper<NumberNode<Number>>, 
+		boost::recursive_wrapper<IdentifierNode<Number>>, 
+		boost::recursive_wrapper<UnaryOperationNode<Number>>, 
+		boost::recursive_wrapper<OperationNode<Number>>, 
+		boost::recursive_wrapper<PostfixOperationNode<Number>>, 
+		boost::recursive_wrapper<MixedDivivsionNode<Number>>, 
+		boost::recursive_wrapper<ImplicitStringMulNode<Number>>, 
+		boost::recursive_wrapper<ImplicitDivMulNode<Number>>, 
+		boost::recursive_wrapper<ImplicitMulNode<Number>>, 
+		boost::recursive_wrapper<FunctionCallNode<Number>>, 
+		boost::recursive_wrapper<FunctionCallStringNode<Number>>, 
+		boost::recursive_wrapper<NoFencesFunctionCallNode<Number>>, 
+		boost::recursive_wrapper<ExpressionNode<Number>>>
+		Operand;
+	
+	qi::rule<std::u32string::iterator, ExpressionNode<Number>(), unicode::space_type> expression, term, addition, multiplication;
+	qi::rule<std::u32string::iterator, Operand(), unicode::space_type> unary;
+	qi::rule<std::u32string::iterator, OperationNode<Number>(), unicode::space_type> multiply;
+	qi::rule<std::u32string::iterator, UnaryOperationNode<Number>(), unicode::space_type> unary_operation;
+	qi::rule<std::u32string::iterator, PostfixOperationNode<Number>(), unicode::space_type> postfix_operation;
+	qi::rule<std::u32string::iterator, MixedDivivsionNode<Number>(), unicode::space_type> mixed_division;
+	qi::rule<std::u32string::iterator, ImplicitStringMulNode<Number>(), unicode::space_type> implicit_string_mul;
+	qi::rule<std::u32string::iterator, ImplicitDivMulNode<Number>(), unicode::space_type> implicit_div_mul;
+	qi::rule<std::u32string::iterator, ImplicitMulNode<Number>(), unicode::space_type> implicit_mul;
+	qi::rule<std::u32string::iterator, IdentifierNode<Number>(), unicode::space_type> identifier;
+	qi::rule<std::u32string::iterator, FunctionCallNode<Number>(), unicode::space_type> function_call;
+	qi::rule<std::u32string::iterator, FunctionCallStringNode<Number>(), unicode::space_type> function_call_string;
+	qi::rule<std::u32string::iterator, NoFencesFunctionCallNode<Number>(), unicode::space_type> no_fences_function_call;
+	qi::rule<std::u32string::iterator, FunctionParamNode<Number>(), unicode::space_type> function_param;
+	qi::rule<std::u32string::iterator, std::u32string(), unicode::space_type> dec_number, hex_number, digits_number, exp_number, integer_number_str;
+	qi::rule<std::u32string::iterator, std::u32string(), unicode::space_type> name;
+	qi::rule<std::u32string::iterator, NumberNode<Number>(), unicode::space_type> number, real_number, integer_number;
+
+	Solver<Number>* solver;
+};
+
 };
 
 #endif

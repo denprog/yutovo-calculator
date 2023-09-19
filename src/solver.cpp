@@ -7,6 +7,24 @@ namespace yutovo_calculator
 //Solver
 
 template<>
+Integer Solver<Integer>::operator()(NumberNode<Integer> const& op) const
+{
+	return Integer(op.number, default_notation);
+}
+
+template<>
+Real Solver<Real>::operator()(NumberNode<Real> const& op) const
+{
+	return Real(op.number);
+}
+
+template<>
+Rational Solver<Rational>::operator()(NumberNode<Rational> const& op) const
+{
+	return Rational(op.number);
+}
+
+template<>
 Real Solver<Real>::operator()(UnitNode<Real> const& op) const
 {
 	//store the unit
@@ -650,7 +668,7 @@ Integer Solver<Integer>::operator()(ImplicitStringMulNode<Integer> const& op) co
 
 	TempVariable* t = FindTempVariable(op.identifier.name);
 	if (t)
-		return op.left * t->second;
+		return (*this)(op.left) * t->second;
 	
 	//find in user defined variables
 	VariableNode<Integer>* v = FindVariable(op.identifier.name, op.identifier.subscript);
@@ -660,7 +678,7 @@ Integer Solver<Integer>::operator()(ImplicitStringMulNode<Integer> const& op) co
 		id = v->id;
 		Integer res = (*this)(v->expression);
 		id = _id;
-		return op.left * res;
+		return (*this)(op.left) * res;
 	}
 	
 	BuiltinVariable* var = FindBuiltinVariable(op.identifier.name);
@@ -669,7 +687,7 @@ Integer Solver<Integer>::operator()(ImplicitStringMulNode<Integer> const& op) co
 		try
 		{
 			IntegerVariable v = boost::get<Variable>(*var);
-			return op.left * (*v)();
+			return (*this)(op.left) * (*v)();
 		}
 		catch (boost::bad_get)
 		{
@@ -689,7 +707,7 @@ Real Solver<Real>::operator()(ImplicitStringMulNode<Real> const& op) const
 
 	TempVariable* t = FindTempVariable(op.identifier.name);
 	if (t)
-		return op.left * t->second;
+		return (*this)(op.left) * t->second;
 	
 	//find in the user defined variables
 	VariableNode<Real>* v = FindVariable(op.identifier.name, op.identifier.subscript);
@@ -699,7 +717,7 @@ Real Solver<Real>::operator()(ImplicitStringMulNode<Real> const& op) const
 		id = v->id;
 		Real res = (*this)(v->expression);
 		id = _id;
-		return op.left * res;
+		return (*this)(op.left) * res;
 	}
 	
 	//find in the build-in variables
@@ -709,7 +727,7 @@ Real Solver<Real>::operator()(ImplicitStringMulNode<Real> const& op) const
 		try
 		{
 			RealPrecisionVariable v = boost::get<PrecisionVariable>(*var);
-			return op.left * (*v)(precision);
+			return (*this)(op.left) * (*v)(precision);
 		}
 		catch (boost::bad_get)
 		{
@@ -722,7 +740,7 @@ Real Solver<Real>::operator()(ImplicitStringMulNode<Real> const& op) const
 		if (unit)
 		{
 			symbols->last_unit_system = U"SI";
-			return op.left * Real(precision, *unit);
+			return (*this)(op.left) * Real(precision, *unit);
 		}
 	}
 
@@ -730,7 +748,7 @@ Real Solver<Real>::operator()(ImplicitStringMulNode<Real> const& op) const
 	if (custom_unit)
 	{
 		symbols->last_unit_system = custom_unit->system;
-		return op.left * custom_unit->value;
+		return (*this)(op.left) * custom_unit->value;
 	}
 
 	//there is no such an identifier
@@ -746,7 +764,7 @@ Rational Solver<Rational>::operator()(ImplicitStringMulNode<Rational> const& op)
 
 	TempVariable* t = FindTempVariable(op.identifier.name);
 	if (t)
-		return op.left * t->second;
+		return (*this)(op.left) * t->second;
 	
 	//find in user defined variables
 	VariableNode<Rational>* v = FindVariable(op.identifier.name, op.identifier.subscript);
@@ -756,7 +774,7 @@ Rational Solver<Rational>::operator()(ImplicitStringMulNode<Rational> const& op)
 		id = v->id;
 		Rational res = (*this)(v->expression);
 		id = _id;
-		return op.left * res;
+		return (*this)(op.left) * res;
 	}
 	
 	BuiltinVariable* var = FindBuiltinVariable(op.identifier.name);
@@ -765,7 +783,7 @@ Rational Solver<Rational>::operator()(ImplicitStringMulNode<Rational> const& op)
 		try
 		{
 			RationalVariable v = boost::get<Variable>(*var);
-			return op.left * (*v)();
+			return (*this)(op.left) * (*v)();
 		}
 		catch (boost::bad_get)
 		{
@@ -778,7 +796,7 @@ Rational Solver<Rational>::operator()(ImplicitStringMulNode<Rational> const& op)
 		if (unit)
 		{
 			symbols->last_unit_system = U"SI";
-			return op.left * Rational(*unit);
+			return (*this)(op.left) * Rational(*unit);
 		}
 	}
 
@@ -786,7 +804,7 @@ Rational Solver<Rational>::operator()(ImplicitStringMulNode<Rational> const& op)
 	if (custom_unit)
 	{
 		symbols->last_unit_system = custom_unit->system;
-		return op.left * custom_unit->value;
+		return (*this)(op.left) * custom_unit->value;
 	}
 
 	//there is no such an identifier

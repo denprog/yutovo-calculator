@@ -27,7 +27,7 @@ struct Parser
 	Parser(const int precision);
 	
 	Number Parse(ElementId id, std::u32string expression, Dependencies& dependencies, AngleMeasure default_angle_measure, AngleMeasure result_angle_measure, 
-		const int precision = -1)
+		Notation default_notation, const int precision = -1)
 	{
 		if (expression.empty() || expression == U";")
 			throw SyntaxException(id, ExpressionExpected, 0, 0);
@@ -36,7 +36,9 @@ struct Parser
 		std::u32string::iterator end = expression.end();
 		unicode::space_type space;
 
-		Script<Number> script(id, expression);
+		solver.SetDefaultNotation(default_notation);
+
+		Script<Number> script(id, expression, &solver);
 		ScriptNode<Number> script_node;
 
 		phrase_parse(iter, end, script, space, script_node);
@@ -47,29 +49,51 @@ struct Parser
 	Number Parse(ElementId id, std::u32string expression, AngleMeasure default_angle_measure, AngleMeasure result_angle_measure, const int precision = -1)
 	{
 		Dependencies dependencies;
-		return Parse(id, expression, dependencies, default_angle_measure, result_angle_measure, precision);
+		return Parse(id, expression, dependencies, default_angle_measure, result_angle_measure, Notation::Decimal, precision);
 	}
 
 	Number Parse(ElementId id, std::string expression, Dependencies& dependencies, AngleMeasure default_angle_measure, AngleMeasure result_angle_measure, 
 		const int precision = -1)
 	{
-		return Parse(id, ToUtfString(expression), dependencies, default_angle_measure, result_angle_measure, precision);
+		return Parse(id, ToUtfString(expression), dependencies, default_angle_measure, result_angle_measure, Notation::Decimal, precision);
+	}
+
+	Number Parse(ElementId id, std::u32string expression, Dependencies& dependencies, AngleMeasure default_angle_measure, AngleMeasure result_angle_measure, 
+		const int precision = -1)
+	{
+		return Parse(id, expression, dependencies, default_angle_measure, result_angle_measure, Notation::Decimal, precision);
 	}
 
 	Number Parse(ElementId id, std::u32string expression)
 	{
 		Dependencies dependencies;
-		return Parse(id, expression, dependencies, AngleMeasure::Radian, AngleMeasure::None);
+		return Parse(id, expression, dependencies, AngleMeasure::Radian, AngleMeasure::None, Notation::Decimal);
 	}
 
 	Number Parse(ElementId id, std::u32string expression, Dependencies& dependencies)
 	{
-		return Parse(id, expression, dependencies, AngleMeasure::Radian, AngleMeasure::None);
+		return Parse(id, expression, dependencies, AngleMeasure::Radian, AngleMeasure::None, Notation::Decimal);
+	}
+
+	Number Parse(ElementId id, std::u32string expression, Dependencies& dependencies, Notation default_notation)
+	{
+		return Parse(id, expression, dependencies, AngleMeasure::Radian, AngleMeasure::None, default_notation);
+	}
+
+	Number Parse(ElementId id, std::string expression, Dependencies& dependencies, Notation default_notation)
+	{
+		return Parse(id, ToUtfString(expression), dependencies, AngleMeasure::Radian, AngleMeasure::None, default_notation);
 	}
 
 	Number Parse(ElementId id, std::string expression, Dependencies& dependencies)
 	{
 		return Parse(id, ToUtfString(expression), dependencies, AngleMeasure::Radian, AngleMeasure::None);
+	}
+
+	Number Parse(ElementId id, std::u32string expression, Notation default_notation)
+	{
+		Dependencies dependencies;
+		return Parse(id, expression, dependencies, AngleMeasure::Radian, AngleMeasure::None, default_notation);
 	}
 
 	bool RemoveIdentifier(ElementId id, const std::u32string& name)

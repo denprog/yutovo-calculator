@@ -10,7 +10,7 @@ namespace yutovo_calculator
 	struct Annotation
 	{
 		typedef boost::variant<
-			Number, 
+			boost::recursive_wrapper<NumberNode<Number>>, 
 			boost::recursive_wrapper<IdentifierNode<Number>>, 
 			boost::recursive_wrapper<UnaryOperationNode<Number>>, 
 			boost::recursive_wrapper<OperationNode<Number>>, 
@@ -70,6 +70,11 @@ namespace yutovo_calculator
 		}
 
 		void operator()(IdentifierNode<Number>& op, std::u32string::iterator pos) const
+		{
+			UpdatePosition(pos, op);
+		}
+
+		void operator()(NumberNode<Number>& op, std::u32string::iterator pos) const
 		{
 			UpdatePosition(pos, op);
 		}
@@ -137,6 +142,11 @@ namespace yutovo_calculator
 			}
 			
 			void operator()(OperationNode<Num> const& op) const
+			{
+				annotation->UpdatePosition(iter, op);
+			}
+
+			void operator()(NumberNode<Num> const& op) const
 			{
 				annotation->UpdatePosition(iter, op);
 			}

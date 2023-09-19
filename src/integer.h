@@ -20,7 +20,7 @@ public:
 	Integer(const int num);
 	Integer(const int precision, const double num);
 	Integer(const Integer& source);
-	Integer(const std::u32string& num, const int base = 10);
+	Integer(const std::u32string& num, const int base);
 	~Integer();
 
 public:
