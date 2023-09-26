@@ -9,6 +9,12 @@ namespace yutovo_calc_test
 using namespace yutovo_calculator;
 using namespace std::chrono_literals;
 
+TEST_F(CalcTestRational, arithmetic1)
+{
+    Rational res = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"10%75;");
+    ASSERT_TRUE(res.ToString() == U"15/2") << res.ToStdString();
+}
+
 TEST_F(CalcTestRational, variables1)
 {
     parser.Parse(ElementId{0, 0, 0, 0, 1}, U"п=3/2;");

@@ -64,6 +64,12 @@ TEST_F(CalcTestReal, numbers6)
     ASSERT_TRUE(s == "18.E+0") << s;
 }
 
+TEST_F(CalcTestReal, arithmetic1)
+{
+    Real res = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"10%75;");
+    ASSERT_TRUE(res.ToString(3, 3) == U"7.5E+0") << res.ToStdString(3, 3);
+}
+
 TEST_F(CalcTestReal, functions1)
 {
     ASSERT_TRUE(parser.Parse(ElementId{0, 0, 1}, U"sin(1);").ToStdString(3, 3) == parser.Parse(ElementId{0, 0, 1}, U"0.841E+0;").ToStdString(3, 3)) << 

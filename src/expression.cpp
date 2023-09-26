@@ -133,7 +133,7 @@ Expression<Real>::Expression(ElementId id, std::u32string& expr, Solver<Real>* _
 	
 	multiplication = unary >> *(multiply);
 
-	multiply = char_('*') > unary | char_('/') > unary;
+	multiply = char_('*') > unary | char_('/') > unary | char_('%') > unary;
 	
 	unary = postfix_operation | implicit_div_mul | implicit_string_mul | mixed_division | implicit_mul | number | function_call | 
 		no_fences_function_call | identifier | unary_operation | '(' > expression > ')';
@@ -234,7 +234,7 @@ Expression<yutovo_calculator::Rational>::Expression(ElementId id, std::u32string
 	
 	multiplication = (unary >> *(multiply));
 
-	multiply = (char_('*') > unary) | (char_('/') > unary);
+	multiply = (char_('*') > unary) | (char_('/') > unary) | (char_('%') > unary);
 	
 	unary = implicit_div_mul | implicit_string_mul | mixed_division | implicit_mul | number | function_call | no_fences_function_call | identifier | 
 	 	unary_operation | '(' > expression > ')';

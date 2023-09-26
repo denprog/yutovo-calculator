@@ -141,6 +141,8 @@ Real Solver<Real>::operator()(OperationNode<Real> const& op) const
 			return left_value * right;
 		case '/':
 			return left_value / right;
+		case '%':
+			return left_value * (float)0.01 * right;
 		}
 	}
 	catch (MathException e)
@@ -169,6 +171,8 @@ Rational Solver<Rational>::operator()(OperationNode<Rational> const& op) const
 			return left_value * right;
 		case '/':
 			return left_value / right;
+		case '%':
+			return left_value / 100 * right;
 		}
 	}
 	catch (MathException e)
