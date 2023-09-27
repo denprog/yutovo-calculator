@@ -21,6 +21,14 @@ Real Solver<Real>::operator()(NumberNode<Real> const& op) const
 template<>
 Rational Solver<Rational>::operator()(NumberNode<Rational> const& op) const
 {
+	auto p = op.number.find(U'.');
+	if (p != std::string::npos)
+	{
+		std::u32string d = U"1";
+		for (int i = 0; i < op.number.length() - p - 1; ++i)
+			d += U"0";
+		return Rational(op.number.substr(0, p)) + Rational(op.number.substr(p + 1, op.number.length() - p - 1)) / Rational(d);
+	}
 	return Rational(op.number);
 }
 

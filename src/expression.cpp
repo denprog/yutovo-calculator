@@ -249,7 +249,7 @@ Expression<yutovo_calculator::Rational>::Expression(ElementId id, std::u32string
 
 	implicit_mul = number >> '(' >> expression > ')';
 	
-	digits_number = +char_("0-9");
+	digits_number = +char_("0-9.");
 
 	number = digits_number;
 

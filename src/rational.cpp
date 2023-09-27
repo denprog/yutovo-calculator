@@ -153,7 +153,6 @@ Rational& Rational::operator=(const std::u32string& source)
 #ifdef TRACE_OUTPUT
 	UpdateNumberStr();
 #endif
-
 	return *this;
 }
 
@@ -161,6 +160,9 @@ Rational Rational::operator+()
 {
 	Rational res(*this);
 
+#ifdef TRACE_OUTPUT
+	res.UpdateNumberStr();
+#endif
 	return res;
 }
 
@@ -170,6 +172,9 @@ Rational Rational::operator-()
 
 	mpq_neg(res.number, number);
 
+#ifdef TRACE_OUTPUT
+	res.UpdateNumberStr();
+#endif
 	return res;
 }
 
@@ -181,6 +186,9 @@ Rational operator+(const Rational& num1, const Rational& num2)
 
 	res.unit = num1.unit + num2.unit;
 
+#ifdef TRACE_OUTPUT
+	res.UpdateNumberStr();
+#endif
 	return res;
 }
 
@@ -193,6 +201,9 @@ Rational operator+(const Rational& num1, const int num2)
 
 	res.unit = num1.unit + num2;
 
+#ifdef TRACE_OUTPUT
+	res.UpdateNumberStr();
+#endif
 	return res;
 }
 
@@ -205,6 +216,9 @@ Rational operator+(const int num1, const Rational& num2)
 
 	res.unit = num1 + num2.unit;
 
+#ifdef TRACE_OUTPUT
+	res.UpdateNumberStr();
+#endif
 	return res;
 }
 
@@ -216,6 +230,9 @@ Rational operator-(const Rational& num1, const Rational& num2)
 
 	res.unit = num1.unit - num2.unit;
 
+#ifdef TRACE_OUTPUT
+	res.UpdateNumberStr();
+#endif
 	return res;
 }
 
@@ -228,6 +245,9 @@ Rational operator-(const Rational& num1, const int num2)
 
 	res.unit = num1.unit - num2;
 
+#ifdef TRACE_OUTPUT
+	res.UpdateNumberStr();
+#endif
 	return res;
 }
 
@@ -240,6 +260,9 @@ Rational operator-(const int num1, const Rational& num2)
 
 	res.unit = num1 - num2.unit;
 
+#ifdef TRACE_OUTPUT
+	res.UpdateNumberStr();
+#endif
 	return res;
 }
 
@@ -251,6 +274,9 @@ Rational operator*(const Rational& num1, const Rational& num2)
 
 	res.unit = num1.unit * num2.unit;
 
+#ifdef TRACE_OUTPUT
+	res.UpdateNumberStr();
+#endif
 	return res;
 }
 
@@ -263,6 +289,9 @@ Rational operator*(const Rational& num1, const int num2)
 
 	res.unit = num1.unit * num2;
 
+#ifdef TRACE_OUTPUT
+	res.UpdateNumberStr();
+#endif
 	return res;
 }
 
@@ -275,6 +304,9 @@ Rational operator*(const int num1, const Rational& num2)
 
 	res.unit = num1 * num2.unit;
 
+#ifdef TRACE_OUTPUT
+	res.UpdateNumberStr();
+#endif
 	return res;
 }
 
@@ -289,6 +321,9 @@ Rational operator/(const Rational& num1, const Rational& num2)
 
 	res.unit = num1.unit / num2.unit;
 
+#ifdef TRACE_OUTPUT
+	res.UpdateNumberStr();
+#endif
 	return res;
 }
 
@@ -304,6 +339,9 @@ Rational operator/(const Rational& num1, const int num2)
 
 	res.unit = num1.unit / num2;
 
+#ifdef TRACE_OUTPUT
+	res.UpdateNumberStr();
+#endif
 	return res;
 }
 
