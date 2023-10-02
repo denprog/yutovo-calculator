@@ -64,6 +64,16 @@ TEST_F(CalcTestReal, numbers6)
     ASSERT_TRUE(s == "18.E+0") << s;
 }
 
+TEST_F(CalcTestReal, numbers7)
+{
+    EXPECT_THROW(parser.Parse(ElementId{0, 0, 0, 0, 1}, U"E;"), yutovo_calculator::SyntaxException);
+    auto s = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"1E+0;").ToStdString(3, 3);
+    ASSERT_TRUE(s == "1.E+0") << s;
+    EXPECT_THROW(parser.Parse(ElementId{0, 0, 0, 0, 1}, U"E+0;"), yutovo_calculator::SyntaxException);
+    EXPECT_THROW(parser.Parse(ElementId{0, 0, 0, 0, 1}, U"E+1;"), yutovo_calculator::SyntaxException);
+    EXPECT_THROW(parser.Parse(ElementId{0, 0, 0, 0, 1}, U"E-1;"), yutovo_calculator::SyntaxException);
+}
+
 TEST_F(CalcTestReal, arithmetic1)
 {
     Real res = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"10%75;");
@@ -122,6 +132,12 @@ TEST_F(CalcTestReal, functions4)
 {
     Real res = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"root(4,2);");
     ASSERT_TRUE(res.ToString(3, 3) == U"2.E+0") << res.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestReal, functions5)
+{
+    auto r = parser.Parse(ElementId{0, 0, 1}, U"exp(1);", 5);
+    ASSERT_TRUE(r.ToStdString(3, 5) == "2.71828E+0") << r.ToStdString(3, 5);
 }
 
 TEST_F(CalcTestReal, user_functions1)
@@ -281,6 +297,22 @@ TEST_F(CalcTestReal, variables12)
     parser.Parse(ElementId{0, 0, 3}, U"a=7;");
     ASSERT_TRUE(parser.Parse(ElementId{0, 0, 4}, U"a{1}+a;").ToStdString(3, 3) == parser.Parse(ElementId{0, 0, 4}, U"12;").ToStdString(3, 3)) << 
         parser.Parse(ElementId{0, 0, 4}, U"a{1}+a;").ToStdString(3, 3);
+}
+
+TEST_F(CalcTestReal, variables13)
+{
+    auto r = parser.Parse(ElementId{0, 0, 1}, U"pi;");
+    ASSERT_TRUE(r.ToStdString(3, 3) == "3.142E+0") << r.ToStdString(3, 3);
+    r = parser.Parse(ElementId{0, 0, 1}, U"pi;", 5);
+    ASSERT_TRUE(r.ToStdString(3, 5) == "3.14159E+0") << r.ToStdString(3, 5);
+}
+
+TEST_F(CalcTestReal, variables14)
+{
+    auto r = parser.Parse(ElementId{0, 0, 1}, U"e;");
+    ASSERT_TRUE(r.ToStdString(3, 3) == "2.718E+0") << r.ToStdString(3, 3);
+    r = parser.Parse(ElementId{0, 0, 1}, U"e;", 5);
+    ASSERT_TRUE(r.ToStdString(3, 5) == "2.71828E+0") << r.ToStdString(3, 5);
 }
 
 TEST_F(CalcTestReal, symbols1)

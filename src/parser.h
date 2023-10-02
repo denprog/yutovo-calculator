@@ -70,6 +70,12 @@ struct Parser
 		return Parse(id, expression, dependencies, AngleMeasure::Radian, AngleMeasure::None, Notation::Decimal);
 	}
 
+	Number Parse(ElementId id, std::u32string expression, const int precision)
+	{
+		Dependencies dependencies;
+		return Parse(id, expression, dependencies, AngleMeasure::Radian, AngleMeasure::None, Notation::Decimal, precision);
+	}
+
 	Number Parse(ElementId id, std::u32string expression, Dependencies& dependencies)
 	{
 		return Parse(id, expression, dependencies, AngleMeasure::Radian, AngleMeasure::None, Notation::Decimal);

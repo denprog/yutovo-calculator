@@ -160,7 +160,7 @@ Expression<Real>::Expression(ElementId id, std::u32string& expr, Solver<Real>* _
 
 	implicit_mul = real_number >> '(' >> expression > ')';
 	
-	name = raw[lexeme[(alpha | '_') >> *(alnum | '_')] - no_case[char_('E')]];
+	name = raw[lexeme[(alpha | '_') >> *(alnum | '_')]];
 
 	unary_operation = (char_('+') > unary) | (char_('-') > unary);
 
