@@ -20,12 +20,6 @@ namespace fusion = boost::fusion;
 namespace yutovo_calculator
 {
 
-enum class Language
-{
-	English = 1,
-	Russian
-};
-
 //Big numbers parser
 template<typename Number>
 struct Parser

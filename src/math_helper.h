@@ -17,6 +17,9 @@ using namespace std;
 #define TRACE_OUTPUT
 #endif
 
+namespace yutovo_calculator
+{
+
 enum class AngleMeasure
 {
 	None = -1, 
@@ -27,6 +30,7 @@ enum class AngleMeasure
 
 enum class Notation
 {
+	None = -1,
 	Binary = 0,
 	Octal,
 	Decimal,
@@ -35,12 +39,16 @@ enum class Notation
 
 enum class FractionForm
 {
+	None = -1,
     Proper = 0,
     Improper
 };
 
-namespace yutovo_calculator
+enum class Language
 {
+	English = 1,
+	Russian
+};
 
 class Real;
 
