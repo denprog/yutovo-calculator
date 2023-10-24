@@ -480,6 +480,12 @@ struct Solver : public boost::static_visitor<Number>
 		symbols->buildin_units.push_back(unit);
 	}
 
+	void ResetUnits()
+	{
+		symbols->buildin_units.clear();
+		symbols->units.clear();
+	}
+
 	Unit* FindBuiltinUnit(const std::u32string& name) const
 	{
 		auto iter = std::find_if(symbols->buildin_units.begin(), symbols->buildin_units.end(), 
@@ -805,7 +811,6 @@ private:
 	mutable AngleMeasure default_angle_measure;
 	mutable AngleMeasure result_angle_measure;
 	mutable int default_notation = 10;
-	mutable std::u32string lang = U"en";
 	Number left_value; //left solved value
 	mutable Dependencies* dependencies = nullptr;
 };

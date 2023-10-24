@@ -20,7 +20,8 @@ namespace yutovo_calculator
 		ArgumentIsOver = 102, 
 		ConversionDoesNotFit = 103,
 		UnitsAreIncompatible = 201,
-		CannotCastToUnit = 202
+		CannotCastToUnit = 202,
+		UnknownLanguage = 301
 	};
 	
 	struct ParserException

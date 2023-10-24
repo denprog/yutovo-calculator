@@ -641,4 +641,12 @@ TEST_F(CalcTestReal, units28)
     ASSERT_TRUE(s == "2.E+0((m)/(s))") << s;
 }
 
+TEST_F(CalcTestReal, units29)
+{
+    parser.SetLanguage(Language::Russian);
+    std::string s = parser.Parse(ElementId{0, 0, 0, 0, 0, 0, 0, 2, 0}, U"2*(м/сек);").ToStdString(3, 3);
+    ASSERT_TRUE(s == "2.E+0((м)/(сек))") << s;
+    EXPECT_THROW(parser.Parse(ElementId{0, 0, 1}, U"2*(m/s);"), yutovo_calculator::SyntaxException);
+}
+
 }

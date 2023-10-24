@@ -58,8 +58,9 @@ Real second(const Real& num);
 Real grad(const Real& num);
 
 template<>
-Parser<yutovo_calculator::Integer>::Parser(const int precision) : 
-	solver(precision)
+Parser<yutovo_calculator::Integer>::Parser(const int precision, const Language _language) : 
+	solver(precision),
+	language(_language)
 {
 	IntegerBinaryFunc binary_func = &pow;
 	solver.AddBuiltinFunction("pow", binary_func);
@@ -75,8 +76,9 @@ Parser<yutovo_calculator::Integer>::Parser(const int precision) :
 }
 
 template<>
-Parser<yutovo_calculator::Real>::Parser(const int precision) : 
-	solver(precision)
+Parser<yutovo_calculator::Real>::Parser(const int precision, const Language _language) : 
+	solver(precision),
+	language(_language)
 {
 	RealPrecisionVariable var;
 	var = &pi;
@@ -162,17 +164,38 @@ Parser<yutovo_calculator::Real>::Parser(const int precision) :
 	binary_func = &root;
 	solver.AddBuiltinFunction("root", binary_func);
 
-	AddUnits();
+	InitUnits();
 }
 
 template<>
-Parser<yutovo_calculator::Rational>::Parser(const int precision) : 
-	solver(precision)
+Parser<yutovo_calculator::Rational>::Parser(const int precision, const Language _language) : 
+	solver(precision),
+	language(_language)
 {
 	RationalBinaryFunc binary_func = &pow;
 	solver.AddBuiltinFunction("pow", binary_func);
 
-	AddUnits();
+	InitUnits();
+}
+
+template<>
+void Parser<yutovo_calculator::Integer>::SetLanguage(Language _language)
+{
+	language = _language;
+}
+
+template<>
+void Parser<yutovo_calculator::Real>::SetLanguage(Language _language)
+{
+	language = _language;
+	InitUnits();
+}
+
+template<>
+void Parser<yutovo_calculator::Rational>::SetLanguage(Language _language)
+{
+	language = _language;
+	InitUnits();
 }
 
 };
