@@ -3,8 +3,6 @@
 
 #include <string>
 #include <map>
-#include <algorithm>
-#include <mpfr.h>
 
 using namespace std;
 
