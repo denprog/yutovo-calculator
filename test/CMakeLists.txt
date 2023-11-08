@@ -14,6 +14,7 @@ add_executable(${PROJECT_NAME}_tests
 	integer.cpp
 	real.cpp
 	rational.cpp
+	complex.cpp
 )
 
 target_link_libraries(${PROJECT_NAME}_tests PRIVATE

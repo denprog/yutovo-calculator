@@ -1825,6 +1825,16 @@ Real grad(const Real& num)
 	return num.ToGrad();
 }
 
+AngleMeasure Real::GetAngleMeasure()
+{
+	return angle_measure;
+}
+
+void Real::SetAngleMeasure(AngleMeasure _angle_measure)
+{
+	angle_measure = _angle_measure;
+}
+
 int Real::GetPrecision() const
 {
 	return MathHelper::ToDecimalPrecision(GetBitPrecision());

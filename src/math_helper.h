@@ -42,6 +42,14 @@ enum class FractionForm
     Improper
 };
 
+enum class ComplexForm
+{
+	None = -1,
+    Arithmetic = 0,
+    Trigonometric,
+    Exponential
+};
+
 enum class Language
 {
 	English = 1,

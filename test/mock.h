@@ -49,6 +49,21 @@ struct CalcTestRational : public testing::Test
     Parser<Rational> parser;
 };
 
+struct CalcTestComplex : public testing::Test
+{
+    CalcTestComplex() :
+        parser(3, Language::English)
+    {
+    }
+
+    bool FindUnit(const std::vector<Unit>& units, const Unit& unit)
+    {
+        return std::find(units.begin(), units.end(), unit) != units.end();
+    }
+
+    Parser<Complex> parser;
+};
+
 }
 
 #endif

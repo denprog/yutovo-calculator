@@ -5,6 +5,7 @@
 #include "integer.h"
 #include "rational.h"
 #include "real.h"
+#include "complex.h"
 #include "ast.h"
 #include "script.h"
 #include "solver.h"

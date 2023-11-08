@@ -12,6 +12,7 @@ Integer hex(const std::u32string& str);
 Integer pow(const Integer& num1, const Integer& num2);
 
 Real pow(const Real& num1, const Real& num2);
+Complex pow(const Complex& num1, const Complex& num2);
 
 Rational pow(const Rational& num1, const Rational& num2);
 
@@ -57,145 +58,302 @@ Real minute(const Real& num);
 Real second(const Real& num);
 Real grad(const Real& num);
 
+Complex sin(const Complex& num);
+Complex cos(const Complex& num);
+Complex tg(const Complex& num);
+Complex ctg(const Complex& num);
+Complex sec(const Complex& num);
+Complex cosec(const Complex& num);
+Complex arcsin(const Complex& num);
+Complex arccos(const Complex& num);
+Complex arctg(const Complex& num);
+Complex arcctg(const Complex& num);
+Complex arcsec(const Complex& num);
+Complex arccosec(const Complex& num);
+Complex sh(const Complex& num);
+Complex ch(const Complex& num);
+Complex th(const Complex& num);
+Complex cth(const Complex& num);
+Complex sch(const Complex& num);
+Complex csch(const Complex& num);
+Complex arsh(const Complex& num);
+Complex arch(const Complex& num);
+Complex arth(const Complex& num);
+Complex arcth(const Complex& num);
+Complex arsch(const Complex& num);
+Complex arcsch(const Complex& num);
+
+Complex pi_complex(const int precision);
+Complex exp_complex(const int precision);
+
+Complex exp(const Complex& num);
+
+Complex ln(const Complex& num);
+Complex lg(const Complex& num);
+Complex log(const Complex& num1, const Complex& num2);
+Complex sqrt(const Complex& num);
+Complex root(const Complex& num1, const Complex& num2);
+
+Complex rad(const Complex& num);
+Complex deg(const Complex& num);
+Complex minute(const Complex& num);
+Complex second(const Complex& num);
+Complex grad(const Complex& num);
+
 template<>
 Parser<yutovo_calculator::Integer>::Parser(const int precision, const Language _language) : 
-	solver(precision),
-	language(_language)
+    solver(precision),
+    language(_language)
 {
-	IntegerBinaryFunc binary_func = &pow;
-	solver.AddBuiltinFunction("pow", binary_func);
+    IntegerBinaryFunc binary_func = &pow;
+    solver.AddBuiltinFunction("pow", binary_func);
 
-	IntegerStringFunc string_func = &bin;
-	solver.AddBuiltinFunction("bin", string_func);
-	string_func = &oct;
-	solver.AddBuiltinFunction("oct", string_func);
-	string_func = &dec;
-	solver.AddBuiltinFunction("dec", string_func);
-	string_func = &hex;
-	solver.AddBuiltinFunction("hex", string_func);
+    IntegerStringFunc string_func = &bin;
+    solver.AddBuiltinFunction("bin", string_func);
+    string_func = &oct;
+    solver.AddBuiltinFunction("oct", string_func);
+    string_func = &dec;
+    solver.AddBuiltinFunction("dec", string_func);
+    string_func = &hex;
+    solver.AddBuiltinFunction("hex", string_func);
 }
 
 template<>
 Parser<yutovo_calculator::Real>::Parser(const int precision, const Language _language) : 
-	solver(precision),
-	language(_language)
+    solver(precision),
+    language(_language)
 {
-	RealPrecisionVariable var;
-	var = &pi;
-	solver.AddBuiltinVariable("pi", var);
-	var = &exp;
-	solver.AddBuiltinVariable("e", var);
-	
-	RealUnaryFunc unary_func;
-	unary_func = &exp;
-	solver.AddBuiltinFunction("exp", unary_func);
-	unary_func = &ln;
-	solver.AddBuiltinFunction("ln", unary_func);
-	unary_func = &lg;
-	solver.AddBuiltinFunction("lg", unary_func);
-	unary_func = &sqrt;
-	solver.AddBuiltinFunction("sqrt", unary_func);
+    RealPrecisionVariable var;
+    var = &pi;
+    solver.AddBuiltinVariable("pi", var);
+    var = &exp;
+    solver.AddBuiltinVariable("e", var);
+    
+    RealUnaryFunc unary_func;
+    unary_func = &exp;
+    solver.AddBuiltinFunction("exp", unary_func);
+    unary_func = &ln;
+    solver.AddBuiltinFunction("ln", unary_func);
+    unary_func = &lg;
+    solver.AddBuiltinFunction("lg", unary_func);
+    unary_func = &sqrt;
+    solver.AddBuiltinFunction("sqrt", unary_func);
 
-	unary_func = &rad;
-	solver.AddBuiltinFunction("rad", unary_func);
-	unary_func = &deg;
-	solver.AddBuiltinFunction("deg", unary_func);
-	unary_func = &minute;
-	solver.AddBuiltinFunction("minute", unary_func);
-	unary_func = &second;
-	solver.AddBuiltinFunction("second", unary_func);
-	unary_func = &grad;
-	solver.AddBuiltinFunction("grad", unary_func);
+    unary_func = &rad;
+    solver.AddBuiltinFunction("rad", unary_func);
+    unary_func = &deg;
+    solver.AddBuiltinFunction("deg", unary_func);
+    unary_func = &minute;
+    solver.AddBuiltinFunction("minute", unary_func);
+    unary_func = &second;
+    solver.AddBuiltinFunction("second", unary_func);
+    unary_func = &grad;
+    solver.AddBuiltinFunction("grad", unary_func);
 
-	RealTrigonometricFunc trigonometric_func;
-	trigonometric_func = &sin;
-	solver.AddTrigonometricFunction("sin", trigonometric_func);
-	trigonometric_func = &cos;
-	solver.AddTrigonometricFunction("cos", trigonometric_func);
-	trigonometric_func = &tg;
-	solver.AddTrigonometricFunction("tg", trigonometric_func);
-	trigonometric_func = &ctg;
-	solver.AddTrigonometricFunction("ctg", trigonometric_func);
-	trigonometric_func = &sec;
-	solver.AddTrigonometricFunction("sec", trigonometric_func);
-	trigonometric_func = &cosec;
-	solver.AddTrigonometricFunction("cosec", trigonometric_func);
-	trigonometric_func = &arcsin;
-	solver.AddBuiltinFunction("arcsin", trigonometric_func);
-	trigonometric_func = &arccos;
-	solver.AddBuiltinFunction("arccos", trigonometric_func);
-	trigonometric_func = &arctg;
-	solver.AddBuiltinFunction("arctg", trigonometric_func);
-	trigonometric_func = &arcctg;
-	solver.AddBuiltinFunction("arcctg", trigonometric_func);
-	trigonometric_func = &arcsec;
-	solver.AddBuiltinFunction("arcsec", trigonometric_func);
-	trigonometric_func = &arccosec;
-	solver.AddBuiltinFunction("arccosec", trigonometric_func);
-	trigonometric_func = &sh;
-	solver.AddTrigonometricFunction("sh", trigonometric_func);
-	trigonometric_func = &ch;
-	solver.AddTrigonometricFunction("ch", trigonometric_func);
-	trigonometric_func = &th;
-	solver.AddTrigonometricFunction("th", trigonometric_func);
-	trigonometric_func = &cth;
-	solver.AddTrigonometricFunction("cth", trigonometric_func);
-	trigonometric_func = &sch;
-	solver.AddTrigonometricFunction("sch", trigonometric_func);
-	trigonometric_func = &csch;
-	solver.AddTrigonometricFunction("csch", trigonometric_func);
-	trigonometric_func = &arsh;
-	solver.AddBuiltinFunction("arsh", trigonometric_func);
-	trigonometric_func = &arch;
-	solver.AddBuiltinFunction("arch", trigonometric_func);
-	trigonometric_func = &arth;
-	solver.AddBuiltinFunction("arth", trigonometric_func);
-	trigonometric_func = &arcth;
-	solver.AddBuiltinFunction("arcth", trigonometric_func);
-	trigonometric_func = &arsch;
-	solver.AddBuiltinFunction("arsch", trigonometric_func);
-	trigonometric_func = &arcsch;
-	solver.AddBuiltinFunction("arcsch", trigonometric_func);
+    RealTrigonometricFunc trigonometric_func;
+    trigonometric_func = &sin;
+    solver.AddTrigonometricFunction("sin", trigonometric_func);
+    trigonometric_func = &cos;
+    solver.AddTrigonometricFunction("cos", trigonometric_func);
+    trigonometric_func = &tg;
+    solver.AddTrigonometricFunction("tg", trigonometric_func);
+    trigonometric_func = &ctg;
+    solver.AddTrigonometricFunction("ctg", trigonometric_func);
+    trigonometric_func = &sec;
+    solver.AddTrigonometricFunction("sec", trigonometric_func);
+    trigonometric_func = &cosec;
+    solver.AddTrigonometricFunction("cosec", trigonometric_func);
+    trigonometric_func = &arcsin;
+    solver.AddBuiltinFunction("arcsin", trigonometric_func);
+    trigonometric_func = &arccos;
+    solver.AddBuiltinFunction("arccos", trigonometric_func);
+    trigonometric_func = &arctg;
+    solver.AddBuiltinFunction("arctg", trigonometric_func);
+    trigonometric_func = &arcctg;
+    solver.AddBuiltinFunction("arcctg", trigonometric_func);
+    trigonometric_func = &arcsec;
+    solver.AddBuiltinFunction("arcsec", trigonometric_func);
+    trigonometric_func = &arccosec;
+    solver.AddBuiltinFunction("arccosec", trigonometric_func);
+    trigonometric_func = &sh;
+    solver.AddTrigonometricFunction("sh", trigonometric_func);
+    trigonometric_func = &ch;
+    solver.AddTrigonometricFunction("ch", trigonometric_func);
+    trigonometric_func = &th;
+    solver.AddTrigonometricFunction("th", trigonometric_func);
+    trigonometric_func = &cth;
+    solver.AddTrigonometricFunction("cth", trigonometric_func);
+    trigonometric_func = &sch;
+    solver.AddTrigonometricFunction("sch", trigonometric_func);
+    trigonometric_func = &csch;
+    solver.AddTrigonometricFunction("csch", trigonometric_func);
+    trigonometric_func = &arsh;
+    solver.AddBuiltinFunction("arsh", trigonometric_func);
+    trigonometric_func = &arch;
+    solver.AddBuiltinFunction("arch", trigonometric_func);
+    trigonometric_func = &arth;
+    solver.AddBuiltinFunction("arth", trigonometric_func);
+    trigonometric_func = &arcth;
+    solver.AddBuiltinFunction("arcth", trigonometric_func);
+    trigonometric_func = &arsch;
+    solver.AddBuiltinFunction("arsch", trigonometric_func);
+    trigonometric_func = &arcsch;
+    solver.AddBuiltinFunction("arcsch", trigonometric_func);
 
-	RealBinaryFunc binary_func = &pow;
-	solver.AddBuiltinFunction("pow", binary_func);
-	binary_func = &log;
-	solver.AddBuiltinFunction("log", binary_func);
-	binary_func = &root;
-	solver.AddBuiltinFunction("root", binary_func);
+    RealBinaryFunc binary_func = &pow;
+    solver.AddBuiltinFunction("pow", binary_func);
+    binary_func = &log;
+    solver.AddBuiltinFunction("log", binary_func);
+    binary_func = &root;
+    solver.AddBuiltinFunction("root", binary_func);
 
-	InitUnits();
+    InitUnits();
 }
 
 template<>
 Parser<yutovo_calculator::Rational>::Parser(const int precision, const Language _language) : 
-	solver(precision),
-	language(_language)
+    solver(precision),
+    language(_language)
 {
-	RationalBinaryFunc binary_func = &pow;
-	solver.AddBuiltinFunction("pow", binary_func);
+    RationalBinaryFunc binary_func = &pow;
+    solver.AddBuiltinFunction("pow", binary_func);
 
-	InitUnits();
+    InitUnits();
+}
+
+template<>
+Parser<yutovo_calculator::Complex>::Parser(const int precision, const Language _language) : 
+    solver(precision),
+    language(_language)
+{
+    ComplexPrecisionVariable var;
+    var = &pi_complex;
+    solver.AddBuiltinVariable("pi", var);
+    var = &exp_complex;
+    solver.AddBuiltinVariable("e", var);
+    
+    ComplexUnaryFunc unary_func;
+    unary_func = &exp;
+    solver.AddBuiltinFunction("exp", unary_func);
+    unary_func = &ln;
+    solver.AddBuiltinFunction("ln", unary_func);
+    unary_func = &lg;
+    solver.AddBuiltinFunction("lg", unary_func);
+    unary_func = &sqrt;
+    solver.AddBuiltinFunction("sqrt", unary_func);
+
+    unary_func = &rad;
+    solver.AddBuiltinFunction("rad", unary_func);
+    unary_func = &deg;
+    solver.AddBuiltinFunction("deg", unary_func);
+    unary_func = &minute;
+    solver.AddBuiltinFunction("minute", unary_func);
+    unary_func = &second;
+    solver.AddBuiltinFunction("second", unary_func);
+    unary_func = &grad;
+    solver.AddBuiltinFunction("grad", unary_func);
+
+    ComplexTrigonometricFunc trigonometric_func;
+    trigonometric_func = &sin;
+    solver.AddTrigonometricFunction("sin", trigonometric_func);
+    trigonometric_func = &cos;
+    solver.AddTrigonometricFunction("cos", trigonometric_func);
+    trigonometric_func = &tg;
+    solver.AddTrigonometricFunction("tg", trigonometric_func);
+    trigonometric_func = &ctg;
+    solver.AddTrigonometricFunction("ctg", trigonometric_func);
+    trigonometric_func = &sec;
+    solver.AddTrigonometricFunction("sec", trigonometric_func);
+    trigonometric_func = &cosec;
+    solver.AddTrigonometricFunction("cosec", trigonometric_func);
+    trigonometric_func = &arcsin;
+    solver.AddBuiltinFunction("arcsin", trigonometric_func);
+    trigonometric_func = &arccos;
+    solver.AddBuiltinFunction("arccos", trigonometric_func);
+    trigonometric_func = &arctg;
+    solver.AddBuiltinFunction("arctg", trigonometric_func);
+    trigonometric_func = &arcctg;
+    solver.AddBuiltinFunction("arcctg", trigonometric_func);
+    trigonometric_func = &arcsec;
+    solver.AddBuiltinFunction("arcsec", trigonometric_func);
+    trigonometric_func = &arccosec;
+    solver.AddBuiltinFunction("arccosec", trigonometric_func);
+    trigonometric_func = &sh;
+    solver.AddTrigonometricFunction("sh", trigonometric_func);
+    trigonometric_func = &ch;
+    solver.AddTrigonometricFunction("ch", trigonometric_func);
+    trigonometric_func = &th;
+    solver.AddTrigonometricFunction("th", trigonometric_func);
+    trigonometric_func = &cth;
+    solver.AddTrigonometricFunction("cth", trigonometric_func);
+    trigonometric_func = &sch;
+    solver.AddTrigonometricFunction("sch", trigonometric_func);
+    trigonometric_func = &csch;
+    solver.AddTrigonometricFunction("csch", trigonometric_func);
+    trigonometric_func = &arsh;
+    solver.AddBuiltinFunction("arsh", trigonometric_func);
+    trigonometric_func = &arch;
+    solver.AddBuiltinFunction("arch", trigonometric_func);
+    trigonometric_func = &arth;
+    solver.AddBuiltinFunction("arth", trigonometric_func);
+    trigonometric_func = &arcth;
+    solver.AddBuiltinFunction("arcth", trigonometric_func);
+    trigonometric_func = &arsch;
+    solver.AddBuiltinFunction("arsch", trigonometric_func);
+    trigonometric_func = &arcsch;
+    solver.AddBuiltinFunction("arcsch", trigonometric_func);
+
+    ComplexBinaryFunc binary_func = &pow;
+    solver.AddBuiltinFunction("pow", binary_func);
+    binary_func = &log;
+    solver.AddBuiltinFunction("log", binary_func);
+    binary_func = &root;
+    solver.AddBuiltinFunction("root", binary_func);
+
+    switch (language)
+    {
+    case Language::Russian:
+        solver.im = U"j";
+        break;
+    default:
+        solver.im = U"i";
+        break;
+    }
 }
 
 template<>
 void Parser<yutovo_calculator::Integer>::SetLanguage(Language _language)
 {
-	language = _language;
+    language = _language;
 }
 
 template<>
 void Parser<yutovo_calculator::Real>::SetLanguage(Language _language)
 {
-	language = _language;
-	InitUnits();
+    language = _language;
+    InitUnits();
 }
 
 template<>
 void Parser<yutovo_calculator::Rational>::SetLanguage(Language _language)
 {
-	language = _language;
-	InitUnits();
+    language = _language;
+    InitUnits();
+}
+
+template<>
+void Parser<yutovo_calculator::Complex>::SetLanguage(Language _language)
+{
+    language = _language;
+    switch (language)
+    {
+    case Language::Russian:
+        solver.im = U"j";
+        break;
+    default:
+        solver.im = U"i";
+        break;
+    }
 }
 
 };

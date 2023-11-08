@@ -17,6 +17,7 @@ add_library(${PROJECT_NAME}
     math_helper.cpp
     rational.cpp
     real.cpp
+    complex.cpp
     script.cpp
     solver.cpp
     utils.cpp
@@ -59,6 +60,7 @@ install(
         parser.h
         rational.h
         real.h
+        complex.h
         script.h
         solver.h
         stdafx.h

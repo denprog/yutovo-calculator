@@ -5,6 +5,7 @@
 #include "integer.h"
 #include "real.h"
 #include "rational.h"
+#include "complex.h"
 #include "utils.h"
 
 namespace yutovo_calculator
@@ -508,5 +509,80 @@ BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::ExpressionNode<yutovo_calculator::R
 
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::ScriptNode<yutovo_calculator::Rational>, 
 	(std::list<yutovo_calculator::ScriptNode<yutovo_calculator::Rational>::Operand>, list))
+
+//Complex adaptors
+
+BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::UnaryOperationNode<yutovo_calculator::Complex>, 
+	(char, op)(yutovo_calculator::UnaryOperationNode<yutovo_calculator::Complex>::Operand, operand))
+
+BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::NumberNode<yutovo_calculator::Complex>, 
+	(std::u32string, number))
+
+BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::OperationNode<yutovo_calculator::Complex>, 
+	(char, op)(yutovo_calculator::OperationNode<yutovo_calculator::Complex>::Operand, operand))
+
+BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::PostfixOperationNode<yutovo_calculator::Complex>, 
+	(yutovo_calculator::PostfixOperationNode<yutovo_calculator::Complex>::Operand, operand)(char, op))
+
+BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::MixedDivivsionNode<yutovo_calculator::Complex>, 
+	(yutovo_calculator::NumberNode<yutovo_calculator::Complex>, left)
+	(yutovo_calculator::NumberNode<yutovo_calculator::Complex>, numerator)
+	(yutovo_calculator::NumberNode<yutovo_calculator::Complex>, denominator))
+
+BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::ImplicitStringMulNode<yutovo_calculator::Complex>,
+	(yutovo_calculator::NumberNode<yutovo_calculator::Complex>, left)
+	(yutovo_calculator::IdentifierNode<yutovo_calculator::Complex>, identifier))
+
+BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::ImplicitDivMulNode<yutovo_calculator::Complex>,
+	(yutovo_calculator::ExpressionNode<yutovo_calculator::Complex>, upper)
+	(yutovo_calculator::ExpressionNode<yutovo_calculator::Complex>, lower)
+	(yutovo_calculator::IdentifierNode<yutovo_calculator::Complex>, identifier))
+
+BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::ImplicitMulNode<yutovo_calculator::Complex>,
+	(yutovo_calculator::NumberNode<yutovo_calculator::Complex>, before)
+	(yutovo_calculator::ExpressionNode<yutovo_calculator::Complex>, inside_braces))
+
+BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::VariableNode<yutovo_calculator::Complex>, 
+	(yutovo_calculator::IdentifierNode<yutovo_calculator::Complex>, name)
+	(yutovo_calculator::ExpressionNode<yutovo_calculator::Complex>, expression))
+
+BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::UnitNode<yutovo_calculator::Complex>, 
+	(yutovo_calculator::IdentifierNode<yutovo_calculator::Complex>, name)
+	(yutovo_calculator::ExpressionNode<yutovo_calculator::Complex>, expression))
+
+BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::FunctionNode<yutovo_calculator::Complex>, 
+	(yutovo_calculator::IdentifierNode<yutovo_calculator::Complex>, name)
+	(std::list<yutovo_calculator::IdentifierNode<yutovo_calculator::Complex>>, arguments)
+	(yutovo_calculator::ExpressionNode<yutovo_calculator::Complex>, return_expression))
+
+BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::DefinitionNode<yutovo_calculator::Complex>, 
+	(yutovo_calculator::DefinitionNode<yutovo_calculator::Complex>::Definition, definition))
+
+BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::IdentifierNode<yutovo_calculator::Complex>, 
+	(std::u32string, name)
+	(std::u32string, subscript))
+
+BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::FunctionCallNode<yutovo_calculator::Complex>, 
+	(yutovo_calculator::IdentifierNode<yutovo_calculator::Complex>, name)
+	(std::list<yutovo_calculator::ExpressionNode<yutovo_calculator::Complex>>, arguments))
+
+BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::FunctionCallStringNode<yutovo_calculator::Complex>, 
+	(yutovo_calculator::IdentifierNode<yutovo_calculator::Complex>, name)
+	(std::u32string, argument))
+
+BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::NoFencesFunctionCallNode<yutovo_calculator::Complex>, 
+	(yutovo_calculator::IdentifierNode<yutovo_calculator::Complex>, name)
+	(std::list<yutovo_calculator::ExpressionNode<yutovo_calculator::Complex>>, arguments)
+	(yutovo_calculator::FunctionParamNode<yutovo_calculator::Complex>, last_argument))
+
+BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::FunctionParamNode<yutovo_calculator::Complex>, 
+	(yutovo_calculator::FunctionParamNode<yutovo_calculator::Complex>::Operand, op))
+
+BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::ExpressionNode<yutovo_calculator::Complex>, 
+	(yutovo_calculator::ExpressionNode<yutovo_calculator::Complex>::Operand, first)
+	(std::list<yutovo_calculator::OperationNode<yutovo_calculator::Complex>>, rest))
+
+BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::ScriptNode<yutovo_calculator::Complex>, 
+	(std::list<yutovo_calculator::ScriptNode<yutovo_calculator::Complex>::Operand>, list))
 
 #endif

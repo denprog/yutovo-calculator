@@ -2,6 +2,7 @@
 #define PARSEREXCEPTION_H
 
 #include <string>
+#include <vector>
 
 namespace yutovo_calculator
 {

@@ -287,6 +287,9 @@ public:
 #endif
 	}
 
+	AngleMeasure GetAngleMeasure();
+	void SetAngleMeasure(AngleMeasure _angle_measure);
+
 	int GetBitPrecision() const
 	{
 		return mpfr_get_prec(number);
