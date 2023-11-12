@@ -348,4 +348,10 @@ TEST_F(CalcTestRational, units17)
     ASSERT_TRUE(t == "20((m)/(min))") << t;
 }
 
+TEST_F(CalcTestRational, units18)
+{
+    std::string t = parser.GetSuitableUnit(ElementId{0, 0, 0, 0, 1}, parser.Parse(ElementId{0, 0, 0, 0, 2}, U"(1/3)m;")).ToStdString();
+    ASSERT_TRUE(t == "1/3(m)") << t;
+}
+
 }

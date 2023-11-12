@@ -368,4 +368,20 @@ TEST_F(CalcTestComplex, functions3)
     ASSERT_TRUE(res == "1.817E+0+i*0.55E+0") << res;
 }
 
+TEST_F(CalcTestComplex, variables1)
+{
+    std::vector<std::u32string> dependencies;
+    parser.Parse(ElementId{0, 0, 1}, U"v=5;");
+    std::string s = parser.Parse(ElementId{0, 0, 2}, U"v;").ToStdString(3, 3);
+    ASSERT_TRUE(s == "5.E+0") << s;
+}
+
+TEST_F(CalcTestComplex, variables2)
+{
+    std::vector<std::u32string> dependencies;
+    parser.Parse(ElementId{0, 0, 1}, U"v=5;");
+    std::string s = parser.Parse(ElementId{0, 0, 2}, U"(1/2)v;").ToStdString(3, 3);
+    ASSERT_TRUE(s == "2.5E+0") << s;
+}
+
 }

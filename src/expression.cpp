@@ -93,6 +93,8 @@ Expression<Integer>::Expression(ElementId id, std::u32string& expr, Solver<Integ
 		boost::phoenix::function<Annotation<yutovo_calculator::Integer>>(Annotation<yutovo_calculator::Integer>(expr.begin(), expr.end(), id))(qi::_val, _1));
 	on_success(function_call_string, 
 		boost::phoenix::function<Annotation<yutovo_calculator::Integer>>(Annotation<yutovo_calculator::Integer>(expr.begin(), expr.end(), id))(qi::_val, _1));
+	on_success(implicit_fraction_mul, 
+		boost::phoenix::function<Annotation<yutovo_calculator::Integer>>(Annotation<yutovo_calculator::Integer>(expr.begin(), expr.end(), id))(qi::_val, _1));
 	
 	//work out the exceptions
 	on_error<fail>(expression, 
@@ -135,7 +137,7 @@ Expression<Real>::Expression(ElementId id, std::u32string& expr, Solver<Real>* _
 
 	multiply = char_('*') > unary | char_('/') > unary | char_('%') > unary;
 	
-	unary = postfix_operation | implicit_div_mul | implicit_string_mul | mixed_division | implicit_mul | number | function_call | 
+	unary = postfix_operation | implicit_div_mul | implicit_string_mul | implicit_fraction_mul | mixed_division | implicit_mul | number | function_call | 
 		no_fences_function_call | identifier | unary_operation | '(' > expression > ')';
 	
 	number = exp_number | digits_number;
@@ -147,6 +149,8 @@ Expression<Real>::Expression(ElementId id, std::u32string& expr, Solver<Real>* _
 	integer_number = integer_number_str;
 
 	mixed_division = integer_number >> '(' >> integer_number >> '/' >> integer_number > ')';
+
+	implicit_fraction_mul = '(' >> number >> '/' >> number >> ')' >> identifier;
 
 	real_number = digits_number;
 
@@ -194,6 +198,8 @@ Expression<Real>::Expression(ElementId id, std::u32string& expr, Solver<Real>* _
 	on_success(implicit_div_mul, 
 		boost::phoenix::function<Annotation<yutovo_calculator::Real>>(Annotation<yutovo_calculator::Real>(expr.begin(), expr.end(), id))(qi::_val, _1));
 	on_success(implicit_mul, 
+		boost::phoenix::function<Annotation<yutovo_calculator::Real>>(Annotation<yutovo_calculator::Real>(expr.begin(), expr.end(), id))(qi::_val, _1));
+	on_success(implicit_fraction_mul, 
 		boost::phoenix::function<Annotation<yutovo_calculator::Real>>(Annotation<yutovo_calculator::Real>(expr.begin(), expr.end(), id))(qi::_val, _1));
 	
 	on_error<fail>(expression, 
@@ -236,14 +242,16 @@ Expression<yutovo_calculator::Rational>::Expression(ElementId id, std::u32string
 
 	multiply = (char_('*') > unary) | (char_('/') > unary) | (char_('%') > unary);
 	
-	unary = implicit_div_mul | implicit_string_mul | mixed_division | implicit_mul | number | function_call | no_fences_function_call | identifier | 
-	 	unary_operation | '(' > expression > ')';
+	unary = implicit_div_mul | implicit_string_mul | implicit_fraction_mul | mixed_division | implicit_mul | number | function_call | 
+		no_fences_function_call | identifier | unary_operation | '(' > expression > ')';
 	
 	number = digits_number;
 
 	mixed_division = (number >> '(' >> number >> '/' >> number >> ')');
 
 	implicit_div_mul = ('(' >> expression >> ')' >> '/' >> '(' >> expression >> ')' >> identifier);
+
+	implicit_fraction_mul = '(' >> number >> '/' >> number >> ')' >> identifier;
 
 	implicit_string_mul = (number >> identifier);
 
@@ -283,6 +291,8 @@ Expression<yutovo_calculator::Rational>::Expression(ElementId id, std::u32string
 	on_success(implicit_div_mul, boost::phoenix::function<Annotation<yutovo_calculator::Rational>>(Annotation<yutovo_calculator::Rational>(expr.begin(), 
 		expr.end(), id))(qi::_val, _1));
 	on_success(implicit_mul, boost::phoenix::function<Annotation<yutovo_calculator::Rational>>(Annotation<yutovo_calculator::Rational>(expr.begin(), 
+		expr.end(), id))(qi::_val, _1));
+	on_success(implicit_fraction_mul, boost::phoenix::function<Annotation<yutovo_calculator::Rational>>(Annotation<yutovo_calculator::Rational>(expr.begin(), 
 		expr.end(), id))(qi::_val, _1));
 	
 	//work out the exceptions
@@ -325,7 +335,7 @@ Expression<Complex>::Expression(ElementId id, std::u32string& expr, Solver<Compl
 
 	multiply = char_('*') > unary | char_('/') > unary | char_('%') > unary;
 	
-	unary = postfix_operation | implicit_div_mul | implicit_string_mul | mixed_division | implicit_mul | number | function_call | 
+	unary = postfix_operation | implicit_div_mul | implicit_string_mul | implicit_fraction_mul | mixed_division | implicit_mul | number | function_call | 
 		no_fences_function_call | identifier | unary_operation | '(' > expression > ')';
 	
 	number = exp_number | digits_number;
@@ -337,6 +347,8 @@ Expression<Complex>::Expression(ElementId id, std::u32string& expr, Solver<Compl
 	integer_number = integer_number_str;
 
 	mixed_division = integer_number >> '(' >> integer_number >> '/' >> integer_number > ')';
+
+	implicit_fraction_mul = '(' >> number >> '/' >> number >> ')' >> identifier;
 
 	real_number = digits_number;
 
@@ -384,6 +396,8 @@ Expression<Complex>::Expression(ElementId id, std::u32string& expr, Solver<Compl
 	on_success(implicit_div_mul, 
 		boost::phoenix::function<Annotation<yutovo_calculator::Complex>>(Annotation<yutovo_calculator::Complex>(expr.begin(), expr.end(), id))(qi::_val, _1));
 	on_success(implicit_mul, 
+		boost::phoenix::function<Annotation<yutovo_calculator::Complex>>(Annotation<yutovo_calculator::Complex>(expr.begin(), expr.end(), id))(qi::_val, _1));
+	on_success(implicit_fraction_mul, 
 		boost::phoenix::function<Annotation<yutovo_calculator::Complex>>(Annotation<yutovo_calculator::Complex>(expr.begin(), expr.end(), id))(qi::_val, _1));
 	
 	on_error<fail>(expression, 

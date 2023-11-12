@@ -286,7 +286,19 @@ struct Solver : public boost::static_visitor<Number>
 
     Number operator()(ImplicitDivMulNode<Number> const& op) const;
 
-    Number operator()(ImplicitMulNode<Number> const& op) const;
+    Number operator()(ImplicitMulNode<Number> const& op) const
+    {
+        Number arg1 = (*this)(op.before);
+        Number arg2 = (*this)(op.inside_braces);
+        return arg1 * arg2;
+    }
+
+    Number operator()(ImplicitFractionMulNode<Number> const& op) const
+    {
+        Number arg1 = (*this)(op.numerator);
+        Number arg2 = (*this)(op.denominator);
+        return arg1 / arg2 * (*this)(op.identifier);
+    }
 
     //The beginning of the solving.
     Number operator()(ScriptNode<Number> const& script, ElementId _id, AngleMeasure _default_angle_measure, AngleMeasure _result_angle_measure, int _precision) const;

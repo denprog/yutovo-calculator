@@ -649,4 +649,16 @@ TEST_F(CalcTestReal, units29)
     EXPECT_THROW(parser.Parse(ElementId{0, 0, 1}, U"2*(m/s);"), yutovo_calculator::SyntaxException);
 }
 
+TEST_F(CalcTestReal, units30)
+{
+    std::string s = parser.Parse(ElementId{0, 0, 0, 0, 0, 0, 0, 2, 0}, U"(1/2)m;").ToStdString(3, 3);
+    ASSERT_TRUE(s == "0.5E+0(m)") << s;
+}
+
+TEST_F(CalcTestReal, units31)
+{
+    std::string s = parser.Parse(ElementId{0, 0, 0, 0, 0, 0, 0, 2, 0}, U"(2.4/2)m;").ToStdString(3, 3);
+    ASSERT_TRUE(s == "1.2E+0(m)") << s;
+}
+
 }

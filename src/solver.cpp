@@ -1104,38 +1104,6 @@ Complex Solver<Complex>::operator()(ImplicitDivMulNode<Complex> const& op) const
 }
 
 template<>
-Integer Solver<Integer>::operator()(ImplicitMulNode<Integer> const& op) const
-{
-    Integer arg1 = (*this)(op.before);
-    Integer arg2 = (*this)(op.inside_braces);
-    return arg1 * arg2;
-}
-
-template<>
-Real Solver<Real>::operator()(ImplicitMulNode<Real> const& op) const
-{
-    Real arg1 = (*this)(op.before);
-    Real arg2 = (*this)(op.inside_braces);
-    return arg1 * arg2;
-}
-
-template<>
-Rational Solver<Rational>::operator()(ImplicitMulNode<Rational> const& op) const
-{
-    Rational arg1 = (*this)(op.before);
-    Rational arg2 = (*this)(op.inside_braces);
-    return arg1 * arg2;
-}
-
-template<>
-Complex Solver<Complex>::operator()(ImplicitMulNode<Complex> const& op) const
-{
-    Complex arg1 = (*this)(op.before);
-    Complex arg2 = (*this)(op.inside_braces);
-    return arg1 * arg2;
-}
-
-template<>
 Real Solver<Real>::operator()(ScriptNode<Real> const& script, ElementId _id, AngleMeasure _default_angle_measure, 
     AngleMeasure _result_angle_measure, int _precision) const
 {
