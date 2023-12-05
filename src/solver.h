@@ -644,7 +644,7 @@ struct Solver : public boost::static_visitor<Number>
     void ListBuiltinUnits(std::vector<std::u32string>& units)
     {
         for (auto& u : symbols->buildin_units)
-            units.push_back(u.ToString());
+            units.push_back(u.ToString(false));
     }
 
     void ListUserUnits(std::vector<std::u32string>& units)

@@ -97,7 +97,7 @@ public:
         return unit.empty();
     }
 
-    std::u32string ToString() const;
+    std::u32string ToString(bool f = true) const;
 
 public:
     std::vector<std::pair<std::u32string, int>> unit; //unit names with their powers

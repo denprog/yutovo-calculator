@@ -234,7 +234,7 @@ int Unit::GetPower() const
 	return p;
 }
 
-std::u32string Unit::ToString() const
+std::u32string Unit::ToString(bool f) const
 {
     if (unit.empty())
         return U"";
@@ -271,7 +271,7 @@ std::u32string Unit::ToString() const
         lower = U"(" + lower + U")";
     }
 
-    auto r = U"(" + upper + lower + U")";
+    std::u32string r = f ? U"(" + upper + lower + U")" : upper + lower;
     if (system.empty() || system == U"SI")
         return r;
     return r + U"{" + system + U"}";
