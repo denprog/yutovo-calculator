@@ -12,7 +12,7 @@ Integer hex(const std::u32string& str);
 Integer pow(const Integer& num1, const Integer& num2);
 
 Real pow(const Real& num1, const Real& num2);
-Complex pow(const Complex& num1, const Complex& num2);
+Complex pow(const Complex& num1, const Complex& num2, int& res_pos);
 
 Rational pow(const Rational& num1, const Rational& num2);
 
@@ -58,47 +58,47 @@ Real minute(const Real& num);
 Real second(const Real& num);
 Real grad(const Real& num);
 
-Complex sin(const Complex& num);
-Complex cos(const Complex& num);
-Complex tg(const Complex& num);
-Complex ctg(const Complex& num);
-Complex sec(const Complex& num);
-Complex cosec(const Complex& num);
-Complex arcsin(const Complex& num);
-Complex arccos(const Complex& num);
-Complex arctg(const Complex& num);
-Complex arcctg(const Complex& num);
-Complex arcsec(const Complex& num);
-Complex arccosec(const Complex& num);
-Complex sh(const Complex& num);
-Complex ch(const Complex& num);
-Complex th(const Complex& num);
-Complex cth(const Complex& num);
-Complex sch(const Complex& num);
-Complex csch(const Complex& num);
-Complex arsh(const Complex& num);
-Complex arch(const Complex& num);
-Complex arth(const Complex& num);
-Complex arcth(const Complex& num);
-Complex arsch(const Complex& num);
-Complex arcsch(const Complex& num);
+Complex sin(const Complex& num, int& res_pos);
+Complex cos(const Complex& num, int& res_pos);
+Complex tg(const Complex& num, int& res_pos);
+Complex ctg(const Complex& num, int& res_pos);
+Complex sec(const Complex& num, int& res_pos);
+Complex cosec(const Complex& num, int& res_pos);
+Complex arcsin(const Complex& num, int& res_pos);
+Complex arccos(const Complex& num, int& res_pos);
+Complex arctg(const Complex& num, int& res_pos);
+Complex arcctg(const Complex& num, int& res_pos);
+Complex arcsec(const Complex& num, int& res_pos);
+Complex arccosec(const Complex& num, int& res_pos);
+Complex sh(const Complex& num, int& res_pos);
+Complex ch(const Complex& num, int& res_pos);
+Complex th(const Complex& num, int& res_pos);
+Complex cth(const Complex& num, int& res_pos);
+Complex sch(const Complex& num, int& res_pos);
+Complex csch(const Complex& num, int& res_pos);
+Complex arsh(const Complex& num, int& res_pos);
+Complex arch(const Complex& num, int& res_pos);
+Complex arth(const Complex& num, int& res_pos);
+Complex arcth(const Complex& num, int& res_pos);
+Complex arsch(const Complex& num, int& res_pos);
+Complex arcsch(const Complex& num, int& res_pos);
 
 Complex pi_complex(const int precision);
 Complex exp_complex(const int precision);
 
-Complex exp(const Complex& num);
+Complex exp(const Complex& num, int& res_pos);
 
-Complex ln(const Complex& num);
-Complex lg(const Complex& num);
-Complex log(const Complex& num1, const Complex& num2);
-Complex sqrt(const Complex& num);
-Complex root(const Complex& num1, const Complex& num2);
+Complex ln(const Complex& num, int& res_pos);
+Complex lg(const Complex& num, int& res_pos);
+Complex log(const Complex& num1, const Complex& num2, int& res_pos);
+Complex sqrt(const Complex& num, int& res_pos);
+Complex root(const Complex& num1, const Complex& num2, int& res_pos);
 
-Complex rad(const Complex& num);
-Complex deg(const Complex& num);
-Complex minute(const Complex& num);
-Complex second(const Complex& num);
-Complex grad(const Complex& num);
+Complex rad(const Complex& num, int& res_pos);
+Complex deg(const Complex& num, int& res_pos);
+Complex minute(const Complex& num, int& res_pos);
+Complex second(const Complex& num, int& res_pos);
+Complex grad(const Complex& num, int& res_pos);
 
 template<>
 Parser<yutovo_calculator::Integer>::Parser(const int precision, const Language _language) : 

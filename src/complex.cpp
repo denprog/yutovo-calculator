@@ -472,7 +472,7 @@ bool operator>=(const Complex& num1, const int num2)
     return (num1 > num2) || (num1 == num2);
 }
 
-Complex exp(const Complex& num)
+Complex exp(const Complex& num, int& res_pos)
 {
     Complex res(num.GetBitPrecision() + 1);
     Complex _num(num);
@@ -488,7 +488,7 @@ Complex exp(const Complex& num)
     return res;
 }
 
-Complex ln(const Complex& num)
+Complex ln(const Complex& num, int& res_pos)
 {
     Complex _num(num);
 
@@ -500,21 +500,21 @@ Complex ln(const Complex& num)
     return res;
 }
 
-Complex lg(const Complex& num)
+Complex lg(const Complex& num, int& res_pos)
 {
-    Complex res = ln(num) / ln(Complex(num.GetBitPrecision(), 10));
+    Complex res = ln(num, res_pos) / ln(Complex(num.GetBitPrecision(), 10), res_pos);
 
     return res;
 }
 
-Complex log(const Complex& num1, const Complex& num2)
+Complex log(const Complex& num1, const Complex& num2, int& res_pos)
 {
-    Complex res = ln(num2) / ln(num1);
+    Complex res = ln(num2, res_pos) / ln(num1, res_pos);
 
     return res;
 }
 
-Complex pow(const Complex& num1, const int num2)
+Complex pow(const Complex& num1, const int num2, int& res_pos)
 {
     Complex _num1;
     int _num2 = num2;
@@ -542,7 +542,7 @@ Complex pow(const Complex& num1, const int num2)
     return res;
 }
 
-Complex pow(const Complex& num1, const Complex& num2)
+Complex pow(const Complex& num1, const Complex& num2, int& res_pos)
 {
     if (num1.IsReal() && num2.IsReal())
     {
@@ -559,18 +559,26 @@ Complex pow(const Complex& num1, const Complex& num2)
         return Complex(r.GetBitPrecision(), 0, r);
     }
 
-    Complex res = exp(num2 * ln(num1));
+    Complex res = exp(num2 * ln(num1, res_pos), res_pos);
 
     return res;
 }
 
-Complex sqrt(const Complex& num)
+Complex sqrt(const Complex& num, int& res_pos)
 {
     if (num.IsZero())
         return Complex(num.GetBitPrecision(), 0);
 
+	int cur_pos = res_pos % 2;
+	res_pos /= 2;
+
     if (num.GetIm() == 0)
-        return Complex(sqrt(num.GetRe()), Real(num.GetBitPrecision(), 0));
+    {
+        if (cur_pos == 0)
+            return Complex(sqrt(num.GetRe()), Real(num.GetBitPrecision(), 0));
+        res_pos -= 2;
+        return -Complex(sqrt(num.GetRe()), Real(num.GetBitPrecision(), 0));
+    }
 
     Real modulus(num.GetBitPrecision(), 0);
     Real theta(num.GetBitPrecision(), 0);
@@ -579,12 +587,16 @@ Complex sqrt(const Complex& num)
 
     Real coeff = sqrt(modulus);
     Real theta2(theta / 2);
-    Real pi2 = pi(num.GetBitPrecision()) * 2;
 
-    return -Complex(coeff * cos((theta + pi2) / 2), coeff * sin((theta + pi2) / 2));
+    if (cur_pos == 0)
+        return Complex(coeff * cos(theta2), coeff * sin(theta2));
+
+    Real pi2 = pi(num.GetBitPrecision()) * 2;
+    res_pos -= 2;
+    return Complex(coeff * cos((theta + pi2) / 2), coeff * sin((theta + pi2) / 2));
 }
 
-Complex root(const Complex& num1, const Complex& num2)
+Complex root(const Complex& num1, const Complex& num2, int& res_pos)
 {
     if (num1.IsZero())
         return Complex(num1.GetBitPrecision(), 0);
@@ -597,17 +609,15 @@ Complex root(const Complex& num1, const Complex& num2)
         Real modulus(num1.GetBitPrecision(), 0);
         Real theta(num1.GetBitPrecision(), 0);
         Real pi2 = pi(num1.GetBitPrecision()) * 2;
+		int cur_pos = res_pos % _num2;
+		res_pos /= _num2;
 
         ((Complex&)num1).GetPolarForm(modulus, theta);
-
         Real coeff = root(modulus, num2.re);
-
-        return Complex(coeff * cos((theta + pi2) / num2.re), coeff * sin((theta + pi2) / num2.re));
+        return Complex(coeff * cos((theta + pi2 * cur_pos) / num2.re), coeff * sin((theta + pi2 * cur_pos) / num2.re));
     }
 
-    res = pow(num1, 1 / num2);
-
-    return res;
+    return pow(num1, 1 / num2, res_pos);
 }
 
 Complex abs(const Complex& num)
@@ -651,151 +661,151 @@ Complex im(const Complex& num)
     return Complex(num.GetIm());
 }
 
-Complex sin(const Complex& num)
+Complex sin(const Complex& num, int& res_pos)
 {
     Complex j(num.GetBitPrecision(), 0, 1);
-    return (exp(j * num) - exp(-j * num)) * (1 / (2 * j));
+    return (exp(j * num, res_pos) - exp(-j * num, res_pos)) * (1 / (2 * j));
 }
 
-Complex cos(const Complex& num)
+Complex cos(const Complex& num, int& res_pos)
 {
     Complex j(num.GetBitPrecision(), 0, 1);
-    return (exp(j * num) + exp(-j * num)) / 2;
+    return (exp(j * num, res_pos) + exp(-j * num, res_pos)) / 2;
 }
 
-Complex tg(const Complex& num)
+Complex tg(const Complex& num, int& res_pos)
 {
     Complex j(num.GetBitPrecision(), 0, 1);
-    Complex exp1 = exp(j * num);
-    Complex exp2 = exp(-j * num);
+    Complex exp1 = exp(j * num, res_pos);
+    Complex exp2 = exp(-j * num, res_pos);
     return (exp1 - exp2) * (1 / (j * (exp1 + exp2)));
 }
 
-Complex ctg(const Complex& num)
+Complex ctg(const Complex& num, int& res_pos)
 {
     Complex j(num.GetBitPrecision(), 0, 1);
-    Complex exp1 = exp(j * num);
-    Complex exp2 = exp(-j * num);
+    Complex exp1 = exp(j * num, res_pos);
+    Complex exp2 = exp(-j * num, res_pos);
     return (j * (exp1 + exp2)) * (1 / (exp1 - exp2));
 }
 
-Complex sec(const Complex& num)
+Complex sec(const Complex& num, int& res_pos)
 {
-    return 1 / cos(num);
+    return 1 / cos(num, res_pos);
 }
 
-Complex cosec(const Complex& num)
+Complex cosec(const Complex& num, int& res_pos)
 {
-    return 1 / sin(num);
+    return 1 / sin(num, res_pos);
 }
 
-Complex arcsin(const Complex& num)
-{
-    Complex j(num.GetBitPrecision(), 0, 1);
-    return 1 / j * ln(j * num + sqrt(1 - pow(num, 2)));
-}
-
-Complex arccos(const Complex& num)
+Complex arcsin(const Complex& num, int& res_pos)
 {
     Complex j(num.GetBitPrecision(), 0, 1);
-    return 1 / j * ln(num + j * sqrt(1 - pow(num, 2)));
+    return 1 / j * ln(j * num + sqrt(1 - pow(num, 2, res_pos), res_pos), res_pos);
 }
 
-Complex arctg(const Complex& num)
+Complex arccos(const Complex& num, int& res_pos)
+{
+    Complex j(num.GetBitPrecision(), 0, 1);
+    return 1 / j * ln(num + j * sqrt(1 - pow(num, 2, res_pos), res_pos), res_pos);
+}
+
+Complex arctg(const Complex& num, int& res_pos)
 {
     if (num.GetIm() == 0)
         return Complex(arctg(num.GetRe()));
     Complex j(num.GetBitPrecision(), 0, 1);
-    return j * (ln(1 - j * num) - ln(1 + j * num)) / 2;
+    return j * (ln(1 - j * num, res_pos) - ln(1 + j * num, res_pos)) / 2;
 }
 
-Complex arcctg(const Complex& num)
+Complex arcctg(const Complex& num, int& res_pos)
 {
     if (num.GetIm() == 0)
         return Complex(arcctg(num.GetRe()));
     Complex j(num.GetBitPrecision(), 0, 1);
-    return j * (ln(1 - j / num) - ln(1 + j / num)) / 2;
+    return j * (ln(1 - j / num, res_pos) - ln(1 + j / num, res_pos)) / 2;
 }
 
-Complex arcsec(const Complex& num)
+Complex arcsec(const Complex& num, int& res_pos)
 {
     Complex j(num.GetBitPrecision(), 0, 1);
 
-    return arccos(1 / num);
+    return arccos(1 / num, res_pos);
 }
 
-Complex arccosec(const Complex& num)
+Complex arccosec(const Complex& num, int& res_pos)
 {
-    return arcsin(1 / num);
+    return arcsin(1 / num, res_pos);
 }
 
-Complex sh(const Complex& num)
+Complex sh(const Complex& num, int& res_pos)
 {
-    return (exp(num) - exp(-(Complex&)num)) / 2;
+    return (exp(num, res_pos) - exp(-(Complex&)num, res_pos)) / 2;
 }
 
-Complex ch(const Complex& num)
+Complex ch(const Complex& num, int& res_pos)
 {
-    return (exp(num) + exp(-(Complex&)num)) / 2;
+    return (exp(num, res_pos) + exp(-(Complex&)num, res_pos)) / 2;
 }
 
-Complex th(const Complex& num)
+Complex th(const Complex& num, int& res_pos)
 {
-    return (exp(num) - exp(-(Complex&)num)) / (exp(num) + exp(-(Complex&)num));
+    return (exp(num, res_pos) - exp(-(Complex&)num, res_pos)) / (exp(num, res_pos) + exp(-(Complex&)num, res_pos));
 }
 
-Complex cth(const Complex& num)
+Complex cth(const Complex& num, int& res_pos)
 {
-    return (exp(num) + exp(-(Complex&)num)) / (exp(num) - exp(-(Complex&)num));
+    return (exp(num, res_pos) + exp(-(Complex&)num, res_pos)) / (exp(num, res_pos) - exp(-(Complex&)num, res_pos));
 }
 
-Complex sch(const Complex& num)
+Complex sch(const Complex& num, int& res_pos)
 {
-    return 1 / ch(num);
+    return 1 / ch(num, res_pos);
 }
 
-Complex csch(const Complex& num)
+Complex csch(const Complex& num, int& res_pos)
 {
-    return 1 / sh(num);
+    return 1 / sh(num, res_pos);
 }
 
-Complex arsh(const Complex& num)
+Complex arsh(const Complex& num, int& res_pos)
 {
     Complex j(num.GetBitPrecision(), 0, 1);
-    Complex r = j * arcsin(-j * num);
+    Complex r = j * arcsin(-j * num, res_pos);
     r.SetAngleMeasure(AngleMeasure::None);
     return r;
 }
 
-Complex arch(const Complex& num)
+Complex arch(const Complex& num, int& res_pos)
 {
     Complex j(num.GetBitPrecision(), 0, 1);
-    Complex r = j * arccos(num);
+    Complex r = j * arccos(num, res_pos);
     r.SetAngleMeasure(AngleMeasure::None);
     return r;
 }
 
-Complex arth(const Complex& num)
+Complex arth(const Complex& num, int& res_pos)
 {
     Complex j(num.GetBitPrecision(), 0, 1);
-    Complex r = j * arctg(-j * num);
+    Complex r = j * arctg(-j * num, res_pos);
     r.SetAngleMeasure(AngleMeasure::None);
     return r;
 }
 
-Complex arcth(const Complex& num)
+Complex arcth(const Complex& num, int& res_pos)
 {
-    return arth(1 / num);
+    return arth(1 / num, res_pos);
 }
 
-Complex arsch(const Complex& num)
+Complex arsch(const Complex& num, int& res_pos)
 {
-    return ln((1 + sqrt(1 - pow(num, 2))) / num);
+    return ln((1 + sqrt(1 - pow(num, 2, res_pos), res_pos)) / num, res_pos);
 }
 
-Complex arcsch(const Complex& num)
+Complex arcsch(const Complex& num, int& res_pos)
 {
-    return arsh(1 / num);
+    return arsh(1 / num, res_pos);
 }
 
 Real module(const Complex& num)
@@ -833,7 +843,8 @@ Real argument(const Complex& num)
 
 Complex exp_complex(const int precision)
 {
-    return exp(Complex(precision, 1));
+    int res_pos = 0;
+    return exp(Complex(precision, 1), res_pos);
 }
 
 Complex pi_complex(const int precision)
@@ -861,27 +872,27 @@ Complex Complex::ToDegree() const
     return Complex(re.ToDegree(), im.ToDegree());
 }
 
-Complex rad(const Complex& num)
+Complex rad(const Complex& num, int& res_pos)
 {
     return Complex(rad(num.re), rad(num.im));
 }
 
-Complex deg(const Complex& num)
+Complex deg(const Complex& num, int& res_pos)
 {
     return Complex(deg(num.re), deg(num.im));
 }
 
-Complex minute(const Complex& num)
+Complex minute(const Complex& num, int& res_pos)
 {
     return Complex(minute(num.re), minute(num.im));
 }
 
-Complex second(const Complex& num)
+Complex second(const Complex& num, int& res_pos)
 {
     return Complex(second(num.re), second(num.im));
 }
 
-Complex grad(const Complex& num)
+Complex grad(const Complex& num, int& res_pos)
 {
     return Complex(grad(num.re), grad(num.im));
 }

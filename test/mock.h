@@ -61,6 +61,19 @@ struct CalcTestComplex : public testing::Test
         return std::find(units.begin(), units.end(), unit) != units.end();
     }
 
+    std::string ToString(std::vector<Complex>& numbers)
+    {
+        std::string res;
+        for (size_t i = 0; i < numbers.size(); ++i)
+        {
+            Complex& n = numbers[i];
+            res += n.ToStdString(3, 3);
+            if (i < numbers.size() - 1)
+                res += ",";
+        }
+        return res;
+    }
+
     Parser<Complex> parser;
 };
 

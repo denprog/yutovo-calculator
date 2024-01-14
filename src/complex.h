@@ -104,21 +104,21 @@ public:
 	friend bool operator>=(const Complex& num1, const int num2);
 
 public:
-	friend Complex exp(const Complex& num);
+	friend Complex exp(const Complex& num, int& res_pos);
 
-	friend Complex ln(const Complex& num);
+	friend Complex ln(const Complex& num, int& res_pos);
 
-	friend Complex lg(const Complex& num);
+	friend Complex lg(const Complex& num, int& res_pos);
 
-	friend Complex log(const Complex& num1, const Complex& num2);
+	friend Complex log(const Complex& num1, const Complex& num2, int& res_pos);
 
-	friend Complex pow(const Complex& num1, const int num2);
+	friend Complex pow(const Complex& num1, const int num2, int& res_pos);
 
-	friend Complex pow(const Complex& num1, const Complex& num2);
+	friend Complex pow(const Complex& num1, const Complex& num2, int& res_pos);
 
-	friend Complex sqrt(const Complex& num);
+	friend Complex sqrt(const Complex& num, int& res_pos);
 
-	friend Complex root(const Complex& num1, const Complex& num2);
+	friend Complex root(const Complex& num1, const Complex& num2, int& res_pos);
 
 	friend Complex abs(const Complex& num);
 
@@ -132,53 +132,53 @@ public:
 
 	friend Complex im(const Complex& num);
 
-	friend Complex sin(const Complex& num);
+	friend Complex sin(const Complex& num, int& res_pos);
 
-	friend Complex cos(const Complex& num);
+	friend Complex cos(const Complex& num, int& res_pos);
 
-	friend Complex tg(const Complex& num);
+	friend Complex tg(const Complex& num, int& res_pos);
 
-	friend Complex ctg(const Complex& num);
+	friend Complex ctg(const Complex& num, int& res_pos);
 
-	friend Complex sec(const Complex& num);
+	friend Complex sec(const Complex& num, int& res_pos);
 
-	friend Complex cosec(const Complex& num);
+	friend Complex cosec(const Complex& num, int& res_pos);
 
-	friend Complex arcsin(const Complex& num);
+	friend Complex arcsin(const Complex& num, int& res_pos);
 
-	friend Complex arccos(const Complex& num);
+	friend Complex arccos(const Complex& num, int& res_pos);
 
-	friend Complex arctg(const Complex& num);
+	friend Complex arctg(const Complex& num, int& res_pos);
 
-	friend Complex arcctg(const Complex& num);
+	friend Complex arcctg(const Complex& num, int& res_pos);
 
-	friend Complex arcsec(const Complex& num);
+	friend Complex arcsec(const Complex& num, int& res_pos);
 
-	friend Complex arccosec(const Complex& num);
+	friend Complex arccosec(const Complex& num, int& res_pos);
 
-	friend Complex sh(const Complex& num);
+	friend Complex sh(const Complex& num, int& res_pos);
 
-	friend Complex ch(const Complex& num);
+	friend Complex ch(const Complex& num, int& res_pos);
 
-	friend Complex th(const Complex& num);
+	friend Complex th(const Complex& num, int& res_pos);
 
-	friend Complex cth(const Complex& num);
+	friend Complex cth(const Complex& num, int& res_pos);
 
-	friend Complex sch(const Complex& num);
+	friend Complex sch(const Complex& num, int& res_pos);
 
-	friend Complex csch(const Complex& num);
+	friend Complex csch(const Complex& num, int& res_pos);
 
-	friend Complex arsh(const Complex& num);
+	friend Complex arsh(const Complex& num, int& res_pos);
 
-	friend Complex arch(const Complex& num);
+	friend Complex arch(const Complex& num, int& res_pos);
 
-	friend Complex arth(const Complex& num);
+	friend Complex arth(const Complex& num, int& res_pos);
 
-	friend Complex arcth(const Complex& num);
+	friend Complex arcth(const Complex& num, int& res_pos);
 
-	friend Complex arsch(const Complex& num);
+	friend Complex arsch(const Complex& num, int& res_pos);
 
-	friend Complex arcsch(const Complex& num);
+	friend Complex arcsch(const Complex& num, int& res_pos);
 
 	friend Real module(const Complex& num);
 
@@ -194,11 +194,11 @@ public:
 	Complex ToRadian() const;
 	Complex ToGrad() const;
 
-	friend Complex rad(const Complex& num);
-	friend Complex deg(const Complex& num);
-	friend Complex minute(const Complex& num);
-	friend Complex second(const Complex& num);
-	friend Complex grad(const Complex& num);
+	friend Complex rad(const Complex& num, int& res_pos);
+	friend Complex deg(const Complex& num, int& res_pos);
+	friend Complex minute(const Complex& num, int& res_pos);
+	friend Complex second(const Complex& num, int& res_pos);
+	friend Complex grad(const Complex& num, int& res_pos);
 
 public:
 	void GetPolarForm(Real& mod, Real& arg);
@@ -274,6 +274,7 @@ private:
 	std::u32string number_str;
 #endif
 };
+
 }
 
 #endif

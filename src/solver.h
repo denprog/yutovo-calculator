@@ -17,9 +17,9 @@ typedef Real (*RealBinaryFunc)(const Real& num1, const Real& num2);
 typedef Real (*RealTrigonometricFunc)(const Real& num);
 typedef Real (*RealPrecisionVariable)(const int precision);
 
-typedef Complex (*ComplexUnaryFunc)(const Complex& num);
-typedef Complex (*ComplexBinaryFunc)(const Complex& num1, const Complex& num2);
-typedef Complex (*ComplexTrigonometricFunc)(const Complex& num);
+typedef Complex (*ComplexUnaryFunc)(const Complex& num, int& res_pos);
+typedef Complex (*ComplexBinaryFunc)(const Complex& num1, const Complex& num2, int& res_pos);
+typedef Complex (*ComplexTrigonometricFunc)(const Complex& num, int& res_pos);
 typedef Complex (*ComplexPrecisionVariable)(const int precision);
 
 typedef Rational (*RationalBinaryFunc)(const Rational& num1, const Rational& num2);
@@ -149,7 +149,12 @@ struct SolverSymbols
     typedef Number (*BinaryFunction)(const Number& num1, const Number& num2);
     typedef Number (*StringFunction)(const std::u32string& str);
     typedef Number (*TrigonometricFunction)(const Number& num);
-    typedef boost::variant<UnaryFunction, BinaryFunction, StringFunction> BuiltinFunction;
+    typedef Number (*ComplexUnaryFunction)(const Number& num, int& res_pos);
+    typedef Number (*ComplexTrigonometricFunction)(const Number& num, int& res_pos);
+    typedef Number (*ComplexBinaryFunction)(const Number& num1, const Number& num2, int& res_pos);
+
+    typedef boost::variant<UnaryFunction, BinaryFunction, StringFunction, ComplexUnaryFunction, ComplexTrigonometricFunction, ComplexBinaryFunction> BuiltinFunction;
+    typedef boost::variant<TrigonometricFunction, ComplexTrigonometricFunction> BuiltinTrigonometricFunction;
     
     //build-in variables' typedefs
     typedef Number (*Variable)();
@@ -161,7 +166,7 @@ struct SolverSymbols
     mutable vector<FunctionNode<Number>> functions; //user functions
 
     map<std::u32string, BuiltinFunction> buildin_functions;
-    map<std::u32string, TrigonometricFunction> trigonometric_functions;
+    map<std::u32string, BuiltinTrigonometricFunction> trigonometric_functions;
     map<std::u32string, BuiltinVariable> buildin_variables;
     std::vector<Unit> buildin_units;
     std::vector<CustomUnit<Number>> units;
@@ -169,7 +174,7 @@ struct SolverSymbols
     std::u32string last_unit_system;
     bool buildin_elements = false;
 };
-    
+
 template<typename Number>
 struct Solver : public boost::static_visitor<Number>
 {
@@ -182,6 +187,10 @@ struct Solver : public boost::static_visitor<Number>
     typedef typename SolverSymbols<Number>::StringFunction StringFunction;
     typedef typename SolverSymbols<Number>::TrigonometricFunction TrigonometricFunction;
     typedef typename SolverSymbols<Number>::BuiltinFunction BuiltinFunction;
+    typedef typename SolverSymbols<Number>::BuiltinTrigonometricFunction BuiltinTrigonometricFunction;
+    typedef typename SolverSymbols<Number>::ComplexUnaryFunction ComplexUnaryFunction;
+    typedef typename SolverSymbols<Number>::ComplexTrigonometricFunction ComplexTrigonometricFunction;
+    typedef typename SolverSymbols<Number>::ComplexBinaryFunction ComplexBinaryFunction;
     
     typedef typename SolverSymbols<Number>::PrecisionVariable PrecisionVariable;
     typedef typename SolverSymbols<Number>::BuiltinVariable BuiltinVariable;
@@ -440,6 +449,21 @@ struct Solver : public boost::static_visitor<Number>
         symbols->trigonometric_functions[ToUtfString(name)] = func;
     }
 
+    void AddBuiltinFunction(const char* name, ComplexUnaryFunction& func)
+    {
+        symbols->buildin_functions[ToUtfString(name)] = func;
+    }
+
+    void AddTrigonometricFunction(const char* name, ComplexTrigonometricFunction& func)
+    {
+        symbols->trigonometric_functions[ToUtfString(name)] = func;
+    }
+
+    void AddBuiltinFunction(const char* name, ComplexBinaryFunction& func)
+    {
+        symbols->buildin_functions[ToUtfString(name)] = func;
+    }
+
     BuiltinFunction* FindBuiltinFunction(const std::u32string& name) const
     {
         typename map<std::u32string, BuiltinFunction>::const_iterator iter = symbols->buildin_functions.find(name);
@@ -448,12 +472,12 @@ struct Solver : public boost::static_visitor<Number>
         return (BuiltinFunction*)&(*iter).second;
     }
 
-    TrigonometricFunction* FindTrigonometricFunction(const std::u32string& name) const
+    BuiltinTrigonometricFunction* FindTrigonometricFunction(const std::u32string& name) const
     {
-        typename map<std::u32string, TrigonometricFunction>::const_iterator iter = symbols->trigonometric_functions.find(name);
+        typename map<std::u32string, BuiltinTrigonometricFunction>::const_iterator iter = symbols->trigonometric_functions.find(name);
         if (iter == symbols->trigonometric_functions.end())
             return nullptr;
-        return (TrigonometricFunction*)&(*iter).second;
+        return (BuiltinTrigonometricFunction*)&(*iter).second;
     }
 
     void AddBuiltinVariable(const u_char* name, PrecisionVariable& var)
@@ -681,6 +705,7 @@ struct Solver : public boost::static_visitor<Number>
 
 public:
     mutable std::u32string im;
+    mutable int res_pos = 0;
 
 private:
     Number GetSuitableUnitImpl(const ElementId _id, const Number& val, const std::u32string& system, const bool buildin) const
@@ -850,12 +875,12 @@ private:
                 return res;
             }
 
-            TrigonometricFunction* t_func = FindTrigonometricFunction(op.name.name);
+            BuiltinTrigonometricFunction* t_func = FindTrigonometricFunction(op.name.name);
             if (t_func)
             {
                 try
                 {
-                    UnaryFunction u = boost::get<UnaryFunction>(*t_func);
+                    TrigonometricFunction u = boost::get<TrigonometricFunction>(*t_func);
                     if (op.arguments.size() != 1)
                         throw SyntaxException(op.id, WrongArgumentsCount, U"Wrong arguments count in '" + op.name.name + U"'", op.pos, op.line);
                     
@@ -864,6 +889,22 @@ private:
                     if (arg.GetAngleMeasure() == AngleMeasure::None)
                         arg.SetAngleMeasure(default_angle_measure);
                     return (*u)(arg);
+                }
+                catch (boost::bad_get)
+                {
+                }
+
+                try
+                {
+                    ComplexTrigonometricFunction u = boost::get<ComplexTrigonometricFunction>(*t_func);
+                    if (op.arguments.size() != 1)
+                        throw SyntaxException(op.id, WrongArgumentsCount, U"Wrong arguments count in '" + op.name.name + U"'", op.pos, op.line);
+                    
+                    ExpressionNodesIter iter = op.arguments.begin();
+                    Number arg = (*this)(*iter);
+                    if (arg.GetAngleMeasure() == AngleMeasure::None)
+                        arg.SetAngleMeasure(default_angle_measure);
+                    return (*u)(arg, res_pos);
                 }
                 catch (boost::bad_get)
                 {
@@ -887,7 +928,23 @@ private:
                 catch (boost::bad_get)
                 {
                 }
-                
+
+                try
+                {
+                    ComplexUnaryFunction u = boost::get<ComplexUnaryFunction>(*func);
+                    if (op.arguments.size() != 1)
+                        throw SyntaxException(op.id, WrongArgumentsCount, U"Wrong arguments count in '" + op.name.name + U"'", op.pos, op.line);
+                    
+                    ExpressionNodesIter iter = op.arguments.begin();
+                    Number arg = (*this)(*iter);
+                    if (arg.GetAngleMeasure() == AngleMeasure::None)
+                        arg.SetAngleMeasure(default_angle_measure);
+                    return (*u)(arg, res_pos);
+                }
+                catch (boost::bad_get)
+                {
+                }
+
                 try
                 {
                     BinaryFunction b = boost::get<BinaryFunction>(*func);
@@ -898,6 +955,21 @@ private:
                     Number arg1 = (*this)(*iter++);
                     Number arg2 = (*this)(*iter);
                     return (*b)(arg1, arg2);
+                }
+                catch (boost::bad_get)
+                {
+                }
+
+                try
+                {
+                    ComplexBinaryFunction b = boost::get<ComplexBinaryFunction>(*func);
+                    if (op.arguments.size() != 2)
+                        throw SyntaxException(op.id, WrongArgumentsCount, U"Wrong arguments count in '" + op.name.name + U"'", op.pos, op.line);
+                    
+                    ExpressionNodesIter iter = op.arguments.begin();
+                    Number arg1 = (*this)(*iter++);
+                    Number arg2 = (*this)(*iter);
+                    return (*b)(arg1, arg2, res_pos);
                 }
                 catch (boost::bad_get)
                 {

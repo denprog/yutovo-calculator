@@ -103,6 +103,43 @@ struct Parser
 		return Parse(id, expression, dependencies, AngleMeasure::Radian, AngleMeasure::None, default_notation);
 	}
 
+	Number Parse(ElementId id, std::u32string expression, Dependencies& dependencies, 
+	    AngleMeasure default_angle_measure, AngleMeasure result_angle_measure, const int precision, const int res_count, 
+		std::vector<Number>& results)
+	{
+		if (expression.empty() || expression == U";")
+			throw SyntaxException(id, ExpressionExpected, 0, 0);
+		
+		std::u32string::iterator iter = expression.begin();
+		std::u32string::iterator end = expression.end();
+		unicode::space_type space;
+
+		Script<Complex> script(id, expression, &solver);
+		ScriptNode<Complex> script_node;
+
+		phrase_parse(iter, end, script, space, script_node);
+		solver.SetDependencies(&dependencies);
+
+		for (int i = 0; i < res_count; ++i)
+		{
+			solver.res_pos = i;
+			Number r = solver(script_node, id, default_angle_measure, result_angle_measure, precision);
+			if (std::find(results.begin(), results.end(), r) != results.end())
+				break;
+			results.push_back(r);
+		}
+		if (results.empty())
+			return Number();
+		return results[0];
+	}
+
+	Number Parse(ElementId id, std::string expression, Dependencies& dependencies, 
+	    AngleMeasure default_angle_measure, AngleMeasure result_angle_measure, const int precision, const int res_count, 
+		std::vector<Number>& results)
+	{
+		return Parse(id, ToUtfString(expression), dependencies, default_angle_measure, result_angle_measure, precision, res_count, results);
+	}
+
 	bool RemoveIdentifier(ElementId id, const std::u32string& name)
 	{
 		return solver.RemoveIdentifier(id, name);
