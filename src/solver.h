@@ -198,24 +198,27 @@ struct Solver : public boost::static_visitor<Number>
     
     std::shared_ptr<SolverSymbols<Number>> symbols;
     
-    Solver(int _precision, std::u32string _im = U"", Number _left_value = Number(), std::shared_ptr<SolverSymbols<Number>> _symbols = nullptr) :
+    Solver(int _precision, std::u32string _im = U"i", char _decimal_point = '.', 
+        Number _left_value = Number(), std::shared_ptr<SolverSymbols<Number>> _symbols = nullptr) :
         precision(_precision),
         left_value(_left_value),
         symbols(_symbols),
-        im(_im)
+        im(_im),
+        decimal_point(_decimal_point)
     {
         if (!symbols)
             symbols.reset(new SolverSymbols<Number>());
     }
 
     Solver(int _precision, AngleMeasure _default_angle_measure, AngleMeasure _result_angle_measure, int _default_notation, std::string _im, 
-        Number _left_value = Number(), std::shared_ptr<SolverSymbols<Number>> _symbols = nullptr) :
+        char _decimal_point, Number _left_value = Number(), std::shared_ptr<SolverSymbols<Number>> _symbols = nullptr) :
         precision(_precision),
         default_angle_measure(_default_angle_measure),
         result_angle_measure(_result_angle_measure),
         left_value(_left_value),
         symbols(_symbols),
-        im(_im)
+        im(_im),
+        decimal_point(_decimal_point)
     {
         if (!symbols)
             symbols.reset(new SolverSymbols<Number>());
@@ -235,7 +238,7 @@ struct Solver : public boost::static_visitor<Number>
         Number res = boost::apply_visitor(*this, expr.first);
         BOOST_FOREACH(typename OperationNode<Number>::Operand const& op, expr.rest)
         {
-            Solver<Number> solver(precision, im, res, symbols);
+            Solver<Number> solver(precision, im, decimal_point, res, symbols);
             solver.id = id;
             solver.SetDependencies(dependencies);
             res = boost::apply_visitor(solver, op);
@@ -706,6 +709,7 @@ struct Solver : public boost::static_visitor<Number>
 public:
     mutable std::u32string im;
     mutable int res_pos = 0;
+    mutable char decimal_point = '.';
 
 private:
     Number GetSuitableUnitImpl(const ElementId _id, const Number& val, const std::u32string& system, const bool buildin) const

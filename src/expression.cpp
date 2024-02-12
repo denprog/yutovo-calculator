@@ -142,7 +142,10 @@ Expression<Real>::Expression(ElementId id, std::u32string& expr, Solver<Real>* _
 	
 	number = exp_number | digits_number;
 	
-	digits_number = +char_("0-9.");
+	auto n = std::string("0-9.");
+	if (solver->decimal_point != '.')
+		n += solver->decimal_point; //add the local decimal point character
+	digits_number = +char_(n);
 
 	integer_number_str = +char_("0-9");
 
@@ -257,7 +260,10 @@ Expression<yutovo_calculator::Rational>::Expression(ElementId id, std::u32string
 
 	implicit_mul = number >> '(' >> expression > ')';
 	
-	digits_number = +char_("0-9.");
+	auto n = std::string("0-9.");
+	if (solver->decimal_point != '.')
+		n += solver->decimal_point; //add the local decimal point character
+	digits_number = +char_(n);
 
 	number = digits_number;
 
@@ -340,7 +346,10 @@ Expression<Complex>::Expression(ElementId id, std::u32string& expr, Solver<Compl
 	
 	number = exp_number | digits_number;
 	
-	digits_number = +char_("0-9.");
+	auto n = std::string("0-9.");
+	if (solver->decimal_point != '.')
+		n += solver->decimal_point; //add the local decimal point character
+	digits_number = +char_(n);
 
 	integer_number_str = +char_("0-9");
 

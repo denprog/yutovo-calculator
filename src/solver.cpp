@@ -15,27 +15,36 @@ Integer Solver<Integer>::operator()(NumberNode<Integer> const& op) const
 template<>
 Real Solver<Real>::operator()(NumberNode<Real> const& op) const
 {
-    return Real(op.number);
+    NumberNode<Real> _op = op;
+    if (decimal_point != '.')
+        std::replace(_op.number.begin(), _op.number.end(), decimal_point, '.');
+    return Real(_op.number);
 }
 
 template<>
 Rational Solver<Rational>::operator()(NumberNode<Rational> const& op) const
 {
-    auto p = op.number.find(U'.');
+    NumberNode<Rational> _op = op;
+    if (decimal_point != '.')
+        std::replace(_op.number.begin(), _op.number.end(), decimal_point, '.');
+    auto p = _op.number.find(U'.');
     if (p != std::string::npos)
     {
         std::u32string d = U"1";
-        for (int i = 0; i < op.number.length() - p - 1; ++i)
+        for (int i = 0; i < _op.number.length() - p - 1; ++i)
             d += U"0";
-        return Rational(op.number.substr(0, p)) + Rational(op.number.substr(p + 1, op.number.length() - p - 1)) / Rational(d);
+        return Rational(_op.number.substr(0, p)) + Rational(_op.number.substr(p + 1, _op.number.length() - p - 1)) / Rational(d);
     }
-    return Rational(op.number);
+    return Rational(_op.number);
 }
 
 template<>
 Complex Solver<Complex>::operator()(NumberNode<Complex> const& op) const
 {
-    return Complex(op.number);
+    NumberNode<Complex> _op = op;
+    if (decimal_point != '.')
+        std::replace(_op.number.begin(), _op.number.end(), decimal_point, '.');
+    return Complex(_op.number);
 }
 
 template<>

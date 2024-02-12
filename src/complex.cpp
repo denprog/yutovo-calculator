@@ -983,13 +983,13 @@ std::u32string Complex::ToString() const
     return re.ToString() + U"+i*" + im.ToString();
 }
 
-std::string Complex::ToStdString(int exp, int accuracy) const
+std::string Complex::ToStdString(int exp, int accuracy, char decimal_point) const
 {
     if (im == 0)
-        return re.ToStdString(exp, accuracy);
+        return re.ToStdString(exp, accuracy, decimal_point);
     if (re == 0)
-        return "i*" + im.ToStdString(exp, accuracy);
-    return re.ToStdString(exp, accuracy) + "+i*" + im.ToStdString(exp, accuracy);
+        return "i*" + im.ToStdString(exp, accuracy, decimal_point);
+    return re.ToStdString(exp, accuracy, decimal_point) + "+i*" + im.ToStdString(exp, accuracy, decimal_point);
 }
 
 Complex Complex::GetNumber()

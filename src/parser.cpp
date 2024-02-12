@@ -101,10 +101,13 @@ Complex second(const Complex& num, int& res_pos);
 Complex grad(const Complex& num, int& res_pos);
 
 template<>
-Parser<yutovo_calculator::Integer>::Parser(const int precision, const Language _language) : 
+Parser<yutovo_calculator::Integer>::Parser(const int precision, const Language _language, const char _decimal_point) : 
     solver(precision),
-    language(_language)
+    language(_language),
+    decimal_point(_decimal_point)
 {
+    solver.decimal_point = decimal_point;
+
     IntegerBinaryFunc binary_func = &pow;
     solver.AddBuiltinFunction("pow", binary_func);
 
@@ -119,10 +122,13 @@ Parser<yutovo_calculator::Integer>::Parser(const int precision, const Language _
 }
 
 template<>
-Parser<yutovo_calculator::Real>::Parser(const int precision, const Language _language) : 
+Parser<yutovo_calculator::Real>::Parser(const int precision, const Language _language, const char _decimal_point) : 
     solver(precision),
-    language(_language)
+    language(_language),
+    decimal_point(_decimal_point)
 {
+    solver.decimal_point = decimal_point;
+
     RealPrecisionVariable var;
     var = &pi;
     solver.AddBuiltinVariable("pi", var);
@@ -211,10 +217,13 @@ Parser<yutovo_calculator::Real>::Parser(const int precision, const Language _lan
 }
 
 template<>
-Parser<yutovo_calculator::Rational>::Parser(const int precision, const Language _language) : 
+Parser<yutovo_calculator::Rational>::Parser(const int precision, const Language _language, const char _decimal_point) : 
     solver(precision),
-    language(_language)
+    language(_language),
+    decimal_point(_decimal_point)
 {
+    solver.decimal_point = decimal_point;
+
     RationalBinaryFunc binary_func = &pow;
     solver.AddBuiltinFunction("pow", binary_func);
 
@@ -222,10 +231,13 @@ Parser<yutovo_calculator::Rational>::Parser(const int precision, const Language 
 }
 
 template<>
-Parser<yutovo_calculator::Complex>::Parser(const int precision, const Language _language) : 
+Parser<yutovo_calculator::Complex>::Parser(const int precision, const Language _language, const char _decimal_point) : 
     solver(precision),
-    language(_language)
+    language(_language),
+    decimal_point(_decimal_point)
 {
+    solver.decimal_point = decimal_point;
+
     ComplexPrecisionVariable var;
     var = &pi_complex;
     solver.AddBuiltinVariable("pi", var);
@@ -322,27 +334,32 @@ Parser<yutovo_calculator::Complex>::Parser(const int precision, const Language _
 }
 
 template<>
-void Parser<yutovo_calculator::Integer>::SetLanguage(Language _language)
+void Parser<yutovo_calculator::Integer>::SetLocale(Language _language, char _decimal_point)
 {
     language = _language;
+    decimal_point = _decimal_point;
 }
 
 template<>
-void Parser<yutovo_calculator::Real>::SetLanguage(Language _language)
+void Parser<yutovo_calculator::Real>::SetLocale(Language _language, char _decimal_point)
 {
     language = _language;
+    decimal_point = _decimal_point;
+    solver.decimal_point = decimal_point;
     InitUnits();
 }
 
 template<>
-void Parser<yutovo_calculator::Rational>::SetLanguage(Language _language)
+void Parser<yutovo_calculator::Rational>::SetLocale(Language _language, char _decimal_point)
 {
     language = _language;
+    decimal_point = _decimal_point;
+    solver.decimal_point = decimal_point;
     InitUnits();
 }
 
 template<>
-void Parser<yutovo_calculator::Complex>::SetLanguage(Language _language)
+void Parser<yutovo_calculator::Complex>::SetLocale(Language _language, char _decimal_point)
 {
     language = _language;
     switch (language)
@@ -354,6 +371,8 @@ void Parser<yutovo_calculator::Complex>::SetLanguage(Language _language)
         solver.im = U"i";
         break;
     }
+    decimal_point = _decimal_point;
+    solver.decimal_point = decimal_point;
 }
 
 };

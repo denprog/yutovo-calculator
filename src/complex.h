@@ -261,7 +261,7 @@ public:
 
 public:
     std::u32string ToString() const;
-    std::string ToStdString(int exp, int accuracy) const;
+    std::string ToStdString(int exp, int accuracy, char decimal_point = '.') const;
 
     Complex GetNumber();
 

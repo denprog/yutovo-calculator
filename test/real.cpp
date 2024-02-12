@@ -74,6 +74,15 @@ TEST_F(CalcTestReal, numbers7)
     EXPECT_THROW(parser.Parse(ElementId{0, 0, 0, 0, 1}, U"E-1;"), yutovo_calculator::SyntaxException);
 }
 
+TEST_F(CalcTestReal, numbers8)
+{
+    parser.SetLocale(Language::Russian, ',');
+    auto res = parser.Parse(ElementId{0, 0, 2}, U"21,2;").ToStdString(3, 3, ',');
+    ASSERT_TRUE(res == "21,2E+0") << res;
+    res = parser.Parse(ElementId{0, 0, 2}, U"21.2;").ToStdString(3, 3, ',');
+    ASSERT_TRUE(res == "21,2E+0") << res;
+}
+
 TEST_F(CalcTestReal, arithmetic1)
 {
     Real res = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"10%75;");
@@ -643,7 +652,7 @@ TEST_F(CalcTestReal, units28)
 
 TEST_F(CalcTestReal, units29)
 {
-    parser.SetLanguage(Language::Russian);
+    parser.SetLocale(Language::Russian, ',');
     std::string s = parser.Parse(ElementId{0, 0, 0, 0, 0, 0, 0, 2, 0}, U"2*(м/сек);").ToStdString(3, 3);
     ASSERT_TRUE(s == "2.E+0((м)/(сек))") << s;
     EXPECT_THROW(parser.Parse(ElementId{0, 0, 1}, U"2*(m/s);"), yutovo_calculator::SyntaxException);

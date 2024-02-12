@@ -49,11 +49,11 @@ TEST_F(CalcTestComplex, numbers3)
 
 TEST_F(CalcTestComplex, numbers4)
 {
-    parser.SetLanguage(Language::Russian);
+    parser.SetLocale(Language::Russian, ',');
     std::string res;
-    EXPECT_THROW(parser.Parse(ElementId{0, 0, 0, 0, 1}, U"(1+2)*i;").ToStdString(3, 3), yutovo_calculator::SyntaxException);
-    res = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"(1+2)*j;").ToStdString(3, 3);
-    ASSERT_TRUE(res == "i*3.E+0") << res;
+    EXPECT_THROW(parser.Parse(ElementId{0, 0, 0, 0, 1}, U"(1+2)*i;").ToStdString(3, 3, ','), yutovo_calculator::SyntaxException);
+    res = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"(1+2)*j;").ToStdString(3, 3, ',');
+    ASSERT_TRUE(res == "i*3,E+0") << res;
 }
 
 TEST_F(CalcTestComplex, trigonometric1)

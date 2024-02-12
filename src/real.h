@@ -325,9 +325,9 @@ public:
 public:
 	std::u32string ToString() const;
 	void ToString(int exp, int accuracy, bool& mantissa_sign, std::u32string& mantissa, bool& exponent_sign, std::u32string& exponent) const;
-	void ToString(int exp, int accuracy, bool& mantissa_sign, std::string& mantissa, bool& exponent_sign, std::string& exponent) const;
+	void ToString(int exp, int accuracy, bool& mantissa_sign, std::string& mantissa, bool& exponent_sign, std::string& exponent, char decimal_point) const;
 	std::u32string ToString(int exp, int accuracy, bool with_unit = true) const;
-	std::string ToStdString(int exp, int accuracy) const;
+	std::string ToStdString(int exp, int accuracy, char decimal_point = '.') const;
 
 	Real GetNumber();
 
