@@ -361,4 +361,27 @@ TEST_F(CalcTestRational, units18)
     ASSERT_TRUE(t == "1/3(m)") << t;
 }
 
+TEST_F(CalcTestRational, compare1)
+{
+    std::string s = parser.Parse(ElementId{0, 0, 0, 0, 0, 0, 0, 2, 0}, U"(0<(2/3));").ToStdString();
+    ASSERT_TRUE(s == "1") << s;
+    s = parser.Parse(ElementId{0, 0, 0, 0, 0, 0, 0, 2, 0}, U"(2/3==2/3);").ToStdString();
+    ASSERT_TRUE(s == "1") << s;
+    s = parser.Parse(ElementId{0, 0, 0, 0, 0, 0, 0, 2, 0}, U"(4/3<>4/3);").ToStdString();
+    ASSERT_TRUE(s == "0") << s;
+}
+
+TEST_F(CalcTestRational, compare2)
+{
+    parser.Parse(ElementId{0, 0, 0, 0, 0}, U"a=5/2;");
+    std::string s = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"(a<10);").ToStdString();
+    ASSERT_TRUE(s == "1") << s;
+    s = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"(a>10);").ToStdString();
+    ASSERT_TRUE(s == "0") << s;
+    s = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"(a==5/2);").ToStdString();
+    ASSERT_TRUE(s == "1") << s;
+    s = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"(a<>10);").ToStdString();
+    ASSERT_TRUE(s == "1") << s;
+}
+
 }

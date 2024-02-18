@@ -23,6 +23,7 @@ namespace yutovo_calculator
 			boost::recursive_wrapper<FunctionCallNode<Number>>, 
 			boost::recursive_wrapper<FunctionCallStringNode<Number>>, 
 			boost::recursive_wrapper<NoFencesFunctionCallNode<Number>>, 
+			boost::recursive_wrapper<CompareNode<Number>>, 
 			boost::recursive_wrapper<ExpressionNode<Number>>>
 			Operand;
 
@@ -140,6 +141,11 @@ namespace yutovo_calculator
 			UpdatePosition(pos, op);
 		}
 
+		void operator()(CompareNode<Number>& op, std::u32string::iterator pos) const
+		{
+			UpdatePosition(pos, op);
+		}
+
 		template<typename Num>
 		struct OperandVisitor
 		{
@@ -208,6 +214,11 @@ namespace yutovo_calculator
 			}
 
 			void operator()(NoFencesFunctionCallNode<Num> const& op) const
+			{
+				annotation->UpdatePosition(iter, op);
+			}
+
+			void operator()(CompareNode<Num> const& op) const
 			{
 				annotation->UpdatePosition(iter, op);
 			}

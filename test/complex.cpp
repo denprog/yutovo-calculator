@@ -420,4 +420,27 @@ TEST_F(CalcTestComplex, variables2)
     ASSERT_TRUE(s == "2.5E+0") << s;
 }
 
+TEST_F(CalcTestComplex, compare1)
+{
+    std::string s = parser.Parse(ElementId{0, 0, 0, 0, 0, 0, 0, 2, 0}, U"(0<3);").ToStdString(3, 3);
+    ASSERT_TRUE(s == "1.E+0") << s;
+    s = parser.Parse(ElementId{0, 0, 0, 0, 0, 0, 0, 2, 0}, U"((3+5*i)==(3+5*i));").ToStdString(3, 3);
+    ASSERT_TRUE(s == "1.E+0") << s;
+    s = parser.Parse(ElementId{0, 0, 0, 0, 0, 0, 0, 2, 0}, U"((3+5*i)<>(3+5*i));").ToStdString(3, 3);
+    ASSERT_TRUE(s == "0.E+0") << s;
+}
+
+TEST_F(CalcTestComplex, compare2)
+{
+    parser.Parse(ElementId{0, 0, 0, 0, 0}, U"a=3;");
+    std::string s = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"(a<10);").ToStdString(3, 3);
+    ASSERT_TRUE(s == "1.E+0") << s;
+    s = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"(a>10);").ToStdString(3, 3);
+    ASSERT_TRUE(s == "0.E+0") << s;
+    s = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"(a==3+5*i);").ToStdString(3, 3);
+    ASSERT_TRUE(s == "0.E+0") << s;
+    s = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"(a<>3+5*i);").ToStdString(3, 3);
+    ASSERT_TRUE(s == "1.E+0") << s;
+}
+
 }

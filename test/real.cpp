@@ -670,4 +670,27 @@ TEST_F(CalcTestReal, units31)
     ASSERT_TRUE(s == "1.2E+0(m)") << s;
 }
 
+TEST_F(CalcTestReal, compare1)
+{
+    std::string s = parser.Parse(ElementId{0, 0, 0, 0, 0, 0, 0, 2, 0}, U"(0<10);").ToStdString(3, 3);
+    ASSERT_TRUE(s == "1.E+0") << s;
+    s = parser.Parse(ElementId{0, 0, 0, 0, 0, 0, 0, 2, 0}, U"(10==10);").ToStdString(3, 3);
+    ASSERT_TRUE(s == "1.E+0") << s;
+    s = parser.Parse(ElementId{0, 0, 0, 0, 0, 0, 0, 2, 0}, U"(10<>10);").ToStdString(3, 3);
+    ASSERT_TRUE(s == "0.E+0") << s;
+}
+
+TEST_F(CalcTestReal, compare2)
+{
+    parser.Parse(ElementId{0, 0, 0, 0, 0}, U"a=5;");
+    std::string s = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"(a<10);").ToStdString(3, 3);
+    ASSERT_TRUE(s == "1.E+0") << s;
+    s = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"(a>10);").ToStdString(3, 3);
+    ASSERT_TRUE(s == "0.E+0") << s;
+    s = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"(a==10);").ToStdString(3, 3);
+    ASSERT_TRUE(s == "0.E+0") << s;
+    s = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"(a<>10.);").ToStdString(3, 3);
+    ASSERT_TRUE(s == "1.E+0") << s;
+}
+
 }

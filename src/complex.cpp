@@ -391,7 +391,7 @@ bool operator==(const float num1, const Complex& num2)
 
 bool operator!=(const Complex& num1, const Complex& num2)
 {
-    return (num1.re != num2.re) || (num1.im == num2.im);
+    return (num1.re != num2.re) || (num1.im != num2.im);
 }
 
 bool operator!=(const Complex& num1, const int num2)

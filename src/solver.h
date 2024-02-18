@@ -312,6 +312,21 @@ struct Solver : public boost::static_visitor<Number>
         return arg1 / arg2 * (*this)(op.identifier);
     }
 
+    Number operator()(CompareNode<Number> const& op) const
+    {
+        Number left = (*this)(op.left);
+        Number right = (*this)(op.right);
+        if (op.sign == U"<")
+            return left < right ? Number(precision, 1) : Number(precision, 0);
+        else if (op.sign == U">")
+            return left > right ? Number(precision, 1) : Number(precision, 0);
+        else if (op.sign == U"==")
+            return left == right ? Number(precision, 1) : Number(precision, 0);
+        else if (op.sign == U"<>")
+            return left != right ? Number(precision, 1) : Number(precision, 0);
+        throw SyntaxException(op.id, ArgumentIsOver, op.pos, op.line);
+    }
+
     //The beginning of the solving.
     Number operator()(ScriptNode<Number> const& script, ElementId _id, AngleMeasure _default_angle_measure, AngleMeasure _result_angle_measure, int _precision) const;
 

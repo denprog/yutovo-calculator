@@ -262,4 +262,27 @@ TEST_F(CalcTestInteger, builtin_functions1)
     ASSERT_TRUE(res.ToString(10) == U"5040") << res.ToStdString(10);
 }
 
+TEST_F(CalcTestInteger, compare1)
+{
+    std::string s = parser.Parse(ElementId{0, 0, 0, 0, 0, 0, 0, 2, 0}, U"(0<10);").ToStdString();
+    ASSERT_TRUE(s == "1") << s;
+    s = parser.Parse(ElementId{0, 0, 0, 0, 0, 0, 0, 2, 0}, U"(10==10);").ToStdString();
+    ASSERT_TRUE(s == "1") << s;
+    s = parser.Parse(ElementId{0, 0, 0, 0, 0, 0, 0, 2, 0}, U"(10<>10);").ToStdString();
+    ASSERT_TRUE(s == "0") << s;
+}
+
+TEST_F(CalcTestInteger, compare2)
+{
+    parser.Parse(ElementId{0, 0, 0, 0, 0}, U"a=5;");
+    std::string s = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"(a<10);").ToStdString();
+    ASSERT_TRUE(s == "1") << s;
+    s = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"(a>10);").ToStdString();
+    ASSERT_TRUE(s == "0") << s;
+    s = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"(a==10);").ToStdString();
+    ASSERT_TRUE(s == "0") << s;
+    s = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"(a<>10);").ToStdString();
+    ASSERT_TRUE(s == "1") << s;
+}
+
 }
