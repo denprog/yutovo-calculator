@@ -9,592 +9,592 @@ namespace yutovo_calculator
 
 Rational::Rational()
 {
-	mpq_init(number);
+    mpq_init(number);
 
 #ifdef TRACE_OUTPUT
-	UpdateNumberStr();
+    UpdateNumberStr();
 #endif
 }
 
 Rational::Rational(const Rational& source)
 {
-	mpq_init(number);
-	mpq_set(number, source.number);
-	unit = source.unit;
+    mpq_init(number);
+    mpq_set(number, source.number);
+    unit = source.unit;
 
 #ifdef TRACE_OUTPUT
-	UpdateNumberStr();
+    UpdateNumberStr();
 #endif
 }
 
 Rational::Rational(const int num)
 {
-	mpq_init(number);
-	mpq_set_si(number, num, 1);
+    mpq_init(number);
+    mpq_set_si(number, num, 1);
 
 #ifdef TRACE_OUTPUT
-	UpdateNumberStr();
+    UpdateNumberStr();
 #endif
 }
 
 Rational::Rational(const int precision, const double num)
 {
-	mpq_init(number);
-	mpq_set_d(number, num);
+    mpq_init(number);
+    mpq_set_d(number, num);
 
 #ifdef TRACE_OUTPUT
-	UpdateNumberStr();
+    UpdateNumberStr();
 #endif
 }
 
 Rational::Rational(const int precision, const int num)
 {
-	mpq_init(number);
-	mpq_set_si(number, num, 1);
+    mpq_init(number);
+    mpq_set_si(number, num, 1);
 
 #ifdef TRACE_OUTPUT
-	UpdateNumberStr();
+    UpdateNumberStr();
 #endif
 }
 
 Rational::Rational(const int precision, Unit& _unit) :
-	unit(_unit)
+    unit(_unit)
 {
-	mpq_init(number);
-	mpq_set_si(number, 1, 1);
+    mpq_init(number);
+    mpq_set_si(number, 1, 1);
 
 #ifdef TRACE_OUTPUT
-	UpdateNumberStr();
+    UpdateNumberStr();
 #endif
 }
 
 Rational::Rational(Unit& _unit)
 {
-	mpq_init(number);
-	mpq_set_si(number, 1, 1);
-	unit = _unit;
+    mpq_init(number);
+    mpq_set_si(number, 1, 1);
+    unit = _unit;
 
 #ifdef TRACE_OUTPUT
-	UpdateNumberStr();
+    UpdateNumberStr();
 #endif
 }
 
 Rational::Rational(const std::u32string& num)
 {
-	mpq_init(number);
-	mpq_set_str(number, (ToBasicString(num)).c_str(), 10);
+    mpq_init(number);
+    mpq_set_str(number, (ToBasicString(num)).c_str(), 10);
 
 #ifdef TRACE_OUTPUT
-	UpdateNumberStr();
+    UpdateNumberStr();
 #endif
 }
 
 Rational::~Rational()
 {
-	mpq_clear(number);
+    mpq_clear(number);
 }
-	
+    
 Rational& Rational::operator=(const Rational& source)
 {
-	if (this == &source)
-		return *this;
+    if (this == &source)
+        return *this;
 
-	mpq_clear(number);
-	mpq_init(number);
+    mpq_clear(number);
+    mpq_init(number);
 
-	mpq_set(number, source.number);
+    mpq_set(number, source.number);
 
-	unit = source.unit;
+    unit = source.unit;
 
 #ifdef TRACE_OUTPUT
-	UpdateNumberStr();
+    UpdateNumberStr();
 #endif
 
-	return *this;
+    return *this;
 }
 
 Rational& Rational::operator=(const std::u32string& source)
 {
-	if (source.find(L'.') != -1)
-	{
-		std::u32string intPart, fractPart;
-		int i = 0;
+    if (source.find(L'.') != -1)
+    {
+        std::u32string intPart, fractPart;
+        int i = 0;
 
-		while (i < (int)source.length() && source[i] != '.')
-		{
-			intPart += source[i];
-			++i;
-		}
+        while (i < (int)source.length() && source[i] != '.')
+        {
+            intPart += source[i];
+            ++i;
+        }
 
-		++i;
+        ++i;
 
-		while (i < (int)source.length())
-		{
-			fractPart += source[i];
-			++i;
-		}
+        while (i < (int)source.length())
+        {
+            fractPart += source[i];
+            ++i;
+        }
 
-		if (fractPart != U"")
-		{
-			int n = fractPart.length();
-			std::u32string t(U"1");
+        if (fractPart != U"")
+        {
+            int n = fractPart.length();
+            std::u32string t(U"1");
 
-			for (int j = 0; j < n; ++j)
-				t += '0';
+            for (int j = 0; j < n; ++j)
+                t += '0';
 
-			*this = Rational(fractPart) / Rational(t) + Rational(intPart);
+            *this = Rational(fractPart) / Rational(t) + Rational(intPart);
 
-			return *this;
-		}
-	}
+            return *this;
+        }
+    }
 
-	mpq_set_str(number, ToBasicString(source).c_str(), DEFAULT_BASE);
+    mpq_set_str(number, ToBasicString(source).c_str(), DEFAULT_BASE);
 
 #ifdef TRACE_OUTPUT
-	UpdateNumberStr();
+    UpdateNumberStr();
 #endif
-	return *this;
+    return *this;
 }
 
 Rational Rational::operator+()
 {
-	Rational res(*this);
+    Rational res(*this);
 
 #ifdef TRACE_OUTPUT
-	res.UpdateNumberStr();
+    res.UpdateNumberStr();
 #endif
-	return res;
+    return res;
 }
 
 Rational Rational::operator-()
 {
-	Rational res(*this);
+    Rational res(*this);
 
-	mpq_neg(res.number, number);
+    mpq_neg(res.number, number);
 
 #ifdef TRACE_OUTPUT
-	res.UpdateNumberStr();
+    res.UpdateNumberStr();
 #endif
-	return res;
+    return res;
 }
 
 Rational operator+(const Rational& num1, const Rational& num2)
 {
-	Rational res;
+    Rational res;
 
-	mpq_add(res.number, num1.number, num2.number);
+    mpq_add(res.number, num1.number, num2.number);
 
-	res.unit = num1.unit + num2.unit;
+    res.unit = num1.unit + num2.unit;
 
 #ifdef TRACE_OUTPUT
-	res.UpdateNumberStr();
+    res.UpdateNumberStr();
 #endif
-	return res;
+    return res;
 }
 
 Rational operator+(const Rational& num1, const int num2)
 {
-	Rational res;
-	Rational _num2(num2);
+    Rational res;
+    Rational _num2(num2);
 
-	mpq_add(res.number, num1.number, _num2.number);
+    mpq_add(res.number, num1.number, _num2.number);
 
-	res.unit = num1.unit + num2;
+    res.unit = num1.unit + num2;
 
 #ifdef TRACE_OUTPUT
-	res.UpdateNumberStr();
+    res.UpdateNumberStr();
 #endif
-	return res;
+    return res;
 }
 
 Rational operator+(const int num1, const Rational& num2)
 {
-	Rational res;
-	Rational _num1(num1);
+    Rational res;
+    Rational _num1(num1);
 
-	mpq_add(res.number, _num1.number, num2.number);
+    mpq_add(res.number, _num1.number, num2.number);
 
-	res.unit = num1 + num2.unit;
+    res.unit = num1 + num2.unit;
 
 #ifdef TRACE_OUTPUT
-	res.UpdateNumberStr();
+    res.UpdateNumberStr();
 #endif
-	return res;
+    return res;
 }
 
 Rational operator-(const Rational& num1, const Rational& num2)
 {
-	Rational res;
+    Rational res;
 
-	mpq_sub(res.number, num1.number, num2.number);
+    mpq_sub(res.number, num1.number, num2.number);
 
-	res.unit = num1.unit - num2.unit;
+    res.unit = num1.unit - num2.unit;
 
 #ifdef TRACE_OUTPUT
-	res.UpdateNumberStr();
+    res.UpdateNumberStr();
 #endif
-	return res;
+    return res;
 }
 
 Rational operator-(const Rational& num1, const int num2)
 {
-	Rational res;
-	Rational _num2(num2);
+    Rational res;
+    Rational _num2(num2);
 
-	mpq_sub(res.number, num1.number, _num2.number);
+    mpq_sub(res.number, num1.number, _num2.number);
 
-	res.unit = num1.unit - num2;
+    res.unit = num1.unit - num2;
 
 #ifdef TRACE_OUTPUT
-	res.UpdateNumberStr();
+    res.UpdateNumberStr();
 #endif
-	return res;
+    return res;
 }
 
 Rational operator-(const int num1, const Rational& num2)
 {
-	Rational res;
-	Rational _num1(num1);
+    Rational res;
+    Rational _num1(num1);
 
-	mpq_sub(res.number, _num1.number, num2.number);
+    mpq_sub(res.number, _num1.number, num2.number);
 
-	res.unit = num1 - num2.unit;
+    res.unit = num1 - num2.unit;
 
 #ifdef TRACE_OUTPUT
-	res.UpdateNumberStr();
+    res.UpdateNumberStr();
 #endif
-	return res;
+    return res;
 }
 
 Rational operator*(const Rational& num1, const Rational& num2)
 {
-	Rational res;
+    Rational res;
 
-	mpq_mul(res.number, num1.number, num2.number);
+    mpq_mul(res.number, num1.number, num2.number);
 
-	res.unit = num1.unit * num2.unit;
+    res.unit = num1.unit * num2.unit;
 
 #ifdef TRACE_OUTPUT
-	res.UpdateNumberStr();
+    res.UpdateNumberStr();
 #endif
-	return res;
+    return res;
 }
 
 Rational operator*(const Rational& num1, const int num2)
 {
-	Rational res;
-	Rational _num2(num2);
+    Rational res;
+    Rational _num2(num2);
 
-	mpq_mul(res.number, num1.number, _num2.number);
+    mpq_mul(res.number, num1.number, _num2.number);
 
-	res.unit = num1.unit * num2;
+    res.unit = num1.unit * num2;
 
 #ifdef TRACE_OUTPUT
-	res.UpdateNumberStr();
+    res.UpdateNumberStr();
 #endif
-	return res;
+    return res;
 }
 
 Rational operator*(const int num1, const Rational& num2)
 {
-	Rational res;
-	Rational _num1(num1);
+    Rational res;
+    Rational _num1(num1);
 
-	mpq_mul(res.number, _num1.number, num2.number);
+    mpq_mul(res.number, _num1.number, num2.number);
 
-	res.unit = num1 * num2.unit;
+    res.unit = num1 * num2.unit;
 
 #ifdef TRACE_OUTPUT
-	res.UpdateNumberStr();
+    res.UpdateNumberStr();
 #endif
-	return res;
+    return res;
 }
 
 Rational operator/(const Rational& num1, const Rational& num2)
 {
-	Rational res;
+    Rational res;
 
-	if (num2 == 0)
-		throw MathException(DivisionByZero);
+    if (num2 == 0)
+        throw MathException(DivisionByZero);
 
-	mpq_div(res.number, num1.number, num2.number);
+    mpq_div(res.number, num1.number, num2.number);
 
-	res.unit = num1.unit / num2.unit;
+    res.unit = num1.unit / num2.unit;
 
 #ifdef TRACE_OUTPUT
-	res.UpdateNumberStr();
+    res.UpdateNumberStr();
 #endif
-	return res;
+    return res;
 }
 
 Rational operator/(const Rational& num1, const int num2)
 {
-	Rational res;
-	Rational _num2(num2);
+    Rational res;
+    Rational _num2(num2);
 
-	if (num2 == 0)
-		throw MathException(DivisionByZero);
+    if (num2 == 0)
+        throw MathException(DivisionByZero);
 
-	mpq_div(res.number, num1.number, _num2.number);
+    mpq_div(res.number, num1.number, _num2.number);
 
-	res.unit = num1.unit / num2;
+    res.unit = num1.unit / num2;
 
 #ifdef TRACE_OUTPUT
-	res.UpdateNumberStr();
+    res.UpdateNumberStr();
 #endif
-	return res;
+    return res;
 }
 
 Rational operator/(const int num1, const Rational& num2)
 {
-	Rational res;
-	Rational _num1(num1);
+    Rational res;
+    Rational _num1(num1);
 
-	if (num2 == 0)
-		throw MathException(DivisionByZero);
+    if (num2 == 0)
+        throw MathException(DivisionByZero);
 
-	mpq_div(res.number, _num1.number, num2.number);
+    mpq_div(res.number, _num1.number, num2.number);
 
-	res.unit = num1 / num2.unit;
+    res.unit = num1 / num2.unit;
 
-	return res;
+    return res;
 }
 
 void Rational::operator+=(const Rational& num)
 {
-	*this = *this + num;
+    *this = *this + num;
 }
 
 void Rational::operator-=(const Rational& num)
 {
-	*this = *this - num;
+    *this = *this - num;
 }
 
 void Rational::operator*=(const Rational& num)
 {
-	*this = *this * num;
+    *this = *this * num;
 }
 
 void Rational::operator/=(const Rational& num)
 {
-	*this = *this / num;
+    *this = *this / num;
 }
 
 void Rational::operator=(const int num)
 {
-	*this = num;
+    *this = num;
 }
 
 Rational::operator int() const
 {
-	mpz_t numer;
-	mpz_init(numer);
-	mpq_get_num(numer, number);
-	return mpz_get_si(numer);
+    mpz_t numer;
+    mpz_init(numer);
+    mpq_get_num(numer, number);
+    return mpz_get_si(numer);
 }
 
 bool operator==(const Rational& num1, const Rational& num2)
 {
-	return mpq_cmp(num1.number, num2.number) == 0;
+    return mpq_cmp(num1.number, num2.number) == 0;
 }
 
 bool operator==(const Rational& num1, const int num2)
 {
-	return mpq_cmp_si(num1.number, num2, 1) == 0;
+    return mpq_cmp_si(num1.number, num2, 1) == 0;
 }
 
 bool operator==(const int num1, const Rational& num2)
 {
-	return mpq_cmp_si(num2.number, num1, 1) == 0;
+    return mpq_cmp_si(num2.number, num1, 1) == 0;
 }
 
 bool operator!=(const Rational& num1, const Rational& num2)
 {
-	return mpq_cmp(num1.number, num2.number) != 0;
+    return mpq_cmp(num1.number, num2.number) != 0;
 }
 
 bool operator!=(const Rational& num1, const int num2)
 {
-	return mpq_cmp_si(num1.number, num2, 1) != 0;
+    return mpq_cmp_si(num1.number, num2, 1) != 0;
 }
 
 bool operator!=(const int num1, const Rational& num2)
 {
-	return mpq_cmp_si(num2.number, num1, 1) == 0;
+    return mpq_cmp_si(num2.number, num1, 1) == 0;
 }
 
 bool operator>(const Rational& num1, const Rational& num2)
 {
-	return mpq_cmp(num1.number, num2.number) > 0;
+    return mpq_cmp(num1.number, num2.number) > 0;
 }
 
 bool operator>(const Rational& num1, const int num2)
 {
-	return mpq_cmp_si(num1.number, num2, 1) > 0;
+    return mpq_cmp_si(num1.number, num2, 1) > 0;
 }
 
 bool operator>(const int num1, const Rational& num2)
 {
-	return mpq_cmp_si(num2.number, num1, 1) < 0;
+    return mpq_cmp_si(num2.number, num1, 1) < 0;
 }
 
 bool operator>=(const Rational& num1, const Rational& num2)
 {
-	return mpq_cmp(num1.number, num2.number) >= 0;
+    return mpq_cmp(num1.number, num2.number) >= 0;
 }
 
 bool operator>=(const Rational& num1, const int num2)
 {
-	return mpq_cmp_si(num1.number, num2, 1) >= 0;
+    return mpq_cmp_si(num1.number, num2, 1) >= 0;
 }
 
 bool operator>=(const int num1, const Rational& num2)
 {
-	return mpq_cmp_si(num2.number, num1, 1) <= 0;
+    return mpq_cmp_si(num2.number, num1, 1) <= 0;
 }
 
 bool operator<(const Rational& num1, const Rational& num2)
 {
-	return mpq_cmp(num1.number, num2.number) < 0;
+    return mpq_cmp(num1.number, num2.number) < 0;
 }
 
 bool operator<(const Rational& num1, const int num2)
 {
-	return mpq_cmp_si(num1.number, num2, 1) < 0;
+    return mpq_cmp_si(num1.number, num2, 1) < 0;
 }
 
 bool operator<(const int num1, const Rational& num2)
 {
-	return mpq_cmp_si(num2.number, num1, 1) > 0;
+    return mpq_cmp_si(num2.number, num1, 1) > 0;
 }
 
 bool operator<=(const Rational& num1, const Rational& num2)
 {
-	return mpq_cmp(num1.number, num2.number) <= 0;
+    return mpq_cmp(num1.number, num2.number) <= 0;
 }
 
 bool operator<=(const Rational& num1, const int num2)
 {
-	return mpq_cmp_si(num1.number, num2, 1) <= 0;
+    return mpq_cmp_si(num1.number, num2, 1) <= 0;
 }
 
 bool operator<=(const int num1, const Rational& num2)
 {
-	return mpq_cmp_si(num2.number, num1, 1) >= 0;
+    return mpq_cmp_si(num2.number, num1, 1) >= 0;
 }
 
 Rational pow(const Rational& num1, const Rational& num2)
 {
-	if (!num2.GetDenomerator())
-		throw MathException(ArgumentIsOver);
-	Rational res(num1);
-	Integer n = num2.GetNumerator();
-	if (n < 1)
-		throw MathException(ArgumentIsOver);
-	Integer i = 1;
-	while (i < n)
-	{
-		res = res * num1;
-		i += 1;
-	}
-	return res;
+    if (!num2.GetDenomerator())
+        throw MathException(ArgumentIsOver);
+    Rational res(num1);
+    Integer n = num2.GetNumerator();
+    if (n < 1)
+        throw MathException(ArgumentIsOver);
+    Integer i = 1;
+    while (i < n)
+    {
+        res = res * num1;
+        i += 1;
+    }
+    return res;
 }
 
 Rational pow(const Rational& num1, const int num2)
 {
-	Rational res(num1);
-	if (num2 < 1)
-		throw MathException(ArgumentIsOver);
-	Integer i = 1;
-	while (i < num2)
-	{
-		res = res * num1;
-		i += 1;
-	}
-	return res;
+    Rational res(num1);
+    if (num2 < 1)
+        throw MathException(ArgumentIsOver);
+    Integer i = 1;
+    while (i < num2)
+    {
+        res = res * num1;
+        i += 1;
+    }
+    return res;
 }
 
 Integer Rational::GetNumerator() const
 {
-	Integer numerator;
-	mpz_t numer;
-	mpz_init(numer);
+    Integer numerator;
+    mpz_t numer;
+    mpz_init(numer);
 
-	mpq_get_num(numer, number);
-	numerator = numer;
+    mpq_get_num(numer, number);
+    numerator = numer;
 
-	return numerator;
+    return numerator;
 }
 
 Integer Rational::GetDenomerator() const
 {
-	Integer denomerator;
-	mpz_t denom;
-	mpz_init(denom);
+    Integer denomerator;
+    mpz_t denom;
+    mpz_init(denom);
 
-	mpq_get_den(denom, number);
-	denomerator = denom;
+    mpq_get_den(denom, number);
+    denomerator = denom;
 
-	return denomerator;
+    return denomerator;
 }
 
 std::u32string Rational::ToString(bool with_unit) const
 {
-	char* tmp = (char*)malloc(mpz_sizeinbase(mpq_numref(number), 10) + 
-		mpz_sizeinbase(mpq_denref(number), 10) + 3);
+    char* tmp = (char*)malloc(mpz_sizeinbase(mpq_numref(number), 10) + 
+        mpz_sizeinbase(mpq_denref(number), 10) + 3);
 
-	char* str = mpq_get_str(tmp, 10, number);
-	std::u32string res(ToUtfString(str));
-	free(str);
+    char* str = mpq_get_str(tmp, 10, number);
+    std::u32string res(ToUtfString(str));
+    free(str);
 
-	if (with_unit)
-		res += unit.ToString();
+    if (with_unit)
+        res += unit.ToString();
 
-	return res;
+    return res;
 }
 
 std::u32string Rational::ToString(int, int, bool with_unit) const
 {
-	return ToString(with_unit);
+    return ToString(with_unit);
 }
 
 std::string Rational::ToStdString() const
 {
-	return ToBasicString(ToString());
+    return ToBasicString(ToString());
 }
 
 void Rational::ToProper(Integer& integer, Integer& numerator, Integer& denomerator) const
 {
-	auto n = GetNumerator();
-	auto d = GetDenomerator();
-	auto i = n / d;
-	if (n < 0)
-	{
-		if (d < 0)
-			n = (-n) % (-d);
-		else
-		{
-			n = (-n) % d;
-			if (i == 0)
-				n = -n;
-		}
-	}
-	else if (d < 0)
-	{
-		n = n % (-d);
-	}
-	else
-		n = n % d;
+    auto n = GetNumerator();
+    auto d = GetDenomerator();
+    auto i = n / d;
+    if (n < 0)
+    {
+        if (d < 0)
+            n = (-n) % (-d);
+        else
+        {
+            n = (-n) % d;
+            if (i == 0)
+                n = -n;
+        }
+    }
+    else if (d < 0)
+    {
+        n = n % (-d);
+    }
+    else
+        n = n % d;
 
-	integer = i;
-	numerator = n;
-	denomerator = d;
+    integer = i;
+    numerator = n;
+    denomerator = d;
 }
 
 #ifdef TRACE_OUTPUT
 void Rational::UpdateNumberStr()
 {
-	number_str = ToString();
+    number_str = ToString();
 }
 #endif
 

@@ -16,120 +16,120 @@ namespace yutovo_calculator
 class Rational
 {
 public:
-	Rational();
-	Rational(const Rational& source);
-	Rational(const int num);
-	Rational(const int precision, const double num);
-	Rational(const int precision, const int num);
-	Rational(const int precision, Unit& _unit);
-	Rational(Unit& _unit);
-	Rational(const std::u32string& num);
-	~Rational();
-	
+    Rational();
+    Rational(const Rational& source);
+    Rational(const int num);
+    Rational(const int precision, const double num);
+    Rational(const int precision, const int num);
+    Rational(const int precision, Unit& _unit);
+    Rational(Unit& _unit);
+    Rational(const std::u32string& num);
+    ~Rational();
+    
 public:
-	typedef Rational value_type;
+    typedef Rational value_type;
 
-	Rational& operator=(const Rational& source);
-	Rational& operator=(const std::u32string& source);
-	
-	Rational operator+();
-	Rational operator-();
+    Rational& operator=(const Rational& source);
+    Rational& operator=(const std::u32string& source);
+    
+    Rational operator+();
+    Rational operator-();
 
-	friend Rational operator+(const Rational& num1, const Rational& num2);
-	friend Rational operator+(const Rational& num1, const int num2);
-	friend Rational operator+(const int num1, const Rational& num2);
+    friend Rational operator+(const Rational& num1, const Rational& num2);
+    friend Rational operator+(const Rational& num1, const int num2);
+    friend Rational operator+(const int num1, const Rational& num2);
 
-	friend Rational operator-(const Rational& num1, const Rational& num2);
-	friend Rational operator-(const Rational& num1, const int num2);
-	friend Rational operator-(const int num1, const Rational& num2);
+    friend Rational operator-(const Rational& num1, const Rational& num2);
+    friend Rational operator-(const Rational& num1, const int num2);
+    friend Rational operator-(const int num1, const Rational& num2);
 
-	friend Rational operator*(const Rational& num1, const Rational& num2);
-	friend Rational operator*(const Rational& num1, const int num2);
-	friend Rational operator*(const int num1, const Rational& num2);
+    friend Rational operator*(const Rational& num1, const Rational& num2);
+    friend Rational operator*(const Rational& num1, const int num2);
+    friend Rational operator*(const int num1, const Rational& num2);
 
-	friend Rational operator/(const Rational& num1, const Rational& num2);
-	friend Rational operator/(const Rational& num1, const int num2);
-	friend Rational operator/(const int num1, const Rational& num2);
+    friend Rational operator/(const Rational& num1, const Rational& num2);
+    friend Rational operator/(const Rational& num1, const int num2);
+    friend Rational operator/(const int num1, const Rational& num2);
 
-	void operator+=(const Rational& num);
+    void operator+=(const Rational& num);
 
-	void operator-=(const Rational& num);
+    void operator-=(const Rational& num);
 
-	void operator*=(const Rational& num);
+    void operator*=(const Rational& num);
 
-	void operator/=(const Rational& num);
-
-public:
-	void operator=(const int num);
-	
-	operator int() const;
+    void operator/=(const Rational& num);
 
 public:
-	friend bool operator==(const Rational& num1, const Rational& num2);
-	friend bool operator==(const Rational& num1, const int num2);
-	friend bool operator==(const int num1, const Rational& num2);
-
-	friend bool operator!=(const Rational& num1, const Rational& num2);
-	friend bool operator!=(const Rational& num1, const int num2);
-	friend bool operator!=(const int num1, const Rational& num2);
-
-	friend bool operator>(const Rational& num1, const Rational& num2);
-	friend bool operator>(const Rational& num1, const int num2);
-	friend bool operator>(const int num1, const Rational& num2);
-
-	friend bool operator>=(const Rational& num1, const Rational& num2);
-	friend bool operator>=(const Rational& num1, const int num2);
-	friend bool operator>=(const int num1, const Rational& num2);
-
-	friend bool operator<(const Rational& num1, const Rational& num2);
-	friend bool operator<(const Rational& num1, const int num2);
-	friend bool operator<(const int num1, const Rational& num2);
-
-	friend bool operator<=(const Rational& num1, const Rational& num2);
-	friend bool operator<=(const Rational& num1, const int num2);
-	friend bool operator<=(const int num1, const Rational& num2);
+    void operator=(const int num);
+    
+    operator int() const;
 
 public:
-	friend Rational pow(const Rational& num1, const Rational& num2);
-	friend Rational pow(const Rational& num1, const int num2);
+    friend bool operator==(const Rational& num1, const Rational& num2);
+    friend bool operator==(const Rational& num1, const int num2);
+    friend bool operator==(const int num1, const Rational& num2);
+
+    friend bool operator!=(const Rational& num1, const Rational& num2);
+    friend bool operator!=(const Rational& num1, const int num2);
+    friend bool operator!=(const int num1, const Rational& num2);
+
+    friend bool operator>(const Rational& num1, const Rational& num2);
+    friend bool operator>(const Rational& num1, const int num2);
+    friend bool operator>(const int num1, const Rational& num2);
+
+    friend bool operator>=(const Rational& num1, const Rational& num2);
+    friend bool operator>=(const Rational& num1, const int num2);
+    friend bool operator>=(const int num1, const Rational& num2);
+
+    friend bool operator<(const Rational& num1, const Rational& num2);
+    friend bool operator<(const Rational& num1, const int num2);
+    friend bool operator<(const int num1, const Rational& num2);
+
+    friend bool operator<=(const Rational& num1, const Rational& num2);
+    friend bool operator<=(const Rational& num1, const int num2);
+    friend bool operator<=(const int num1, const Rational& num2);
 
 public:
-	Integer GetNumerator() const;
-	Integer GetDenomerator() const;
-
-	std::u32string ToString(bool with_unit = true) const;
-	std::u32string ToString(int, int, bool with_unit = true) const;
-
-	int GetPrecision() const
-	{
-		return 0;
-	}
-
-	void SetPrecision(int precision)
-	{
-	}
-
-	void SetBitPrecision(const int precision)
-	{
-	}
-
-	std::string ToStdString() const;
-
-	void ToProper(Integer& integer, Integer& numerator, Integer& denomerator) const;
+    friend Rational pow(const Rational& num1, const Rational& num2);
+    friend Rational pow(const Rational& num1, const int num2);
 
 public:
-	Unit unit;
+    Integer GetNumerator() const;
+    Integer GetDenomerator() const;
+
+    std::u32string ToString(bool with_unit = true) const;
+    std::u32string ToString(int, int, bool with_unit = true) const;
+
+    int GetPrecision() const
+    {
+        return 0;
+    }
+
+    void SetPrecision(int precision)
+    {
+    }
+
+    void SetBitPrecision(const int precision)
+    {
+    }
+
+    std::string ToStdString() const;
+
+    void ToProper(Integer& integer, Integer& numerator, Integer& denomerator) const;
+
+public:
+    Unit unit;
 
 private:
 #ifdef TRACE_OUTPUT
-	void UpdateNumberStr();
+    void UpdateNumberStr();
 #endif
 
 private:
-	mpq_t number;
+    mpq_t number;
 
 #ifdef TRACE_OUTPUT
-	std::u32string number_str; //the std::u32string representation of the number for debug purposes
+    std::u32string number_str; //the std::u32string representation of the number for debug purposes
 #endif
 };
 
