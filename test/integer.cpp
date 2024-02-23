@@ -285,4 +285,26 @@ TEST_F(CalcTestInteger, compare2)
     ASSERT_TRUE(s == "1") << s;
 }
 
+TEST_F(CalcTestInteger, sum1)
+{
+    std::string s = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"loop(i=0,(i<=10),i=i+1,t=0,t=t+1);").ToStdString();
+    ASSERT_TRUE(s == "11") << s;
+    s = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"loop(i=1,(i<=10),i=i+1,t=0,t=t+i);").ToStdString();
+    ASSERT_TRUE(s == "55") << s;
+}
+
+TEST_F(CalcTestInteger, sum2)
+{
+    std::string s = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"loop(i=0,(i<=10),i=i+1,t1=0,t1=t1+loop(j=0,(j<=20),j=j+1,t2=0,t2=t2+i+j));").ToStdString();
+    ASSERT_TRUE(s == "3465") << s;
+}
+
+TEST_F(CalcTestInteger, prod1)
+{
+    std::string s = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"loop(i=0,(i<=10),i=i+1,t=1,t=t*2);").ToStdString();
+    ASSERT_TRUE(s == "2048") << s;
+    s = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"loop(i=1,(i<=10),i=i+1,t=1,t=t*i);").ToStdString();
+    ASSERT_TRUE(s == "3628800") << s;
+}
+
 }

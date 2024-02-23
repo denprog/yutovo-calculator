@@ -383,5 +383,26 @@ TEST_F(CalcTestRational, compare2)
     s = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"(a<>10);").ToStdString();
     ASSERT_TRUE(s == "1") << s;
 }
+TEST_F(CalcTestRational, sum1)
+{
+    std::string s = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"loop(i=0,(i<=10),i=i+1,t=0,t=t+1);").ToStdString();
+    ASSERT_TRUE(s == "11") << s;
+    s = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"loop(i=1,(i<=10),i=i+1,t=0,t=t+i);").ToStdString();
+    ASSERT_TRUE(s == "55") << s;
+}
+
+TEST_F(CalcTestRational, sum2)
+{
+    std::string s = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"loop(i=0,(i<=10),i=i+1,t1=0,t1=t1+loop(j=1,(j<=10),j=j+1,t2=0,t2=t2+i/j));").ToStdString();
+    ASSERT_TRUE(s == "81191/504") << s;
+}
+
+TEST_F(CalcTestRational, prod1)
+{
+    std::string s = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"loop(i=0,(i<=10),i=i+1,t=1,t=t*2/3);").ToStdString();
+    ASSERT_TRUE(s == "2048/177147") << s;
+    s = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"loop(i=1,(i<=10),i=i+1,t=1,t=t*i/5);").ToStdString();
+    ASSERT_TRUE(s == "145152/390625") << s;
+}
 
 }

@@ -320,11 +320,34 @@ struct Solver : public boost::static_visitor<Number>
             return left < right ? Number(precision, 1) : Number(precision, 0);
         else if (op.sign == U">")
             return left > right ? Number(precision, 1) : Number(precision, 0);
+        else if (op.sign == U"<=")
+            return left <= right ? Number(precision, 1) : Number(precision, 0);
+        else if (op.sign == U">=")
+            return left >= right ? Number(precision, 1) : Number(precision, 0);
         else if (op.sign == U"==")
             return left == right ? Number(precision, 1) : Number(precision, 0);
         else if (op.sign == U"<>")
             return left != right ? Number(precision, 1) : Number(precision, 0);
         throw SyntaxException(op.id, ArgumentIsOver, op.pos, op.line);
+    }
+
+    Number operator()(LoopNode<Number> const& op) const
+    {
+        Number counter = (*this)(op.counter.expression);
+        PushTempVariable(op.counter.name.name, counter);
+        Number counter_max = (*this)(op.counter_max);
+        Number res = (*this)(op.loop_var.expression);
+        PushTempVariable(op.loop_var.name.name, res);
+        while (counter_max != 0)
+        {
+            res = (*this)(op.loop_expression.expression);
+            SetTempVariable(op.loop_expression.name.name, res);
+            counter = (*this)(op.counter_increment.expression);
+            SetTempVariable(op.counter.name.name, counter);
+            counter_max = (*this)(op.counter_max);
+        }
+        PopTempVariables(2);
+        return res;
     }
 
     //The beginning of the solving.
@@ -334,8 +357,19 @@ struct Solver : public boost::static_visitor<Number>
     {
         symbols->temp_variables.push_back(TempVariable(name, value));
     }
-    
-    void PopTempVariable(int count = 1) const
+
+    void SetTempVariable(const std::u32string& name, Number& value) const
+    {
+        auto it = std::find_if(symbols->temp_variables.begin(), symbols->temp_variables.end(), 
+            [name](TempVariable& var)
+            {
+                return var.first == name;
+            });
+        if (it != symbols->temp_variables.end())
+            it->second = value;
+    }
+
+    void PopTempVariables(int count = 1) const
     {
         for (int i = 0; i < count; ++i)
             symbols->temp_variables.pop_back();
@@ -890,7 +924,7 @@ private:
                 }
 
                 res = (*this)(user_func->return_expression);
-                PopTempVariable(op.arguments.size());
+                PopTempVariables(op.arguments.size());
                 return res;
             }
 

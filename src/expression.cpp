@@ -36,12 +36,12 @@ Expression<Integer>::Expression(ElementId id, std::u32string& expr, Solver<Integ
 
     if (solver->default_notation == 16)
     {
-        unary = compare | postfix_operation | implicit_mul | function_call | function_call_string | 
+        unary = loop | compare | postfix_operation | implicit_mul | function_call | function_call_string | 
             no_fences_function_call | identifier | number | implicit_string_mul | unary_operation | '(' > expression > ')';
     }
     else
     {
-        unary = compare | postfix_operation | implicit_string_mul | implicit_mul | number | function_call | function_call_string | 
+        unary = loop | compare | postfix_operation | implicit_string_mul | implicit_mul | number | function_call | function_call_string | 
             identifier | no_fences_function_call | unary_operation | '(' > expression > ')';
     }
     
@@ -74,7 +74,12 @@ Expression<Integer>::Expression(ElementId id, std::u32string& expr, Solver<Integ
     
     function_param = number | identifier | '(' > expression > ')';
 
-    compare = '(' >> expression >> (+char_("<>") | +char_("==") | char_('<') | char_('>')) >> expression >> ')';
+    compare = '(' >> expression >> (raw[lexeme["<>"]] | raw[lexeme["=="]] | raw[lexeme["<="]] | raw[lexeme[">="]] | 
+        raw[lexeme["<"]] | raw[lexeme[">"]]) >> expression >> ')';
+
+    loop = "loop(" > variable > ',' > compare > ',' > variable > ',' > variable > ',' > variable > ')';
+
+    variable = identifier >> ('=' > expression);
 
     //annotate the items with an expression's position
     on_success(unary, 
@@ -141,8 +146,8 @@ Expression<Real>::Expression(ElementId id, std::u32string& expr, Solver<Real>* _
 
     multiply = char_('*') > unary | char_('/') > unary | char_('%') > unary;
     
-    unary = compare | postfix_operation | implicit_div_mul | implicit_string_mul | implicit_fraction_mul | mixed_division | implicit_mul | number | function_call | 
-        no_fences_function_call | identifier | unary_operation | '(' > expression > ')';
+    unary = loop | compare | postfix_operation | implicit_div_mul | implicit_string_mul | implicit_fraction_mul | mixed_division | 
+        implicit_mul | number | function_call | no_fences_function_call | identifier | unary_operation | '(' > expression > ')';
     
     number = exp_number | digits_number;
     
@@ -183,7 +188,12 @@ Expression<Real>::Expression(ElementId id, std::u32string& expr, Solver<Real>* _
     
     function_param = number | identifier | '(' > expression > ')';
 
-    compare = '(' >> expression >> (+char_("<>") | +char_("==") | char_('<') | char_('>')) >> expression >> ')';
+    compare = '(' >> expression >> (raw[lexeme["<>"]] | raw[lexeme["=="]] | raw[lexeme["<="]] | raw[lexeme[">="]] | 
+        raw[lexeme["<"]] | raw[lexeme[">"]]) >> expression >> ')';
+
+    loop = "loop(" > variable > ',' > compare > ',' > variable > ',' > variable > ',' > variable > ')';
+
+    variable = identifier >> ('=' > expression);
 
     //annotate the items with the expression's position
     on_success(unary, 
@@ -212,20 +222,29 @@ Expression<Real>::Expression(ElementId id, std::u32string& expr, Solver<Real>* _
         boost::phoenix::function<Annotation<yutovo_calculator::Real>>(Annotation<yutovo_calculator::Real>(expr.begin(), expr.end(), id))(qi::_val, _1));
     on_success(compare, 
         boost::phoenix::function<Annotation<yutovo_calculator::Real>>(Annotation<yutovo_calculator::Real>(expr.begin(), expr.end(), id))(qi::_val, _1));
+    on_success(loop, 
+        boost::phoenix::function<Annotation<yutovo_calculator::Real>>(Annotation<yutovo_calculator::Real>(expr.begin(), expr.end(), id))(qi::_val, _1));
+    // on_success(variable, 
+    //     boost::phoenix::function<Annotation<yutovo_calculator::Real>>(Annotation<yutovo_calculator::Real>(expr.begin(), expr.end(), id))(qi::_val, _1));
     
     on_error<fail>(expression, 
         boost::phoenix::function<ErrorHandler<SyntaxException>>(ErrorHandler<SyntaxException>(id, expr.begin(), expr.end(), SyntaxError))(_3));
     
     // BOOST_SPIRIT_DEBUG_NODE(expression);
     // BOOST_SPIRIT_DEBUG_NODE(addition);
+    // BOOST_SPIRIT_DEBUG_NODE(unary_operation);
+    // BOOST_SPIRIT_DEBUG_NODE(postfix_operation);
     // BOOST_SPIRIT_DEBUG_NODE(multiplication);
     // BOOST_SPIRIT_DEBUG_NODE(mixed_division);
     // BOOST_SPIRIT_DEBUG_NODE(number);
     // BOOST_SPIRIT_DEBUG_NODE(function_call);
+    // BOOST_SPIRIT_DEBUG_NODE(function_param);
     // BOOST_SPIRIT_DEBUG_NODE(identifier);
     // BOOST_SPIRIT_DEBUG_NODE(implicit_mul);
     // BOOST_SPIRIT_DEBUG_NODE(implicit_div_mul);
     // BOOST_SPIRIT_DEBUG_NODE(compare);
+    // BOOST_SPIRIT_DEBUG_NODE(loop);
+    // BOOST_SPIRIT_DEBUG_NODE(variable);
 }
 
 template<>
@@ -254,7 +273,7 @@ Expression<yutovo_calculator::Rational>::Expression(ElementId id, std::u32string
 
     multiply = (char_('*') > unary) | (char_('/') > unary) | (char_('%') > unary);
     
-    unary = compare | implicit_div_mul | implicit_string_mul | implicit_fraction_mul | mixed_division | implicit_mul | number | function_call | 
+    unary = loop | compare | implicit_div_mul | implicit_string_mul | implicit_fraction_mul | mixed_division | implicit_mul | number | function_call | 
         no_fences_function_call | identifier | unary_operation | '(' > expression > ')';
     
     number = digits_number;
@@ -288,7 +307,12 @@ Expression<yutovo_calculator::Rational>::Expression(ElementId id, std::u32string
     
     function_param = number | identifier | '(' > expression > ')';
 
-    compare = '(' >> expression >> (+char_("<>") | +char_("==") | char_('<') | char_('>')) >> expression >> ')';
+    compare = '(' >> expression >> (raw[lexeme["<>"]] | raw[lexeme["=="]] | raw[lexeme["<="]] | raw[lexeme[">="]] | 
+        raw[lexeme["<"]] | raw[lexeme[">"]]) >> expression >> ')';
+
+    loop = "loop(" > variable > ',' > compare > ',' > variable > ',' > variable > ',' > variable > ')';
+
+    variable = identifier >> ('=' > expression);
 
     //annotate the items with an expression's position
     on_success(unary, boost::phoenix::function<Annotation<yutovo_calculator::Rational>>(Annotation<yutovo_calculator::Rational>(expr.begin(), 
@@ -354,8 +378,8 @@ Expression<Complex>::Expression(ElementId id, std::u32string& expr, Solver<Compl
 
     multiply = char_('*') > unary | char_('/') > unary | char_('%') > unary;
     
-    unary = compare | postfix_operation | implicit_div_mul | implicit_string_mul | implicit_fraction_mul | mixed_division | implicit_mul | number | function_call | 
-        no_fences_function_call | identifier | unary_operation | '(' > expression > ')';
+    unary = loop | compare | postfix_operation | implicit_div_mul | implicit_string_mul | implicit_fraction_mul | mixed_division | implicit_mul | 
+        number | function_call | no_fences_function_call | identifier | unary_operation | '(' > expression > ')';
     
     number = exp_number | digits_number;
     
@@ -396,7 +420,12 @@ Expression<Complex>::Expression(ElementId id, std::u32string& expr, Solver<Compl
     
     function_param = number | identifier | '(' > expression > ')';
 
-    compare = '(' >> expression >> (+char_("<>") | +char_("==") | char_('<') | char_('>')) >> expression >> ')';
+    compare = '(' >> expression >> (raw[lexeme["<>"]] | raw[lexeme["=="]] | raw[lexeme["<="]] | raw[lexeme[">="]] | 
+        raw[lexeme["<"]] | raw[lexeme[">"]]) >> expression >> ')';
+
+    loop = "loop(" > variable > ',' > compare > ',' > variable > ',' > variable > ',' > variable > ')';
+
+    variable = identifier >> ('=' > expression);
 
     //annotate the items with the expression's position
     on_success(unary, 

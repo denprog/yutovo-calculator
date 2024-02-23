@@ -443,4 +443,26 @@ TEST_F(CalcTestComplex, compare2)
     ASSERT_TRUE(s == "1.E+0") << s;
 }
 
+TEST_F(CalcTestComplex, sum1)
+{
+    std::string s = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"loop(k=0,(k<=10),k=k+1,t=0,t=t+1);").ToStdString(3, 3);
+    ASSERT_TRUE(s == "11.E+0") << s;
+    s = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"loop(k=1,(k<=10),k=k+1,t=0,t=t+k);").ToStdString(3, 3);
+    ASSERT_TRUE(s == "55.E+0") << s;
+}
+
+TEST_F(CalcTestComplex, sum2)
+{
+    std::string s = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"loop(k=0,(k<=10),k=k+1,t1=0,t1=t1+k*i+1);").ToStdString(3, 3);
+    ASSERT_TRUE(s == "11.E+0+i*55.E+0") << s;
+}
+
+TEST_F(CalcTestComplex, prod1)
+{
+    std::string s = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"loop(k=0,(k<=5),k=k+1,t=1,t=t*(2));").ToStdString(3, 3);
+    ASSERT_TRUE(s == "64.E+0") << s;
+    s = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"loop(k=1,(k<=3),k=k+1,t=1,t=t*(i+5));").ToStdString(3, 3);
+    ASSERT_TRUE(s == "110.E+0+i*74.E+0") << s;
+}
+
 }

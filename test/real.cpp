@@ -691,6 +691,36 @@ TEST_F(CalcTestReal, compare2)
     ASSERT_TRUE(s == "0.E+0") << s;
     s = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"(a<>10.);").ToStdString(3, 3);
     ASSERT_TRUE(s == "1.E+0") << s;
+    s = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"(a<=10.);").ToStdString(3, 3);
+    ASSERT_TRUE(s == "1.E+0") << s;
+}
+
+TEST_F(CalcTestReal, sum1)
+{
+    std::string s = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"loop(i=0,(i<=10),i=i+1,t=0,t=t+1);").ToStdString(3, 3);
+    ASSERT_TRUE(s == "11.E+0") << s;
+    s = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"loop(i=1,(i<=10),i=i+1,t=0,t=t+i);").ToStdString(3, 3);
+    ASSERT_TRUE(s == "55.E+0") << s;
+}
+
+TEST_F(CalcTestReal, sum2)
+{
+    std::string s = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"loop(i=0,(i<=10),i=i+1,t1=0,t1=t1+loop(j=0,(j<=20),j=j+1,t2=0,t2=t2+i+j));").ToStdString(3, 3);
+    ASSERT_TRUE(s == "3.465E+3") << s;
+}
+
+TEST_F(CalcTestReal, prod1)
+{
+    std::string s = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"loop(i=0,(i<=10),i=i+1,t=1,t=t*2);").ToStdString(3, 3);
+    ASSERT_TRUE(s == "2.048E+3") << s;
+    s = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"loop(i=1,(i<=10),i=i+1,t=1,t=t*i);").ToStdString(3, 3);
+    ASSERT_TRUE(s == "3.629E+6") << s;
+}
+
+TEST_F(CalcTestReal, prod2)
+{
+    std::string s = parser.Parse(ElementId{0, 0, 0, 0, 0, 0, 0, 2, 0}, U"loop(i=1,(i<=10),i=i+1,i_=1,i_=i_*(i));").ToStdString(3, 3);
+    ASSERT_TRUE(s == "3.629E+6") << s;
 }
 
 }

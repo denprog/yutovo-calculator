@@ -319,7 +319,7 @@ Integer Solver<Integer>::operator()(FunctionCallNode<Integer> const& op) const
             }
 
             res = (*this)(user_func->return_expression);
-            PopTempVariable(op.arguments.size());
+            PopTempVariables(op.arguments.size());
             return res;
         }
 
@@ -395,7 +395,7 @@ Rational Solver<Rational>::operator()(FunctionCallNode<Rational> const& op) cons
             }
 
             res = (*this)(user_func->return_expression);
-            PopTempVariable(op.arguments.size());
+            PopTempVariables(op.arguments.size());
             return res;
         }
 

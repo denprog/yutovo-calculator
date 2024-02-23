@@ -398,28 +398,28 @@ bool operator!=(const Complex& num1, const int num2)
 {
     Complex _num2(num1.GetBitPrecision(), num2);
 
-    return (num1.re != _num2.re) && (num1.im != _num2.im);
+    return (num1.re != _num2.re) || (num1.im != _num2.im);
 }
 
 bool operator!=(const int num1, const Complex& num2)
 {
     Complex _num1(num2.GetBitPrecision(), num1);
 
-    return (_num1.re != num2.re) && (_num1.im != num2.im);
+    return (_num1.re != num2.re) || (_num1.im != num2.im);
 }
 
 bool operator!=(const Complex& num1, const float num2)
 {
     Complex _num2(num1.GetBitPrecision(), num2);
 
-    return (num1.re != _num2.re) && (num1.im != _num2.im);
+    return (num1.re != _num2.re) || (num1.im != _num2.im);
 }
 
 bool operator!=(const float num1, const Complex& num2)
 {
     Complex _num1(num2.GetBitPrecision(), num1);
 
-    return (_num1.re != num2.re) && (_num1.im != num2.im);
+    return (_num1.re != num2.re) || (_num1.im != num2.im);
 }
 
 bool operator<(const Complex& num1, const Complex& num2)
