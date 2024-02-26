@@ -723,10 +723,11 @@ struct Solver : public boost::static_visitor<Number>
             units.push_back(u.ToString(false));
     }
 
-    void ListUserUnits(std::vector<std::u32string>& units)
+    void ListUserUnits(std::vector<CustomUnit<Number>>& units)
     {
-        for (auto& u : symbols->units)
-            units.push_back(u.name);
+        for (auto& u : symbols->buildin_units)
+            units.push_back(CustomUnit<Number>(ElementId{0, 0, 1}, u.unit[0].first, u.system, Number(precision, u), true));
+        units.insert(units.end(), symbols->units.begin(), symbols->units.end());
     }
 
     void SetDependencies(Dependencies* _dependencies)

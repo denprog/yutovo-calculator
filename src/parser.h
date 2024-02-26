@@ -192,7 +192,7 @@ struct Parser
         solver.ListBuiltinUnits(units);
     }
 
-    void ListUserUnits(std::vector<std::u32string>& units)
+    void ListUserUnits(std::vector<CustomUnit<Number>>& units)
     {
         solver.ListUserUnits(units);
     }
@@ -211,7 +211,7 @@ private:
             solver.AddBuiltinUnit(Unit(U"mol")); //mole (amount of matter)
             solver.AddBuiltinUnit(Unit(U"A")); //ampere (electric current)
             solver.AddBuiltinUnit(Unit(U"Cd")); //candella (luminosity)
-            solver.AddBuiltinUnit(Unit(U"k")); //kelvin (temperature)
+            solver.AddBuiltinUnit(Unit(U"K")); //kelvin (temperature)
 
             solver.symbols->buildin_elements = true;
 
