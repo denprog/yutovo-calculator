@@ -257,7 +257,7 @@ TEST_F(CalcTestRational, units6)
     std::string s = parser.GetSuitableUnit(ElementId{0, 0, 0, 0, 1}, parser.Parse(ElementId{0, 0, 0, 0, 1}, U"pow(3m,2);")).ToStdString();
     ASSERT_TRUE(s == "9(m^2)") << s;
     s = parser.GetSuitableUnit(ElementId{0, 0, 0, 0, 1}, parser.Parse(ElementId{0, 0, 0, 0, 1}, U"pow(3m/s,2);")).ToStdString();
-    ASSERT_TRUE(s == "9((m^2)/(s^2))") << s;
+    ASSERT_TRUE(s == "9(Gy)") << s;
     s = parser.GetSuitableUnit(ElementId{0, 0, 0, 0, 1}, parser.Parse(ElementId{0, 0, 0, 0, 1}, U"5m/pow(s,2);")).ToStdString();
     ASSERT_TRUE(s == "5((m)/(s^2))") << s;
 }
@@ -286,7 +286,7 @@ TEST_F(CalcTestRational, units8)
 TEST_F(CalcTestRational, units9)
 {
     std::string s = parser.GetSuitableUnit(ElementId{0, 0, 0, 0, 1}, parser.Parse(ElementId{0, 0, 0, 0, 2}, U"(1)/(5)m/s;")).ToStdString();
-    ASSERT_TRUE(s == "12((m)/(min))") << s;
+    ASSERT_TRUE(s == "2((dm)/(s))") << s;
     s = parser.GetSuitableUnit(ElementId{0, 0, 0, 0, 1}, parser.Parse(ElementId{0, 0, 0, 0, 2}, U"5000m/s;")).ToStdString();
     ASSERT_TRUE(s == "5((km)/(s))") << s;
 }

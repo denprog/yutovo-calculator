@@ -1919,9 +1919,8 @@ std::u32string Real::ToString() const
 
 void Real::ToString(int exp, int accuracy, bool& mantissa_sign, std::u32string& mantissa, bool& exponent_sign, std::u32string& exponent) const
 {
-    //Real res(abs(*this));
-    char* numStr;
-    mp_exp_t numExp;
+    char* num_str;
+    mp_exp_t num_exp;
     char buf[20];
 
     mantissa_sign = GetSign();
@@ -1932,42 +1931,42 @@ void Real::ToString(int exp, int accuracy, bool& mantissa_sign, std::u32string& 
     if (IsNaN() || IsInfinity())
         return;
 
-    numStr = mpfr_get_str(NULL, &numExp, 10, accuracy + 1, number, DEFAULT_RND);
+    num_str = mpfr_get_str(NULL, &num_exp, 10, accuracy + 1, number, DEFAULT_RND);
 
-    if (numExp >= 0 && exp >= numExp)
+    if (num_exp >= 0 && exp >= num_exp)
     {
-        mpfr_free_str(numStr);
-        numStr = mpfr_get_str(NULL, &numExp, 10, numExp + accuracy, number, DEFAULT_RND);
+        mpfr_free_str(num_str);
+        num_str = mpfr_get_str(NULL, &num_exp, 10, num_exp + accuracy, number, DEFAULT_RND);
     }
-    else if (exp > ::abs(numExp))
+    else if (exp > ::abs(num_exp))
     {
-        mpfr_free_str(numStr);
-        numStr = mpfr_get_str(NULL, &numExp, 10, accuracy, number, DEFAULT_RND);
+        mpfr_free_str(num_str);
+        num_str = mpfr_get_str(NULL, &num_exp, 10, accuracy, number, DEFAULT_RND);
     }
 
-    mantissa = ToUtfString(numStr);
-    mpfr_free_str(numStr);
+    mantissa = ToUtfString(num_str);
+    mpfr_free_str(num_str);
 
     if (mantissa_sign)
         mantissa.erase(0, 1);
 
     if (*this >= 1 || *this <= -1)
     {
-        if (numExp > exp)
+        if (num_exp > exp)
         {
             mantissa.insert(1, 1, '.');
 
-            --numExp;
+            --num_exp;
 #ifdef _WIN32
-            _itoa_s(numExp, buf, 10);
+            _itoa_s(num_exp, buf, 10);
 #else
-            sprintf(buf, "%d", (int)numExp);
+            sprintf(buf, "%d", (int)num_exp);
 #endif
             exponent = ToUtfString(buf);
         }
         else
         {
-            mantissa.insert(numExp, 1, '.');
+            mantissa.insert(num_exp, 1, '.');
             exponent = U"";
         }
     }
@@ -1980,9 +1979,9 @@ void Real::ToString(int exp, int accuracy, bool& mantissa_sign, std::u32string& 
             return;
         }
 
-        int i = ::abs(numExp);
+        int i = ::abs(num_exp);
 
-        if (numExp <= 0)
+        if (num_exp <= 0)
         {
             while (i < (int)mantissa.size() - 1 && mantissa[i] == '0')
                 ++i;
@@ -1991,16 +1990,16 @@ void Real::ToString(int exp, int accuracy, bool& mantissa_sign, std::u32string& 
             {
                 mantissa.insert(1, 1, '.');
 
-                --numExp;
-                if (numExp < 0)
+                --num_exp;
+                if (num_exp < 0)
                     exponent_sign = true;
 
-                if (numExp != 0)
+                if (num_exp != 0)
                 {
 #ifdef _WIN32
-                  _itoa_s(::abs(numExp), buf, 10);
+                    _itoa_s(::abs(num_exp), buf, 10);
 #else
-                  sprintf(buf, "%d", ::abs(numExp));
+                    sprintf(buf, "%d", ::abs(num_exp));
 #endif
                     exponent = ToUtfString(buf);
                 }
@@ -2012,8 +2011,8 @@ void Real::ToString(int exp, int accuracy, bool& mantissa_sign, std::u32string& 
                 mantissa.insert(0, 1, '0');
                 mantissa.insert(1, 1, '.');
 
-                if (numExp < 0)
-                    mantissa.insert(2, ::abs(numExp), '0');
+                if (num_exp < 0)
+                    mantissa.insert(2, ::abs(num_exp), '0');
 
                 exponent = U"";
             }
@@ -2022,16 +2021,16 @@ void Real::ToString(int exp, int accuracy, bool& mantissa_sign, std::u32string& 
         {
             mantissa.insert(1, 1, '.');
 
-            --numExp;
-            if (numExp < 0)
+            --num_exp;
+            if (num_exp < 0)
                 exponent_sign = true;
 
-            if (numExp != 0)
+            if (num_exp != 0)
             {
 #ifdef _WIN32
-                _itoa_s(::abs(numExp), buf, 10);
+                _itoa_s(::abs(num_exp), buf, 10);
 #else
-                sprintf(buf, "%d", ::abs(numExp));
+                sprintf(buf, "%d", ::abs(num_exp));
 #endif
                 exponent = ToUtfString(buf);
             }

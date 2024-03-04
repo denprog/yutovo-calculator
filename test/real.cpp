@@ -477,7 +477,7 @@ TEST_F(CalcTestReal, units6)
     std::string s = parser.GetSuitableUnit(ElementId{0, 0, 0, 0, 2}, parser.Parse(ElementId{0, 0, 0, 0, 1}, U"pow(3m,2);")).ToStdString(3, 3);
     ASSERT_TRUE(s == "9.E+0(m^2)") << s;
     s = parser.GetSuitableUnit(ElementId{0, 0, 0, 0, 2}, parser.Parse(ElementId{0, 0, 0, 0, 1}, U"pow(3m/s,2);")).ToStdString(3, 3);
-    ASSERT_TRUE(s == "9.E+0((m^2)/(s^2))") << s;
+    ASSERT_TRUE(s == "9.E+0(Gy)") << s;
     s = parser.GetSuitableUnit(ElementId{0, 0, 0, 0, 2}, parser.Parse(ElementId{0, 0, 0, 0, 1}, U"5m/pow(s,2);")).ToStdString(3, 3);
     ASSERT_TRUE(s == "5.E+0((m)/(s^2))") << s;
 }
@@ -492,7 +492,7 @@ TEST_F(CalcTestReal, units7)
 TEST_F(CalcTestReal, units8)
 {
     std::string s = parser.GetSuitableUnit(ElementId{0, 0, 0, 0, 2}, parser.Parse(ElementId{0, 0, 0, 0, 2}, U"0.2m;")).ToStdString(3, 3);
-    ASSERT_TRUE(s == "0.2E+0(m)") << s;
+    ASSERT_TRUE(s == "2.E+0(dm)") << s;
     s = parser.GetSuitableUnit(ElementId{0, 0, 0, 0, 2}, parser.Parse(ElementId{0, 0, 0, 0, 2}, U"0.02m;")).ToStdString(3, 3);
     ASSERT_TRUE(s == "2.E+0(cm)") << s;
     s = parser.GetSuitableUnit(ElementId{0, 0, 0, 0, 2}, parser.Parse(ElementId{0, 0, 0, 0, 2}, U"0.002m;")).ToStdString(3, 3);
@@ -506,7 +506,7 @@ TEST_F(CalcTestReal, units8)
 TEST_F(CalcTestReal, units9)
 {
     std::string s = parser.GetSuitableUnit(ElementId{0, 0, 0, 0, 2}, parser.Parse(ElementId{0, 0, 0, 0, 2}, U"0.2m/s;")).ToStdString(3, 3);
-    ASSERT_TRUE(s == "0.2E+0((m)/(s))") << s;
+    ASSERT_TRUE(s == "2.E+0((dm)/(s))") << s;
     s = parser.GetSuitableUnit(ElementId{0, 0, 0, 0, 2}, parser.Parse(ElementId{0, 0, 0, 0, 2}, U"5000m/s;")).ToStdString(3, 3);
     ASSERT_TRUE(s == "5.E+0((km)/(s))") << s;
 }
@@ -668,6 +668,25 @@ TEST_F(CalcTestReal, units31)
 {
     std::string s = parser.Parse(ElementId{0, 0, 0, 0, 0, 0, 0, 2, 0}, U"(2.4/2)m;").ToStdString(3, 3);
     ASSERT_TRUE(s == "1.2E+0(m)") << s;
+}
+
+TEST_F(CalcTestReal, units32)
+{
+    auto r = parser.Parse(ElementId{0, 0, 0, 0, 0, 0, 0, 2, 0}, U"5mm;");
+    std::string s = parser.GetSuitableUnit(ElementId{0, 0, 0, 0, 0, 0, 0, 2, 0}, r).ToStdString(3, 3);
+    ASSERT_TRUE(s == "5.E+0(mm)") << s;
+
+    r = parser.Parse(ElementId{0, 0, 0, 0, 0, 0, 0, 2, 0}, U"50mm;");
+    s = parser.GetSuitableUnit(ElementId{0, 0, 0, 0, 0, 0, 0, 2, 0}, r).ToStdString(3, 3);
+    ASSERT_TRUE(s == "5.E+0(cm)") << s;
+}
+
+TEST_F(CalcTestReal, units33)
+{
+    parser.SetLocale(Language::Russian, ',');
+    auto r = parser.Parse(ElementId{0, 0, 0, 0, 0, 0, 0, 2, 0}, U"500сажень{rus};");
+    std::string s = parser.GetSuitableUnit(ElementId{0, 0, 0, 0, 0, 0, 0, 2, 0}, r).ToStdString(3, 3);
+    ASSERT_TRUE(s == "1.E+0(верста){rus}") << s;
 }
 
 TEST_F(CalcTestReal, compare1)

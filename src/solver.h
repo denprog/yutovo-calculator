@@ -780,8 +780,19 @@ private:
         {
             if (c.unit.unit.size() <= s) //a unit should have minimal size
             {
+                size_t m2 = c.ToString(abs(c.GetExp()) + 1, abs(c.GetExp()) + 1, false).length();
+                if (c.unit.unit.size() == 1 && c.unit.unit[0].second == 1) //choose the simplest one
+                {
+                    if (s > 1 || m2 < m || res.unit.unit[0].second < 1 || (m2 == m && (c < res || res < 1) && c >= 1))
+                    {
+                        res = c;
+                        m = m2;
+                        s = c.unit.unit.size();
+                    }
+                    continue;
+                }
+
                 //result string should have minimal length and should have the simpliest unit
-                size_t m2 = c.ToString(10, 10, false).length();
                 if (m2 > m)
                     continue;
                 if (m2 == m)

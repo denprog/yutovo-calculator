@@ -100,6 +100,11 @@ public:
     std::u32string ToString(bool with_unit = true) const;
     std::u32string ToString(int, int, bool with_unit = true) const;
 
+    int GetExp() const
+    {
+        return 0;
+    }
+
     int GetPrecision() const
     {
         return 0;
