@@ -212,7 +212,8 @@ private:
             solver.AddBuiltinUnit(Unit(U"A")); //ampere (electric current)
             solver.AddBuiltinUnit(Unit(U"cd")); //candella (luminosity)
             solver.AddBuiltinUnit(Unit(U"K")); //kelvin (temperature)
-            solver.AddBuiltinUnit(Unit(U"sr")); //steradian (angle)
+            solver.AddBuiltinUnit(Unit(U"rad")); //radian (angle)
+            solver.AddBuiltinUnit(Unit(U"sr")); //steradian (solid angle)
             solver.AddBuiltinUnit(Unit(U"bit")); //bit (data)
             break;
         case Language::Russian:
@@ -223,7 +224,8 @@ private:
             solver.AddBuiltinUnit(Unit(U"А")); //ampere (electric current)
             solver.AddBuiltinUnit(Unit(U"Кд")); //candella (luminosity)
             solver.AddBuiltinUnit(Unit(U"К")); //kelvin (temperature)
-            solver.AddBuiltinUnit(Unit(U"ср")); //steradian (angle)
+            solver.AddBuiltinUnit(Unit(U"рад")); //radian (angle)
+            solver.AddBuiltinUnit(Unit(U"ср")); //steradian (solid angle)
             solver.AddBuiltinUnit(Unit(U"бит")); //bit (data)
             break;
         default:
@@ -235,6 +237,7 @@ private:
         InitSIUnits();
         InitOtherUnits();
         InitRussianUnits();
+        InitAngleUnits();
 
         solver.symbols->buildin_elements = false;
     }
@@ -692,6 +695,10 @@ private:
             Parse(ElementId{0, 2, 3, 15}, U"бочка{rus}~40ведро{rus};");
             break;
         }
+    }
+
+    void InitAngleUnits()
+    {
     }
 
     Solver<Number> solver;

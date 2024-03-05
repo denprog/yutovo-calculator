@@ -428,6 +428,17 @@ TEST_F(CalcTestReal, trigonometric3)
         res.ToStdString(3, 3) << "\n" << (int)res.angle_measure;
 }
 
+TEST_F(CalcTestReal, trigonometric4)
+{
+    Real res = parser.Parse(ElementId{0, 0, 1}, U"sin(90°);", AngleMeasure::Radian, AngleMeasure::Radian);
+    ASSERT_TRUE(res.angle_measure == AngleMeasure::None && res.ToStdString(3, 3) == parser.Parse(ElementId{0, 0, 1}, U"1;").ToStdString(3, 3)) << 
+        res.ToStdString(3, 3);
+
+    res = parser.Parse(ElementId{0, 0, 1}, U"sin((pi)/(2)rad);", AngleMeasure::Radian, AngleMeasure::Radian);
+    ASSERT_TRUE(res.angle_measure == AngleMeasure::None && res.ToStdString(3, 3) == parser.Parse(ElementId{0, 0, 1}, U"1;").ToStdString(3, 3)) << 
+        res.ToStdString(3, 3);
+}
+
 TEST_F(CalcTestReal, units1)
 {
     std::string s = parser.GetSuitableUnit(ElementId{0, 0, 0, 0, 1}, parser.Parse(ElementId{0, 0, 0, 0, 1}, U"1m;")).ToStdString(3, 3);
@@ -687,6 +698,25 @@ TEST_F(CalcTestReal, units33)
     auto r = parser.Parse(ElementId{0, 0, 0, 0, 0, 0, 0, 2, 0}, U"500сажень{rus};");
     std::string s = parser.GetSuitableUnit(ElementId{0, 0, 0, 0, 0, 0, 0, 2, 0}, r).ToStdString(3, 3);
     ASSERT_TRUE(s == "1.E+0(верста){rus}") << s;
+}
+
+TEST_F(CalcTestReal, units34)
+{
+    auto r = parser.Parse(ElementId{0, 0, 0, 0, 0, 0, 0, 2, 0}, U"1rad;");
+    std::string s = parser.GetSuitableUnit(ElementId{0, 0, 0, 0, 0, 0, 0, 2, 0}, r).ToStdString(3, 3);
+    ASSERT_TRUE(s == "1.E+0(rad)") << s;
+
+    r = parser.Parse(ElementId{0, 0, 0, 0, 0, 0, 0, 2, 0}, U"1°;");
+    s = parser.GetSuitableUnit(ElementId{0, 0, 0, 0, 0, 0, 0, 2, 0}, r).ToStdString(3, 3);
+    ASSERT_TRUE(s == "1.E+0(°)") << s;
+
+    r = parser.Parse(ElementId{0, 0, 0, 0, 0, 0, 0, 2, 0}, U"1';");
+    s = parser.GetSuitableUnit(ElementId{0, 0, 0, 0, 0, 0, 0, 2, 0}, r).ToStdString(3, 3);
+    ASSERT_TRUE(s == "1.E+0(')") << s;
+
+    r = parser.Parse(ElementId{0, 0, 0, 0, 0, 0, 0, 2, 0}, U"1'';");
+    s = parser.GetSuitableUnit(ElementId{0, 0, 0, 0, 0, 0, 0, 2, 0}, r).ToStdString(3, 3);
+    ASSERT_TRUE(s == "1.E+0('')") << s;
 }
 
 TEST_F(CalcTestReal, compare1)

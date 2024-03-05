@@ -331,6 +331,9 @@ public:
 
     Real GetNumber();
 
+private:
+    static void CheckUnit(Real& num);
+
 public:
     AngleMeasure angle_measure = AngleMeasure::None;
     Unit unit;

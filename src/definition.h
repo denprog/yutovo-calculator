@@ -46,7 +46,7 @@ struct Definition : qi::grammar<std::u32string::iterator, DefinitionNode<Number>
 		identifier = name >> -('{' > (+char_("0-9") | name) > '}');
 		
 		//name is a letter-numeric std::u32string with an letter in the beginning
-		name = raw[lexeme[(alpha | '_') >> *(alnum | '_')]];
+		name = (raw[lexeme[(alpha | char_("'_")) >> *(alnum | char_("'_"))]]) | char_("°");
 
 		// BOOST_SPIRIT_DEBUG_NODE(definition);
 		// BOOST_SPIRIT_DEBUG_NODE(function);

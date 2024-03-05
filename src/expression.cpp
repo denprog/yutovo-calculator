@@ -175,8 +175,8 @@ Expression<Real>::Expression(ElementId id, std::u32string& expr, Solver<Real>* _
     implicit_string_mul = (number >> identifier);
 
     implicit_mul = real_number >> '(' >> expression > ')';
-    
-    name = raw[lexeme[(alpha | '_') >> *(alnum | '_')]];
+
+    name = (raw[lexeme[(alpha | char_("'_")) >> *(alnum | char_("'_"))]]) | char_("°");
 
     unary_operation = (char_('+') > unary) | (char_('-') > unary);
 
