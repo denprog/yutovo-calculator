@@ -556,6 +556,9 @@ private:
         switch (language)
         {
         case Language::English:
+            //temperature
+            Parse(ElementId{0, 1, 0, 0, 1}, U"°C~K;");
+            
             //data
             Parse(ElementId{0, 1, 0, 1}, U"byte~8bit;");
             Parse(ElementId{0, 1, 0, 2}, U"kbyte~1024byte;");
@@ -575,6 +578,9 @@ private:
             Parse(ElementId{0, 1, 2, 5}, U"hl~100l;");
             break;
         case Language::Russian:
+            //temperature
+            Parse(ElementId{0, 1, 0, 0, 1}, U"°C~К;");
+
             //data
             Parse(ElementId{0, 1, 0, 1}, U"байт~8бит;");
             Parse(ElementId{0, 1, 0, 2}, U"кбайт~1024байт;");

@@ -176,7 +176,7 @@ Expression<Real>::Expression(ElementId id, std::u32string& expr, Solver<Real>* _
 
     implicit_mul = real_number >> '(' >> expression > ')';
 
-    name = (raw[lexeme[(alpha | char_("'_")) >> *(alnum | char_("'_"))]]) | char_("°");
+    name = (raw[lexeme[(alpha | char_("°'_")) >> *(alnum | char_("'_"))]]);
 
     unary_operation = (char_('+') > unary) | (char_('-') > unary);
 
@@ -297,7 +297,7 @@ Expression<yutovo_calculator::Rational>::Expression(ElementId id, std::u32string
 
     identifier = name >> -('{' > (digits_number | name) > '}');
     
-    name = raw[lexeme[(alpha | '_') >> *(alnum | '_')]];
+    name = (raw[lexeme[(alpha | char_("°'_")) >> *(alnum | char_("'_"))]]);
 
     unary_operation = (char_('+') > unary) | (char_('-') > unary);
     
