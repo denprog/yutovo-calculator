@@ -616,10 +616,16 @@ struct Solver : public boost::static_visitor<Number>
                 continue;
             if (unit.name == name)
             {
-                if (!unit_id.empty() && IsLess(unit.id, unit_id))
-                    continue;
-                res = &unit;
-                unit_id = unit.id;
+                if (unit.buildin || IsLess(unit.id, id))
+                {
+                    if (!unit_id.empty())
+                    {
+                        if (unit.buildin || IsLess(unit.id, unit_id))
+                            continue;
+                    }
+                    unit_id = unit.id;
+                    res = &unit;
+                }
             }
         }
         return res;

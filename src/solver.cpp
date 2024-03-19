@@ -965,6 +965,15 @@ Real Solver<Real>::operator()(ImplicitDivMulNode<Real> const& op) const
         }
     }
 
+    auto* custom_unit = FindUnit(op.identifier.name, op.identifier.subscript);
+    if (custom_unit)
+    {
+        symbols->last_unit_system = custom_unit->system;
+        Real arg1 = (*this)(op.upper);
+        Real arg2 = (*this)(op.lower);
+        return (arg1 / arg2) * custom_unit->value;
+    }
+
     if (op.identifier.subscript.empty() || op.identifier.subscript == U"SI")
     {
         Unit* unit = FindBuiltinUnit(op.identifier.name);
@@ -975,15 +984,6 @@ Real Solver<Real>::operator()(ImplicitDivMulNode<Real> const& op) const
             Real arg2 = (*this)(op.lower);
             return (arg1 / arg2) * Real(precision, *unit);
         }
-    }
-
-    auto* custom_unit = FindUnit(op.identifier.name, op.identifier.subscript);
-    if (custom_unit)
-    {
-        symbols->last_unit_system = custom_unit->system;
-        Real arg1 = (*this)(op.upper);
-        Real arg2 = (*this)(op.lower);
-        return (arg1 / arg2) * custom_unit->value;
     }
 
     //there is no such an identifier
@@ -1034,6 +1034,15 @@ Rational Solver<Rational>::operator()(ImplicitDivMulNode<Rational> const& op) co
         }
     }
 
+    auto* custom_unit = FindUnit(op.identifier.name, op.identifier.subscript);
+    if (custom_unit)
+    {
+        symbols->last_unit_system = custom_unit->system;
+        Rational arg1 = (*this)(op.upper);
+        Rational arg2 = (*this)(op.lower);
+        return (arg1 / arg2) * custom_unit->value;
+    }
+
     if (op.identifier.subscript.empty() || op.identifier.subscript == U"SI")
     {
         Unit* unit = FindBuiltinUnit(op.identifier.name);
@@ -1044,15 +1053,6 @@ Rational Solver<Rational>::operator()(ImplicitDivMulNode<Rational> const& op) co
             Rational arg2 = (*this)(op.lower);
             return (arg1 / arg2) * Rational(*unit);
         }
-    }
-
-    auto* custom_unit = FindUnit(op.identifier.name, op.identifier.subscript);
-    if (custom_unit)
-    {
-        symbols->last_unit_system = custom_unit->system;
-        Rational arg1 = (*this)(op.upper);
-        Rational arg2 = (*this)(op.lower);
-        return (arg1 / arg2) * custom_unit->value;
     }
 
     //there is no such an identifier

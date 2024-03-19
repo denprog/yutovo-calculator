@@ -730,6 +730,28 @@ TEST_F(CalcTestReal, units35)
     ASSERT_TRUE(s == "1.E+0(K)") << s;
 }
 
+TEST_F(CalcTestReal, units36)
+{
+    auto r = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"dm~1mm;");
+    r = parser.Parse(ElementId{0, 0, 0, 0, 2}, U"dm;");
+    std::string s = parser.GetSuitableUnit(ElementId{0, 0, 0, 0, 2}, r).ToStdString(3, 3);
+    ASSERT_TRUE(s == "1.E+0(mm)") << s;
+
+    std::string t = parser.CastToUnit(ElementId{0, 0, 0, 0, 2}, r, Unit(U"dm")).ToStdString(3, 3);
+    ASSERT_TRUE(t == "1.E+0(dm)") << t;
+}
+
+TEST_F(CalcTestReal, units37)
+{
+    auto r = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"dm~1.2mm;");
+    r = parser.Parse(ElementId{0, 0, 0, 0, 2}, U"dm;");
+    std::string s = parser.GetSuitableUnit(ElementId{0, 0, 0, 0, 2}, r).ToStdString(3, 3);
+    ASSERT_TRUE(s == "1.E+0(dm)") << s;
+
+    std::string t = parser.CastToUnit(ElementId{0, 0, 0, 0, 2}, r, Unit(U"mm")).ToStdString(3, 3);
+    ASSERT_TRUE(t == "1.2E+0(mm)") << t;
+}
+
 TEST_F(CalcTestReal, compare1)
 {
     std::string s = parser.Parse(ElementId{0, 0, 0, 0, 0, 0, 0, 2, 0}, U"(0<10);").ToStdString(3, 3);
