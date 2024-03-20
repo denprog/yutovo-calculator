@@ -411,6 +411,7 @@ struct Solver : public boost::static_visitor<Number>
         if (it != symbols->units.end())
             symbols->units.erase(it);
 
+        AddDependency(unit.name.name);
         Number res = (*this)(unit.expression);
         symbols->units.push_back(CustomUnit<Number>(id, unit.name.name, unit.name.subscript, res, symbols->buildin_elements));
     }
