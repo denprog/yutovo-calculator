@@ -2066,17 +2066,12 @@ void Real::ToString(int exp, int accuracy, bool& mantissa_sign, std::u32string& 
     }
 }
 
-void Real::ToString(int exp, int accuracy, bool& mantissa_sign, std::string& mantissa, bool& exponent_sign, std::string& exponent, char decimal_point) const
+void Real::ToString(int exp, int accuracy, bool& mantissa_sign, std::string& mantissa, bool& exponent_sign, std::string& exponent) const
 {
     std::u32string m, e;
     ToString(exp, accuracy, mantissa_sign, m, exponent_sign, e);
     mantissa = ToBasicString(m);
     exponent = ToBasicString(e);
-    if (decimal_point != '.')
-    {
-        std::replace(mantissa.begin(), mantissa.end(), '.', decimal_point);
-        std::replace(exponent.begin(), exponent.end(), '.', decimal_point);
-    }
 }
 
 std::u32string Real::ToString(int exp, int accuracy, bool with_unit) const
@@ -2100,11 +2095,9 @@ std::u32string Real::ToString(int exp, int accuracy, bool with_unit) const
     return res;
 }
 
-std::string Real::ToStdString(int exp, int accuracy, char decimal_point) const
+std::string Real::ToStdString(int exp, int accuracy) const
 {
     auto r = ToString(exp, accuracy);
-    if (decimal_point != '.')
-        std::replace(r.begin(), r.end(), '.', decimal_point);
     return ToBasicString(r);
 }
 

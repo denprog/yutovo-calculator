@@ -123,8 +123,8 @@ TEST_F(CalcTestRational, rationals5)
 
 TEST_F(CalcTestRational, rationals6)
 {
-    parser.SetLocale(Language::Russian, ',');
-    Rational res = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"2,5;");
+    parser.SetLocale(Language::Russian);
+    Rational res = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"2.5;");
     ASSERT_TRUE(res.ToStdString() == "5/2") << res.ToStdString();
 }
 

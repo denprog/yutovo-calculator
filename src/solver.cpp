@@ -16,8 +16,6 @@ template<>
 Real Solver<Real>::operator()(NumberNode<Real> const& op) const
 {
     NumberNode<Real> _op = op;
-    if (decimal_point != '.')
-        std::replace(_op.number.begin(), _op.number.end(), decimal_point, '.');
     return Real(_op.number);
 }
 
@@ -25,8 +23,6 @@ template<>
 Rational Solver<Rational>::operator()(NumberNode<Rational> const& op) const
 {
     NumberNode<Rational> _op = op;
-    if (decimal_point != '.')
-        std::replace(_op.number.begin(), _op.number.end(), decimal_point, '.');
     auto p = _op.number.find(U'.');
     if (p != std::string::npos)
     {
@@ -42,8 +38,6 @@ template<>
 Complex Solver<Complex>::operator()(NumberNode<Complex> const& op) const
 {
     NumberNode<Complex> _op = op;
-    if (decimal_point != '.')
-        std::replace(_op.number.begin(), _op.number.end(), decimal_point, '.');
     return Complex(_op.number);
 }
 

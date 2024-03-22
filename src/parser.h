@@ -25,7 +25,7 @@ namespace yutovo_calculator
 template<typename Number>
 struct Parser
 {
-    Parser(const int precision, const Language _language, const char _decimal_point);
+    Parser(const int precision, const Language _language);
     
     Number Parse(ElementId id, std::u32string expression, Dependencies& dependencies, AngleMeasure default_angle_measure, AngleMeasure result_angle_measure, 
         Notation default_notation, const int precision = -1)
@@ -165,7 +165,7 @@ struct Parser
         return solver.CastToUnit(id, val, unit);
     }
 
-    void SetLocale(Language _language, char _decimal_point);
+    void SetLocale(Language _language);
 
     void ListBuiltinVariables(std::vector<std::u32string>& variables)
     {
@@ -710,7 +710,6 @@ private:
     Solver<Number> solver;
 
     Language language = Language::English;
-    char decimal_point;
 };
 
 };
