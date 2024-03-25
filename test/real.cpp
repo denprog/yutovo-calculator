@@ -171,6 +171,14 @@ TEST_F(CalcTestReal, user_functions2)
         parser.Parse(ElementId{0, 0, 4}, U"f(10);").ToStdString(3, 3);
 }
 
+TEST_F(CalcTestReal, user_functions3)
+{
+    std::vector<std::u32string> dependencies;
+    parser.Parse(ElementId{0, 0, 1}, U"f(x)=x*2;");
+    parser.Parse(ElementId{0, 0, 2}, U"f(5);", &dependencies);
+    ASSERT_TRUE(std::find(dependencies.begin(), dependencies.end(), U"f") != dependencies.end());
+}
+
 TEST_F(CalcTestReal, str1)
 {
     EXPECT_THROW(parser.Parse(ElementId{0, 0, 1}, U"в;"), yutovo_calculator::SyntaxException);
