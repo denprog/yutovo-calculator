@@ -4,9 +4,12 @@
 #include "ast.h"
 #include "script.h"
 #include "utils.h"
+#include <chrono>
 
 namespace yutovo_calculator
 {
+
+using namespace std::chrono;
 
 typedef Integer (*IntegerBinaryFunc)(const Integer& num1, const Integer& num2);
 typedef Integer (*IntegerStringFunc)(const std::u32string& str);
@@ -198,24 +201,29 @@ struct Solver : public boost::static_visitor<Number>
     
     std::shared_ptr<SolverSymbols<Number>> symbols;
     
-    Solver(int _precision, std::u32string _im = U"i", Number _left_value = Number(), std::shared_ptr<SolverSymbols<Number>> _symbols = nullptr) :
+    Solver(int _precision, uint64_t _max_time, std::u32string _im = U"i", Number _left_value = Number(), 
+        std::shared_ptr<SolverSymbols<Number>> _symbols = nullptr) :
         precision(_precision),
         left_value(_left_value),
         symbols(_symbols),
-        im(_im)
+        im(_im),
+        start_time(duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count()),
+        max_time(_max_time)
     {
         if (!symbols)
             symbols.reset(new SolverSymbols<Number>());
     }
 
     Solver(int _precision, AngleMeasure _default_angle_measure, AngleMeasure _result_angle_measure, int _default_notation, std::string _im, 
-        Number _left_value = Number(), std::shared_ptr<SolverSymbols<Number>> _symbols = nullptr) :
+        uint64_t _max_time, Number _left_value = Number(), std::shared_ptr<SolverSymbols<Number>> _symbols = nullptr) :
         precision(_precision),
         default_angle_measure(_default_angle_measure),
         result_angle_measure(_result_angle_measure),
         left_value(_left_value),
         symbols(_symbols),
-        im(_im)
+        im(_im),
+        start_time(duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count()),
+        max_time(_max_time)
     {
         if (!symbols)
             symbols.reset(new SolverSymbols<Number>());
@@ -235,8 +243,11 @@ struct Solver : public boost::static_visitor<Number>
         Number res = boost::apply_visitor(*this, expr.first);
         BOOST_FOREACH(typename OperationNode<Number>::Operand const& op, expr.rest)
         {
-            Solver<Number> solver(precision, im, res, symbols);
+            CheckTime();
+            
+            Solver<Number> solver(precision, max_time, im, res, symbols);
             solver.id = id;
+            solver.start_time = start_time;
             solver.SetDependencies(dependencies);
             res = boost::apply_visitor(solver, op);
         }
@@ -337,6 +348,8 @@ struct Solver : public boost::static_visitor<Number>
         PushTempVariable(op.loop_var.name.name, res);
         while (counter_max != 0)
         {
+            CheckTime();
+
             res = (*this)(op.loop_expression.expression);
             SetTempVariable(op.loop_expression.name.name, res);
             counter = (*this)(op.counter_increment.expression);
@@ -348,7 +361,8 @@ struct Solver : public boost::static_visitor<Number>
     }
 
     //The beginning of the solving.
-    Number operator()(ScriptNode<Number> const& script, ElementId _id, AngleMeasure _default_angle_measure, AngleMeasure _result_angle_measure, int _precision) const;
+    Number operator()(ScriptNode<Number> const& script, ElementId _id, AngleMeasure _default_angle_measure, 
+        AngleMeasure _result_angle_measure, int _precision, Dependencies* _dependencies) const;
 
     void PushTempVariable(const std::u32string& name, Number& value) const
     {
@@ -410,7 +424,8 @@ struct Solver : public boost::static_visitor<Number>
 
         AddDependency(unit.name.name);
         Number res = (*this)(unit.expression);
-        symbols->units.push_back(CustomUnit<Number>(id, unit.name.name, unit.name.subscript, res, symbols->buildin_elements));
+        auto c = CustomUnit<Number>(id, unit.name.name, unit.name.subscript, res, symbols->buildin_elements);
+        symbols->units.emplace_back(c);
     }
 
     VariableNode<Number>* FindVariable(const std::u32string& name, const std::u32string& subscript) const
@@ -760,6 +775,11 @@ struct Solver : public boost::static_visitor<Number>
         }
     }
 
+    void SetMaxTime(uint64_t _max_time)
+    {
+        max_time = _max_time;
+    }
+
 public:
     mutable std::u32string im;
     mutable int res_pos = 0;
@@ -781,6 +801,8 @@ private:
 
         for (Number& c : cast_units)
         {
+            CheckTime();
+
             if (c.unit.unit.size() <= s) //a unit should have minimal size
             {
                 size_t m2 = c.ToString(abs(c.GetExp()) + 1, abs(c.GetExp()) + 1, false).length();
@@ -880,6 +902,8 @@ private:
         Number u(precision, 1);
         for (auto& p : unit.unit)
         {
+            CheckTime();
+
             Number unit_val;
             if (unit.system == U"SI" || unit.system == U"")
             {
@@ -921,6 +945,8 @@ private:
 
     Number FunctionCall(FunctionCallNode<Number> const& op) const
     {
+        CheckTime();
+
         AddDependency(op.name.name);
 
         Number res;
@@ -1087,6 +1113,15 @@ private:
         return res;
     }
 
+    void CheckTime() const
+    {
+        if (max_time == 0)
+            return;
+        uint64_t now = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
+        if (now - start_time > max_time)
+            throw TimeExceedException();
+    }
+
     friend class Expression<Number>;
     
     mutable ElementId id;
@@ -1096,6 +1131,8 @@ private:
     mutable int default_notation = 10;
     Number left_value; //left solved value
     mutable Dependencies* dependencies = nullptr;
+    mutable uint64_t start_time;
+    mutable uint64_t max_time = 0; //in milliseconds
 };
 
 };

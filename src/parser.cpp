@@ -101,8 +101,8 @@ Complex second(const Complex& num, int& res_pos);
 Complex grad(const Complex& num, int& res_pos);
 
 template<>
-Parser<yutovo_calculator::Integer>::Parser(const int precision, const Language _language) : 
-    solver(precision),
+Parser<yutovo_calculator::Integer>::Parser(const int precision, const Language _language, uint64_t _max_time) : 
+    solver(precision, _max_time),
     language(_language)
 {
     IntegerBinaryFunc binary_func = &pow;
@@ -119,8 +119,8 @@ Parser<yutovo_calculator::Integer>::Parser(const int precision, const Language _
 }
 
 template<>
-Parser<yutovo_calculator::Real>::Parser(const int precision, const Language _language) : 
-    solver(precision),
+Parser<yutovo_calculator::Real>::Parser(const int precision, const Language _language, uint64_t _max_time) : 
+    solver(precision, _max_time),
     language(_language)
 {
     RealPrecisionVariable var;
@@ -211,8 +211,8 @@ Parser<yutovo_calculator::Real>::Parser(const int precision, const Language _lan
 }
 
 template<>
-Parser<yutovo_calculator::Rational>::Parser(const int precision, const Language _language) : 
-    solver(precision),
+Parser<yutovo_calculator::Rational>::Parser(const int precision, const Language _language, uint64_t _max_time) : 
+    solver(precision, _max_time),
     language(_language)
 {
     RationalBinaryFunc binary_func = &pow;
@@ -222,8 +222,8 @@ Parser<yutovo_calculator::Rational>::Parser(const int precision, const Language 
 }
 
 template<>
-Parser<yutovo_calculator::Complex>::Parser(const int precision, const Language _language) : 
-    solver(precision),
+Parser<yutovo_calculator::Complex>::Parser(const int precision, const Language _language, uint64_t _max_time) : 
+    solver(precision, _max_time),
     language(_language)
 {
     ComplexPrecisionVariable var;

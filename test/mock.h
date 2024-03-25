@@ -12,7 +12,7 @@ using namespace yutovo_calculator;
 struct CalcTestInteger : public testing::Test
 {
     CalcTestInteger() :
-        parser(0, Language::English)
+        parser(0, Language::English, 0)
     {
     }
 
@@ -22,7 +22,7 @@ struct CalcTestInteger : public testing::Test
 struct CalcTestReal : public testing::Test
 {
     CalcTestReal() :
-        parser(3, Language::English)
+        parser(3, Language::English, 0)
     {
     }
 
@@ -37,7 +37,7 @@ struct CalcTestReal : public testing::Test
 struct CalcTestRational : public testing::Test
 {
     CalcTestRational() :
-        parser(0, Language::English)
+        parser(0, Language::English, 0)
     {
     }
 
@@ -52,7 +52,7 @@ struct CalcTestRational : public testing::Test
 struct CalcTestComplex : public testing::Test
 {
     CalcTestComplex() :
-        parser(3, Language::English)
+        parser(3, Language::English, 0)
     {
     }
 

@@ -25,9 +25,9 @@ namespace yutovo_calculator
 template<typename Number>
 struct Parser
 {
-    Parser(const int precision, const Language _language);
+    Parser(const int precision, const Language _language, uint64_t _max_time);
     
-    Number Parse(ElementId id, std::u32string expression, Dependencies& dependencies, AngleMeasure default_angle_measure, AngleMeasure result_angle_measure, 
+    Number Parse(ElementId id, std::u32string expression, Dependencies* dependencies, AngleMeasure default_angle_measure, AngleMeasure result_angle_measure, 
         Notation default_notation, const int precision = -1)
     {
         if (expression.empty() || expression == U";")
@@ -43,23 +43,22 @@ struct Parser
         ScriptNode<Number> script_node;
 
         phrase_parse(iter, end, script, space, script_node);
-        solver.SetDependencies(&dependencies);
-        return solver(script_node, id, default_angle_measure, result_angle_measure, precision);
+        return solver(script_node, id, default_angle_measure, result_angle_measure, precision, dependencies);
     }
 
     Number Parse(ElementId id, std::u32string expression, AngleMeasure default_angle_measure, AngleMeasure result_angle_measure, const int precision = -1)
     {
         Dependencies dependencies;
-        return Parse(id, expression, dependencies, default_angle_measure, result_angle_measure, Notation::Decimal, precision);
+        return Parse(id, expression, &dependencies, default_angle_measure, result_angle_measure, Notation::Decimal, precision);
     }
 
-    Number Parse(ElementId id, std::string expression, Dependencies& dependencies, AngleMeasure default_angle_measure, AngleMeasure result_angle_measure, 
+    Number Parse(ElementId id, std::string expression, Dependencies* dependencies, AngleMeasure default_angle_measure, AngleMeasure result_angle_measure, 
         const int precision = -1)
     {
         return Parse(id, ToUtfString(expression), dependencies, default_angle_measure, result_angle_measure, Notation::Decimal, precision);
     }
 
-    Number Parse(ElementId id, std::u32string expression, Dependencies& dependencies, AngleMeasure default_angle_measure, AngleMeasure result_angle_measure, 
+    Number Parse(ElementId id, std::u32string expression, Dependencies* dependencies, AngleMeasure default_angle_measure, AngleMeasure result_angle_measure, 
         const int precision = -1)
     {
         return Parse(id, expression, dependencies, default_angle_measure, result_angle_measure, Notation::Decimal, precision);
@@ -68,31 +67,31 @@ struct Parser
     Number Parse(ElementId id, std::u32string expression)
     {
         Dependencies dependencies;
-        return Parse(id, expression, dependencies, AngleMeasure::Radian, AngleMeasure::None, Notation::Decimal);
+        return Parse(id, expression, &dependencies, AngleMeasure::Radian, AngleMeasure::None, Notation::Decimal);
     }
 
     Number Parse(ElementId id, std::u32string expression, const int precision)
     {
         Dependencies dependencies;
-        return Parse(id, expression, dependencies, AngleMeasure::Radian, AngleMeasure::None, Notation::Decimal, precision);
+        return Parse(id, expression, &dependencies, AngleMeasure::Radian, AngleMeasure::None, Notation::Decimal, precision);
     }
 
-    Number Parse(ElementId id, std::u32string expression, Dependencies& dependencies)
+    Number Parse(ElementId id, std::u32string expression, Dependencies* dependencies)
     {
         return Parse(id, expression, dependencies, AngleMeasure::Radian, AngleMeasure::None, Notation::Decimal);
     }
 
-    Number Parse(ElementId id, std::u32string expression, Dependencies& dependencies, Notation default_notation)
+    Number Parse(ElementId id, std::u32string expression, Dependencies* dependencies, Notation default_notation)
     {
         return Parse(id, expression, dependencies, AngleMeasure::Radian, AngleMeasure::None, default_notation);
     }
 
-    Number Parse(ElementId id, std::string expression, Dependencies& dependencies, Notation default_notation)
+    Number Parse(ElementId id, std::string expression, Dependencies* dependencies, Notation default_notation)
     {
         return Parse(id, ToUtfString(expression), dependencies, AngleMeasure::Radian, AngleMeasure::None, default_notation);
     }
 
-    Number Parse(ElementId id, std::string expression, Dependencies& dependencies)
+    Number Parse(ElementId id, std::string expression, Dependencies* dependencies)
     {
         return Parse(id, ToUtfString(expression), dependencies, AngleMeasure::Radian, AngleMeasure::None);
     }
@@ -100,10 +99,10 @@ struct Parser
     Number Parse(ElementId id, std::u32string expression, Notation default_notation)
     {
         Dependencies dependencies;
-        return Parse(id, expression, dependencies, AngleMeasure::Radian, AngleMeasure::None, default_notation);
+        return Parse(id, expression, &dependencies, AngleMeasure::Radian, AngleMeasure::None, default_notation);
     }
 
-    Number Parse(ElementId id, std::u32string expression, Dependencies& dependencies, 
+    Number Parse(ElementId id, std::u32string expression, Dependencies* dependencies, 
         AngleMeasure default_angle_measure, AngleMeasure result_angle_measure, const int precision, const int res_count, 
         std::vector<Number>& results)
     {
@@ -118,12 +117,11 @@ struct Parser
         ScriptNode<Complex> script_node;
 
         phrase_parse(iter, end, script, space, script_node);
-        solver.SetDependencies(&dependencies);
 
         for (int i = 0; i < res_count; ++i)
         {
             solver.res_pos = i;
-            Number r = solver(script_node, id, default_angle_measure, result_angle_measure, precision);
+            Number r = solver(script_node, id, default_angle_measure, result_angle_measure, precision, dependencies);
             if (std::find(results.begin(), results.end(), r) != results.end())
                 break;
             results.push_back(r);
@@ -133,7 +131,7 @@ struct Parser
         return results[0];
     }
 
-    Number Parse(ElementId id, std::string expression, Dependencies& dependencies, 
+    Number Parse(ElementId id, std::string expression, Dependencies* dependencies, 
         AngleMeasure default_angle_measure, AngleMeasure result_angle_measure, const int precision, const int res_count, 
         std::vector<Number>& results)
     {
@@ -195,6 +193,11 @@ struct Parser
     void ListUserUnits(std::vector<CustomUnit<Number>>& units)
     {
         solver.ListUserUnits(units);
+    }
+
+    void SetMaxTime(uint64_t max_time)
+    {
+        solver.SetMaxTime(max_time);
     }
 
 private:
@@ -710,6 +713,7 @@ private:
     Solver<Number> solver;
 
     Language language = Language::English;
+    uint64_t max_time = 0;
 };
 
 };

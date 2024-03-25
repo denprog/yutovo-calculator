@@ -192,8 +192,8 @@ TEST_F(CalcTestReal, variables1)
         parser.Parse(ElementId{0, 0, 1}, U"v=55.5;").ToStdString(3, 3);
     ASSERT_TRUE(parser.Parse(ElementId{0, 0, 2}, U"v=55.5;v;") == parser.Parse(ElementId{0, 0, 2}, U"55.5;")) << 
         parser.Parse(ElementId{0, 0, 2}, U"v=55.5;v;").ToStdString(3, 3);
-    parser.Parse(ElementId{0, 0, 3}, U"vp=55.5;", dependencies);
-    ASSERT_TRUE(parser.Parse(ElementId{0, 0, 3, 0}, U"vp+5;", dependencies) == parser.Parse(ElementId{0, 0, 3, 0}, U"60.5;")) << 
+    parser.Parse(ElementId{0, 0, 3}, U"vp=55.5;", &dependencies);
+    ASSERT_TRUE(parser.Parse(ElementId{0, 0, 3, 0}, U"vp+5;", &dependencies) == parser.Parse(ElementId{0, 0, 3, 0}, U"60.5;")) << 
         parser.Parse(ElementId{0, 0, 3, 0}, U"vp+5;").ToStdString(3, 3);
     ASSERT_TRUE(std::find(dependencies.begin(), dependencies.end(), U"vp") != dependencies.end());
 }
@@ -803,6 +803,19 @@ TEST_F(CalcTestReal, prod2)
 {
     std::string s = parser.Parse(ElementId{0, 0, 0, 0, 0, 0, 0, 2, 0}, U"loop(i=1,(i<=10),i=i+1,i_=1,i_=i_*(i));").ToStdString(3, 3);
     ASSERT_TRUE(s == "3.629E+6") << s;
+}
+
+TEST_F(CalcTestReal, max_time1)
+{
+    parser.SetMaxTime(1000);
+    EXPECT_THROW(parser.GetSuitableUnit(ElementId{0, 0, 0, 0, 2}, parser.Parse(ElementId{0, 0, 0, 0, 2}, U"10kg*10m/(2*pow(s,2));")).ToStdString(3, 3), 
+        yutovo_calculator::TimeExceedException);
+    auto res = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"(1+2);");
+    ASSERT_TRUE(res.ToStdString(3, 3) == parser.Parse(ElementId{0, 0, 0, 0, 1}, U"3;").ToStdString(3, 3));
+
+    parser.SetMaxTime(10000);
+    std::string s = parser.GetSuitableUnit(ElementId{0, 0, 0, 0, 2}, parser.Parse(ElementId{0, 0, 0, 0, 2}, U"10kg*10m/(2*pow(s,2));")).ToStdString(3, 3);
+    ASSERT_TRUE(s == "50.E+0(N)") << s;
 }
 
 }

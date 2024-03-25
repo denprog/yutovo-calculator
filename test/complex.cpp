@@ -362,17 +362,17 @@ TEST_F(CalcTestComplex, sqrt1)
 {
     Dependencies dependencies;
     std::vector<Complex> results;
-    parser.Parse(ElementId{0, 0, 1}, U"sqrt(i);", dependencies, AngleMeasure::Radian, AngleMeasure::Radian, 3, 10, results);
+    parser.Parse(ElementId{0, 0, 1}, U"sqrt(i);", &dependencies, AngleMeasure::Radian, AngleMeasure::Radian, 3, 10, results);
     std::string res = ToString(results);
     ASSERT_TRUE(res == "0.707E+0+i*0.707E+0,-0.707E+0+i*-0.707E+0") << res;
 
     results.clear();
-    parser.Parse(ElementId{0, 0, 1}, U"sqrt(3);", dependencies, AngleMeasure::Radian, AngleMeasure::Radian, 3, 10, results);
+    parser.Parse(ElementId{0, 0, 1}, U"sqrt(3);", &dependencies, AngleMeasure::Radian, AngleMeasure::Radian, 3, 10, results);
     res = ToString(results);
     ASSERT_TRUE(res == "1.732E+0,-1.732E+0") << res;
 
     results.clear();
-    parser.Parse(ElementId{0, 0, 1}, U"sqrt(2i+3);", dependencies, AngleMeasure::Radian, AngleMeasure::Radian, 3, 10, results);
+    parser.Parse(ElementId{0, 0, 1}, U"sqrt(2i+3);", &dependencies, AngleMeasure::Radian, AngleMeasure::Radian, 3, 10, results);
     res = ToString(results);
     ASSERT_TRUE(res == "1.817E+0+i*0.55E+0,-1.817E+0+i*-0.55E+0") << res;
 }
@@ -381,7 +381,7 @@ TEST_F(CalcTestComplex, sqrt2)
 {
     Dependencies dependencies;
     std::vector<Complex> results;
-    parser.Parse(ElementId{0, 0, 1}, U"sqrt(sqrt(1+i));", dependencies, AngleMeasure::Radian, AngleMeasure::Radian, 3, 10, results);
+    parser.Parse(ElementId{0, 0, 1}, U"sqrt(sqrt(1+i));", &dependencies, AngleMeasure::Radian, AngleMeasure::Radian, 3, 10, results);
     std::string res = ToString(results);
     ASSERT_TRUE(res == "1.07E+0+i*0.213E+0,0.213E+0+i*-1.07E+0,-1.07E+0+i*-0.213E+0,-0.213E+0+i*1.07E+0") << res;
 }
@@ -390,7 +390,7 @@ TEST_F(CalcTestComplex, root1)
 {
     Dependencies dependencies;
     std::vector<Complex> results;
-    parser.Parse(ElementId{0, 0, 1}, U"root(1+i,3);", dependencies, AngleMeasure::Radian, AngleMeasure::Radian, 3, 10, results);
+    parser.Parse(ElementId{0, 0, 1}, U"root(1+i,3);", &dependencies, AngleMeasure::Radian, AngleMeasure::Radian, 3, 10, results);
     std::string res = ToString(results);
     ASSERT_TRUE(res == "1.084E+0+i*0.291E+0,-0.794E+0+i*0.794E+0,-0.291E+0+i*-1.084E+0") << res;
 }
@@ -399,14 +399,13 @@ TEST_F(CalcTestComplex, exp1)
 {
     Dependencies dependencies;
     std::vector<Complex> results;
-    parser.Parse(ElementId{0, 0, 1}, U"exp(i);", dependencies, AngleMeasure::Radian, AngleMeasure::Radian, 3, 10, results);
+    parser.Parse(ElementId{0, 0, 1}, U"exp(i);", &dependencies, AngleMeasure::Radian, AngleMeasure::Radian, 3, 10, results);
     std::string res = ToString(results);
     ASSERT_TRUE(res == "0.54E+0+i*0.841E+0") << res;
 }
 
 TEST_F(CalcTestComplex, variables1)
 {
-    std::vector<std::u32string> dependencies;
     parser.Parse(ElementId{0, 0, 1}, U"v=5;");
     std::string s = parser.Parse(ElementId{0, 0, 2}, U"v;").ToStdString(3, 3);
     ASSERT_TRUE(s == "5.E+0") << s;
@@ -414,7 +413,6 @@ TEST_F(CalcTestComplex, variables1)
 
 TEST_F(CalcTestComplex, variables2)
 {
-    std::vector<std::u32string> dependencies;
     parser.Parse(ElementId{0, 0, 1}, U"v=5;");
     std::string s = parser.Parse(ElementId{0, 0, 2}, U"(1/2)v;").ToStdString(3, 3);
     ASSERT_TRUE(s == "2.5E+0") << s;

@@ -22,7 +22,8 @@ namespace yutovo_calculator
 		ConversionDoesNotFit = 103,
 		UnitsAreIncompatible = 201,
 		CannotCastToUnit = 202,
-		UnknownLanguage = 301
+		UnknownLanguage = 301,
+		TimeExceed = 401
 	};
 	
 	struct ParserException
@@ -88,6 +89,13 @@ namespace yutovo_calculator
 		}
 
 		MathException(ElementId _id, ParserExceptionCode _ex_id, int _pos, int _line) : ParserException(_id, _ex_id, _pos, _line)
+		{
+		}
+	};
+
+	struct TimeExceedException : public ParserException
+	{
+		TimeExceedException() : ParserException(ElementId{}, ParserExceptionCode::TimeExceed)
 		{
 		}
 	};
