@@ -9,6 +9,8 @@ set(Boost_USE_STATIC_LIBS ON)
 set(Boost_USE_MULTITHREADED ON)
 find_package(Boost 1.81.0 REQUIRED PATHS ${INSTALL_PATH}/lib/cmake/)
 
+set(CMAKE_DEBUG_POSTFIX d)
+
 add_library(${PROJECT_NAME}
     parser.cpp
     definition.cpp
