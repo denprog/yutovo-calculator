@@ -70,6 +70,7 @@ struct IdentifierNode : public ExpressionPosition
 {
 	std::u32string name;
 	std::u32string subscript;
+	std::u32string description;
 };
 
 template<typename Number>
@@ -361,7 +362,8 @@ BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::DefinitionNode<yutovo_calculator::I
 
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::IdentifierNode<yutovo_calculator::Integer>, 
 	(std::u32string, name)
-	(std::u32string, subscript))
+	(std::u32string, subscript)
+	(std::u32string, description))
 
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::FunctionCallNode<yutovo_calculator::Integer>, 
 	(yutovo_calculator::IdentifierNode<yutovo_calculator::Integer>, name)
@@ -476,7 +478,8 @@ BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::DefinitionNode<yutovo_calculator::R
 
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::IdentifierNode<yutovo_calculator::Real>, 
 	(std::u32string, name)
-	(std::u32string, subscript))
+	(std::u32string, subscript)
+	(std::u32string, description))
 
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::FunctionCallNode<yutovo_calculator::Real>, 
 	(yutovo_calculator::IdentifierNode<yutovo_calculator::Real>, name)
@@ -568,7 +571,8 @@ BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::DefinitionNode<yutovo_calculator::R
 
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::IdentifierNode<yutovo_calculator::Rational>, 
 	(std::u32string, name)
-	(std::u32string, subscript))
+	(std::u32string, subscript)
+	(std::u32string, description))
 
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::FunctionCallNode<yutovo_calculator::Rational>, 
 	(yutovo_calculator::IdentifierNode<yutovo_calculator::Rational>, name)
@@ -660,7 +664,8 @@ BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::DefinitionNode<yutovo_calculator::C
 
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::IdentifierNode<yutovo_calculator::Complex>, 
 	(std::u32string, name)
-	(std::u32string, subscript))
+	(std::u32string, subscript)
+	(std::u32string, description))
 
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::FunctionCallNode<yutovo_calculator::Complex>, 
 	(yutovo_calculator::IdentifierNode<yutovo_calculator::Complex>, name)

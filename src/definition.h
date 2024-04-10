@@ -42,8 +42,10 @@ struct Definition : qi::grammar<std::u32string::iterator, DefinitionNode<Number>
 		//unit definition
 		unit = identifier >> ('~' > expression);
 
-		//identifier is a name with on optional subscript
-		identifier = name >> -('{' > (+char_("0-9") | name) > '}');
+		description = raw[lexeme[+(alnum | '_' | ' ')]];
+
+		//identifier is a name with an optional subscript and optional description
+		identifier = name >> -('{' > (+char_("0-9") | name) > '}') >> -('`' > description > '`');
 		
 		//name is a letter-numeric std::u32string with an letter in the beginning
 		name = (raw[lexeme[(alpha | char_("°'_")) >> *(alnum | char_("'_"))]]);
@@ -65,7 +67,7 @@ struct Definition : qi::grammar<std::u32string::iterator, DefinitionNode<Number>
 	qi::rule<std::u32string::iterator, FunctionNode<Number>(), unicode::space_type> function;
 	qi::rule<std::u32string::iterator, VariableNode<Number>(), unicode::space_type> variable;
 	qi::rule<std::u32string::iterator, UnitNode<Number>(), unicode::space_type> unit;
-	qi::rule<std::u32string::iterator, std::u32string(), unicode::space_type> name;
+	qi::rule<std::u32string::iterator, std::u32string(), unicode::space_type> name, description;
 	qi::rule<std::u32string::iterator, IdentifierNode<Number>(), unicode::space_type> identifier;
 	qi::rule<std::u32string::iterator, std::list<IdentifierNode<Number> >(), unicode::space_type> argument_list;
 	

@@ -7,7 +7,7 @@
 namespace yutovo_calculator
 {
 	typedef unsigned int uint;
-	typedef std::vector<uint> ElementId;
+	typedef std::vector<int> ElementId;
 
 	enum ParserExceptionCode
 	{

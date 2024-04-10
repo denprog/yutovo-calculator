@@ -594,6 +594,11 @@ struct Solver : public boost::static_visitor<Number>
         symbols->units.clear();
     }
 
+    void ResetVariables()
+    {
+        symbols->variables.clear();
+    }
+
     Unit* FindBuiltinUnit(const std::u32string& name) const
     {
         auto iter = std::find_if(symbols->buildin_units.begin(), symbols->buildin_units.end(), 
@@ -724,10 +729,10 @@ struct Solver : public boost::static_visitor<Number>
             functions.push_back(p.first);
     }
 
-    void ListUserVariables(std::vector<std::u32string>& variables)
+    void ListUserVariables(std::vector<std::pair<std::u32string, std::u32string>>& variables)
     {
         for (auto& var : symbols->variables)
-            variables.push_back(var.name.name);
+            variables.push_back(std::make_pair(var.name.name, var.name.description));
     }
 
     void ListUserFunctions(std::vector<std::u32string>& functions)

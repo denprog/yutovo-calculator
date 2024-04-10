@@ -208,6 +208,7 @@ Parser<yutovo_calculator::Real>::Parser(const int precision, const Language _lan
     solver.AddBuiltinFunction("root", binary_func);
 
     InitUnits();
+    InitPhisicalConstants();
 }
 
 template<>
@@ -332,6 +333,7 @@ void Parser<yutovo_calculator::Real>::SetLocale(Language _language)
 {
     language = _language;
     InitUnits();
+    InitPhisicalConstants();
 }
 
 template<>

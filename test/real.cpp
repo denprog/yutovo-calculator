@@ -332,6 +332,12 @@ TEST_F(CalcTestReal, variables14)
     ASSERT_TRUE(r.ToStdString(3, 5) == "2.71828E+0") << r.ToStdString(3, 5);
 }
 
+TEST_F(CalcTestReal, variables15)
+{
+    auto r = parser.Parse(ElementId{0, 0, 1}, U"G;");
+    ASSERT_TRUE(r.ToStdString(3, 3) == "6.674E-11((m^3)/(kg*s^2))") << r.ToStdString(3, 3);
+}
+
 TEST_F(CalcTestReal, symbols1)
 {
     EXPECT_THROW(parser.Parse(ElementId{0, 0, 1}, U"•;"), yutovo_calculator::SyntaxException) << parser.Parse(ElementId{0, 0, 1}, U"•;").ToStdString(3, 3);
@@ -824,6 +830,26 @@ TEST_F(CalcTestReal, max_time1)
     parser.SetMaxTime(10000);
     std::string s = parser.GetSuitableUnit(ElementId{0, 0, 0, 0, 2}, parser.Parse(ElementId{0, 0, 0, 0, 2}, U"10kg*10m/(2*pow(s,2));")).ToStdString(3, 3);
     ASSERT_TRUE(s == "50.E+0(N)") << s;
+}
+
+TEST_F(CalcTestReal, list_identifiers1)
+{
+    std::vector<std::pair<std::u32string, std::u32string>> variables;
+    parser.ListUserVariables(variables);
+    ASSERT_TRUE(std::find_if(variables.begin(), variables.end(), 
+        [](auto& p)
+        {
+            return p.first == U"c" && p.second == U"speed of light";
+        }) != variables.end());
+    
+    variables.clear();
+    parser.SetLocale(Language::Russian);
+    parser.ListUserVariables(variables);
+    ASSERT_TRUE(std::find_if(variables.begin(), variables.end(), 
+        [](auto& p)
+        {
+            return p.first == U"с" && p.second == U"скорость света";
+        }) != variables.end());
 }
 
 }

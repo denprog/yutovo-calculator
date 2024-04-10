@@ -175,7 +175,7 @@ struct Parser
         solver.ListBuiltinFunctions(functions);
     }
 
-    void ListUserVariables(std::vector<std::u32string>& variables)
+    void ListUserVariables(std::vector<std::pair<std::u32string, std::u32string>>& variables)
     {
         solver.ListUserVariables(variables);
     }
@@ -708,6 +708,29 @@ private:
 
     void InitAngleUnits()
     {
+    }
+
+    void InitPhisicalConstants()
+    {
+        solver.ResetVariables();
+
+        switch (language)
+        {
+        case Language::English:
+            Parse(ElementId{0, -1, 0, 0, 0}, U"c`speed of light`=299792458(m/s);");
+            Parse(ElementId{0, -1, 0, 0, 1}, U"G`gravitational constant`=6.674301515151515*pow(10,-11)*(pow(m,3)/(kg*pow(s,2)));");
+            Parse(ElementId{0, -1, 0, 0, 2}, U"h`Planck constant`=6.62607015*pow(10,-34)*(J*s);");
+            Parse(ElementId{0, -1, 0, 0, 3}, U"e_c`elementary charge`=1.602176634*pow(10,-19)*C;");
+            Parse(ElementId{0, -1, 0, 0, 4}, U"k`Boltzmann constant`=1.380649*pow(10,-23)*(J/K);");
+            break;
+        case Language::Russian:
+            Parse(ElementId{0, -1, 0, 0, 0}, U"с`скорость света`=299792458(м/сек);");
+            Parse(ElementId{0, -1, 0, 0, 1}, U"G`гравитационная постоянная`=6.674301515151515*pow(10,-11)*(pow(м,3)/(кг*pow(сек,2)));");
+            Parse(ElementId{0, -1, 0, 0, 2}, U"h`постоянная Планка`=6.62607015*pow(10,-34)*(Дж*сек);");
+            Parse(ElementId{0, -1, 0, 0, 3}, U"e_c`элементарный заряд`=1.602176634*pow(10,-19)*Кл;");
+            Parse(ElementId{0, -1, 0, 0, 4}, U"k`постоянная Больцмана`=1.380649*pow(10,-23)*(Дж/К);");
+            break;
+        }
     }
 
     Solver<Number> solver;
