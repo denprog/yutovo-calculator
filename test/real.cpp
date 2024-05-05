@@ -338,6 +338,17 @@ TEST_F(CalcTestReal, variables15)
     ASSERT_TRUE(r.ToStdString(3, 3) == "6.674E-11((m^3)/(kg*s^2))") << r.ToStdString(3, 3);
 }
 
+TEST_F(CalcTestReal, variables16)
+{
+    parser.Parse(ElementId{0, 0, 1}, U"a=5.5;");
+    auto r = parser.Parse(ElementId{0, 0, 2}, U"a;", 5);
+    ASSERT_TRUE(r.ToStdString(3, 3) == "5.5E+0") << r.ToStdString(3, 3);
+
+    parser.SetLocale(Language::Russian);
+    r = parser.Parse(ElementId{0, 0, 2}, U"a;", 5);
+    ASSERT_TRUE(r.ToStdString(3, 3) == "5.5E+0") << r.ToStdString(3, 3);
+}
+
 TEST_F(CalcTestReal, symbols1)
 {
     EXPECT_THROW(parser.Parse(ElementId{0, 0, 1}, U"•;"), yutovo_calculator::SyntaxException) << parser.Parse(ElementId{0, 0, 1}, U"•;").ToStdString(3, 3);
@@ -764,6 +775,19 @@ TEST_F(CalcTestReal, units37)
 
     std::string t = parser.CastToUnit(ElementId{0, 0, 0, 0, 2}, r, Unit(U"mm")).ToStdString(3, 3);
     ASSERT_TRUE(t == "1.2E+0(mm)") << t;
+}
+
+TEST_F(CalcTestReal, units38)
+{
+    auto r = parser.Parse(ElementId{0, 0, 0, 0, 0, 0, 0, 2, 0}, U"5mm;");
+    std::string s = parser.GetSuitableUnit(ElementId{0, 0, 0, 0, 0, 0, 0, 2, 0}, r).ToStdString(3, 3);
+    ASSERT_TRUE(s == "5.E+0(mm)") << s;
+
+    parser.SetLocale(Language::Russian);
+    EXPECT_THROW(parser.Parse(ElementId{0, 0, 0, 0, 0, 0, 0, 2, 0}, U"5mm;"), yutovo_calculator::SyntaxException);
+    r = parser.Parse(ElementId{0, 0, 0, 0, 0, 0, 0, 2, 0}, U"5мм;");
+    s = parser.GetSuitableUnit(ElementId{0, 0, 0, 0, 0, 0, 0, 2, 0}, r).ToStdString(3, 3);
+    ASSERT_TRUE(s == "5.E+0(мм)") << s;
 }
 
 TEST_F(CalcTestReal, compare1)

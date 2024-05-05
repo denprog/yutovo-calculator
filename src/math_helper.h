@@ -52,6 +52,7 @@ enum class ComplexForm
 
 enum class Language
 {
+	None = 0,
 	English = 1,
 	Russian
 };

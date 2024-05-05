@@ -583,6 +583,26 @@ struct Solver : public boost::static_visitor<Number>
         return func_it != symbols->functions.end();
     }
 
+    bool RemoveIdentifier(ElementId id)
+    {
+        auto var_it = symbols->variables.erase(std::remove_if(symbols->variables.begin(), symbols->variables.end(), 
+            [id](auto& var)
+            {
+                return var.id == id;
+            }), 
+            symbols->variables.end());
+        if (var_it != symbols->variables.end())
+            return true;
+
+        auto func_it = symbols->functions.erase(std::remove_if(symbols->functions.begin(), symbols->functions.end(), 
+            [id](auto& func)
+            {
+                return func.id == id;;
+            }), 
+            symbols->functions.end());
+        return func_it != symbols->functions.end();
+    }
+
     void AddBuiltinUnit(const Unit& unit)
     {
         symbols->buildin_units.push_back(unit);
@@ -592,6 +612,11 @@ struct Solver : public boost::static_visitor<Number>
     {
         symbols->buildin_units.clear();
         symbols->units.clear();
+    }
+
+    void ResetBuildinUnits()
+    {
+        symbols->buildin_units.clear();
     }
 
     void ResetVariables()

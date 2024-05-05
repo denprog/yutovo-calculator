@@ -203,7 +203,7 @@ struct Parser
 private:
     void InitUnits()
     {
-        solver.ResetUnits();
+        solver.ResetBuildinUnits();
 
         switch (language)
         {
@@ -247,463 +247,56 @@ private:
 
     void InitSIUnits()
     {
-        switch (language)
+        auto it = si_units.find(last_language);
+        if (it != si_units.end())
         {
-        case Language::English:
-            //distance
-            Parse(ElementId{0, 0, 0, 1}, U"ang~0.000000000001m;");
-            Parse(ElementId{0, 0, 0, 2}, U"nm~0.000000001m;");
-            Parse(ElementId{0, 0, 0, 3}, U"mcm~0.000001m;");
-            Parse(ElementId{0, 0, 0, 4}, U"mm~0.001m;");
-            Parse(ElementId{0, 0, 0, 5}, U"cm~0.01m;");
-            Parse(ElementId{0, 0, 0, 6}, U"dm~0.1m;");
-            Parse(ElementId{0, 0, 0, 7}, U"km~1000m;");
-
-            //time
-            Parse(ElementId{0, 0, 1, 1}, U"ps~0.000000000001s;");
-            Parse(ElementId{0, 0, 1, 2}, U"ns~0.000000001s;");
-            Parse(ElementId{0, 0, 1, 3}, U"mcs~0.000001s;");
-            Parse(ElementId{0, 0, 1, 4}, U"ms~0.001s;");
-            Parse(ElementId{0, 0, 1, 5}, U"min~60s;");
-            Parse(ElementId{0, 0, 1, 6}, U"hour~60min;");
-            Parse(ElementId{0, 0, 1, 7}, U"day~24hour;");
-            Parse(ElementId{0, 0, 1, 8}, U"week~7day;");
-
-            //mass
-            Parse(ElementId{0, 0, 2, 1}, U"g~0.001kg;");
-            Parse(ElementId{0, 0, 2, 2}, U"mcg~0.000001kg;");
-            Parse(ElementId{0, 0, 2, 3}, U"mg~0.001kg;");
-            Parse(ElementId{0, 0, 2, 4}, U"ton~1000kg;");
-
-            //electric current
-            Parse(ElementId{0, 0, 3, 1}, U"mcA~0.000001A;");
-            Parse(ElementId{0, 0, 3, 2}, U"mA~0.001A;");
-            Parse(ElementId{0, 0, 3, 3}, U"kA~1000A;");
-            Parse(ElementId{0, 0, 3, 4}, U"MA~1000000A;");
-
-            //frequency
-            Parse(ElementId{0, 0, 4, 1}, U"Hz~1/s;");
-            Parse(ElementId{0, 0, 4, 2}, U"kHz~1000Hz;");
-            Parse(ElementId{0, 0, 4, 3}, U"MHz~1000kHz;");
-            Parse(ElementId{0, 0, 4, 4}, U"GHz~1000MHz;");
-
-            //force
-            Parse(ElementId{0, 0, 5, 1}, U"N~(kg*m)/(pow(s,2));");
-            Parse(ElementId{0, 0, 5, 2}, U"mcN~0.000001N;");
-            Parse(ElementId{0, 0, 5, 3}, U"mN~0.001N;");
-            Parse(ElementId{0, 0, 5, 4}, U"kN~1000N;");
-            Parse(ElementId{0, 0, 5, 5}, U"MN~1000kN;");
-
-            //energy
-            Parse(ElementId{0, 0, 6, 1}, U"J~N*m;");
-            Parse(ElementId{0, 0, 6, 2}, U"mcJ~0.000001J;");
-            Parse(ElementId{0, 0, 6, 3}, U"mJ~0.001J;");
-            Parse(ElementId{0, 0, 6, 4}, U"kJ~1000J;");
-            Parse(ElementId{0, 0, 6, 5}, U"MJ~1000000J;");
-
-            //power
-            Parse(ElementId{0, 0, 7, 1}, U"W~(J)/(s);");
-            Parse(ElementId{0, 0, 7, 2}, U"mcW~0.000001W;");
-            Parse(ElementId{0, 0, 7, 3}, U"mW~0.001W;");
-            Parse(ElementId{0, 0, 7, 4}, U"kW~1000W;");
-            Parse(ElementId{0, 0, 7, 5}, U"MW~1000000W;");
-
-            //pressure
-            Parse(ElementId{0, 0, 8, 1}, U"Pa~(N)/(pow(m,2));");
-            Parse(ElementId{0, 0, 8, 2}, U"mcPa~0.000001Pa;");
-            Parse(ElementId{0, 0, 8, 3}, U"mPa~0.001Pa;");
-            Parse(ElementId{0, 0, 8, 4}, U"kPa~1000Pa;");
-            Parse(ElementId{0, 0, 8, 5}, U"MPa~1000000Pa;");
-
-            //luminous intensity
-            Parse(ElementId{0, 0, 9, 1}, U"mccd~0.000001cd;");
-            Parse(ElementId{0, 0, 9, 2}, U"mcd~0.001cd;");
-            Parse(ElementId{0, 0, 9, 3}, U"kcd~1000cd;");
-            Parse(ElementId{0, 0, 9, 4}, U"Mcd~1000000cd;");
-
-            //luminous flux
-            Parse(ElementId{0, 0, 10, 1}, U"lm~cd*sr;");
-            Parse(ElementId{0, 0, 10, 2}, U"mclm~0.000001lm;");
-            Parse(ElementId{0, 0, 10, 3}, U"mlm~0.001lm;");
-            Parse(ElementId{0, 0, 10, 4}, U"klm~1000lm;");
-            Parse(ElementId{0, 0, 10, 5}, U"Mlm~1000000lm;");
-
-            //illuminance
-            Parse(ElementId{0, 0, 11, 1}, U"lx~lm/pow(m,2);");
-            Parse(ElementId{0, 0, 11, 2}, U"mclx~0.000001lx;");
-            Parse(ElementId{0, 0, 11, 3}, U"mlx~0.001lx;");
-            Parse(ElementId{0, 0, 11, 4}, U"klx~1000lx;");
-            Parse(ElementId{0, 0, 11, 5}, U"Mlx~1000000lx;");
-
-            //electrical charge
-            Parse(ElementId{0, 0, 12, 1}, U"C~A*s;");
-            Parse(ElementId{0, 0, 12, 2}, U"mcC~0.000001C;");
-            Parse(ElementId{0, 0, 12, 3}, U"mC~0.001C;");
-            Parse(ElementId{0, 0, 12, 4}, U"kC~1000C;");
-            Parse(ElementId{0, 0, 12, 5}, U"MC~1000000C;");
-
-            //potential
-            Parse(ElementId{0, 0, 13, 1}, U"V~(J)/(C);");
-            Parse(ElementId{0, 0, 13, 2}, U"pV~0.000000000001V;");
-            Parse(ElementId{0, 0, 13, 3}, U"nV~0.000000001V;");
-            Parse(ElementId{0, 0, 13, 4}, U"mcV~0.000001V;");
-            Parse(ElementId{0, 0, 13, 5}, U"mV~0.001V;");
-            Parse(ElementId{0, 0, 13, 6}, U"kV~1000V;");
-            Parse(ElementId{0, 0, 13, 7}, U"MV~1000000V;");
-
-            //electrical resistance
-            Parse(ElementId{0, 0, 14, 1}, U"Ohm~V/A;");
-            Parse(ElementId{0, 0, 14, 2}, U"mcOhm~0.000001Ohm;");
-            Parse(ElementId{0, 0, 14, 3}, U"mOhm~0.001Ohm;");
-            Parse(ElementId{0, 0, 14, 4}, U"kOhm~1000Ohm;");
-            Parse(ElementId{0, 0, 14, 5}, U"MOhm~1000000Ohm;");
-
-            //electrical capacity
-            Parse(ElementId{0, 0, 15, 1}, U"F~C/V;");
-            Parse(ElementId{0, 0, 15, 2}, U"pF~0.000000000001F;");
-            Parse(ElementId{0, 0, 15, 3}, U"nF~0.000000001F;");
-            Parse(ElementId{0, 0, 15, 4}, U"mcF~0.000001F;");
-            Parse(ElementId{0, 0, 15, 5}, U"mF~0.001F;");
-
-            //magnetic flux
-            Parse(ElementId{0, 0, 16, 1}, U"Wb~(kg*pow(m,2)/(pow(s,2)*A));");
-            Parse(ElementId{0, 0, 16, 2}, U"mcWb~0.000001Wb;");
-            Parse(ElementId{0, 0, 16, 3}, U"mWb~0.001Wb;");
-            Parse(ElementId{0, 0, 16, 4}, U"kWb~1000Wb;");
-            Parse(ElementId{0, 0, 16, 5}, U"MWb~1000000Wb;");
-
-            //magnetic field
-            Parse(ElementId{0, 0, 17, 1}, U"T~(Wb)/(pow(m,2));");
-            Parse(ElementId{0, 0, 17, 2}, U"mcT~0.000001T;");
-            Parse(ElementId{0, 0, 17, 3}, U"mT~0.001T;");
-            Parse(ElementId{0, 0, 17, 4}, U"kT~1000T;");
-            Parse(ElementId{0, 0, 17, 5}, U"MT~1000000T;");
-
-            //electrical inductance
-            Parse(ElementId{0, 0, 18, 1}, U"H~(kg*pow(m,2))/(pow(s,2)*pow(A,2));");
-            Parse(ElementId{0, 0, 18, 2}, U"pH~0.000000000001H;");
-            Parse(ElementId{0, 0, 18, 3}, U"nH~0.000000001H;");
-            Parse(ElementId{0, 0, 18, 4}, U"mcH~0.000001H;");
-            Parse(ElementId{0, 0, 18, 5}, U"mH~0.001H;");
-
-            //electric conductance
-            Parse(ElementId{0, 0, 19, 1}, U"S~(1)/(Ohm);");
-            Parse(ElementId{0, 0, 19, 2}, U"mcS~0.000001Ohm;");
-            Parse(ElementId{0, 0, 19, 3}, U"mS~0.001Ohm;");
-            Parse(ElementId{0, 0, 19, 4}, U"kS~1000Ohm;");
-            Parse(ElementId{0, 0, 19, 5}, U"MS~1000000Ohm;");
-
-            //ionizing radiation
-            Parse(ElementId{0, 0, 20, 1}, U"Gy~(J)/(kg);");
-            Parse(ElementId{0, 0, 20, 2}, U"mcGy~0.000001Gy;");
-            Parse(ElementId{0, 0, 20, 3}, U"mGy~0.001Gy;");
-            Parse(ElementId{0, 0, 20, 4}, U"kGy~1000Gy;");
-            Parse(ElementId{0, 0, 20, 5}, U"MGy~1000000Gy;");
-            break;
-        case Language::Russian:
-            //distance
-            Parse(ElementId{0, 0, 0, 1}, U"анг~0.0000000001м;");
-            Parse(ElementId{0, 0, 0, 2}, U"нм~0.000000001м;");
-            Parse(ElementId{0, 0, 0, 3}, U"мкм~0.000001м;");
-            Parse(ElementId{0, 0, 0, 4}, U"мм~0.001м;");
-            Parse(ElementId{0, 0, 0, 5}, U"см~0.01м;");
-            Parse(ElementId{0, 0, 0, 6}, U"дм~0.1м;");
-            Parse(ElementId{0, 0, 0, 7}, U"км~1000м;");
-
-            //time
-            Parse(ElementId{0, 0, 1, 1}, U"пс~0.000000000001сек;");
-            Parse(ElementId{0, 0, 1, 2}, U"нс~0.000000001сек;");
-            Parse(ElementId{0, 0, 1, 3}, U"мкс~0.000001сек;");
-            Parse(ElementId{0, 0, 1, 4}, U"мс~0.001сек;");
-            Parse(ElementId{0, 0, 1, 5}, U"мин~60сек;");
-            Parse(ElementId{0, 0, 1, 6}, U"час~60мин;");
-            Parse(ElementId{0, 0, 1, 7}, U"сутки~24час;");
-            Parse(ElementId{0, 0, 1, 8}, U"неделя~7сутки;");
-
-            //mass
-            Parse(ElementId{0, 0, 2, 1}, U"г~0.001кг;");
-            Parse(ElementId{0, 0, 2, 2}, U"мкг~0.000001кг;");
-            Parse(ElementId{0, 0, 2, 3}, U"мг~0.001кг;");
-            Parse(ElementId{0, 0, 2, 4}, U"тонна~1000кг;");
-
-            //electric current
-            Parse(ElementId{0, 0, 3, 1}, U"мкА~0.000001А;");
-            Parse(ElementId{0, 0, 3, 2}, U"мА~0.001А;");
-            Parse(ElementId{0, 0, 3, 3}, U"кА~1000А;");
-            Parse(ElementId{0, 0, 3, 4}, U"МА~1000000А;");
-
-            //frequency
-            Parse(ElementId{0, 0, 4, 1}, U"Гц~1/сек;");
-            Parse(ElementId{0, 0, 4, 2}, U"кГц~1000Гц;");
-            Parse(ElementId{0, 0, 4, 3}, U"МГц~1000кГц;");
-            Parse(ElementId{0, 0, 4, 4}, U"ГГц~1000МГц;");
-
-            //force
-            Parse(ElementId{0, 0, 5, 1}, U"Н~кг*м/pow(сек,2);");
-            Parse(ElementId{0, 0, 5, 2}, U"мкН~0.000001Н;");
-            Parse(ElementId{0, 0, 5, 3}, U"мН~0.001Н;");
-            Parse(ElementId{0, 0, 5, 4}, U"кН~1000Н;");
-            Parse(ElementId{0, 0, 5, 5}, U"МН~1000кН;");
-
-            //energy
-            Parse(ElementId{0, 0, 6, 1}, U"Дж~Н*м;");
-            Parse(ElementId{0, 0, 6, 2}, U"мкДж~0.000001Дж;");
-            Parse(ElementId{0, 0, 6, 3}, U"мДж~0.001Дж;");
-            Parse(ElementId{0, 0, 6, 4}, U"кДж~1000Дж;");
-            Parse(ElementId{0, 0, 6, 5}, U"МДж~1000000Дж;");
-
-            //power
-            Parse(ElementId{0, 0, 7, 1}, U"Вт~Дж/сек;");
-            Parse(ElementId{0, 0, 7, 2}, U"мкВт~0.000001Вт;");
-            Parse(ElementId{0, 0, 7, 3}, U"мВт~0.001Вт;");
-            Parse(ElementId{0, 0, 7, 4}, U"кВт~1000Вт;");
-            Parse(ElementId{0, 0, 7, 5}, U"МВт~1000000Вт;");
-
-            //pressure
-            Parse(ElementId{0, 0, 8, 1}, U"Па~(Н)/pow(м,2);");
-            Parse(ElementId{0, 0, 8, 2}, U"мкПа~0.000001Па;");
-            Parse(ElementId{0, 0, 8, 3}, U"мПа~0.001Па;");
-            Parse(ElementId{0, 0, 8, 4}, U"кПа~1000Па;");
-            Parse(ElementId{0, 0, 8, 5}, U"МПа~1000000Па;");
-
-            //luminous intensity
-            Parse(ElementId{0, 0, 9, 1}, U"мкКд~0.000001Кд;");
-            Parse(ElementId{0, 0, 9, 2}, U"мКд~0.001Кд;");
-            Parse(ElementId{0, 0, 9, 3}, U"кКд~1000Кд;");
-            Parse(ElementId{0, 0, 9, 4}, U"МКд~1000000Кд;");
-
-            //luminous flux
-            Parse(ElementId{0, 0, 10, 1}, U"лм~Кд*ср;");
-            Parse(ElementId{0, 0, 10, 2}, U"мклм~0.000001лм;");
-            Parse(ElementId{0, 0, 10, 3}, U"млм~0.001лм;");
-            Parse(ElementId{0, 0, 10, 4}, U"клм~1000лм;");
-            Parse(ElementId{0, 0, 10, 5}, U"Млм~1000000лм;");
-
-            //illuminance
-            Parse(ElementId{0, 0, 11, 1}, U"лк~лм/pow(м,2);");
-            Parse(ElementId{0, 0, 11, 2}, U"мклк~0.000001лк;");
-            Parse(ElementId{0, 0, 11, 3}, U"млк~0.001лк;");
-            Parse(ElementId{0, 0, 11, 4}, U"клк~1000лк;");
-            Parse(ElementId{0, 0, 11, 5}, U"Млк~1000000лк;");
-
-            //electrical charge
-            Parse(ElementId{0, 0, 12, 1}, U"Кл~А*сек;");
-            Parse(ElementId{0, 0, 12, 2}, U"мкКл~0.000001Кл;");
-            Parse(ElementId{0, 0, 12, 3}, U"мКл~0.001Кл;");
-            Parse(ElementId{0, 0, 12, 4}, U"кКл~1000Кл;");
-            Parse(ElementId{0, 0, 12, 5}, U"МКл~1000000Кл;");
-
-            //potential
-            Parse(ElementId{0, 0, 13, 1}, U"В~Дж/Кл;");
-            Parse(ElementId{0, 0, 13, 2}, U"пВ~0.000000000001В;");
-            Parse(ElementId{0, 0, 13, 3}, U"нВ~0.000000001В;");
-            Parse(ElementId{0, 0, 13, 4}, U"мкВ~0.000001В;");
-            Parse(ElementId{0, 0, 13, 5}, U"мВ~0.001В;");
-            Parse(ElementId{0, 0, 13, 6}, U"кВ~1000В;");
-            Parse(ElementId{0, 0, 13, 7}, U"МВ~1000000В;");
-
-            //electrical resistance
-            Parse(ElementId{0, 0, 14, 1}, U"Ом~В/А;");
-            Parse(ElementId{0, 0, 14, 2}, U"мкОм~0.000001Ом;");
-            Parse(ElementId{0, 0, 14, 3}, U"мОм~0.001Ом;");
-            Parse(ElementId{0, 0, 14, 4}, U"кОм~1000Ом;");
-            Parse(ElementId{0, 0, 14, 5}, U"МОм~1000000Ом;");
-
-            //electrical capacity
-            Parse(ElementId{0, 0, 15, 1}, U"Ф~Кл/В;");
-            Parse(ElementId{0, 0, 15, 2}, U"пФ~0.000000000001Ф;");
-            Parse(ElementId{0, 0, 15, 3}, U"нФ~0.000000001Ф;");
-            Parse(ElementId{0, 0, 15, 4}, U"мкФ~0.000001Ф;");
-            Parse(ElementId{0, 0, 15, 5}, U"мФ~0.001Ф;");
-
-            //magnetic flux
-            Parse(ElementId{0, 0, 16, 1}, U"Вб~(кг*pow(м,2)/(pow(сек,2)*А));");
-            Parse(ElementId{0, 0, 16, 2}, U"мкВб~0.000001Вб;");
-            Parse(ElementId{0, 0, 16, 3}, U"мВб~0.001Вб;");
-            Parse(ElementId{0, 0, 16, 4}, U"кВб~1000Вб;");
-            Parse(ElementId{0, 0, 16, 5}, U"МВб~1000000Вб;");
-
-            //magnetic field
-            Parse(ElementId{0, 0, 17, 1}, U"Тл~(Вб)/(pow(м,2));");
-            Parse(ElementId{0, 0, 17, 2}, U"мкТл~0.000001Тл;");
-            Parse(ElementId{0, 0, 17, 3}, U"мТл~0.001Тл;");
-            Parse(ElementId{0, 0, 17, 4}, U"кТл~1000Тл;");
-            Parse(ElementId{0, 0, 17, 5}, U"МТл~1000000Тл;");
-
-            //electrical inductance
-            Parse(ElementId{0, 0, 18, 1}, U"Гн~(кг*pow(м,2))/(pow(сек,2)*pow(А,2));");
-            Parse(ElementId{0, 0, 18, 2}, U"пГн~0.000000000001Гн;");
-            Parse(ElementId{0, 0, 18, 3}, U"нГн~0.000000001Гн;");
-            Parse(ElementId{0, 0, 18, 4}, U"мкГн~0.000001Гн;");
-            Parse(ElementId{0, 0, 18, 5}, U"мГн~0.001Гн;");
-
-            //electric conductance
-            Parse(ElementId{0, 0, 19, 1}, U"См~(1)/(Ом);");
-            Parse(ElementId{0, 0, 19, 2}, U"мкСм~0.000001См;");
-            Parse(ElementId{0, 0, 19, 3}, U"мСм~0.001См;");
-            Parse(ElementId{0, 0, 19, 4}, U"кСм~1000См;");
-            Parse(ElementId{0, 0, 19, 5}, U"МСм~1000000См;");
-
-            //ionizing radiation
-            Parse(ElementId{0, 0, 20, 1}, U"Гр~(Дж)/(кг);");
-            Parse(ElementId{0, 0, 20, 2}, U"мкГр~0.000001Гр;");
-            Parse(ElementId{0, 0, 20, 3}, U"мГр~0.001Гр;");
-            Parse(ElementId{0, 0, 20, 4}, U"кГр~1000Гр;");
-            Parse(ElementId{0, 0, 20, 5}, U"МГр~1000000Гр;");
-            break;
+            int p = 0;
+            for (auto& expr : it->second)
+                solver.RemoveIdentifier(ElementId{0, -2, 0, 0, p++});
         }
+
+        it = si_units.find(language);
+        if (it == si_units.end())
+            return;
+        int p = 0;
+        for (auto& expr : it->second)
+            Parse(ElementId{0, -2, 0, 0, p++}, expr);
     }
 
     void InitOtherUnits()
     {
-        switch (language)
+        auto it = other_units.find(last_language);
+        if (it != other_units.end())
         {
-        case Language::English:
-            //temperature
-            Parse(ElementId{0, 1, 0, 0, 1}, U"°C~K;");
-            
-            //data
-            Parse(ElementId{0, 1, 0, 1}, U"byte~8bit;");
-            Parse(ElementId{0, 1, 0, 2}, U"kbyte~1024byte;");
-            Parse(ElementId{0, 1, 0, 3}, U"Mbyte~1024kbyte;");
-            Parse(ElementId{0, 1, 0, 4}, U"Gbyte~1024Mbyte;");
-            Parse(ElementId{0, 1, 0, 5}, U"Tbyte~1024Gbyte;");
-
-            //square
-            Parse(ElementId{0, 1, 1, 1}, U"a~100*pow(m,2);"); //ar
-            Parse(ElementId{0, 1, 1, 2}, U"ha~100a;"); //hectar
-
-            //volume
-            Parse(ElementId{0, 1, 2, 1}, U"l~pow(dm,3);"); //litre
-            Parse(ElementId{0, 1, 2, 2}, U"ml~0.001l;");
-            Parse(ElementId{0, 1, 2, 3}, U"dl~0.1l;");
-            Parse(ElementId{0, 1, 2, 4}, U"dal~10l;");
-            Parse(ElementId{0, 1, 2, 5}, U"hl~100l;");
-            break;
-        case Language::Russian:
-            //temperature
-            Parse(ElementId{0, 1, 0, 0, 1}, U"°C~К;");
-
-            //data
-            Parse(ElementId{0, 1, 0, 1}, U"байт~8бит;");
-            Parse(ElementId{0, 1, 0, 2}, U"кбайт~1024байт;");
-            Parse(ElementId{0, 1, 0, 3}, U"Мбайт~1024кбайт;");
-            Parse(ElementId{0, 1, 0, 4}, U"Гбайт~1024Мбайт;");
-            Parse(ElementId{0, 1, 0, 5}, U"Тбайт~1024Гбайт;");
-
-            //square
-            Parse(ElementId{0, 1, 1, 1}, U"ар~100*pow(м,2);"); //ar
-            Parse(ElementId{0, 1, 1, 2}, U"га~100ар;"); //hectar
-
-            //volume
-            Parse(ElementId{0, 1, 2, 1}, U"л~pow(дм,3);"); //litre
-            Parse(ElementId{0, 1, 2, 2}, U"мл~0.001л;");
-            Parse(ElementId{0, 1, 2, 3}, U"дл~0.1л;");
-            Parse(ElementId{0, 1, 2, 4}, U"дал~10л;");
-            Parse(ElementId{0, 1, 2, 5}, U"гл~100л;");
-            break;
+            int p = 0;
+            for (auto& expr : it->second)
+                solver.RemoveIdentifier(ElementId{0, -2, 1, 0, p++});
         }
+
+        it = other_units.find(language);
+        if (it == other_units.end())
+            return;
+        int p = 0;
+        for (auto& expr : it->second)
+            Parse(ElementId{0, -2, 1, 0, p++}, expr);
     }
 
     void InitRussianUnits()
     {
-        switch (language)
+        auto it = russian_units.find(last_language);
+        if (it != russian_units.end())
         {
-        case Language::English:
-            //distance
-            Parse(ElementId{0, 2, 0, 0}, U"tochka{rus}~(254)/(1000)mm;");
-            Parse(ElementId{0, 2, 0, 1}, U"liniya{rus}~10tochka{rus};");
-            Parse(ElementId{0, 2, 0, 2}, U"sotka{rus}~84tochka{rus};");
-            Parse(ElementId{0, 2, 0, 3}, U"dyum{rus}~10liniya{rus};");
-            Parse(ElementId{0, 2, 0, 4}, U"vershok{rus}~(7)/(4)dyum{rus};");
-            Parse(ElementId{0, 2, 0, 5}, U"chetvert{rus}~7dyum{rus};");
-            Parse(ElementId{0, 2, 0, 6}, U"fut{rus}~12dyum{rus};");
-            Parse(ElementId{0, 2, 0, 7}, U"arshin{rus}~28dyum{rus};");
-            Parse(ElementId{0, 2, 0, 8}, U"sazhen{rus}~7fut{rus};");
-            Parse(ElementId{0, 2, 0, 9}, U"versta{rus}~500sazhen{rus};");
-
-            //mass
-            Parse(ElementId{0, 2, 1, 1}, U"funt{rus}~0.4095124*kg;");
-            Parse(ElementId{0, 2, 1, 2}, U"batman{rus}~10funt{rus};");
-            Parse(ElementId{0, 2, 1, 3}, U"pud{rus}~40funt{rus};");
-            Parse(ElementId{0, 2, 1, 4}, U"bezmen{rus}~(1)/(16pud{rus});");
-            Parse(ElementId{0, 2, 1, 5}, U"kongar{rus}~40.95kg;");
-            Parse(ElementId{0, 2, 1, 6}, U"pirog{rus}~43mg;");
-            Parse(ElementId{0, 2, 1, 7}, U"zolotnik{rus}~4.266g;");
-            Parse(ElementId{0, 2, 1, 8}, U"dolya{rus}~(1)/(96zolotnik{rus});");
-            Parse(ElementId{0, 2, 1, 9}, U"pochka{rus}~(1)/(25zolotnik{rus});");
-            Parse(ElementId{0, 2, 1, 10}, U"lot{rus}~zolotnik{rus};");
-
-            //time
-            Parse(ElementId{0, 2, 2, 1}, U"s{rus}~s;");
-            Parse(ElementId{0, 2, 2, 2}, U"min{rus}~min;");
-            Parse(ElementId{0, 2, 2, 3}, U"hour{rus}~hour;");
-
-            //volume
-            Parse(ElementId{0, 2, 3, 1}, U"stakan{rus}~0.273l;");
-            Parse(ElementId{0, 2, 3, 2}, U"polygarnets{rus}~6stakan{rus};");
-            Parse(ElementId{0, 2, 3, 3}, U"garnets{rus}~12stakan{rus};");
-            Parse(ElementId{0, 2, 3, 4}, U"chetveric{rus}~8garnets{rus};");
-            Parse(ElementId{0, 2, 3, 5}, U"osmina{rus}~4chetveric{rus};");
-            Parse(ElementId{0, 2, 3, 6}, U"polosminy{rus}~52.48*l;");
-            Parse(ElementId{0, 2, 3, 7}, U"chet{rus}~64garnets{rus};");
-            Parse(ElementId{0, 2, 3, 8}, U"polovnik{rus}~419.84l;");
-            Parse(ElementId{0, 2, 3, 9}, U"kadka{rus}~2polovnik{rus};");
-            Parse(ElementId{0, 2, 3, 10}, U"shkalic{rus}~61.5ml;");
-            Parse(ElementId{0, 2, 3, 11}, U"charka{rus}~2shkalic{rus};");
-            Parse(ElementId{0, 2, 3, 12}, U"kosushka{rus}~5shkalic{rus};");
-            Parse(ElementId{0, 2, 3, 13}, U"shtof{rus}~10charka{rus};");
-            Parse(ElementId{0, 2, 3, 14}, U"vedro{rus}~4chet{rus};");
-            Parse(ElementId{0, 2, 3, 15}, U"bochka{rus}~40vedro{rus};");
-            break;
-        case Language::Russian:
-            //distance
-            Parse(ElementId{0, 2, 0, 0}, U"точка{rus}~(254)/(1000)мм;");
-            Parse(ElementId{0, 2, 0, 1}, U"линия{rus}~10точка{rus};");
-            Parse(ElementId{0, 2, 0, 2}, U"сотка{rus}~84точка{rus};");
-            Parse(ElementId{0, 2, 0, 3}, U"дюйм{rus}~10линия{rus};");
-            Parse(ElementId{0, 2, 0, 4}, U"вершок{rus}~(7)/(4)дюйм{rus};");
-            Parse(ElementId{0, 2, 0, 5}, U"четверть{rus}~7дюйм{rus};");
-            Parse(ElementId{0, 2, 0, 6}, U"фут{rus}~12дюйм{rus};");
-            Parse(ElementId{0, 2, 0, 7}, U"аршин{rus}~28дюйм{rus};");
-            Parse(ElementId{0, 2, 0, 8}, U"сажень{rus}~7фут{rus};");
-            Parse(ElementId{0, 2, 0, 9}, U"верста{rus}~500сажень{rus};");
-
-            //mass
-            Parse(ElementId{0, 2, 1, 1}, U"фунт{rus}~0.4095124*кг;");
-            Parse(ElementId{0, 2, 1, 2}, U"батман{rus}~10фунт{rus};");
-            Parse(ElementId{0, 2, 1, 3}, U"пуд{rus}~40фунт{rus};");
-            Parse(ElementId{0, 2, 1, 4}, U"безмен{rus}~(1)/(16пуд{rus});");
-            Parse(ElementId{0, 2, 1, 5}, U"конгарь{rus}~40.95кг;");
-            Parse(ElementId{0, 2, 1, 6}, U"пирог{rus}~43мг;");
-            Parse(ElementId{0, 2, 1, 7}, U"золотник{rus}~4.266г;");
-            Parse(ElementId{0, 2, 1, 8}, U"доля{rus}~(1)/(96золотник{rus});");
-            Parse(ElementId{0, 2, 1, 9}, U"почка{rus}~(1)/(25золотник{rus});");
-            Parse(ElementId{0, 2, 1, 10}, U"лот{rus}~золотник{rus};");
-
-            //time
-            Parse(ElementId{0, 2, 2, 1}, U"сек{rus}~сек;");
-            Parse(ElementId{0, 2, 2, 2}, U"мин{rus}~мин;");
-            Parse(ElementId{0, 2, 2, 3}, U"час{rus}~час;");
-
-            //volume
-            Parse(ElementId{0, 2, 3, 1}, U"стакан{rus}~0.273л;");
-            Parse(ElementId{0, 2, 3, 2}, U"полигарнец{rus}~6стакан{rus};");
-            Parse(ElementId{0, 2, 3, 3}, U"гарнец{rus}~12стакан{rus};");
-            Parse(ElementId{0, 2, 3, 4}, U"четверик{rus}~8гарнец{rus};");
-            Parse(ElementId{0, 2, 3, 5}, U"осмина{rus}~4четверик{rus};");
-            Parse(ElementId{0, 2, 3, 6}, U"полосмины{rus}~52.48л;");
-            Parse(ElementId{0, 2, 3, 7}, U"чет{rus}~64гарнец{rus};");
-            Parse(ElementId{0, 2, 3, 8}, U"половник{rus}~419.84л;");
-            Parse(ElementId{0, 2, 3, 9}, U"кадка{rus}~2половник{rus};");
-            Parse(ElementId{0, 2, 3, 10}, U"шкалик{rus}~61.5мл;");
-            Parse(ElementId{0, 2, 3, 11}, U"чарка{rus}~2шкалик{rus};");
-            Parse(ElementId{0, 2, 3, 12}, U"косушка{rus}~5шкалик{rus};");
-            Parse(ElementId{0, 2, 3, 13}, U"штоф{rus}~10чарка{rus};");
-            Parse(ElementId{0, 2, 3, 14}, U"ведро{rus}~4чет{rus};");
-            Parse(ElementId{0, 2, 3, 15}, U"бочка{rus}~40ведро{rus};");
-            break;
+            int p = 0;
+            for (auto& expr : it->second)
+                solver.RemoveIdentifier(ElementId{0, -2, 2, 0, p++});
         }
+
+        it = russian_units.find(language);
+        if (it == russian_units.end())
+            return;
+        int p = 0;
+        for (auto& expr : it->second)
+            Parse(ElementId{0, -2, 2, 0, p++}, expr);
     }
 
     void InitAngleUnits()
@@ -712,31 +305,522 @@ private:
 
     void InitPhisicalConstants()
     {
-        solver.ResetVariables();
-
-        switch (language)
+        auto it = phisical_constants.find(last_language);
+        if (it != phisical_constants.end())
         {
-        case Language::English:
-            Parse(ElementId{0, -1, 0, 0, 0}, U"c`speed of light`=299792458(m/s);");
-            Parse(ElementId{0, -1, 0, 0, 1}, U"G`gravitational constant`=6.674301515151515*pow(10,-11)*(pow(m,3)/(kg*pow(s,2)));");
-            Parse(ElementId{0, -1, 0, 0, 2}, U"h`Planck constant`=6.62607015*pow(10,-34)*(J*s);");
-            Parse(ElementId{0, -1, 0, 0, 3}, U"e_c`elementary charge`=1.602176634*pow(10,-19)*C;");
-            Parse(ElementId{0, -1, 0, 0, 4}, U"k`Boltzmann constant`=1.380649*pow(10,-23)*(J/K);");
-            break;
-        case Language::Russian:
-            Parse(ElementId{0, -1, 0, 0, 0}, U"с`скорость света`=299792458(м/сек);");
-            Parse(ElementId{0, -1, 0, 0, 1}, U"G`гравитационная постоянная`=6.674301515151515*pow(10,-11)*(pow(м,3)/(кг*pow(сек,2)));");
-            Parse(ElementId{0, -1, 0, 0, 2}, U"h`постоянная Планка`=6.62607015*pow(10,-34)*(Дж*сек);");
-            Parse(ElementId{0, -1, 0, 0, 3}, U"e_c`элементарный заряд`=1.602176634*pow(10,-19)*Кл;");
-            Parse(ElementId{0, -1, 0, 0, 4}, U"k`постоянная Больцмана`=1.380649*pow(10,-23)*(Дж/К);");
-            break;
+            int p = 0;
+            for (auto& expr : it->second)
+                solver.RemoveIdentifier(ElementId{0, -1, 0, 0, p++});
         }
+
+        it = phisical_constants.find(language);
+        if (it == phisical_constants.end())
+            return;
+        int p = 0;
+        for (auto& expr : it->second)
+            Parse(ElementId{0, -1, 0, 0, p++}, expr);
     }
 
     Solver<Number> solver;
 
     Language language = Language::English;
+    Language last_language = Language::None;
+
     uint64_t max_time = 0;
+
+    std::map<Language, std::vector<std::u32string>> si_units = 
+        {
+            {
+                Language::English,
+                {
+                    //distance
+                    U"ang~0.000000000001m;",
+                    U"nm~0.000000001m;",
+                    U"mcm~0.000001m;",
+                    U"mm~0.001m;",
+                    U"cm~0.01m;",
+                    U"dm~0.1m;",
+                    U"km~1000m;",
+
+                    //time
+                    U"ps~0.000000000001s;",
+                    U"ns~0.000000001s;",
+                    U"mcs~0.000001s;",
+                    U"ms~0.001s;",
+                    U"min~60s;",
+                    U"hour~60min;",
+                    U"day~24hour;",
+                    U"week~7day;",
+
+                    //mass
+                    U"g~0.001kg;",
+                    U"mcg~0.000001kg;",
+                    U"mg~0.001kg;",
+                    U"ton~1000kg;",
+
+                    //electric current
+                    U"mcA~0.000001A;",
+                    U"mA~0.001A;",
+                    U"kA~1000A;",
+                    U"MA~1000000A;",
+
+                    //frequency
+                    U"Hz~1/s;",
+                    U"kHz~1000Hz;",
+                    U"MHz~1000kHz;",
+                    U"GHz~1000MHz;",
+
+                    //force
+                    U"N~(kg*m)/(pow(s,2));",
+                    U"mcN~0.000001N;",
+                    U"mN~0.001N;",
+                    U"kN~1000N;",
+                    U"MN~1000kN;",
+
+                    //energy
+                    U"J~N*m;",
+                    U"mcJ~0.000001J;",
+                    U"mJ~0.001J;",
+                    U"kJ~1000J;",
+                    U"MJ~1000000J;",
+
+                    //power
+                    U"W~(J)/(s);",
+                    U"mcW~0.000001W;",
+                    U"mW~0.001W;",
+                    U"kW~1000W;",
+                    U"MW~1000000W;",
+
+                    //pressure
+                    U"Pa~(N)/(pow(m,2));",
+                    U"mcPa~0.000001Pa;",
+                    U"mPa~0.001Pa;",
+                    U"kPa~1000Pa;",
+                    U"MPa~1000000Pa;",
+
+                    //luminous intensity
+                    U"mccd~0.000001cd;",
+                    U"mcd~0.001cd;",
+                    U"kcd~1000cd;",
+                    U"Mcd~1000000cd;",
+
+                    //luminous flux
+                    U"lm~cd*sr;",
+                    U"mclm~0.000001lm;",
+                    U"mlm~0.001lm;",
+                    U"klm~1000lm;",
+                    U"Mlm~1000000lm;",
+
+                    //illuminance
+                    U"lx~lm/pow(m,2);",
+                    U"mclx~0.000001lx;",
+                    U"mlx~0.001lx;",
+                    U"klx~1000lx;",
+                    U"Mlx~1000000lx;",
+
+                    //electrical charge
+                    U"C~A*s;",
+                    U"mcC~0.000001C;",
+                    U"mC~0.001C;",
+                    U"kC~1000C;",
+                    U"MC~1000000C;",
+
+                    //potential
+                    U"V~(J)/(C);",
+                    U"pV~0.000000000001V;",
+                    U"nV~0.000000001V;",
+                    U"mcV~0.000001V;",
+                    U"mV~0.001V;",
+                    U"kV~1000V;",
+                    U"MV~1000000V;",
+
+                    //electrical resistance
+                    U"Ohm~V/A;",
+                    U"mcOhm~0.000001Ohm;",
+                    U"mOhm~0.001Ohm;",
+                    U"kOhm~1000Ohm;",
+                    U"MOhm~1000000Ohm;",
+
+                    //electrical capacity
+                    U"F~C/V;",
+                    U"pF~0.000000000001F;",
+                    U"nF~0.000000001F;",
+                    U"mcF~0.000001F;",
+                    U"mF~0.001F;",
+
+                    //magnetic flux
+                    U"Wb~(kg*pow(m,2)/(pow(s,2)*A));",
+                    U"mcWb~0.000001Wb;",
+                    U"mWb~0.001Wb;",
+                    U"kWb~1000Wb;",
+                    U"MWb~1000000Wb;",
+
+                    //magnetic field
+                    U"T~(Wb)/(pow(m,2));",
+                    U"mcT~0.000001T;",
+                    U"mT~0.001T;",
+                    U"kT~1000T;",
+                    U"MT~1000000T;",
+
+                    //electrical inductance
+                    U"H~(kg*pow(m,2))/(pow(s,2)*pow(A,2));",
+                    U"pH~0.000000000001H;",
+                    U"nH~0.000000001H;",
+                    U"mcH~0.000001H;",
+                    U"mH~0.001H;",
+
+                    //electric conductance
+                    U"S~(1)/(Ohm);",
+                    U"mcS~0.000001Ohm;",
+                    U"mS~0.001Ohm;",
+                    U"kS~1000Ohm;",
+                    U"MS~1000000Ohm;",
+
+                    //ionizing radiation
+                    U"Gy~(J)/(kg);",
+                    U"mcGy~0.000001Gy;",
+                    U"mGy~0.001Gy;",
+                    U"kGy~1000Gy;",
+                    U"MGy~1000000Gy;"
+                }
+            },
+            {
+                Language::Russian,
+                {
+                    //distance
+                    U"анг~0.0000000001м;",
+                    U"нм~0.000000001м;",
+                    U"мкм~0.000001м;",
+                    U"мм~0.001м;",
+                    U"см~0.01м;",
+                    U"дм~0.1м;",
+                    U"км~1000м;",
+
+                    //time
+                    U"пс~0.000000000001сек;",
+                    U"нс~0.000000001сек;",
+                    U"мкс~0.000001сек;",
+                    U"мс~0.001сек;",
+                    U"мин~60сек;",
+                    U"час~60мин;",
+                    U"сутки~24час;",
+                    U"неделя~7сутки;",
+
+                    //mass
+                    U"г~0.001кг;",
+                    U"мкг~0.000001кг;",
+                    U"мг~0.001кг;",
+                    U"тонна~1000кг;",
+
+                    //electric current
+                    U"мкА~0.000001А;",
+                    U"мА~0.001А;",
+                    U"кА~1000А;",
+                    U"МА~1000000А;",
+
+                    //frequency
+                    U"Гц~1/сек;",
+                    U"кГц~1000Гц;",
+                    U"МГц~1000кГц;",
+                    U"ГГц~1000МГц;",
+
+                    //force
+                    U"Н~кг*м/pow(сек,2);",
+                    U"мкН~0.000001Н;",
+                    U"мН~0.001Н;",
+                    U"кН~1000Н;",
+                    U"МН~1000кН;",
+
+                    //energy
+                    U"Дж~Н*м;",
+                    U"мкДж~0.000001Дж;",
+                    U"мДж~0.001Дж;",
+                    U"кДж~1000Дж;",
+                    U"МДж~1000000Дж;",
+
+                    //power
+                    U"Вт~Дж/сек;",
+                    U"мкВт~0.000001Вт;",
+                    U"мВт~0.001Вт;",
+                    U"кВт~1000Вт;",
+                    U"МВт~1000000Вт;",
+
+                    //pressure
+                    U"Па~(Н)/pow(м,2);",
+                    U"мкПа~0.000001Па;",
+                    U"мПа~0.001Па;",
+                    U"кПа~1000Па;",
+                    U"МПа~1000000Па;",
+
+                    //luminous intensity
+                    U"мкКд~0.000001Кд;",
+                    U"мКд~0.001Кд;",
+                    U"кКд~1000Кд;",
+                    U"МКд~1000000Кд;",
+
+                    //luminous flux
+                    U"лм~Кд*ср;",
+                    U"мклм~0.000001лм;",
+                    U"млм~0.001лм;",
+                    U"клм~1000лм;",
+                    U"Млм~1000000лм;",
+
+                    //illuminance
+                    U"лк~лм/pow(м,2);",
+                    U"мклк~0.000001лк;",
+                    U"млк~0.001лк;",
+                    U"клк~1000лк;",
+                    U"Млк~1000000лк;",
+
+                    //electrical charge
+                    U"Кл~А*сек;",
+                    U"мкКл~0.000001Кл;",
+                    U"мКл~0.001Кл;",
+                    U"кКл~1000Кл;",
+                    U"МКл~1000000Кл;",
+
+                    //potential
+                    U"В~Дж/Кл;",
+                    U"пВ~0.000000000001В;",
+                    U"нВ~0.000000001В;",
+                    U"мкВ~0.000001В;",
+                    U"мВ~0.001В;",
+                    U"кВ~1000В;",
+                    U"МВ~1000000В;",
+
+                    //electrical resistance
+                    U"Ом~В/А;",
+                    U"мкОм~0.000001Ом;",
+                    U"мОм~0.001Ом;",
+                    U"кОм~1000Ом;",
+                    U"МОм~1000000Ом;",
+
+                    //electrical capacity
+                    U"Ф~Кл/В;",
+                    U"пФ~0.000000000001Ф;",
+                    U"нФ~0.000000001Ф;",
+                    U"мкФ~0.000001Ф;",
+                    U"мФ~0.001Ф;",
+
+                    //magnetic flux
+                    U"Вб~(кг*pow(м,2)/(pow(сек,2)*А));",
+                    U"мкВб~0.000001Вб;",
+                    U"мВб~0.001Вб;",
+                    U"кВб~1000Вб;",
+                    U"МВб~1000000Вб;",
+
+                    //magnetic field
+                    U"Тл~(Вб)/(pow(м,2));",
+                    U"мкТл~0.000001Тл;",
+                    U"мТл~0.001Тл;",
+                    U"кТл~1000Тл;",
+                    U"МТл~1000000Тл;",
+
+                    //electrical inductance
+                    U"Гн~(кг*pow(м,2))/(pow(сек,2)*pow(А,2));",
+                    U"пГн~0.000000000001Гн;",
+                    U"нГн~0.000000001Гн;",
+                    U"мкГн~0.000001Гн;",
+                    U"мГн~0.001Гн;",
+
+                    //electric conductance
+                    U"См~(1)/(Ом);",
+                    U"мкСм~0.000001См;",
+                    U"мСм~0.001См;",
+                    U"кСм~1000См;",
+                    U"МСм~1000000См;",
+
+                    //ionizing radiation
+                    U"Гр~(Дж)/(кг);",
+                    U"мкГр~0.000001Гр;",
+                    U"мГр~0.001Гр;",
+                    U"кГр~1000Гр;",
+                    U"МГр~1000000Гр;",
+                }
+            }
+        };
+
+    std::map<Language, std::vector<std::u32string>> other_units = 
+        {
+            {
+                Language::English,
+                {
+                    //temperature
+                    U"°C~K;",
+                    
+                    //data
+                    U"byte~8bit;",
+                    U"kbyte~1024byte;",
+                    U"Mbyte~1024kbyte;",
+                    U"Gbyte~1024Mbyte;",
+                    U"Tbyte~1024Gbyte;",
+
+                    //square
+                    U"a~100*pow(m,2);", //ar
+                    U"ha~100a;", //hectar
+
+                    //volume
+                    U"l~pow(dm,3);", //litre
+                    U"ml~0.001l;",
+                    U"dl~0.1l;",
+                    U"dal~10l;",
+                    U"hl~100l;"
+                }
+            },
+            {
+                Language::Russian,
+                {
+                    //temperature
+                    U"°C~К;",
+
+                    //data
+                    U"байт~8бит;",
+                    U"кбайт~1024байт;",
+                    U"Мбайт~1024кбайт;",
+                    U"Гбайт~1024Мбайт;",
+                    U"Тбайт~1024Гбайт;",
+
+                    //square
+                    U"ар~100*pow(м,2);", //ar
+                    U"га~100ар;", //hectar
+
+                    //volume
+                    U"л~pow(дм,3);", //litre
+                    U"мл~0.001л;",
+                    U"дл~0.1л;",
+                    U"дал~10л;",
+                    U"гл~100л;"
+                }
+            }
+        };
+
+    std::map<Language, std::vector<std::u32string>> russian_units = 
+        {
+            {
+                Language::English,
+                {
+                    //distance
+                    U"tochka{rus}~(254)/(1000)mm;",
+                    U"liniya{rus}~10tochka{rus};",
+                    U"sotka{rus}~84tochka{rus};",
+                    U"dyum{rus}~10liniya{rus};",
+                    U"vershok{rus}~(7)/(4)dyum{rus};",
+                    U"chetvert{rus}~7dyum{rus};",
+                    U"fut{rus}~12dyum{rus};",
+                    U"arshin{rus}~28dyum{rus};",
+                    U"sazhen{rus}~7fut{rus};",
+                    U"versta{rus}~500sazhen{rus};",
+
+                    //mass
+                    U"funt{rus}~0.4095124*kg;",
+                    U"batman{rus}~10funt{rus};",
+                    U"pud{rus}~40funt{rus};",
+                    U"bezmen{rus}~(1)/(16pud{rus});",
+                    U"kongar{rus}~40.95kg;",
+                    U"pirog{rus}~43mg;",
+                    U"zolotnik{rus}~4.266g;",
+                    U"dolya{rus}~(1)/(96zolotnik{rus});",
+                    U"pochka{rus}~(1)/(25zolotnik{rus});",
+                    U"lot{rus}~zolotnik{rus};",
+
+                    //time
+                    U"s{rus}~s;",
+                    U"min{rus}~min;",
+                    U"hour{rus}~hour;",
+
+                    //volume
+                    U"stakan{rus}~0.273l;",
+                    U"polygarnets{rus}~6stakan{rus};",
+                    U"garnets{rus}~12stakan{rus};",
+                    U"chetveric{rus}~8garnets{rus};",
+                    U"osmina{rus}~4chetveric{rus};",
+                    U"polosminy{rus}~52.48*l;",
+                    U"chet{rus}~64garnets{rus};",
+                    U"polovnik{rus}~419.84l;",
+                    U"kadka{rus}~2polovnik{rus};",
+                    U"shkalic{rus}~61.5ml;",
+                    U"charka{rus}~2shkalic{rus};",
+                    U"kosushka{rus}~5shkalic{rus};",
+                    U"shtof{rus}~10charka{rus};",
+                    U"vedro{rus}~4chet{rus};",
+                    U"bochka{rus}~40vedro{rus};",
+                }
+            },
+            {
+                Language::Russian,
+                {
+                    //distance
+                    U"точка{rus}~(254)/(1000)мм;",
+                    U"линия{rus}~10точка{rus};",
+                    U"сотка{rus}~84точка{rus};",
+                    U"дюйм{rus}~10линия{rus};",
+                    U"вершок{rus}~(7)/(4)дюйм{rus};",
+                    U"четверть{rus}~7дюйм{rus};",
+                    U"фут{rus}~12дюйм{rus};",
+                    U"аршин{rus}~28дюйм{rus};",
+                    U"сажень{rus}~7фут{rus};",
+                    U"верста{rus}~500сажень{rus};",
+
+                    //mass
+                    U"фунт{rus}~0.4095124*кг;",
+                    U"батман{rus}~10фунт{rus};",
+                    U"пуд{rus}~40фунт{rus};",
+                    U"безмен{rus}~(1)/(16пуд{rus});",
+                    U"конгарь{rus}~40.95кг;",
+                    U"пирог{rus}~43мг;",
+                    U"золотник{rus}~4.266г;",
+                    U"доля{rus}~(1)/(96золотник{rus});",
+                    U"почка{rus}~(1)/(25золотник{rus});",
+                    U"лот{rus}~золотник{rus};",
+
+                    //time
+                    U"сек{rus}~сек;",
+                    U"мин{rus}~мин;",
+                    U"час{rus}~час;",
+
+                    //volume
+                    U"стакан{rus}~0.273л;",
+                    U"полигарнец{rus}~6стакан{rus};",
+                    U"гарнец{rus}~12стакан{rus};",
+                    U"четверик{rus}~8гарнец{rus};",
+                    U"осмина{rus}~4четверик{rus};",
+                    U"полосмины{rus}~52.48л;",
+                    U"чет{rus}~64гарнец{rus};",
+                    U"половник{rus}~419.84л;",
+                    U"кадка{rus}~2половник{rus};",
+                    U"шкалик{rus}~61.5мл;",
+                    U"чарка{rus}~2шкалик{rus};",
+                    U"косушка{rus}~5шкалик{rus};",
+                    U"штоф{rus}~10чарка{rus};",
+                    U"ведро{rus}~4чет{rus};",
+                    U"бочка{rus}~40ведро{rus};",
+                }
+            }
+        };
+
+    std::map<Language, std::vector<std::u32string>> phisical_constants = 
+        {
+            {
+                Language::English,
+                {
+                    U"c`speed of light`=299792458(m/s);",
+                    U"G`gravitational constant`=6.674301515151515*pow(10,-11)*(pow(m,3)/(kg*pow(s,2)));",
+                    U"h`Planck constant`=6.62607015*pow(10,-34)*(J*s);",
+                    U"e_c`elementary charge`=1.602176634*pow(10,-19)*C;",
+                    U"k`Boltzmann constant`=1.380649*pow(10,-23)*(J/K);"
+                }
+            },
+            {
+                Language::Russian,
+                {
+                    U"с`скорость света`=299792458(м/сек);",
+                    U"G`гравитационная постоянная`=6.674301515151515*pow(10,-11)*(pow(м,3)/(кг*pow(сек,2)));"
+                    U"h`постоянная Планка`=6.62607015*pow(10,-34)*(Дж*сек);",
+                    U"e_c`элементарный заряд`=1.602176634*pow(10,-19)*Кл;",
+                    U"k`постоянная Больцмана`=1.380649*pow(10,-23)*(Дж/К);"
+                }
+            }
+        };
 };
 
 };

@@ -326,6 +326,7 @@ template<>
 void Parser<yutovo_calculator::Integer>::SetLocale(Language _language)
 {
     language = _language;
+    last_language = language;
 }
 
 template<>
@@ -334,6 +335,7 @@ void Parser<yutovo_calculator::Real>::SetLocale(Language _language)
     language = _language;
     InitUnits();
     InitPhisicalConstants();
+    last_language = language;
 }
 
 template<>
@@ -341,6 +343,7 @@ void Parser<yutovo_calculator::Rational>::SetLocale(Language _language)
 {
     language = _language;
     InitUnits();
+    last_language = language;
 }
 
 template<>
@@ -356,6 +359,7 @@ void Parser<yutovo_calculator::Complex>::SetLocale(Language _language)
         solver.im = U"i";
         break;
     }
+    last_language = language;
 }
 
 template<>
