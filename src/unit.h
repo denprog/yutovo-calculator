@@ -25,6 +25,12 @@ public:
         unit.push_back(std::make_pair(name, power));
     }
 
+    Unit(const std::u32string& name, const std::u32string& _description, const int power) :
+        description(_description)
+    {
+        unit.push_back(std::make_pair(name, power));
+    }
+
     Unit(const std::u32string& numerator, const std::u32string& denomerator)
     {
         unit.push_back(std::make_pair(numerator, 1));
@@ -102,6 +108,7 @@ public:
 public:
     std::vector<std::pair<std::u32string, int>> unit; //unit names with their powers
     std::u32string system;
+    std::u32string description;
 };
 
 }

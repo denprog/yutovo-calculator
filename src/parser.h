@@ -185,7 +185,7 @@ struct Parser
         solver.ListUserFunctions(functions);
     }
 
-    void ListBuiltinUnits(std::vector<std::u32string>& units)
+    void ListBuiltinUnits(std::vector<std::pair<std::u32string, std::u32string>>& units)
     {
         solver.ListBuiltinUnits(units);
     }
@@ -208,27 +208,27 @@ private:
         switch (language)
         {
         case Language::English:
-            solver.AddBuiltinUnit(Unit(U"m")); //meter (length)
-            solver.AddBuiltinUnit(Unit(U"kg")); //kilogram (mass)
-            solver.AddBuiltinUnit(Unit(U"s")); //second (time)
-            solver.AddBuiltinUnit(Unit(U"mol")); //mole (amount of matter)
-            solver.AddBuiltinUnit(Unit(U"A")); //ampere (electric current)
-            solver.AddBuiltinUnit(Unit(U"cd")); //candella (luminosity)
-            solver.AddBuiltinUnit(Unit(U"K")); //kelvin (temperature)
-            solver.AddBuiltinUnit(Unit(U"rad")); //radian (angle)
-            solver.AddBuiltinUnit(Unit(U"sr")); //steradian (solid angle)
+            solver.AddBuiltinUnit(Unit(U"m", U"metre", 1)); //meter (length)
+            solver.AddBuiltinUnit(Unit(U"kg", U"kilogram", 1)); //kilogram (mass)
+            solver.AddBuiltinUnit(Unit(U"s", U"second", 1)); //second (time)
+            solver.AddBuiltinUnit(Unit(U"mol", U"mole", 1)); //mole (amount of matter)
+            solver.AddBuiltinUnit(Unit(U"A", U"ampere", 1)); //ampere (electric current)
+            solver.AddBuiltinUnit(Unit(U"cd", U"candella", 1)); //candella (luminosity)
+            solver.AddBuiltinUnit(Unit(U"K", U"kelvin", 1)); //kelvin (temperature)
+            solver.AddBuiltinUnit(Unit(U"rad", U"radian", 1)); //radian (angle)
+            solver.AddBuiltinUnit(Unit(U"sr", U"steradian", 1)); //steradian (solid angle)
             solver.AddBuiltinUnit(Unit(U"bit")); //bit (data)
             break;
         case Language::Russian:
-            solver.AddBuiltinUnit(Unit(U"м")); //meter (length)
-            solver.AddBuiltinUnit(Unit(U"кг")); //kilogram (mass)
-            solver.AddBuiltinUnit(Unit(U"сек")); //second (time)
+            solver.AddBuiltinUnit(Unit(U"м", U"метр", 1)); //meter (length)
+            solver.AddBuiltinUnit(Unit(U"кг", U"килограмм", 1)); //kilogram (mass)
+            solver.AddBuiltinUnit(Unit(U"сек", U"секунда", 1)); //second (time)
             solver.AddBuiltinUnit(Unit(U"моль")); //mole (amount of matter)
-            solver.AddBuiltinUnit(Unit(U"А")); //ampere (electric current)
-            solver.AddBuiltinUnit(Unit(U"Кд")); //candella (luminosity)
-            solver.AddBuiltinUnit(Unit(U"К")); //kelvin (temperature)
-            solver.AddBuiltinUnit(Unit(U"рад")); //radian (angle)
-            solver.AddBuiltinUnit(Unit(U"ср")); //steradian (solid angle)
+            solver.AddBuiltinUnit(Unit(U"А", U"ампер", 1)); //ampere (electric current)
+            solver.AddBuiltinUnit(Unit(U"Кд", U"кандела", 1)); //candella (luminosity)
+            solver.AddBuiltinUnit(Unit(U"К", U"кельвин", 1)); //kelvin (temperature)
+            solver.AddBuiltinUnit(Unit(U"рад", U"радиан", 1)); //radian (angle)
+            solver.AddBuiltinUnit(Unit(U"ср", U"стерадиан", 1)); //steradian (solid angle)
             solver.AddBuiltinUnit(Unit(U"бит")); //bit (data)
             break;
         default:
@@ -334,308 +334,306 @@ private:
                 Language::English,
                 {
                     //distance
-                    U"ang~0.000000000001m;",
-                    U"nm~0.000000001m;",
-                    U"mcm~0.000001m;",
-                    U"mm~0.001m;",
-                    U"cm~0.01m;",
-                    U"dm~0.1m;",
-                    U"km~1000m;",
+                    U"nm`nanometre`~0.000000001m;",
+                    U"mcm`micrometre`~0.000001m;",
+                    U"mm`millimetre`~0.001m;",
+                    U"cm`centimetre`~0.01m;",
+                    U"dm`decimetre`~0.1m;",
+                    U"km`kilometre`~1000m;",
 
                     //time
-                    U"ps~0.000000000001s;",
-                    U"ns~0.000000001s;",
-                    U"mcs~0.000001s;",
-                    U"ms~0.001s;",
-                    U"min~60s;",
+                    U"ps`picosecond`~0.000000000001s;",
+                    U"ns`nanosecond`~0.000000001s;",
+                    U"mcs`microsecond`~0.000001s;",
+                    U"ms`millisecond`~0.001s;",
+                    U"min`minute`~60s;",
                     U"hour~60min;",
                     U"day~24hour;",
                     U"week~7day;",
 
                     //mass
-                    U"g~0.001kg;",
-                    U"mcg~0.000001kg;",
-                    U"mg~0.001kg;",
+                    U"g`gram`~0.001kg;",
+                    U"mcg`microgram`~0.000001kg;",
+                    U"mg`milligram`~0.001kg;",
                     U"ton~1000kg;",
 
                     //electric current
-                    U"mcA~0.000001A;",
-                    U"mA~0.001A;",
-                    U"kA~1000A;",
-                    U"MA~1000000A;",
+                    U"mcA`microampere`~0.000001A;",
+                    U"mA`milliampere`~0.001A;",
+                    U"kA`kiloampere`~1000A;",
+                    U"MA`megaampere`~1000000A;",
 
                     //frequency
-                    U"Hz~1/s;",
-                    U"kHz~1000Hz;",
-                    U"MHz~1000kHz;",
-                    U"GHz~1000MHz;",
+                    U"Hz`hertz`~1/s;",
+                    U"kHz`kilohertz`~1000Hz;",
+                    U"MHz`megahertz`~1000kHz;",
+                    U"GHz`gigahertz`~1000MHz;",
 
                     //force
-                    U"N~(kg*m)/(pow(s,2));",
-                    U"mcN~0.000001N;",
-                    U"mN~0.001N;",
-                    U"kN~1000N;",
-                    U"MN~1000kN;",
+                    U"N`newton`~(kg*m)/(pow(s,2));",
+                    U"mcN`micronewton`~0.000001N;",
+                    U"mN`millinewton`~0.001N;",
+                    U"kN`kilonewton`~1000N;",
+                    U"MN`meganewton`~1000kN;",
 
                     //energy
-                    U"J~N*m;",
-                    U"mcJ~0.000001J;",
-                    U"mJ~0.001J;",
-                    U"kJ~1000J;",
-                    U"MJ~1000000J;",
+                    U"J`joule`~N*m;",
+                    U"mcJ`microjoule`~0.000001J;",
+                    U"mJ`millijoule`~0.001J;",
+                    U"kJ`kilojoule`~1000J;",
+                    U"MJ`megajoule`~1000000J;",
 
                     //power
-                    U"W~(J)/(s);",
-                    U"mcW~0.000001W;",
-                    U"mW~0.001W;",
-                    U"kW~1000W;",
-                    U"MW~1000000W;",
+                    U"W`watt`~(J)/(s);",
+                    U"mcW`microwatt`~0.000001W;",
+                    U"mW`milliwatt`~0.001W;",
+                    U"kW`kilowatt`~1000W;",
+                    U"MW`megawatt`~1000000W;",
 
                     //pressure
-                    U"Pa~(N)/(pow(m,2));",
-                    U"mcPa~0.000001Pa;",
-                    U"mPa~0.001Pa;",
-                    U"kPa~1000Pa;",
-                    U"MPa~1000000Pa;",
+                    U"Pa`pascal`~(N)/(pow(m,2));",
+                    U"mcPa`micropascal`~0.000001Pa;",
+                    U"mPa`millipascal`~0.001Pa;",
+                    U"kPa`kilopascal`~1000Pa;",
+                    U"MPa`megapascal`~1000000Pa;",
 
                     //luminous intensity
-                    U"mccd~0.000001cd;",
-                    U"mcd~0.001cd;",
-                    U"kcd~1000cd;",
-                    U"Mcd~1000000cd;",
+                    U"mccd`microcandela`~0.000001cd;",
+                    U"mcd`millicandela`~0.001cd;",
+                    U"kcd`kilocandela`~1000cd;",
+                    U"Mcd`megacandela`~1000000cd;",
 
                     //luminous flux
-                    U"lm~cd*sr;",
-                    U"mclm~0.000001lm;",
-                    U"mlm~0.001lm;",
-                    U"klm~1000lm;",
-                    U"Mlm~1000000lm;",
+                    U"lm`lumen`~cd*sr;",
+                    U"mclm`microlumen`~0.000001lm;",
+                    U"mlm`millilumen`~0.001lm;",
+                    U"klm`kilolumen`~1000lm;",
+                    U"Mlm`megalumen`~1000000lm;",
 
                     //illuminance
-                    U"lx~lm/pow(m,2);",
-                    U"mclx~0.000001lx;",
-                    U"mlx~0.001lx;",
-                    U"klx~1000lx;",
-                    U"Mlx~1000000lx;",
+                    U"lx`lux`~lm/pow(m,2);",
+                    U"mclx`microlux`~0.000001lx;",
+                    U"mlx`millilux`~0.001lx;",
+                    U"klx`kilolux`~1000lx;",
+                    U"Mlx`megalux`~1000000lx;",
 
                     //electrical charge
-                    U"C~A*s;",
-                    U"mcC~0.000001C;",
-                    U"mC~0.001C;",
-                    U"kC~1000C;",
-                    U"MC~1000000C;",
+                    U"C`coulomb`~A*s;",
+                    U"mcC`microcoulomb`~0.000001C;",
+                    U"mC`millicoulomb`~0.001C;",
+                    U"kC`kilocoulomb`~1000C;",
+                    U"MC`megacoulomb`~1000000C;",
 
                     //potential
-                    U"V~(J)/(C);",
-                    U"pV~0.000000000001V;",
-                    U"nV~0.000000001V;",
-                    U"mcV~0.000001V;",
-                    U"mV~0.001V;",
-                    U"kV~1000V;",
-                    U"MV~1000000V;",
+                    U"V`volt`~(J)/(C);",
+                    U"pV`pikovolt`~0.000000000001V;",
+                    U"nV`nanovolt`~0.000000001V;",
+                    U"mcV`microvolt`~0.000001V;",
+                    U"mV`millivolt`~0.001V;",
+                    U"kV`kilovolt`~1000V;",
+                    U"MV`megavolt`~1000000V;",
 
                     //electrical resistance
                     U"Ohm~V/A;",
-                    U"mcOhm~0.000001Ohm;",
-                    U"mOhm~0.001Ohm;",
-                    U"kOhm~1000Ohm;",
-                    U"MOhm~1000000Ohm;",
+                    U"mcOhm`microohm`~0.000001Ohm;",
+                    U"mOhm`milliohm`~0.001Ohm;",
+                    U"kOhm`kiloohm`~1000Ohm;",
+                    U"MOhm`megaohm`~1000000Ohm;",
 
                     //electrical capacity
-                    U"F~C/V;",
-                    U"pF~0.000000000001F;",
-                    U"nF~0.000000001F;",
-                    U"mcF~0.000001F;",
-                    U"mF~0.001F;",
+                    U"F`farad`~C/V;",
+                    U"pF`pikofarad`~0.000000000001F;",
+                    U"nF`nanofarad`~0.000000001F;",
+                    U"mcF`microfarad`~0.000001F;",
+                    U"mF`millifarad`~0.001F;",
 
                     //magnetic flux
-                    U"Wb~(kg*pow(m,2)/(pow(s,2)*A));",
-                    U"mcWb~0.000001Wb;",
-                    U"mWb~0.001Wb;",
-                    U"kWb~1000Wb;",
-                    U"MWb~1000000Wb;",
+                    U"Wb`weber`~(kg*pow(m,2)/(pow(s,2)*A));",
+                    U"mcWb`microweber`~0.000001Wb;",
+                    U"mWb`milliweber`~0.001Wb;",
+                    U"kWb`kiloweber`~1000Wb;",
+                    U"MWb`megaweber`~1000000Wb;",
 
                     //magnetic field
-                    U"T~(Wb)/(pow(m,2));",
-                    U"mcT~0.000001T;",
-                    U"mT~0.001T;",
-                    U"kT~1000T;",
-                    U"MT~1000000T;",
+                    U"T`tesla`~(Wb)/(pow(m,2));",
+                    U"mcT`microtesla`~0.000001T;",
+                    U"mT`millitesla`~0.001T;",
+                    U"kT`kilotesla`~1000T;",
+                    U"MT`megatesla`~1000000T;",
 
                     //electrical inductance
-                    U"H~(kg*pow(m,2))/(pow(s,2)*pow(A,2));",
-                    U"pH~0.000000000001H;",
-                    U"nH~0.000000001H;",
-                    U"mcH~0.000001H;",
-                    U"mH~0.001H;",
+                    U"H`henry`~(kg*pow(m,2))/(pow(s,2)*pow(A,2));",
+                    U"pH`pikohenry`~0.000000000001H;",
+                    U"nH`nanohenry`~0.000000001H;",
+                    U"mcH`microhenry`~0.000001H;",
+                    U"mH`millihenry`~0.001H;",
 
                     //electric conductance
-                    U"S~(1)/(Ohm);",
-                    U"mcS~0.000001Ohm;",
-                    U"mS~0.001Ohm;",
-                    U"kS~1000Ohm;",
-                    U"MS~1000000Ohm;",
+                    U"S`siemens`~(1)/(Ohm);",
+                    U"mcS`microsiemens`~0.000001Ohm;",
+                    U"mS`millisiemens`~0.001Ohm;",
+                    U"kS`kilosiemens`~1000Ohm;",
+                    U"MS`megasiemens`~1000000Ohm;",
 
                     //ionizing radiation
-                    U"Gy~(J)/(kg);",
-                    U"mcGy~0.000001Gy;",
-                    U"mGy~0.001Gy;",
-                    U"kGy~1000Gy;",
-                    U"MGy~1000000Gy;"
+                    U"Gy`gray`~(J)/(kg);",
+                    U"mcGy`microgray`~0.000001Gy;",
+                    U"mGy`milligray`~0.001Gy;",
+                    U"kGy`kilogray`~1000Gy;",
+                    U"MGy`megagray`~1000000Gy;"
                 }
             },
             {
                 Language::Russian,
                 {
                     //distance
-                    U"анг~0.0000000001м;",
-                    U"нм~0.000000001м;",
-                    U"мкм~0.000001м;",
-                    U"мм~0.001м;",
-                    U"см~0.01м;",
-                    U"дм~0.1м;",
-                    U"км~1000м;",
+                    U"нм`нанометр`~0.000000001м;",
+                    U"мкм`микрометр`~0.000001м;",
+                    U"мм`миллиметр`~0.001м;",
+                    U"см`сантиметр`~0.01м;",
+                    U"дм`дециметр`~0.1м;",
+                    U"км`километр`~1000м;",
 
                     //time
-                    U"пс~0.000000000001сек;",
-                    U"нс~0.000000001сек;",
-                    U"мкс~0.000001сек;",
-                    U"мс~0.001сек;",
-                    U"мин~60сек;",
+                    U"пс`пикосекунда`~0.000000000001сек;",
+                    U"нс`наносекунда`~0.000000001сек;",
+                    U"мкс`микросекунда`~0.000001сек;",
+                    U"мс`миллисекунда`~0.001сек;",
+                    U"мин`минута`~60сек;",
                     U"час~60мин;",
                     U"сутки~24час;",
                     U"неделя~7сутки;",
 
                     //mass
-                    U"г~0.001кг;",
-                    U"мкг~0.000001кг;",
-                    U"мг~0.001кг;",
+                    U"г`грамм`~0.001кг;",
+                    U"мкг`микрограмм`~0.000001кг;",
+                    U"мг`миллиграмм`~0.001кг;",
                     U"тонна~1000кг;",
 
                     //electric current
-                    U"мкА~0.000001А;",
-                    U"мА~0.001А;",
-                    U"кА~1000А;",
-                    U"МА~1000000А;",
+                    U"мкА`микроампер`~0.000001А;",
+                    U"мА`миллиампер`~0.001А;",
+                    U"кА`килоампер`~1000А;",
+                    U"МА`мегаампер`~1000000А;",
 
                     //frequency
-                    U"Гц~1/сек;",
-                    U"кГц~1000Гц;",
-                    U"МГц~1000кГц;",
-                    U"ГГц~1000МГц;",
+                    U"Гц`герц`~1/сек;",
+                    U"кГц`килогерц`~1000Гц;",
+                    U"МГц`мегагерц`~1000кГц;",
+                    U"ГГц`гигагерц`~1000МГц;",
 
                     //force
-                    U"Н~кг*м/pow(сек,2);",
-                    U"мкН~0.000001Н;",
-                    U"мН~0.001Н;",
-                    U"кН~1000Н;",
-                    U"МН~1000кН;",
+                    U"Н`ньютон`~кг*м/pow(сек,2);",
+                    U"мкН`микроньютон`~0.000001Н;",
+                    U"мН`миллиньютон`~0.001Н;",
+                    U"кН`килоньютон`~1000Н;",
+                    U"МН`меганьютон`~1000кН;",
 
                     //energy
-                    U"Дж~Н*м;",
-                    U"мкДж~0.000001Дж;",
-                    U"мДж~0.001Дж;",
-                    U"кДж~1000Дж;",
-                    U"МДж~1000000Дж;",
+                    U"Дж`джоуль`~Н*м;",
+                    U"мкДж`микроджоуль`~0.000001Дж;",
+                    U"мДж`миллиджоуль`~0.001Дж;",
+                    U"кДж`килоджоуль`~1000Дж;",
+                    U"МДж`мегаджоуль`~1000000Дж;",
 
                     //power
-                    U"Вт~Дж/сек;",
-                    U"мкВт~0.000001Вт;",
-                    U"мВт~0.001Вт;",
-                    U"кВт~1000Вт;",
-                    U"МВт~1000000Вт;",
+                    U"Вт`ватт`~Дж/сек;",
+                    U"мкВт`микроватт`~0.000001Вт;",
+                    U"мВт`милливатт`~0.001Вт;",
+                    U"кВт`киловатт`~1000Вт;",
+                    U"МВт`мегаватт`~1000000Вт;",
 
                     //pressure
-                    U"Па~(Н)/pow(м,2);",
-                    U"мкПа~0.000001Па;",
-                    U"мПа~0.001Па;",
-                    U"кПа~1000Па;",
-                    U"МПа~1000000Па;",
+                    U"Па`паскаль`~(Н)/pow(м,2);",
+                    U"мкПа`микропаскаль`~0.000001Па;",
+                    U"мПа`миллипаскаль`~0.001Па;",
+                    U"кПа`килопаскаль`~1000Па;",
+                    U"МПа`мегапаскаль`~1000000Па;",
 
                     //luminous intensity
-                    U"мкКд~0.000001Кд;",
-                    U"мКд~0.001Кд;",
-                    U"кКд~1000Кд;",
-                    U"МКд~1000000Кд;",
+                    U"мкКд`микрокандела`~0.000001Кд;",
+                    U"мКд`милликандела`~0.001Кд;",
+                    U"кКд`килокандела`~1000Кд;",
+                    U"МКд`мегакандела`~1000000Кд;",
 
                     //luminous flux
-                    U"лм~Кд*ср;",
-                    U"мклм~0.000001лм;",
-                    U"млм~0.001лм;",
-                    U"клм~1000лм;",
-                    U"Млм~1000000лм;",
+                    U"лм`люмен`~Кд*ср;",
+                    U"мклм`микролюмен`~0.000001лм;",
+                    U"млм`миллилюмен`~0.001лм;",
+                    U"клм`килолюмен`~1000лм;",
+                    U"Млм`мегалюмен`~1000000лм;",
 
                     //illuminance
-                    U"лк~лм/pow(м,2);",
-                    U"мклк~0.000001лк;",
-                    U"млк~0.001лк;",
-                    U"клк~1000лк;",
-                    U"Млк~1000000лк;",
+                    U"лк`люкс`~лм/pow(м,2);",
+                    U"мклк`микролюкс`~0.000001лк;",
+                    U"млк`миллилюкс`~0.001лк;",
+                    U"клк`килолюкс`~1000лк;",
+                    U"Млк`мегалюкс`~1000000лк;",
 
                     //electrical charge
-                    U"Кл~А*сек;",
-                    U"мкКл~0.000001Кл;",
-                    U"мКл~0.001Кл;",
-                    U"кКл~1000Кл;",
-                    U"МКл~1000000Кл;",
+                    U"Кл`кулон`~А*сек;",
+                    U"мкКл`микрокулон`~0.000001Кл;",
+                    U"мКл`милликулон`~0.001Кл;",
+                    U"кКл`килокулон`~1000Кл;",
+                    U"МКл`мегакулон`~1000000Кл;",
 
                     //potential
-                    U"В~Дж/Кл;",
-                    U"пВ~0.000000000001В;",
-                    U"нВ~0.000000001В;",
-                    U"мкВ~0.000001В;",
-                    U"мВ~0.001В;",
-                    U"кВ~1000В;",
-                    U"МВ~1000000В;",
+                    U"В`вольт`~Дж/Кл;",
+                    U"пВ`пиковольт`~0.000000000001В;",
+                    U"нВ`нановольт`~0.000000001В;",
+                    U"мкВ`микровольт`~0.000001В;",
+                    U"мВ`милливольт`~0.001В;",
+                    U"кВ`киловольт`~1000В;",
+                    U"МВ`мегавольт`~1000000В;",
 
                     //electrical resistance
                     U"Ом~В/А;",
-                    U"мкОм~0.000001Ом;",
-                    U"мОм~0.001Ом;",
-                    U"кОм~1000Ом;",
-                    U"МОм~1000000Ом;",
+                    U"мкОм`микроом`~0.000001Ом;",
+                    U"мОм`миллиом`~0.001Ом;",
+                    U"кОм`килоом`~1000Ом;",
+                    U"МОм`мегаом`~1000000Ом;",
 
                     //electrical capacity
-                    U"Ф~Кл/В;",
-                    U"пФ~0.000000000001Ф;",
-                    U"нФ~0.000000001Ф;",
-                    U"мкФ~0.000001Ф;",
-                    U"мФ~0.001Ф;",
+                    U"Ф`фарад`~Кл/В;",
+                    U"пФ`пикофарад`~0.000000000001Ф;",
+                    U"нФ`нанофарад`~0.000000001Ф;",
+                    U"мкФ`микрофарад`~0.000001Ф;",
+                    U"мФ`миллифарад`~0.001Ф;",
 
                     //magnetic flux
-                    U"Вб~(кг*pow(м,2)/(pow(сек,2)*А));",
-                    U"мкВб~0.000001Вб;",
-                    U"мВб~0.001Вб;",
-                    U"кВб~1000Вб;",
-                    U"МВб~1000000Вб;",
+                    U"Вб`вебер`~(кг*pow(м,2)/(pow(сек,2)*А));",
+                    U"мкВб`микровебер`~0.000001Вб;",
+                    U"мВб`милливебер`~0.001Вб;",
+                    U"кВб`киловебер`~1000Вб;",
+                    U"МВб`мегавебер`~1000000Вб;",
 
                     //magnetic field
-                    U"Тл~(Вб)/(pow(м,2));",
-                    U"мкТл~0.000001Тл;",
-                    U"мТл~0.001Тл;",
-                    U"кТл~1000Тл;",
-                    U"МТл~1000000Тл;",
+                    U"Тл`тесла`~(Вб)/(pow(м,2));",
+                    U"мкТл`микротесла`~0.000001Тл;",
+                    U"мТл`миллитесла`~0.001Тл;",
+                    U"кТл`килотесла`~1000Тл;",
+                    U"МТл`мегатесла`~1000000Тл;",
 
                     //electrical inductance
-                    U"Гн~(кг*pow(м,2))/(pow(сек,2)*pow(А,2));",
-                    U"пГн~0.000000000001Гн;",
-                    U"нГн~0.000000001Гн;",
-                    U"мкГн~0.000001Гн;",
-                    U"мГн~0.001Гн;",
+                    U"Гн`генри`~(кг*pow(м,2))/(pow(сек,2)*pow(А,2));",
+                    U"пГн`пикогенри`~0.000000000001Гн;",
+                    U"нГн`наногенри`~0.000000001Гн;",
+                    U"мкГн`микрогенри`~0.000001Гн;",
+                    U"мГн`миллигенри`~0.001Гн;",
 
                     //electric conductance
-                    U"См~(1)/(Ом);",
-                    U"мкСм~0.000001См;",
-                    U"мСм~0.001См;",
-                    U"кСм~1000См;",
-                    U"МСм~1000000См;",
+                    U"См`сименс`~(1)/(Ом);",
+                    U"мкСм`микросименс`~0.000001См;",
+                    U"мСм`миллисименс`~0.001См;",
+                    U"кСм`килосименс`~1000См;",
+                    U"МСм`мегасименс`~1000000См;",
 
                     //ionizing radiation
-                    U"Гр~(Дж)/(кг);",
-                    U"мкГр~0.000001Гр;",
-                    U"мГр~0.001Гр;",
-                    U"кГр~1000Гр;",
-                    U"МГр~1000000Гр;",
+                    U"Гр`грей`~(Дж)/(кг);",
+                    U"мкГр`микрогрей`~0.000001Гр;",
+                    U"мГр`миллигрей`~0.001Гр;",
+                    U"кГр`килогрей`~1000Гр;",
+                    U"МГр`мегагрей`~1000000Гр;",
                 }
             }
         };
@@ -645,6 +643,9 @@ private:
             {
                 Language::English,
                 {
+                    //distance
+                    U"ang`angstrom`~0.000000000001m;",
+
                     //temperature
                     U"°C~K;",
                     
@@ -656,20 +657,23 @@ private:
                     U"Tbyte~1024Gbyte;",
 
                     //square
-                    U"a~100*pow(m,2);", //ar
-                    U"ha~100a;", //hectar
+                    U"a`ar`~100*pow(m,2);", //ar
+                    U"ha`hectar`~100a;", //hectar
 
                     //volume
-                    U"l~pow(dm,3);", //litre
-                    U"ml~0.001l;",
-                    U"dl~0.1l;",
+                    U"l`litre`~pow(dm,3);", //litre
+                    U"ml`millilitre`~0.001l;",
+                    U"dl`decilitre`~0.1l;",
                     U"dal~10l;",
-                    U"hl~100l;"
+                    U"hl`hectolitre`~100l;"
                 }
             },
             {
                 Language::Russian,
                 {
+                    //distance
+                    U"анг`ангстрем`~0.0000000001м;",
+
                     //temperature
                     U"°C~К;",
 
@@ -682,14 +686,14 @@ private:
 
                     //square
                     U"ар~100*pow(м,2);", //ar
-                    U"га~100ар;", //hectar
+                    U"га`гектар`~100ар;", //hectar
 
                     //volume
-                    U"л~pow(дм,3);", //litre
-                    U"мл~0.001л;",
-                    U"дл~0.1л;",
+                    U"л`литр`~pow(дм,3);", //litre
+                    U"мл`миллилитр`~0.001л;",
+                    U"дл`децилитр`~0.1л;",
                     U"дал~10л;",
-                    U"гл~100л;"
+                    U"гл`гекталитр`~100л;"
                 }
             }
         };

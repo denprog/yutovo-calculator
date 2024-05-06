@@ -790,6 +790,14 @@ TEST_F(CalcTestReal, units38)
     ASSERT_TRUE(s == "5.E+0(мм)") << s;
 }
 
+TEST_F(CalcTestReal, units39)
+{
+    auto r = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"d_m`decimeter`~10mm;");
+    r = parser.Parse(ElementId{0, 0, 0, 0, 2}, U"d_m;");
+    std::string s = parser.GetSuitableUnit(ElementId{0, 0, 0, 0, 2}, r).ToStdString(3, 3);
+    ASSERT_TRUE(s == "1.E+0(d_m)") << s;
+}
+
 TEST_F(CalcTestReal, compare1)
 {
     std::string s = parser.Parse(ElementId{0, 0, 0, 0, 0, 0, 0, 2, 0}, U"(0<10);").ToStdString(3, 3);
@@ -874,6 +882,46 @@ TEST_F(CalcTestReal, list_identifiers1)
         {
             return p.first == U"с" && p.second == U"скорость света";
         }) != variables.end());
+}
+
+TEST_F(CalcTestReal, list_identifiers2)
+{
+    std::vector<CustomUnit<Real>> units;
+    parser.ListUserUnits(units);
+    ASSERT_TRUE(std::find_if(units.begin(), units.end(), 
+        [](auto& p)
+        {
+            return p.name == U"km" && p.description == U"kilometre";
+        }) != units.end());
+    
+    units.clear();
+    parser.SetLocale(Language::Russian);
+    parser.ListUserUnits(units);
+    ASSERT_TRUE(std::find_if(units.begin(), units.end(), 
+        [](auto& p)
+        {
+            return p.name == U"км" && p.description == U"километр";
+        }) != units.end());
+}
+
+TEST_F(CalcTestReal, list_identifiers3)
+{
+    std::vector<std::pair<std::u32string, std::u32string>> units;
+    parser.ListBuiltinUnits(units);
+    ASSERT_TRUE(std::find_if(units.begin(), units.end(), 
+        [](auto& p)
+        {
+            return p.first == U"m" && p.second == U"metre";
+        }) != units.end());
+    
+    units.clear();
+    parser.SetLocale(Language::Russian);
+    parser.ListBuiltinUnits(units);
+    ASSERT_TRUE(std::find_if(units.begin(), units.end(), 
+        [](auto& p)
+        {
+            return p.first == U"м" && p.second == U"метр";
+        }) != units.end());
 }
 
 }
