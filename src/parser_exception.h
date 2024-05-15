@@ -23,7 +23,8 @@ namespace yutovo_calculator
 		UnitsAreIncompatible = 201,
 		CannotCastToUnit = 202,
 		UnknownLanguage = 301,
-		TimeExceed = 401
+		TimeExceed = 401,
+		Break = 501
 	};
 	
 	struct ParserException
@@ -96,6 +97,13 @@ namespace yutovo_calculator
 	struct TimeExceedException : public ParserException
 	{
 		TimeExceedException() : ParserException(ElementId{}, ParserExceptionCode::TimeExceed)
+		{
+		}
+	};
+
+	struct BreakException : public ParserException
+	{
+		BreakException() : ParserException(ElementId{}, ParserExceptionCode::Break)
 		{
 		}
 	};

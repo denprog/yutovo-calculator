@@ -28,16 +28,22 @@ struct Parser
     Parser(const int precision, const Language _language, uint64_t _max_time);
     
     Number Parse(ElementId id, std::u32string expression, Dependencies* dependencies, AngleMeasure default_angle_measure, AngleMeasure result_angle_measure, 
-        Notation default_notation, const int precision = -1)
+        Notation default_notation, const int precision = -1, ParserContext* _context = nullptr)
     {
         if (expression.empty() || expression == U";")
             throw SyntaxException(id, ExpressionExpected, 0, 0);
+
+        context = _context;
+        if (context)
+            context->break_solving = false;
         
         std::u32string::iterator iter = expression.begin();
         std::u32string::iterator end = expression.end();
         unicode::space_type space;
 
+        solver.ClearTempVariables();
         solver.SetDefaultNotation(default_notation);
+        solver.parser_context = context;
 
         Script<Number> script(id, expression, &solver);
         ScriptNode<Number> script_node;
@@ -46,68 +52,73 @@ struct Parser
         return solver(script_node, id, default_angle_measure, result_angle_measure, precision, dependencies);
     }
 
-    Number Parse(ElementId id, std::u32string expression, AngleMeasure default_angle_measure, AngleMeasure result_angle_measure, const int precision = -1)
+    Number Parse(ElementId id, std::u32string expression, AngleMeasure default_angle_measure, AngleMeasure result_angle_measure, const int precision = -1, 
+        ParserContext* _context = nullptr)
     {
         Dependencies dependencies;
-        return Parse(id, expression, &dependencies, default_angle_measure, result_angle_measure, Notation::Decimal, precision);
+        return Parse(id, expression, &dependencies, default_angle_measure, result_angle_measure, Notation::Decimal, precision, _context);
     }
 
     Number Parse(ElementId id, std::string expression, Dependencies* dependencies, AngleMeasure default_angle_measure, AngleMeasure result_angle_measure, 
-        const int precision = -1)
+        const int precision = -1, ParserContext* _context = nullptr)
     {
-        return Parse(id, ToUtfString(expression), dependencies, default_angle_measure, result_angle_measure, Notation::Decimal, precision);
+        return Parse(id, ToUtfString(expression), dependencies, default_angle_measure, result_angle_measure, Notation::Decimal, precision, _context);
     }
 
     Number Parse(ElementId id, std::u32string expression, Dependencies* dependencies, AngleMeasure default_angle_measure, AngleMeasure result_angle_measure, 
-        const int precision = -1)
+        const int precision = -1, ParserContext* _context = nullptr)
     {
-        return Parse(id, expression, dependencies, default_angle_measure, result_angle_measure, Notation::Decimal, precision);
+        return Parse(id, expression, dependencies, default_angle_measure, result_angle_measure, Notation::Decimal, precision, _context);
     }
 
-    Number Parse(ElementId id, std::u32string expression)
+    Number Parse(ElementId id, std::u32string expression, ParserContext* _context = nullptr)
     {
         Dependencies dependencies;
-        return Parse(id, expression, &dependencies, AngleMeasure::Radian, AngleMeasure::None, Notation::Decimal);
+        return Parse(id, expression, &dependencies, AngleMeasure::Radian, AngleMeasure::None, Notation::Decimal, -1, _context);
     }
 
-    Number Parse(ElementId id, std::u32string expression, const int precision)
+    Number Parse(ElementId id, std::u32string expression, const int precision, ParserContext* _context = nullptr)
     {
         Dependencies dependencies;
-        return Parse(id, expression, &dependencies, AngleMeasure::Radian, AngleMeasure::None, Notation::Decimal, precision);
+        return Parse(id, expression, &dependencies, AngleMeasure::Radian, AngleMeasure::None, Notation::Decimal, precision, _context);
     }
 
-    Number Parse(ElementId id, std::u32string expression, Dependencies* dependencies)
+    Number Parse(ElementId id, std::u32string expression, Dependencies* dependencies, ParserContext* _context = nullptr)
     {
-        return Parse(id, expression, dependencies, AngleMeasure::Radian, AngleMeasure::None, Notation::Decimal);
+        return Parse(id, expression, dependencies, AngleMeasure::Radian, AngleMeasure::None, Notation::Decimal, -1, _context);
     }
 
-    Number Parse(ElementId id, std::u32string expression, Dependencies* dependencies, Notation default_notation)
+    Number Parse(ElementId id, std::u32string expression, Dependencies* dependencies, Notation default_notation, ParserContext* _context = nullptr)
     {
-        return Parse(id, expression, dependencies, AngleMeasure::Radian, AngleMeasure::None, default_notation);
+        return Parse(id, expression, dependencies, AngleMeasure::Radian, AngleMeasure::None, default_notation, -1, _context);
     }
 
-    Number Parse(ElementId id, std::string expression, Dependencies* dependencies, Notation default_notation)
+    Number Parse(ElementId id, std::string expression, Dependencies* dependencies, Notation default_notation, ParserContext* _context = nullptr)
     {
-        return Parse(id, ToUtfString(expression), dependencies, AngleMeasure::Radian, AngleMeasure::None, default_notation);
+        return Parse(id, ToUtfString(expression), dependencies, AngleMeasure::Radian, AngleMeasure::None, default_notation, -1, _context);
     }
 
-    Number Parse(ElementId id, std::string expression, Dependencies* dependencies)
+    Number Parse(ElementId id, std::string expression, Dependencies* dependencies, ParserContext* _context = nullptr)
     {
-        return Parse(id, ToUtfString(expression), dependencies, AngleMeasure::Radian, AngleMeasure::None);
+        return Parse(id, ToUtfString(expression), dependencies, AngleMeasure::Radian, AngleMeasure::None, -1, _context);
     }
 
-    Number Parse(ElementId id, std::u32string expression, Notation default_notation)
+    Number Parse(ElementId id, std::u32string expression, Notation default_notation, ParserContext* _context = nullptr)
     {
         Dependencies dependencies;
-        return Parse(id, expression, &dependencies, AngleMeasure::Radian, AngleMeasure::None, default_notation);
+        return Parse(id, expression, &dependencies, AngleMeasure::Radian, AngleMeasure::None, default_notation, -1, _context);
     }
 
     Number Parse(ElementId id, std::u32string expression, Dependencies* dependencies, 
         AngleMeasure default_angle_measure, AngleMeasure result_angle_measure, const int precision, const int res_count, 
-        std::vector<Number>& results)
+        std::vector<Number>& results, ParserContext* _context = nullptr)
     {
         if (expression.empty() || expression == U";")
             throw SyntaxException(id, ExpressionExpected, 0, 0);
+        
+        context = _context;
+        if (context)
+            context->break_solving = false;
         
         std::u32string::iterator iter = expression.begin();
         std::u32string::iterator end = expression.end();
@@ -133,9 +144,9 @@ struct Parser
 
     Number Parse(ElementId id, std::string expression, Dependencies* dependencies, 
         AngleMeasure default_angle_measure, AngleMeasure result_angle_measure, const int precision, const int res_count, 
-        std::vector<Number>& results)
+        std::vector<Number>& results, ParserContext* _context = nullptr)
     {
-        return Parse(id, ToUtfString(expression), dependencies, default_angle_measure, result_angle_measure, precision, res_count, results);
+        return Parse(id, ToUtfString(expression), dependencies, default_angle_measure, result_angle_measure, precision, res_count, results, _context);
     }
 
     bool RemoveIdentifier(ElementId id, const std::u32string& name)
@@ -322,6 +333,8 @@ private:
     }
 
     Solver<Number> solver;
+
+    ParserContext* context = nullptr;
 
     Language language = Language::English;
     Language last_language = Language::None;

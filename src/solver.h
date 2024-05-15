@@ -244,9 +244,10 @@ struct Solver : public boost::static_visitor<Number>
         Number res = boost::apply_visitor(*this, expr.first);
         BOOST_FOREACH(typename OperationNode<Number>::Operand const& op, expr.rest)
         {
-            CheckTime();
+            CheckBreak();
             
             Solver<Number> solver(precision, max_time, im, res, symbols);
+            solver.parser_context = parser_context;
             solver.id = id;
             solver.start_time = start_time;
             solver.SetDependencies(dependencies);
@@ -349,7 +350,7 @@ struct Solver : public boost::static_visitor<Number>
         PushTempVariable(op.loop_var.name.name, res);
         while (counter_max != 0)
         {
-            CheckTime();
+            CheckBreak();
 
             res = (*this)(op.loop_expression.expression);
             SetTempVariable(op.loop_expression.name.name, res);
@@ -386,7 +387,12 @@ struct Solver : public boost::static_visitor<Number>
         for (int i = 0; i < count; ++i)
             symbols->temp_variables.pop_back();
     }
-    
+
+    void ClearTempVariables()
+    {
+        symbols->temp_variables.clear();
+    }
+
     TempVariable* FindTempVariable(const std::u32string& name) const
     {
         for (int i = symbols->temp_variables.size() - 1; i >= 0; --i)
@@ -719,6 +725,8 @@ struct Solver : public boost::static_visitor<Number>
 
     void GetCastUnits(const ElementId _id, const Number& val, const std::u32string& system, std::vector<Number>& cast_units) const
     {
+        CheckBreak();
+
         if (val.unit.IsEmpty())
             return;
 
@@ -817,6 +825,8 @@ struct Solver : public boost::static_visitor<Number>
     }
 
 public:
+    ParserContext* parser_context = nullptr;
+
     mutable std::u32string im;
     mutable int res_pos = 0;
 
@@ -837,7 +847,7 @@ private:
 
         for (Number& c : cast_units)
         {
-            CheckTime();
+            CheckBreak();
 
             if (c.unit.unit.size() <= s) //a unit should have minimal size
             {
@@ -938,7 +948,7 @@ private:
         Number u(precision, 1);
         for (auto& p : unit.unit)
         {
-            CheckTime();
+            CheckBreak();
 
             Number unit_val;
             if (unit.system == U"SI" || unit.system == U"")
@@ -981,7 +991,7 @@ private:
 
     Number FunctionCall(FunctionCallNode<Number> const& op) const
     {
-        CheckTime();
+        CheckBreak();
 
         AddDependency(op.name.name);
 
@@ -1149,8 +1159,10 @@ private:
         return res;
     }
 
-    void CheckTime() const
+    void CheckBreak() const
     {
+        if (parser_context && parser_context->break_solving)
+            throw BreakException();
         if (max_time == 0)
             return;
         uint64_t now = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
@@ -1159,7 +1171,7 @@ private:
     }
 
     friend class Expression<Number>;
-    
+
     mutable ElementId id;
     mutable int precision;
     mutable AngleMeasure default_angle_measure;
