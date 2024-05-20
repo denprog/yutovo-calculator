@@ -42,6 +42,7 @@ struct Parser
         unicode::space_type space;
 
         solver.ClearTempVariables();
+        solver.ClearCastUnits();
         solver.SetDefaultNotation(default_notation);
         solver.parser_context = context;
 

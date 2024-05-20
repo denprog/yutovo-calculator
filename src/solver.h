@@ -250,6 +250,7 @@ struct Solver : public boost::static_visitor<Number>
             solver.parser_context = parser_context;
             solver.id = id;
             solver.start_time = start_time;
+            solver.cast_units = cast_units;
             solver.SetDependencies(dependencies);
             res = boost::apply_visitor(solver, op);
         }
@@ -682,19 +683,49 @@ struct Solver : public boost::static_visitor<Number>
         return res;
     }
 
-    void GetCastUnits(const ElementId _id, const Number& val, std::vector<Unit>& cast_units)
+    void GetCastUnits(const ElementId _id, const Number& val, std::vector<Unit>& _cast_units)
     {
         if (val.unit.IsEmpty())
             return;
 
-        GetCastUnits(_id, val, U"SI", cast_units);
-        GetCastUnits(_id, val, U"rus", cast_units);
+        GetCastUnits(_id, val, U"SI", _cast_units);
+        GetCastUnits(_id, val, U"rus", _cast_units);
     }
 
-    void GetCastUnits(const ElementId _id, const Number& val, const std::u32string& system, std::vector<Unit>& cast_units)
+    void GetCastUnits(const ElementId _id, const Number& val, const std::u32string& system, std::vector<Unit>& _cast_units)
+    {
+        auto it = cast_units.find(system);
+        if (it != cast_units.end())
+        {
+            auto& v = it->second;
+            for (auto& n : v)
+                _cast_units.push_back(n.unit);
+            return;
+        }
+
+        GetCastUnitsImpl(_id, val, system, _cast_units);
+    }
+
+    void GetCastUnits(const ElementId _id, const Number& val, const std::u32string& system, std::vector<Number>& _cast_units) const
+    {
+        auto it = cast_units.find(system);
+        if (it != cast_units.end())
+        {
+            _cast_units = it->second;
+            return;
+        }
+
+        GetCastUnitsImpl(_id, val, system, _cast_units);
+
+        cast_units[system] = _cast_units;
+    }
+
+    void GetCastUnitsImpl(const ElementId _id, const Number& val, const std::u32string& system, std::vector<Unit>& _cast_units)
     {
         if (val.unit.IsEmpty())
             return;
+
+        CheckBreak();
 
         //add the cast unit if all of its parts have the same system
         size_t i = 0;
@@ -707,7 +738,7 @@ struct Solver : public boost::static_visitor<Number>
                 break;
         }
         if (i == val.unit.unit.size())
-            cast_units.push_back(val.unit);
+            _cast_units.push_back(val.unit);
 
         for (size_t i = 0; i < symbols->units.size(); ++i)
         {
@@ -718,20 +749,20 @@ struct Solver : public boost::static_visitor<Number>
             if (custom_unit.system == system || (custom_unit.system == U"" && system == U"SI"))
             {
                 if (custom_unit.Cast(t))
-                    GetCastUnits(_id, t, system, cast_units);
+                    GetCastUnitsImpl(_id, t, system, _cast_units);
             }
         }
     }
 
-    void GetCastUnits(const ElementId _id, const Number& val, const std::u32string& system, std::vector<Number>& cast_units) const
+    void GetCastUnitsImpl(const ElementId _id, const Number& val, const std::u32string& system, std::vector<Number>& _cast_units) const
     {
-        CheckBreak();
-
         if (val.unit.IsEmpty())
             return;
 
+        CheckBreak();
+
         if (val.unit.system == system || (val.unit.system == U"" && system == U"SI"))
-            cast_units.push_back(val);
+            _cast_units.push_back(val);
         for (size_t i = 0; i < symbols->units.size(); ++i)
         {
             CustomUnit<Number>& custom_unit = symbols->units[i];
@@ -741,7 +772,7 @@ struct Solver : public boost::static_visitor<Number>
             {
                 Number t = val;
                 if (custom_unit.Cast(t))
-                    GetCastUnits(_id, t, system, cast_units);
+                    GetCastUnitsImpl(_id, t, system, _cast_units);
             }
         }
     }
@@ -749,6 +780,11 @@ struct Solver : public boost::static_visitor<Number>
     Number GetSuitableUnit(const ElementId _id, const Number& val, const std::u32string& system, const bool buildin) const;
 
     Number CastToUnit(const ElementId id, const Number& val, const Unit& unit) const;
+
+    void ClearCastUnits()
+    {
+        cast_units.clear();
+    }
 
     void ListBuiltinVariables(std::vector<std::u32string>& variables)
     {
@@ -842,10 +878,14 @@ private:
         int s = val.unit.unit.size();
         int p1 = val.unit.GetPower();
 
-        std::vector<Number> cast_units;
-        GetCastUnits(_id, val, system, cast_units);
+        std::vector<Number> _cast_units;
+        auto it = cast_units.find(system);
+        if (it != cast_units.end())
+            _cast_units = it->second;
+        else
+            GetCastUnits(_id, val, system, _cast_units);
 
-        for (Number& c : cast_units)
+        for (Number& c : _cast_units)
         {
             CheckBreak();
 
@@ -935,6 +975,8 @@ private:
                 s = c.unit.unit.size();
             }
         }
+
+        cast_units[system] = _cast_units;
 
         return res;
     }
@@ -1179,6 +1221,7 @@ private:
     mutable int default_notation = 10;
     Number left_value; //left solved value
     mutable Dependencies* dependencies = nullptr;
+    mutable std::map<std::u32string, std::vector<Number>> cast_units;
     mutable uint64_t start_time;
     mutable uint64_t max_time = 0; //in milliseconds
 };
