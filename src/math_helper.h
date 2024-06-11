@@ -11,7 +11,7 @@ using namespace std;
 #define DEFAULT_RND MPFR_RNDN
 #define DEFAULT_INCREASE_PRECISION 5
 
-#ifdef DEBUG
+#ifndef NDEBUG
 #define TRACE_OUTPUT
 #endif
 

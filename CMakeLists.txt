@@ -5,8 +5,6 @@ project(yutovo_calculator
     LANGUAGES CXX
 )
 
-add_compile_definitions(DEBUG)
-
 set(INSTALL_PATH "$ENV{YUTOVO_DEPLOY}")
 
 add_subdirectory(src)
