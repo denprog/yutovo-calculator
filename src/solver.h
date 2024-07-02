@@ -748,7 +748,7 @@ struct Solver : public boost::static_visitor<Number>
             Number t = val;
             if (custom_unit.system == system || (custom_unit.system == U"" && system == U"SI"))
             {
-                if (custom_unit.Cast(t))
+                if (custom_unit.Cast(t) && t.unit.unit.size() <= max_cast_unit_size)
                     GetCastUnitsImpl(_id, t, system, _cast_units);
             }
         }
@@ -771,7 +771,7 @@ struct Solver : public boost::static_visitor<Number>
             if (custom_unit.system == system || (custom_unit.system == U"" && system == U"SI"))
             {
                 Number t = val;
-                if (custom_unit.Cast(t))
+                if (custom_unit.Cast(t) && t.unit.unit.size() <= max_cast_unit_size)
                     GetCastUnitsImpl(_id, t, system, _cast_units);
             }
         }
@@ -1224,6 +1224,8 @@ private:
     mutable std::map<std::u32string, std::vector<Number>> cast_units;
     mutable uint64_t start_time;
     mutable uint64_t max_time = 0; //in milliseconds
+
+    const int max_cast_unit_size = 3; //max size of each unit in the cast vector
 };
 
 };
