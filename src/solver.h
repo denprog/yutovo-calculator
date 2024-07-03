@@ -5,6 +5,7 @@
 #include "script.h"
 #include "utils.h"
 #include <chrono>
+#include <boost/chrono.hpp>
 
 namespace yutovo_calculator
 {
@@ -208,7 +209,7 @@ struct Solver : public boost::static_visitor<Number>
         left_value(_left_value),
         symbols(_symbols),
         im(_im),
-        start_time(duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count()),
+        start_time(boost::chrono::thread_clock::now()),
         max_time(_max_time)
     {
         if (!symbols)
@@ -223,7 +224,7 @@ struct Solver : public boost::static_visitor<Number>
         left_value(_left_value),
         symbols(_symbols),
         im(_im),
-        start_time(duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count()),
+        start_time(boost::chrono::thread_clock::now()),
         max_time(_max_time)
     {
         if (!symbols)
@@ -1207,8 +1208,9 @@ private:
             throw BreakException();
         if (max_time == 0)
             return;
-        uint64_t now = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
-        if (now - start_time > max_time)
+        auto now = boost::chrono::thread_clock::now();
+        boost::chrono::duration<uint64_t, boost::milli> d(max_time);
+        if (now - start_time > d)
             throw TimeExceedException();
     }
 
@@ -1222,7 +1224,7 @@ private:
     Number left_value; //left solved value
     mutable Dependencies* dependencies = nullptr;
     mutable std::map<std::u32string, std::vector<Number>> cast_units;
-    mutable uint64_t start_time;
+    mutable boost::chrono::thread_clock::time_point start_time;
     mutable uint64_t max_time = 0; //in milliseconds
 
     const int max_cast_unit_size = 3; //max size of each unit in the cast vector
