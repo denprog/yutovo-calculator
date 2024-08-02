@@ -7,7 +7,16 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 set(Boost_USE_STATIC_LIBS ON)
 set(Boost_USE_MULTITHREADED ON)
-find_package(Boost 1.81.0 REQUIRED PATHS ${INSTALL_PATH}/lib/cmake/)
+
+if(EMSCRIPTEN)
+    set(CMAKE_FIND_ROOT_PATH ${INSTALL_PATH}/wasm/cmake/)
+else()
+    find_package(Boost 1.81.0 REQUIRED PATHS ${INSTALL_PATH}/lib/cmake/)
+endif()
+
+if(EMSCRIPTEN)
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O0 -g")
+endif()
 
 set(CMAKE_DEBUG_POSTFIX d)
 
@@ -41,12 +50,21 @@ target_include_directories(${PROJECT_NAME} PUBLIC
     $<INSTALL_INTERFACE:${INSTALL_PATH}/include>
 )
 
-install(
-    TARGETS ${PROJECT_NAME}
-    EXPORT ${PROJECT_NAME}
-    DESTINATION ${INSTALL_PATH}/lib
-    COMPONENT ${PROJECT_NAME}
-)
+if(EMSCRIPTEN)
+    install(
+        TARGETS ${PROJECT_NAME}
+        EXPORT ${PROJECT_NAME}
+        DESTINATION ${INSTALL_PATH}/wasm
+        COMPONENT ${PROJECT_NAME}
+    )
+else()
+    install(
+        TARGETS ${PROJECT_NAME}
+        EXPORT ${PROJECT_NAME}
+        DESTINATION ${INSTALL_PATH}/lib
+        COMPONENT ${PROJECT_NAME}
+    )
+endif()
 
 install(
     FILES 
@@ -72,28 +90,32 @@ install(
     COMPONENT ${PROJECT_NAME}
 )
 
-install(
-    EXPORT ${PROJECT_NAME}
-    DESTINATION ${INSTALL_PATH}/cmake/${PROJECT_NAME}
-    COMPONENT ${PROJECT_NAME}
-    FILE ${PROJECT_NAME}.cmake
-)
+if(EMSCRIPTEN)
+    install(
+        EXPORT ${PROJECT_NAME}
+        DESTINATION ${INSTALL_PATH}/wasm/cmake/${PROJECT_NAME}
+        COMPONENT ${PROJECT_NAME}
+        FILE ${PROJECT_NAME}.cmake
+    )
+else()
+    install(
+        EXPORT ${PROJECT_NAME}
+        DESTINATION ${INSTALL_PATH}/lib/cmake/${PROJECT_NAME}
+        COMPONENT ${PROJECT_NAME}
+        FILE ${PROJECT_NAME}.cmake
+    )
+endif()
 
-install(
-    FILES ${PROJECT_NAME}-config.cmake
-    DESTINATION ${INSTALL_PATH}/cmake/${PROJECT_NAME}
-    COMPONENT ${PROJECT_NAME}
-)
-
-install(
-    EXPORT ${PROJECT_NAME}
-    DESTINATION ${INSTALL_PATH}/lib/cmake/${PROJECT_NAME}
-    COMPONENT ${PROJECT_NAME}
-    FILE ${PROJECT_NAME}.cmake
-)
-
-install(
-    FILES ${PROJECT_NAME}-config.cmake
-    DESTINATION ${INSTALL_PATH}/lib/cmake/${PROJECT_NAME}
-    COMPONENT ${PROJECT_NAME}
-)
+if(EMSCRIPTEN)
+    install(
+        FILES ${PROJECT_NAME}-config.cmake
+        DESTINATION ${INSTALL_PATH}/wasm/cmake/${PROJECT_NAME}
+        COMPONENT ${PROJECT_NAME}
+    )
+else()
+    install(
+        FILES ${PROJECT_NAME}-config.cmake
+        DESTINATION ${INSTALL_PATH}/lib/cmake/${PROJECT_NAME}
+        COMPONENT ${PROJECT_NAME}
+    )
+endif()

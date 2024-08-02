@@ -223,7 +223,7 @@ struct Solver : public boost::static_visitor<Number>
         result_angle_measure(_result_angle_measure),
         left_value(_left_value),
         symbols(_symbols),
-        im(_im),
+        im(ToUtfString(_im)),
         start_time(boost::chrono::thread_clock::now()),
         max_time(_max_time)
     {
@@ -493,20 +493,10 @@ struct Solver : public boost::static_visitor<Number>
         func.id = id;
         symbols->functions.push_back((FunctionNode<Number>&)func);
     }
-    
-    void AddBuiltinFunction(const u_char* name, UnaryFunction& func)
-    {
-        symbols->buildin_functions[std::u32string(name)] = func;
-    }
 
     void AddBuiltinFunction(const char* name, UnaryFunction& func)
     {
         symbols->buildin_functions[ToUtfString(name)] = func;
-    }
-
-    void AddBuiltinFunction(const u_char* name, BinaryFunction& func)
-    {
-        symbols->buildin_functions[std::u32string(name)] = func;
     }
 
     void AddBuiltinFunction(const char* name, BinaryFunction& func)
@@ -553,11 +543,6 @@ struct Solver : public boost::static_visitor<Number>
         if (iter == symbols->trigonometric_functions.end())
             return nullptr;
         return (BuiltinTrigonometricFunction*)&(*iter).second;
-    }
-
-    void AddBuiltinVariable(const u_char* name, PrecisionVariable& var)
-    {
-        symbols->buildin_variables[std::u32string(name)] = var;
     }
 
     void AddBuiltinVariable(const char* name, PrecisionVariable& var)

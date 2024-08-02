@@ -2,7 +2,6 @@
 #define RATIONAL_H
 
 #include <string>
-#include <mpir.h>
 #include "math_helper.h"
 #include "integer.h"
 #include "unit.h"

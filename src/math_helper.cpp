@@ -1,7 +1,6 @@
 #include "stdafx.h"
 #include "math_helper.h"
 #include <algorithm>
-#include <mpir.h>
 #include "integer.h"
 #include "real.h"
 #include "rational.h"

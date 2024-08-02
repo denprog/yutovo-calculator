@@ -31,7 +31,6 @@
 #include <list>
 #include <map>
 
-#include "mpir.h"
 #include "mpfr.h"
 
 namespace spirit = boost::spirit;

@@ -2,7 +2,6 @@
 #define INTEGER_H
 
 #include <string>
-#include <mpir.h>
 #include "math_helper.h"
 #include "parser_exception.h"
 
