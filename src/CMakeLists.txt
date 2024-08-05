@@ -16,6 +16,8 @@ endif()
 
 if(EMSCRIPTEN)
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O0 -g")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -s USE_PTHREADS=1 -s PTHREAD_POOL_SIZE=2")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -s ALLOW_MEMORY_GROWTH=1 -s NO_DISABLE_EXCEPTION_CATCHING=1")
 endif()
 
 set(CMAKE_DEBUG_POSTFIX d)
@@ -35,11 +37,19 @@ add_library(${PROJECT_NAME}
     unit.cpp
 )
 
-target_link_libraries(${PROJECT_NAME} PRIVATE 
-    stdc++
-    mpfr
-    gmp
-)
+if(EMSCRIPTEN)
+    target_link_libraries(${PROJECT_NAME} PRIVATE 
+        stdc++
+        ${INSTALL_PATH}/wasm/libmpfr.a
+        ${INSTALL_PATH}/wasm/libgmp.a
+    )
+else()
+    target_link_libraries(${PROJECT_NAME} PRIVATE 
+        stdc++
+        mpfr
+        gmp
+    )
+endif()
 
 target_include_directories(${PROJECT_NAME} PUBLIC
 	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>

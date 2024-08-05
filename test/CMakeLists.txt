@@ -25,7 +25,6 @@ target_link_libraries(${PROJECT_NAME}_tests PRIVATE
 	gmock_main
 	m
 	dl
-	boost_chrono
 	${PROJECT_NAME}
 )
 

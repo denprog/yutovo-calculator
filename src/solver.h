@@ -5,7 +5,6 @@
 #include "script.h"
 #include "utils.h"
 #include <chrono>
-#include <boost/chrono.hpp>
 
 namespace yutovo_calculator
 {
@@ -209,9 +208,11 @@ struct Solver : public boost::static_visitor<Number>
         left_value(_left_value),
         symbols(_symbols),
         im(_im),
-        start_time(boost::chrono::thread_clock::now()),
         max_time(_max_time)
     {
+        pthread_getcpuclockid(pthread_self(), &clock_id);
+        GetThreadTime(start_time);
+        
         if (!symbols)
             symbols.reset(new SolverSymbols<Number>());
     }
@@ -224,9 +225,11 @@ struct Solver : public boost::static_visitor<Number>
         left_value(_left_value),
         symbols(_symbols),
         im(ToUtfString(_im)),
-        start_time(boost::chrono::thread_clock::now()),
         max_time(_max_time)
     {
+        pthread_getcpuclockid(pthread_self(), &clock_id);
+        GetThreadTime(start_time);
+
         if (!symbols)
             symbols.reset(new SolverSymbols<Number>());
     }
@@ -1193,10 +1196,18 @@ private:
             throw BreakException();
         if (max_time == 0)
             return;
-        auto now = boost::chrono::thread_clock::now();
-        boost::chrono::duration<uint64_t, boost::milli> d(max_time);
-        if (now - start_time > d)
+        
+        uint64_t now;
+        GetThreadTime(now);
+        if (now - start_time > max_time)
             throw TimeExceedException();
+    }
+
+    void GetThreadTime(uint64_t& time) const
+    {
+        timespec s;
+        clock_gettime(clock_id, &s);
+        time = s.tv_sec * 1000 + s.tv_nsec / 1000000;
     }
 
     friend class Expression<Number>;
@@ -1209,7 +1220,8 @@ private:
     Number left_value; //left solved value
     mutable Dependencies* dependencies = nullptr;
     mutable std::map<std::u32string, std::vector<Number>> cast_units;
-    mutable boost::chrono::thread_clock::time_point start_time;
+    mutable uint64_t start_time = 0;
+    clockid_t clock_id;
     mutable uint64_t max_time = 0; //in milliseconds
 
     const int max_cast_unit_size = 3; //max size of each unit in the cast vector

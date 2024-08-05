@@ -1149,7 +1149,7 @@ Real Solver<Real>::operator()(ScriptNode<Real> const& script, ElementId _id, Ang
     default_angle_measure = _default_angle_measure;
     result_angle_measure = _result_angle_measure;
     precision = _precision;
-    start_time = boost::chrono::thread_clock::now();
+    GetThreadTime(start_time);
     
     Real res;
     //calculate all the script nodes
@@ -1183,7 +1183,7 @@ Integer Solver<Integer>::operator()(ScriptNode<Integer> const& script, ElementId
     
     id = _id;
     dependencies = _dependencies;
-    start_time = boost::chrono::thread_clock::now();
+    GetThreadTime(start_time);
     
     Integer res;
 
@@ -1206,7 +1206,7 @@ Rational Solver<Rational>::operator()(ScriptNode<Rational> const& script, Elemen
     
     id = _id;
     dependencies = _dependencies;
-    start_time = boost::chrono::thread_clock::now();
+    GetThreadTime(start_time);
    
     Rational res;
 
@@ -1232,8 +1232,8 @@ Complex Solver<Complex>::operator()(ScriptNode<Complex> const& script, ElementId
     default_angle_measure = _default_angle_measure;
     result_angle_measure = _result_angle_measure;
     precision = _precision;
-    start_time = boost::chrono::thread_clock::now();
-    
+    GetThreadTime(start_time);
+
     Complex res;
     //calculate all the script nodes
     BOOST_FOREACH(typename ScriptNode<Complex>::Operand const& op, script.list)
