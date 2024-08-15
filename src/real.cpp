@@ -1811,6 +1811,8 @@ void ToCommonAngleMeasure(Real& num1, Real& num2)
         case AngleMeasure::Grad:
             num1 = num1.ToGrad();
             break;
+        case AngleMeasure::None:
+            break;
         }
     }
     }
@@ -2015,7 +2017,11 @@ void Real::ToString(int exp, int accuracy, bool& mantissa_sign, std::u32string& 
 #ifdef _WIN32
                     _itoa_s(::abs(num_exp), buf, 10);
 #else
+#ifdef EMSCRIPTEN
+                    sprintf(buf, "%ld", ::abs(num_exp));
+#else
                     sprintf(buf, "%d", ::abs(num_exp));
+#endif
 #endif
                     exponent = ToUtfString(buf);
                 }
@@ -2046,7 +2052,11 @@ void Real::ToString(int exp, int accuracy, bool& mantissa_sign, std::u32string& 
 #ifdef _WIN32
                 _itoa_s(::abs(num_exp), buf, 10);
 #else
+#ifdef EMSCRIPTEN
+                sprintf(buf, "%ld", ::abs(num_exp));
+#else
                 sprintf(buf, "%d", ::abs(num_exp));
+#endif
 #endif
                 exponent = ToUtfString(buf);
             }

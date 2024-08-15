@@ -1169,6 +1169,8 @@ Real Solver<Real>::operator()(ScriptNode<Real> const& script, ElementId _id, Ang
             return res.ToDegree();
         case AngleMeasure::Grad:
             return res.ToGrad();
+        case AngleMeasure::None:
+            break;
         }
     }
     return res;
@@ -1252,6 +1254,8 @@ Complex Solver<Complex>::operator()(ScriptNode<Complex> const& script, ElementId
             return res.ToDegree();
         case AngleMeasure::Grad:
             return res.ToGrad();
+        case AngleMeasure::None:
+            break;
         }
     }
     return res;
