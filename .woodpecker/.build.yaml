@@ -7,4 +7,4 @@ steps:
     image: debian:stable-slim
     commands:
       - echo building
-      - sleep 10
+      - sleep 5
