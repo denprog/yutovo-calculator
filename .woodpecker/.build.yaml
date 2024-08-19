@@ -1,3 +1,7 @@
+when:
+  - event: push
+    branch: develop
+
 steps:
   - name: build
     image: debian:stable-slim
