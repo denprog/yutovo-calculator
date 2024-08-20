@@ -9,7 +9,7 @@ steps:
   - name: build
     image: ubuntu:22.04
     commands:
-      - apt update && apt install -y build-essential cmake libmpfr-dev
+      - apt update && apt install -y build-essential cmake libmpfr-dev libgtest-dev libgmock-dev
       - export YUTOVO_DEPLOY=/home/denis/programs/Math/yutovo/deploy
       - ls -la $YUTOVO_DEPLOY
       - mkdir build && cd build
