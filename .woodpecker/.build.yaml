@@ -3,7 +3,8 @@ when:
     branch: develop
 
 workspace:
-  path: /home/denis/programs/Math/yutovo/deploy
+  base: /
+  path: denis/programs/Math/yutovo/deploy
 
 steps:
   - name: build
