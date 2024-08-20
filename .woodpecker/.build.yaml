@@ -8,7 +8,6 @@ steps:
     commands:
       - apt update && apt install -y build-essential cmake libmpfr-dev libgtest-dev libgmock-dev
       - export YUTOVO_DEPLOY=/home/denis/programs/Math/yutovo/deploy
-      - ls -la $YUTOVO_DEPLOY
       - mkdir build && cd build
       - cmake -DCMAKE_BUILD_TYPE=Debug ..
-      - make -sj4
+      - make -sj4 && make install
