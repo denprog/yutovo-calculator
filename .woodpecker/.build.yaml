@@ -1,10 +1,12 @@
 when:
-  - event: push
+  - event: [push, manual]
     branch: develop
 
 steps:
   - name: build
-    image: debian:stable-slim
+    image: ubuntu:22.04
     commands:
-      - echo building
-      - sleep 15
+      - apt update && apt install -y build-essential libmpfr-dev
+      - mkdir build && cd build
+      - cmake -DCMAKE_BUILD_TYPE=Debug ..
+      - make -sj4
