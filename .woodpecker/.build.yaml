@@ -6,7 +6,7 @@ steps:
   - name: build
     image: ubuntu:22.04
     commands:
-      - apt update && apt install -y build-essential libmpfr-dev
+      - apt update && apt install -y build-essential cmake libmpfr-dev
       - mkdir build && cd build
       - cmake -DCMAKE_BUILD_TYPE=Debug ..
       - make -sj4
