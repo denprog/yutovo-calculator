@@ -2,6 +2,9 @@ when:
   - event: [push, manual]
     branch: develop
 
+workspace:
+  - path: /home/denis/programs/Math/yutovo/deploy/
+  
 steps:
   - name: build
     image: ubuntu:22.04
