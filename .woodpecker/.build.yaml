@@ -3,14 +3,14 @@ when:
     branch: develop
 
 steps:
-  # - name: build
-  #   image: ubuntu:22.04
-  #   commands:
-  #     - apt update && apt install -y build-essential cmake libmpfr-dev libgtest-dev libgmock-dev
-  #     - export YUTOVO_DEPLOY=/home/denis/programs/Math/yutovo/deploy
-  #     - mkdir build && cd build
-  #     - cmake -DCMAKE_BUILD_TYPE=Debug ..
-  #     - make -sj4 && make install
+  - name: build
+    image: ubuntu:22.04
+    commands:
+      - apt update && apt install -y build-essential cmake libmpfr-dev libgtest-dev libgmock-dev
+      - export YUTOVO_DEPLOY=/home/denis/programs/Math/yutovo/deploy
+      - mkdir build && cd build
+      - cmake -DCMAKE_BUILD_TYPE=Debug ..
+      - make -sj4 && make install
   
   - name: build_web
     image: emscripten/emsdk:3.0.1
