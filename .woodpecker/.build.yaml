@@ -15,7 +15,7 @@ steps:
   - name: build_web
     image: emscripten/emsdk:3.0.1
     commands:
-      - apt update && apt install -y build-essential cmake libgtest-dev libgmock-dev
+      - apt update && apt install -y build-essential cmake libgtest-dev libgmock-dev autoconf
       - export YUTOVO_DEPLOY=/home/denis/programs/Math/yutovo/deploy
 
       - git clone https://github.com/sethtroisi/libgmp.git
