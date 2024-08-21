@@ -3,11 +3,33 @@ when:
     branch: develop
 
 steps:
-  - name: build
-    image: ubuntu:22.04
+  # - name: build
+  #   image: ubuntu:22.04
+  #   commands:
+  #     - apt update && apt install -y build-essential cmake libmpfr-dev libgtest-dev libgmock-dev
+  #     - export YUTOVO_DEPLOY=/home/denis/programs/Math/yutovo/deploy
+  #     - mkdir build && cd build
+  #     - cmake -DCMAKE_BUILD_TYPE=Debug ..
+  #     - make -sj4 && make install
+  
+  - name: build_web
+    image: emscripten/emsdk:3.0.1
     commands:
-      - apt update && apt install -y build-essential cmake libmpfr-dev libgtest-dev libgmock-dev
+      - apt update && apt install -y build-essential cmake libgtest-dev libgmock-dev
       - export YUTOVO_DEPLOY=/home/denis/programs/Math/yutovo/deploy
-      - mkdir build && cd build
-      - cmake -DCMAKE_BUILD_TYPE=Debug ..
+
+      - git clone https://github.com/sethtroisi/libgmp.git
+      - cd libgmp
+      - git checkout prev_prime
+      - ./.bootstrap
+      - emconfigure ./configure --enable-static --disable-shared --host wasm32 --enable-cxx --libdir=/home/denis/programs/Math/yutovo/deploy/wasm/ --prefix=/home/denis/programs/Math/yutovo/deploy/
       - make -sj4 && make install
+
+      - git clone --branch=4.2.1 https://gitlab.inria.fr/mpfr/mpfr.git
+      - cd mpfr
+      - emconfigure ./configure --enable-static --disable-shared --libdir=/home/denis/programs/Math/yutovo/deploy/wasm/ --prefix=/home/denis/programs/Math/yutovo/deploy/ --with-gmp-build=/home/denis/programs/Math/yutovo/third_party/libgmp/
+      - make -sj4 && make install
+
+      - cd .. && mkdir build && cd build
+      - cmake -DCMAKE_BUILD_TYPE=Debug ..
+      - make -sj4 && make install      
