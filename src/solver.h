@@ -5,6 +5,9 @@
 #include "script.h"
 #include "utils.h"
 #include <chrono>
+#ifdef EMSCRIPTEN
+#include <emscripten.h>
+#endif
 
 namespace yutovo_calculator
 {
@@ -1199,15 +1202,19 @@ private:
         
         uint64_t now;
         GetThreadTime(now);
-        if (now - start_time > max_time)
+        if (now > start_time && now - start_time > max_time)
             throw TimeExceedException();
     }
 
     void GetThreadTime(uint64_t& time) const
     {
+#ifdef EMSCRIPTEN
+        time = (uint64_t)emscripten_get_now();
+#else
         timespec s;
         clock_gettime(clock_id, &s);
         time = s.tv_sec * 1000 + s.tv_nsec / 1000000;
+#endif
     }
 
     friend class Expression<Number>;
