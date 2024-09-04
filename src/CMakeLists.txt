@@ -21,7 +21,9 @@ if(EMSCRIPTEN)
         set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O2")
     endif()
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -s USE_PTHREADS=1")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -s ALLOW_MEMORY_GROWTH=1 -s NO_DISABLE_EXCEPTION_CATCHING=1")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fexceptions")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -s DISABLE_EXCEPTION_THROWING=0")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -s ALLOW_MEMORY_GROWTH=1")
 endif()
 
 set(CMAKE_DEBUG_POSTFIX d)
@@ -47,6 +49,7 @@ if(EMSCRIPTEN)
         ${INSTALL_PATH}/wasm/libmpfr.a
         ${INSTALL_PATH}/wasm/libgmp.a
     )
+    target_link_options(${PROJECT_NAME} PUBLIC "-fexceptions -s DISABLE_EXCEPTION_THROWING=0")
 else()
     target_link_libraries(${PROJECT_NAME} PRIVATE 
         stdc++
