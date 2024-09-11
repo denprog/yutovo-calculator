@@ -812,6 +812,41 @@ TEST_F(CalcTestReal, units41)
     ASSERT_TRUE(s == "5.E+0(V)") << s;
 }
 
+TEST_F(CalcTestReal, units42)
+{
+    auto r = parser.Parse(ElementId{0, 0, 0, 0, 0, 0, 0, 2, 0}, U"pow(5m,2);");
+    std::string s = parser.GetSuitableUnit(ElementId{0, 0, 0, 0, 0, 0, 0, 2, 0}, r).ToStdString(3, 3);
+    ASSERT_TRUE(s == "25.E+0(m^2)") << s;
+}
+
+TEST_F(CalcTestReal, units43)
+{
+    auto r = parser.Parse(ElementId{0, 0, 0, 0, 0, 0, 0, 2, 0}, U"sqrt(pow(5m,2));");
+    std::string s = parser.GetSuitableUnit(ElementId{0, 0, 0, 0, 0, 0, 0, 2, 0}, r).ToStdString(3, 3);
+    ASSERT_TRUE(s == "5.E+0(m)") << s;
+
+    r = parser.Parse(ElementId{0, 0, 0, 0, 0, 0, 0, 2, 0}, U"sqrt(pow(5m,2)/pow(3s,2));");
+    s = parser.CastToUnit(ElementId{0, 0, 0, 0, 0, 0, 0, 2, 0}, r, Unit(U"m", U"s")).ToStdString(3, 3);
+    ASSERT_TRUE(s == "1.667E+0((m)/(s))") << s;
+
+    EXPECT_THROW(parser.Parse(ElementId{0, 0, 0, 0, 0, 0, 0, 2, 0}, U"sqrt(5m);"), yutovo_calculator::MathException);
+    EXPECT_THROW(parser.Parse(ElementId{0, 0, 0, 0, 0, 0, 0, 2, 0}, U"sqrt(pow(5m,3));"), yutovo_calculator::MathException);
+}
+
+TEST_F(CalcTestReal, units44)
+{
+    auto r = parser.Parse(ElementId{0, 0, 0, 0, 0, 0, 0, 2, 0}, U"root(pow(5m,2),2);");
+    std::string s = parser.GetSuitableUnit(ElementId{0, 0, 0, 0, 0, 0, 0, 2, 0}, r).ToStdString(3, 3);
+    ASSERT_TRUE(s == "5.E+0(m)") << s;
+
+    r = parser.Parse(ElementId{0, 0, 0, 0, 0, 0, 0, 2, 0}, U"root(pow(5m,3),3);");
+    s = parser.GetSuitableUnit(ElementId{0, 0, 0, 0, 0, 0, 0, 2, 0}, r).ToStdString(3, 3);
+    ASSERT_TRUE(s == "5.E+0(m)") << s;
+
+    EXPECT_THROW(parser.Parse(ElementId{0, 0, 0, 0, 0, 0, 0, 2, 0}, U"root(pow(5m,2),3);"), yutovo_calculator::MathException);
+    EXPECT_THROW(parser.Parse(ElementId{0, 0, 0, 0, 0, 0, 0, 2, 0}, U"root(pow(5m,3),2);"), yutovo_calculator::MathException);
+}
+
 TEST_F(CalcTestReal, compare1)
 {
     std::string s = parser.Parse(ElementId{0, 0, 0, 0, 0, 0, 0, 2, 0}, U"(0<10);").ToStdString(3, 3);

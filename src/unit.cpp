@@ -204,6 +204,34 @@ Unit pow(const Unit& unit1, const float)
     throw MathException(UnitsAreIncompatible);
 }
 
+Unit sqrt(const Unit& unit)
+{
+    if (unit.IsEmpty())
+        return Unit();
+    Unit res(unit);
+    for (auto& u : res.unit)
+    {
+        if (u.second % 2 != 0)
+            throw MathException(UnitsAreIncompatible);
+        u.second /= 2;
+    }
+    return res;
+}
+
+Unit root(const Unit& unit, const Real& val)
+{
+    if (unit.IsEmpty())
+        return Unit();
+    Unit res(unit);
+    for (auto& u : res.unit)
+    {
+        if (u.second % val != 0)
+            throw MathException(UnitsAreIncompatible);
+        u.second /= val;
+    }
+    return res;
+}
+
 bool Unit::operator==(const std::u32string& name) const
 {
     return unit.size() == 1 && unit[0].first == name && unit[0].second == 1;

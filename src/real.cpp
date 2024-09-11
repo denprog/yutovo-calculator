@@ -1562,6 +1562,8 @@ Real sqrt(const Real& num)
         res.SetBitPrecision(res.GetBitPrecision() + DEFAULT_INCREASE_PRECISION);
     }
 
+    res.unit = sqrt(num.unit);
+
 #ifdef TRACE_OUTPUT
     res.UpdateNumberStr();
 #endif
@@ -1570,7 +1572,22 @@ Real sqrt(const Real& num)
 
 Real root(const Real& num1, const Real& num2)
 {
-    Real res(pow(num1, 1 / num2));
+    if (num1.unit.IsEmpty())
+    {
+        Real res(pow(num1, 1 / num2));
+
+#ifdef TRACE_OUTPUT
+        res.UpdateNumberStr();
+#endif
+        return res;
+    }
+
+    Unit u = num1.unit;
+    Real _num1 = num1;
+    _num1.unit.unit.clear();
+    Real res(pow(_num1, 1 / num2));
+
+    res.unit = root(u, num2);
 
 #ifdef TRACE_OUTPUT
     res.UpdateNumberStr();

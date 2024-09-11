@@ -65,6 +65,9 @@ public:
     friend Unit pow(const Unit& unit1, const int val);
     friend Unit pow(const Unit& unit1, const float);
 
+    friend Unit sqrt(const Unit& unit);
+    friend Unit root(const Unit& unit, const Real& val);
+
     bool operator==(const std::u32string& name) const;
 
     bool operator==(const Unit& other) const
