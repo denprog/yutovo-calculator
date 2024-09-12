@@ -322,6 +322,8 @@ TEST_F(CalcTestReal, variables13)
     ASSERT_TRUE(r.ToStdString(3, 3) == "3.142E+0") << r.ToStdString(3, 3);
     r = parser.Parse(ElementId{0, 0, 1}, U"pi;", 5);
     ASSERT_TRUE(r.ToStdString(3, 5) == "3.14159E+0") << r.ToStdString(3, 5);
+    r = parser.Parse(ElementId{0, 0, 1}, U"π;", 5);
+    ASSERT_TRUE(r.ToStdString(3, 5) == "3.14159E+0") << r.ToStdString(3, 5);
 }
 
 TEST_F(CalcTestReal, variables14)

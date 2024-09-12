@@ -126,6 +126,7 @@ Parser<yutovo_calculator::Real>::Parser(const int precision, const Language _lan
     RealPrecisionVariable var;
     var = &pi;
     solver.AddBuiltinVariable("pi", var);
+    solver.AddBuiltinVariable("π", var);
     var = &exp;
     solver.AddBuiltinVariable("e", var);
     
