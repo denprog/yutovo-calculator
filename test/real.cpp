@@ -351,6 +351,17 @@ TEST_F(CalcTestReal, variables16)
     ASSERT_TRUE(r.ToStdString(3, 3) == "5.5E+0") << r.ToStdString(3, 3);
 }
 
+TEST_F(CalcTestReal, variables17)
+{
+    parser.SetLocale(Language::Russian);
+    parser.Parse(ElementId{0, 0, 1}, U"α=1;");
+    parser.Parse(ElementId{0, 0, 2}, U"a=1см;");
+    parser.Parse(ElementId{0, 0, 3}, U"b=2см;");
+    parser.Parse(ElementId{0, 0, 4}, U"S=a*b*sin(α);");
+    auto r = parser.GetSuitableUnit(ElementId{0, 0, 5}, parser.Parse(ElementId{0, 0, 5}, U"S;"));
+    ASSERT_TRUE(r.ToStdString(3, 3) == "1.683E+0(см^2)") << r.ToStdString(3, 3);
+}
+
 TEST_F(CalcTestReal, symbols1)
 {
     EXPECT_THROW(parser.Parse(ElementId{0, 0, 1}, U"•;"), yutovo_calculator::SyntaxException) << parser.Parse(ElementId{0, 0, 1}, U"•;").ToStdString(3, 3);

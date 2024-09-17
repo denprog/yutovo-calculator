@@ -205,9 +205,10 @@ struct Solver : public boost::static_visitor<Number>
     
     std::shared_ptr<SolverSymbols<Number>> symbols;
     
-    Solver(int _precision, uint64_t _max_time, std::u32string _im = U"i", Number _left_value = Number(), 
+    Solver(int _precision, AngleMeasure _default_angle_measure, uint64_t _max_time, std::u32string _im = U"i", Number _left_value = Number(), 
         std::shared_ptr<SolverSymbols<Number>> _symbols = nullptr) :
         precision(_precision),
+        default_angle_measure(_default_angle_measure),
         left_value(_left_value),
         symbols(_symbols),
         im(_im),
@@ -253,7 +254,7 @@ struct Solver : public boost::static_visitor<Number>
         {
             CheckBreak();
             
-            Solver<Number> solver(precision, max_time, im, res, symbols);
+            Solver<Number> solver(precision, default_angle_measure, max_time, im, res, symbols);
             solver.parser_context = parser_context;
             solver.id = id;
             solver.start_time = start_time;
