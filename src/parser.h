@@ -160,6 +160,11 @@ struct Parser
         return RemoveIdentifier(id, ToUtfString(name));
     }
 
+    void RemoveUserIdentifiers()
+    {
+        solver.RemoveUserIdentifiers();
+    }
+
     Number GetSuitableUnit(ElementId id, const Number& val)
     {
         return solver.GetSuitableUnit(id, val, solver.symbols->last_unit_system, solver.symbols->buildin_elements);

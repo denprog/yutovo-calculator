@@ -610,20 +610,49 @@ struct Solver : public boost::static_visitor<Number>
         symbols->buildin_units.push_back(unit);
     }
 
-    void ResetUnits()
-    {
-        symbols->buildin_units.clear();
-        symbols->units.clear();
-    }
-
     void ResetBuildinUnits()
     {
         symbols->buildin_units.clear();
     }
 
-    void ResetVariables()
+    void RemoveUserIdentifiers()
     {
-        symbols->variables.clear();
+        //user identifiers have ids' positions >= 0
+        symbols->units.erase(std::remove_if(symbols->units.begin(), symbols->units.end(), 
+            [](auto& unit)
+            {
+                for (int p : unit.id)
+                {
+                    if (p < 0)
+                        return false;
+                }
+                return true;
+            }), 
+            symbols->units.end());
+
+        symbols->variables.erase(std::remove_if(symbols->variables.begin(), symbols->variables.end(), 
+            [](auto& var)
+            {
+                for (int p : var.id)
+                {
+                    if (p < 0)
+                        return false;
+                }
+                return true;
+            }), 
+            symbols->variables.end());
+
+        symbols->functions.erase(std::remove_if(symbols->functions.begin(), symbols->functions.end(), 
+            [](auto& func)
+            {
+                for (int p : func.id)
+                {
+                    if (p < 0)
+                        return false;
+                }
+                return true;
+            }), 
+            symbols->functions.end());
     }
 
     Unit* FindBuiltinUnit(const std::u32string& name) const
