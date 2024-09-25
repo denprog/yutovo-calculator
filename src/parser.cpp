@@ -366,21 +366,25 @@ void Parser<yutovo_calculator::Complex>::SetLocale(Language _language)
 template<>
 void Parser<yutovo_calculator::Real>::InitAngleUnits()
 {
+    for (int i = 1; i <= 5; ++i)
+        solver.RemoveIdentifier(ElementId{0, -1, 3, i});
     switch (language)
     {
     case Language::English:
-        Parse(ElementId{0, 1, 3, 1}, U"°~(pi)/(180)rad;");
-        Parse(ElementId{0, 1, 3, 2}, U"deg~°;");
-        Parse(ElementId{0, 1, 3, 3}, U"'~°/60;");
-        Parse(ElementId{0, 1, 3, 4}, U"''~(')/(60);");
-        Parse(ElementId{0, 1, 3, 5}, U"grad~(9)/(10)°;");
+        Parse(ElementId{0, -1, 3, 1}, U"°~(pi)/(180)rad;");
+        Parse(ElementId{0, -1, 3, 2}, U"deg~°;");
+        Parse(ElementId{0, -1, 3, 3}, U"'~°/60;");
+        Parse(ElementId{0, -1, 3, 4}, U"''~(')/(60);");
+        Parse(ElementId{0, -1, 3, 5}, U"grad~(9)/(10)°;");
         break;
     case Language::Russian:
-        Parse(ElementId{0, 1, 3, 1}, U"°~(pi)/(180)рад;");
-        Parse(ElementId{0, 1, 3, 2}, U"deg~°;");
-        Parse(ElementId{0, 1, 3, 3}, U"'~°/60;");
-        Parse(ElementId{0, 1, 3, 4}, U"''~(')/(60);");
-        Parse(ElementId{0, 1, 3, 5}, U"град~(9)/(10)°;");
+        Parse(ElementId{0, -1, 3, 1}, U"°~(pi)/(180)рад;");
+        Parse(ElementId{0, -1, 3, 2}, U"deg~°;");
+        Parse(ElementId{0, -1, 3, 3}, U"'~°/60;");
+        Parse(ElementId{0, -1, 3, 4}, U"''~(')/(60);");
+        Parse(ElementId{0, -1, 3, 5}, U"град~(9)/(10)°;");
+        break;
+    default:
         break;
     }
 }
