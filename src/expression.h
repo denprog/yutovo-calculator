@@ -28,6 +28,7 @@ struct Expression : qi::grammar<std::u32string::iterator, ExpressionNode<Number>
 		boost::recursive_wrapper<ImplicitDivMulNode<Number>>, 
 		boost::recursive_wrapper<ImplicitMulNode<Number>>, 
 		boost::recursive_wrapper<ImplicitFractionMulNode<Number>>, 
+		boost::recursive_wrapper<ImplicitFunctionMulNode<Number>>, 
 		boost::recursive_wrapper<FunctionCallNode<Number>>, 
 		boost::recursive_wrapper<FunctionCallStringNode<Number>>, 
 		boost::recursive_wrapper<NoFencesFunctionCallNode<Number>>, 
@@ -46,6 +47,7 @@ struct Expression : qi::grammar<std::u32string::iterator, ExpressionNode<Number>
 	qi::rule<std::u32string::iterator, ImplicitDivMulNode<Number>(), unicode::space_type> implicit_div_mul;
 	qi::rule<std::u32string::iterator, ImplicitMulNode<Number>(), unicode::space_type> implicit_mul;
 	qi::rule<std::u32string::iterator, ImplicitFractionMulNode<Number>(), unicode::space_type> implicit_fraction_mul;
+	qi::rule<std::u32string::iterator, ImplicitFunctionMulNode<Number>(), unicode::space_type> implicit_function_mul;
 	qi::rule<std::u32string::iterator, IdentifierNode<Number>(), unicode::space_type> identifier;
 	qi::rule<std::u32string::iterator, FunctionCallNode<Number>(), unicode::space_type> function_call;
 	qi::rule<std::u32string::iterator, FunctionCallStringNode<Number>(), unicode::space_type> function_call_string;

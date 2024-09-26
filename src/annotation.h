@@ -20,6 +20,7 @@ namespace yutovo_calculator
 			boost::recursive_wrapper<ImplicitDivMulNode<Number>>, 
 			boost::recursive_wrapper<ImplicitMulNode<Number>>, 
 			boost::recursive_wrapper<ImplicitFractionMulNode<Number>>, 
+			boost::recursive_wrapper<ImplicitFunctionMulNode<Number>>, 
 			boost::recursive_wrapper<FunctionCallNode<Number>>, 
 			boost::recursive_wrapper<FunctionCallStringNode<Number>>, 
 			boost::recursive_wrapper<NoFencesFunctionCallNode<Number>>, 
@@ -127,6 +128,11 @@ namespace yutovo_calculator
 			UpdatePosition(pos, op);
 		}
 
+		void operator()(ImplicitFunctionMulNode<Number>& op, std::u32string::iterator pos) const
+		{
+			UpdatePosition(pos, op);
+		}
+
 		void operator()(FunctionCallNode<Number>& op, std::u32string::iterator pos) const
 		{
 			UpdatePosition(pos, op);
@@ -210,6 +216,11 @@ namespace yutovo_calculator
 			}
 
 			void operator()(ImplicitFractionMulNode<Number>& op) const
+			{
+				annotation->UpdatePosition(iter, op);
+			}
+
+			void operator()(ImplicitFunctionMulNode<Number>& op) const
 			{
 				annotation->UpdatePosition(iter, op);
 			}

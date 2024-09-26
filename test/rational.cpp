@@ -62,6 +62,12 @@ TEST_F(CalcTestRational, functions1)
         parser.Parse(ElementId{0, 0, 0, 2, 3, 1}, U"f(2);").ToStdString();
 }
 
+TEST_F(CalcTestRational, functions2)
+{
+    auto r = parser.Parse(ElementId{0, 0, 1}, U"3pow(2,3);", 3);
+    ASSERT_TRUE(r.ToStdString() == "24") << r.ToStdString();
+}
+
 TEST_F(CalcTestRational, symbols1)
 {
     EXPECT_THROW(parser.Parse(ElementId{0, 0, 0, 0, 1}, U"•;"), yutovo_calculator::SyntaxException) << parser.Parse(ElementId{0, 0, 0, 0, 1}, U"•;").ToStdString();

@@ -89,6 +89,12 @@ TEST_F(CalcTestReal, arithmetic1)
     ASSERT_TRUE(res.ToString(3, 3) == U"7.5E+0") << res.ToStdString(3, 3);
 }
 
+TEST_F(CalcTestReal, arithmetic2)
+{
+    Real res = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"2(3+4);");
+    ASSERT_TRUE(res.ToString(3, 3) == U"14.E+0") << res.ToStdString(3, 3);
+}
+
 TEST_F(CalcTestReal, functions1)
 {
     ASSERT_TRUE(parser.Parse(ElementId{0, 0, 1}, U"sin(1);").ToStdString(3, 3) == parser.Parse(ElementId{0, 0, 1}, U"0.841E+0;").ToStdString(3, 3)) << 
@@ -147,6 +153,18 @@ TEST_F(CalcTestReal, functions5)
 {
     auto r = parser.Parse(ElementId{0, 0, 1}, U"exp(1);", 5);
     ASSERT_TRUE(r.ToStdString(3, 5) == "2.71828E+0") << r.ToStdString(3, 5);
+}
+
+TEST_F(CalcTestReal, functions6)
+{
+    auto r = parser.Parse(ElementId{0, 0, 1}, U"2exp(1);", 3);
+    ASSERT_TRUE(r.ToStdString(3, 3) == "5.437E+0") << r.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestReal, functions7)
+{
+    auto r = parser.Parse(ElementId{0, 0, 1}, U"3pow(2,3);", 3);
+    ASSERT_TRUE(r.ToStdString(3, 3) == "24.E+0") << r.ToStdString(3, 3);
 }
 
 TEST_F(CalcTestReal, user_functions1)

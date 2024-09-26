@@ -358,6 +358,12 @@ TEST_F(CalcTestComplex, functions2)
     ASSERT_TRUE(res == "i*8.E+0") << res;
 }
 
+TEST_F(CalcTestComplex, functions3)
+{
+    auto r = parser.Parse(ElementId{0, 0, 1}, U"2exp(1);", 3);
+    ASSERT_TRUE(r.ToStdString(3, 3) == "5.437E+0") << r.ToStdString(3, 3);
+}
+
 TEST_F(CalcTestComplex, sqrt1)
 {
     Dependencies dependencies;

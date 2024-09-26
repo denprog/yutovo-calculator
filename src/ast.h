@@ -32,6 +32,8 @@ struct ImplicitDivMulNode;
 template<typename Number>
 struct ImplicitFractionMulNode;
 template<typename Number>
+struct ImplicitFunctionMulNode;
+template<typename Number>
 struct ImplicitMulNode;
 template<typename Number>
 struct VariableNode;
@@ -93,6 +95,7 @@ struct UnaryOperationNode : public ExpressionPosition
 		boost::recursive_wrapper<ImplicitStringMulNode<Number>>,
 		boost::recursive_wrapper<ImplicitDivMulNode<Number>>,
 		boost::recursive_wrapper<ImplicitFractionMulNode<Number>>, 
+		boost::recursive_wrapper<ImplicitFunctionMulNode<Number>>, 
 		boost::recursive_wrapper<ImplicitMulNode<Number>>,
 		boost::recursive_wrapper<FunctionCallNode<Number>>, 
 		boost::recursive_wrapper<FunctionCallStringNode<Number>>, 
@@ -121,6 +124,7 @@ struct OperationNode : ExpressionPosition
 		boost::recursive_wrapper<ImplicitDivMulNode<Number>>,
 		boost::recursive_wrapper<ImplicitMulNode<Number>>,
 		boost::recursive_wrapper<ImplicitFractionMulNode<Number>>, 
+		boost::recursive_wrapper<ImplicitFunctionMulNode<Number>>, 
 		boost::recursive_wrapper<FunctionCallNode<Number>>, 
 		boost::recursive_wrapper<FunctionCallStringNode<Number>>, 
 		boost::recursive_wrapper<NoFencesFunctionCallNode<Number>>, 
@@ -148,6 +152,7 @@ struct PostfixOperationNode : ExpressionPosition
 		boost::recursive_wrapper<ImplicitDivMulNode<Number>>,
 		boost::recursive_wrapper<ImplicitMulNode<Number>>,
 		boost::recursive_wrapper<ImplicitFractionMulNode<Number>>, 
+		boost::recursive_wrapper<ImplicitFunctionMulNode<Number>>, 
 		boost::recursive_wrapper<FunctionCallNode<Number>>, 
 		boost::recursive_wrapper<FunctionCallStringNode<Number>>, 
 		boost::recursive_wrapper<NoFencesFunctionCallNode<Number>>, 
@@ -189,6 +194,13 @@ struct ImplicitFractionMulNode : ExpressionPosition
 	NumberNode<Number> numerator;
 	NumberNode<Number> denominator;
 	IdentifierNode<Number> identifier;
+};
+
+template<typename Number>
+struct ImplicitFunctionMulNode : ExpressionPosition
+{
+	NumberNode<Number> left;
+	FunctionCallNode<Number> function_call;
 };
 
 template<typename Number>
@@ -303,6 +315,7 @@ struct ExpressionNode : ExpressionPosition
 		boost::recursive_wrapper<ImplicitDivMulNode<Number>>,
 		boost::recursive_wrapper<ImplicitMulNode<Number>>,
 		boost::recursive_wrapper<ImplicitFractionMulNode<Number>>, 
+		boost::recursive_wrapper<ImplicitFunctionMulNode<Number>>, 
 		boost::recursive_wrapper<FunctionCallNode<Number>>, 
 		boost::recursive_wrapper<FunctionCallStringNode<Number>>, 
 		boost::recursive_wrapper<NoFencesFunctionCallNode<Number>>, 
@@ -411,6 +424,10 @@ BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::ImplicitFractionMulNode<yutovo_calc
 	(yutovo_calculator::NumberNode<yutovo_calculator::Integer>, denominator)
 	(yutovo_calculator::IdentifierNode<yutovo_calculator::Integer>, identifier))
 
+BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::ImplicitFunctionMulNode<yutovo_calculator::Integer>, 
+	(yutovo_calculator::NumberNode<yutovo_calculator::Integer>, left)
+	(yutovo_calculator::FunctionCallNode<yutovo_calculator::Integer>, function_call))
+
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::CompareNode<yutovo_calculator::Integer>, 
 	(yutovo_calculator::ExpressionNode<yutovo_calculator::Integer>, left)
 	(std::u32string, sign)
@@ -459,6 +476,10 @@ BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::ImplicitFractionMulNode<yutovo_calc
 	(yutovo_calculator::NumberNode<yutovo_calculator::Real>, numerator)
 	(yutovo_calculator::NumberNode<yutovo_calculator::Real>, denominator)
 	(yutovo_calculator::IdentifierNode<yutovo_calculator::Real>, identifier))
+
+BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::ImplicitFunctionMulNode<yutovo_calculator::Real>, 
+	(yutovo_calculator::NumberNode<yutovo_calculator::Real>, left)
+	(yutovo_calculator::FunctionCallNode<yutovo_calculator::Real>, function_call))
 
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::VariableNode<yutovo_calculator::Real>, 
 	(yutovo_calculator::IdentifierNode<yutovo_calculator::Real>, name)
@@ -553,6 +574,10 @@ BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::ImplicitFractionMulNode<yutovo_calc
 	(yutovo_calculator::NumberNode<yutovo_calculator::Rational>, denominator)
 	(yutovo_calculator::IdentifierNode<yutovo_calculator::Rational>, identifier))
 
+BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::ImplicitFunctionMulNode<yutovo_calculator::Rational>, 
+	(yutovo_calculator::NumberNode<yutovo_calculator::Rational>, left)
+	(yutovo_calculator::FunctionCallNode<yutovo_calculator::Rational>, function_call))
+
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::VariableNode<yutovo_calculator::Rational>, 
 	(yutovo_calculator::IdentifierNode<yutovo_calculator::Rational>, name)
 	(yutovo_calculator::ExpressionNode<yutovo_calculator::Rational>, expression))
@@ -645,6 +670,10 @@ BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::ImplicitFractionMulNode<yutovo_calc
 	(yutovo_calculator::NumberNode<yutovo_calculator::Complex>, numerator)
 	(yutovo_calculator::NumberNode<yutovo_calculator::Complex>, denominator)
 	(yutovo_calculator::IdentifierNode<yutovo_calculator::Complex>, identifier))
+
+BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::ImplicitFunctionMulNode<yutovo_calculator::Complex>, 
+	(yutovo_calculator::NumberNode<yutovo_calculator::Complex>, left)
+	(yutovo_calculator::FunctionCallNode<yutovo_calculator::Complex>, function_call))
 
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::VariableNode<yutovo_calculator::Complex>, 
 	(yutovo_calculator::IdentifierNode<yutovo_calculator::Complex>, name)

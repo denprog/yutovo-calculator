@@ -41,8 +41,8 @@ Expression<Integer>::Expression(ElementId id, std::u32string& expr, Solver<Integ
     }
     else
     {
-        unary = loop | compare | postfix_operation | implicit_string_mul | implicit_mul | number | function_call | function_call_string | 
-            identifier | no_fences_function_call | unary_operation | '(' > expression > ')';
+        unary = loop | compare | implicit_function_mul | postfix_operation | implicit_string_mul | implicit_mul | number | function_call | 
+            function_call_string | identifier | no_fences_function_call | unary_operation | '(' > expression > ')';
     }
     
     if (solver->default_notation == 16)	
@@ -65,6 +65,8 @@ Expression<Integer>::Expression(ElementId id, std::u32string& expr, Solver<Integ
     implicit_string_mul = (number >> identifier);
     
     implicit_mul = number >> '(' >> expression > ')';
+
+    implicit_function_mul = dec_number >> function_call;
 
     function_call = identifier >> '(' >> -(expression % ',') > ')';
 
@@ -146,7 +148,7 @@ Expression<Real>::Expression(ElementId id, std::u32string& expr, Solver<Real>* _
 
     multiply = char_('*') > unary | char_('/') > unary | char_('%') > unary;
     
-    unary = loop | compare | postfix_operation | implicit_div_mul | implicit_string_mul | implicit_fraction_mul | mixed_division | 
+    unary = loop | compare | implicit_function_mul | postfix_operation | implicit_div_mul | implicit_string_mul | implicit_fraction_mul | mixed_division | 
         implicit_mul | number | function_call | no_fences_function_call | identifier | unary_operation | '(' > expression > ')';
     
     number = exp_number | digits_number;
@@ -160,6 +162,8 @@ Expression<Real>::Expression(ElementId id, std::u32string& expr, Solver<Real>* _
     mixed_division = integer_number >> '(' >> integer_number >> '/' >> integer_number > ')';
 
     implicit_fraction_mul = '(' >> number >> '/' >> number >> ')' >> identifier;
+
+    implicit_function_mul = digits_number >> function_call;
 
     real_number = digits_number;
 
@@ -239,6 +243,7 @@ Expression<Real>::Expression(ElementId id, std::u32string& expr, Solver<Real>* _
     // BOOST_SPIRIT_DEBUG_NODE(identifier);
     // BOOST_SPIRIT_DEBUG_NODE(implicit_mul);
     // BOOST_SPIRIT_DEBUG_NODE(implicit_div_mul);
+    // BOOST_SPIRIT_DEBUG_NODE(implicit_function_mul);
     // BOOST_SPIRIT_DEBUG_NODE(compare);
     // BOOST_SPIRIT_DEBUG_NODE(loop);
     // BOOST_SPIRIT_DEBUG_NODE(variable);
@@ -270,8 +275,8 @@ Expression<yutovo_calculator::Rational>::Expression(ElementId id, std::u32string
 
     multiply = (char_('*') > unary) | (char_('/') > unary) | (char_('%') > unary);
     
-    unary = loop | compare | implicit_div_mul | implicit_string_mul | implicit_fraction_mul | mixed_division | implicit_mul | number | function_call | 
-        no_fences_function_call | identifier | unary_operation | '(' > expression > ')';
+    unary = loop | compare | implicit_function_mul | implicit_div_mul | implicit_string_mul | implicit_fraction_mul | mixed_division | 
+        implicit_mul | number | function_call | no_fences_function_call | identifier | unary_operation | '(' > expression > ')';
     
     number = digits_number;
 
@@ -284,6 +289,8 @@ Expression<yutovo_calculator::Rational>::Expression(ElementId id, std::u32string
     implicit_string_mul = (number >> identifier);
 
     implicit_mul = number >> '(' >> expression > ')';
+
+    implicit_function_mul = digits_number >> function_call;
     
     digits_number = +char_("0-9.");
 
@@ -372,8 +379,8 @@ Expression<Complex>::Expression(ElementId id, std::u32string& expr, Solver<Compl
 
     multiply = char_('*') > unary | char_('/') > unary | char_('%') > unary;
     
-    unary = loop | compare | postfix_operation | implicit_div_mul | implicit_string_mul | implicit_fraction_mul | mixed_division | implicit_mul | 
-        number | function_call | no_fences_function_call | identifier | unary_operation | '(' > expression > ')';
+    unary = loop | compare | implicit_function_mul | postfix_operation | implicit_div_mul | implicit_string_mul | implicit_fraction_mul | 
+        mixed_division | implicit_mul | number | function_call | no_fences_function_call | identifier | unary_operation | '(' > expression > ')';
     
     number = exp_number | digits_number;
     
@@ -398,6 +405,8 @@ Expression<Complex>::Expression(ElementId id, std::u32string& expr, Solver<Compl
     implicit_string_mul = (number >> identifier);
 
     implicit_mul = real_number >> '(' >> expression > ')';
+
+    implicit_function_mul = digits_number >> function_call;
     
     name = raw[lexeme[(alpha | '_') >> *(alnum | '_')]];
 
