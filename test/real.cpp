@@ -380,6 +380,13 @@ TEST_F(CalcTestReal, variables17)
     ASSERT_TRUE(r.ToStdString(3, 3) == "1.683E+0(см^2)") << r.ToStdString(3, 3);
 }
 
+TEST_F(CalcTestReal, variables18)
+{
+    parser.SetLocale(Language::Russian);
+    auto r = parser.Parse(ElementId{0, 0, 1}, U"G;");
+    ASSERT_TRUE(r.ToStdString(3, 3) == "6.674E-11((м^3)/(кг*сек^2))") << r.ToStdString(3, 3);
+}
+
 TEST_F(CalcTestReal, symbols1)
 {
     EXPECT_THROW(parser.Parse(ElementId{0, 0, 1}, U"•;"), yutovo_calculator::SyntaxException) << parser.Parse(ElementId{0, 0, 1}, U"•;").ToStdString(3, 3);
