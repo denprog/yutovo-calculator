@@ -336,6 +336,11 @@ struct Solver : public boost::static_visitor<Number>
         return (*this)(op.left) * (*this)(op.function_call);
     }
 
+    Number operator()(ImplicitPostFunctionMulNode<Number> const& op) const
+    {
+        return (*this)(op.function_call) * (*this)(op.right);
+    }
+
     Number operator()(CompareNode<Number> const& op) const
     {
         Number left = (*this)(op.left);

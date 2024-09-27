@@ -162,6 +162,13 @@ TEST_F(CalcTestInteger, functions2)
     ASSERT_TRUE(r.ToStdString() == "24") << r.ToStdString();
 }
 
+TEST_F(CalcTestInteger, functions3)
+{
+    parser.Parse(ElementId{0, 0, 0, 0, 2}, U"a=5;");
+    auto r = parser.Parse(ElementId{0, 0, 1}, U"pow(2,3)a;", 3);
+    ASSERT_TRUE(r.ToStdString() == "40") << r.ToStdString();
+}
+
 TEST_F(CalcTestInteger, symbols1)
 {
     EXPECT_THROW(parser.Parse(ElementId{0, 0, 0, 0, 1}, U"•"), yutovo_calculator::SyntaxException) << parser.Parse(ElementId{0, 0, 0, 0, 1}, U"•").ToStdString();

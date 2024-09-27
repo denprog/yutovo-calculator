@@ -314,12 +314,15 @@ bool Unit::FromString(const std::u32string& str)
     auto p1 = str.find(U'{');
     if (p1 != std::string::npos)
     {
-        auto p2 = str.find(U'}');
+        auto p2 = _str.find(U'}');
         if (p2 == std::string::npos)
             return false;
-        _system = str.substr(p1 + 1, p2 - p1 - 1);
-        _str = str.substr(0, p1);
+        _system = _str.substr(p1 + 1, p2 - p1 - 1);
+        _str = _str.substr(0, p1);
     }
+
+    if (_str.length() > 2 && _str[0] == U'(' && _str[1] == U'(' && _str[_str.length() - 1] == U')')
+        _str = _str.substr(1, _str.length() - 2);
 
     std::vector<std::u32string> arr;
     boost::split(arr, _str, boost::is_any_of("/"));

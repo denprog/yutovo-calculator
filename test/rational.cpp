@@ -378,6 +378,12 @@ TEST_F(CalcTestRational, units19)
     ASSERT_TRUE(s == "1(m)") << s;
 }
 
+TEST_F(CalcTestRational, units20)
+{
+    auto r = parser.Parse(ElementId{0, 0, 1}, U"pow(2,3)m;", 3);
+    ASSERT_TRUE(r.ToStdString() == "8(m)") << r.ToStdString();
+}
+
 TEST_F(CalcTestRational, compare1)
 {
     std::string s = parser.Parse(ElementId{0, 0, 0, 0, 0, 0, 0, 2, 0}, U"(0<(2/3));").ToStdString();

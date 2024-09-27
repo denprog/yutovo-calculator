@@ -364,6 +364,13 @@ TEST_F(CalcTestComplex, functions3)
     ASSERT_TRUE(r.ToStdString(3, 3) == "5.437E+0") << r.ToStdString(3, 3);
 }
 
+TEST_F(CalcTestComplex, functions4)
+{
+    parser.Parse(ElementId{0, 0, 0, 0, 2}, U"a=5;");
+    auto r = parser.Parse(ElementId{0, 0, 1}, U"pow(2,3)a;", 3);
+    ASSERT_TRUE(r.ToStdString(3, 3) == "40.E+0") << r.ToStdString(3, 3);
+}
+
 TEST_F(CalcTestComplex, sqrt1)
 {
     Dependencies dependencies;
