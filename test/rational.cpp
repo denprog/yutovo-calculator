@@ -367,6 +367,17 @@ TEST_F(CalcTestRational, units18)
     ASSERT_TRUE(t == "1/3(m)") << t;
 }
 
+TEST_F(CalcTestRational, units19)
+{
+    auto r = parser.Parse(ElementId{0, 0, 0, 0, 0, 0, 0, 2, 0}, U"-(1m-2m);");
+    std::string s = parser.GetSuitableUnit(ElementId{0, 0, 0, 0, 0, 0, 0, 2, 0}, r).ToStdString();
+    ASSERT_TRUE(s == "1(m)") << s;
+
+    r = parser.Parse(ElementId{0, 0, 0, 0, 0, 0, 0, 2, 0}, U"+(2m-1m);");
+    s = parser.GetSuitableUnit(ElementId{0, 0, 0, 0, 0, 0, 0, 2, 0}, r).ToStdString();
+    ASSERT_TRUE(s == "1(m)") << s;
+}
+
 TEST_F(CalcTestRational, compare1)
 {
     std::string s = parser.Parse(ElementId{0, 0, 0, 0, 0, 0, 0, 2, 0}, U"(0<(2/3));").ToStdString();

@@ -228,6 +228,8 @@ Real Real::operator-()
 
     mpfr_neg(res.number, number, GMP_RNDN);
 
+    res.unit = unit;
+
     return res;
 }
 

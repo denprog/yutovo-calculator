@@ -172,6 +172,8 @@ Rational Rational::operator-()
 
     mpq_neg(res.number, number);
 
+    res.unit = unit;
+
 #ifdef TRACE_OUTPUT
     res.UpdateNumberStr();
 #endif
