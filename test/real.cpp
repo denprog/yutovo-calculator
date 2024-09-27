@@ -957,6 +957,20 @@ TEST_F(CalcTestReal, units51)
     ASSERT_TRUE(t == "6.674E-11((м^3)/(кг*сек^2))") << t;
 }
 
+TEST_F(CalcTestReal, units52)
+{
+    parser.SetLocale(Language::Russian);
+    auto r = parser.Parse(ElementId{0, 0, 0, 0, 0, 0, 0, 2, 0}, U"((м/pow(сек,2))*pow(м,2))/(pow(м,3)/(кг*pow(сек,2)));");
+    ASSERT_TRUE(r.ToStdString(3, 3) == "1.E+0(кг)") << r.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestReal, units53)
+{
+    parser.SetLocale(Language::Russian);
+    auto r = parser.Parse(ElementId{0, 0, 0, 0, 0, 0, 0, 2, 0}, U"(м/сек)/(м/сек);");
+    ASSERT_TRUE(r.ToStdString(3, 3) == "1.E+0") << r.ToStdString(3, 3);
+}
+
 TEST_F(CalcTestReal, compare1)
 {
     std::string s = parser.Parse(ElementId{0, 0, 0, 0, 0, 0, 0, 2, 0}, U"(0<10);").ToStdString(3, 3);

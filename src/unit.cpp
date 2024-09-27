@@ -125,23 +125,31 @@ Unit operator*(const float, const Unit& unit2)
 
 Unit operator/(const Unit& unit1, const Unit& unit2)
 {
-    Unit res(unit1);
-    for (size_t i = 0, j = 0; i < unit2.unit.size(); ++i)
+    Unit res;
+    Unit _unit2(unit2);
+    for (int i = 0; i < unit1.unit.size(); ++i)
     {
-        auto& p1 = unit2.unit[i];
-        for (; j < res.unit.size(); ++j)
+        auto& p1 = unit1.unit[i];
+        bool f = false;
+        for (int j = 0; j < _unit2.unit.size(); ++j)
         {
-            auto& p2 = res.unit[j];
+            auto& p2 = _unit2.unit[j];
             if (p1.first == p2.first)
             {
-                p2.second -= p1.second;
-                if (p2.second == 0)
-                    res.unit.erase(res.unit.begin() + j--);
+                if (p1.second != p2.second)
+                    res.unit.push_back({p1.first, p1.second - p2.second});
+                _unit2.unit.erase(_unit2.unit.begin() + j);
+                f = true;
                 break;
             }
         }
-        if (j == res.unit.size())
-            res.unit.push_back({p1.first, -p1.second});
+        if (!f)
+            res.unit.push_back({p1.first, p1.second});
+    }
+    for (int j = 0; j < _unit2.unit.size(); ++j)
+    {
+        auto& p2 = _unit2.unit[j];
+        res.unit.push_back({p2.first, -p2.second});
     }
     return res;
 }
