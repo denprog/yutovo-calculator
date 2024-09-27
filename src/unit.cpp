@@ -2,6 +2,8 @@
 #include "utils.h"
 #include "real.h"
 #include "parser_exception.h"
+#include <boost/algorithm/string.hpp>
+#include <boost/lexical_cast.hpp>
 
 namespace yutovo_calculator
 {
@@ -303,6 +305,113 @@ std::u32string Unit::ToString(bool f) const
     if (system.empty() || system == U"SI")
         return r;
     return r + U"{" + system + U"}";
+}
+
+bool Unit::FromString(const std::u32string& str)
+{
+    std::u32string _str = str;
+    std::u32string _system;
+    auto p1 = str.find(U'{');
+    if (p1 != std::string::npos)
+    {
+        auto p2 = str.find(U'}');
+        if (p2 == std::string::npos)
+            return false;
+        _system = str.substr(p1 + 1, p2 - p1 - 1);
+        _str = str.substr(0, p1);
+    }
+
+    std::vector<std::u32string> arr;
+    boost::split(arr, _str, boost::is_any_of("/"));
+
+    std::u32string upper, lower;
+    if (arr.empty())
+        return false;
+    upper = arr[0];
+    if (upper.empty())
+        return false;
+    if (arr.size() == 2)
+    {
+        lower = arr[1];
+        if (lower.empty())
+            return false;
+    }
+    
+    if (upper[0] == U'(')
+    {
+        if (upper[upper.length() - 1] != U')')
+            return false;
+        upper = upper.substr(1, upper.length() - 2);
+    }
+
+    std::vector<std::pair<std::u32string, int>> _unit;
+
+    arr.clear();
+    if (upper != U"1")
+    {
+        boost::split(arr, upper, boost::is_any_of("*"));
+        for (auto& s : arr)
+        {
+            std::vector<std::u32string> _arr;
+            boost::split(_arr, s, boost::is_any_of("^"));
+            if (_arr.empty())
+                return false;
+            std::u32string name = _arr[0];
+            int power = 1;
+            if (_arr.size() == 2)
+            {
+                try
+                {
+                    power = boost::lexical_cast<int>(_arr[1]);
+                }
+                catch (std::bad_cast& ex)
+                {
+                    return false;
+                }
+            }
+            _unit.push_back(std::make_pair(name, power));
+        }
+    }
+
+    if (!lower.empty())
+    {
+        if (lower[0] == U'(')
+        {
+            if (lower[lower.length() - 1] != U')')
+                return false;
+            lower = lower.substr(1, lower.length() - 2);
+        }
+
+        arr.clear();
+        boost::split(arr, lower, boost::is_any_of("*"));
+        for (auto& s : arr)
+        {
+            std::vector<std::u32string> _arr;
+            boost::split(_arr, s, boost::is_any_of("^"));
+            if (_arr.empty())
+                return false;
+            std::u32string name = _arr[0];
+            int power = -1;
+            if (_arr.size() == 2)
+            {
+                try
+                {
+                    power = -boost::lexical_cast<int>(_arr[1]);
+                }
+                catch (std::bad_cast& ex)
+                {
+                    return false;
+                }
+            }
+            _unit.push_back(std::make_pair(name, power));
+        }
+    }
+
+    unit = _unit;
+    system = _system;
+    description = U"";
+
+    return true;
 }
 
 }

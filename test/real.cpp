@@ -903,6 +903,44 @@ TEST_F(CalcTestReal, units45)
     ASSERT_TRUE(s == "1.E+0(m)") << s;
 }
 
+TEST_F(CalcTestReal, units46)
+{
+    auto val = parser.Parse(ElementId{0, 0, 0, 0, 0, 0, 0, 2, 0}, U"5*(m/min);");
+    Unit u;
+    ASSERT_TRUE(u.FromString(U"km/hour"));
+    std::string t = parser.CastToUnit(ElementId{0, 0, 0, 0, 0, 0, 0, 2, 0}, val, u).ToStdString(3, 3);
+    ASSERT_TRUE(t == "0.3E+0((km)/(hour))") << t;
+}
+
+TEST_F(CalcTestReal, units47)
+{
+    auto val = parser.Parse(ElementId{0, 0, 0, 0, 0, 0, 0, 2, 0}, U"5*(N);");
+    Unit u;
+    ASSERT_TRUE(u.FromString(U"(kg*m)/(s^2)"));
+    std::string t = parser.CastToUnit(ElementId{0, 0, 0, 0, 0, 0, 0, 2, 0}, val, u).ToStdString(3, 3);
+    ASSERT_TRUE(t == "5.E+0((kg*m)/(s^2))") << t;
+}
+
+TEST_F(CalcTestReal, units48)
+{
+    parser.SetLocale(Language::Russian);
+    auto val = parser.Parse(ElementId{0, 0, 0, 0, 0, 0, 0, 2, 0}, U"5*(м/сек{SI});");
+    Unit u;
+    ASSERT_TRUE(u.FromString(U"(км)/(час)"));
+    std::string t = parser.CastToUnit(ElementId{0, 0, 0, 0, 0, 0, 0, 2, 0}, val, u).ToStdString(3, 3);
+    ASSERT_TRUE(t == "18.E+0((км)/(час))") << t;
+}
+
+TEST_F(CalcTestReal, units49)
+{
+    parser.SetLocale(Language::Russian);
+    auto val = parser.Parse(ElementId{0, 0, 0, 0, 0, 0, 0, 2, 0}, U"5*(м{SI});");
+    Unit u;
+    ASSERT_TRUE(u.FromString(U"сотка{rus}"));
+    std::string t = parser.CastToUnit(ElementId{0, 0, 0, 0, 0, 0, 0, 2, 0}, val, u).ToStdString(3, 3);
+    ASSERT_TRUE(t == "234.346E+0(сотка){rus}") << t;
+}
+
 TEST_F(CalcTestReal, compare1)
 {
     std::string s = parser.Parse(ElementId{0, 0, 0, 0, 0, 0, 0, 2, 0}, U"(0<10);").ToStdString(3, 3);
