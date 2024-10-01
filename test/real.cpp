@@ -971,6 +971,19 @@ TEST_F(CalcTestReal, units53)
     ASSERT_TRUE(r.ToStdString(3, 3) == "1.E+0") << r.ToStdString(3, 3);
 }
 
+TEST_F(CalcTestReal, units54)
+{
+    parser.SetLocale(Language::Russian);
+    auto val = parser.Parse(ElementId{0, 0, 0, 0, 0, 0, 0, 2, 0}, U"1Ом;");
+    Unit u;
+    ASSERT_TRUE(u.FromString(U"((Дж)/(нс*мкА^2))"));
+    std::string t = parser.CastToUnit(ElementId{0, 0, 0, 0, 0, 0, 0, 2, 0}, val, u).ToStdString(3, 3);
+    ASSERT_TRUE(t == "1.E-21((Дж)/(нс*мкА^2))") << t;
+    ASSERT_TRUE(u.FromString(U"((Дж)/(сутки*мА^2))"));
+    t = parser.CastToUnit(ElementId{0, 0, 0, 0, 0, 0, 0, 2, 0}, val, u).ToStdString(3, 3);
+    ASSERT_TRUE(t == "0.0864E+0((Дж)/(сутки*мА^2))") << t;
+}
+
 TEST_F(CalcTestReal, compare1)
 {
     std::string s = parser.Parse(ElementId{0, 0, 0, 0, 0, 0, 0, 2, 0}, U"(0<10);").ToStdString(3, 3);
