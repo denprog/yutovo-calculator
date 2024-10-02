@@ -436,7 +436,7 @@ struct Solver : public boost::static_visitor<Number>
         }
         var.id = id;
         symbols->variables.push_back(var);
-        (*this)(var.expression); //for adding dependecies
+        (*this)(var.expression); //for adding dependencies
     }
 
     void AddUnit(UnitNode<Number> const& unit) const
@@ -510,6 +510,13 @@ struct Solver : public boost::static_visitor<Number>
         }
         func.id = id;
         symbols->functions.push_back((FunctionNode<Number>&)func);
+
+        //parse for adding dependencies
+        Number arg;
+        for (IdentifierNodesIter iter = func.arguments.begin(); iter != func.arguments.end(); ++iter)
+            PushTempVariable(iter->name, arg);
+        (*this)(func.return_expression);
+        PopTempVariables(func.arguments.size());
     }
 
     void AddBuiltinFunction(const char* name, UnaryFunction& func)
