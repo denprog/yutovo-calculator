@@ -436,6 +436,7 @@ struct Solver : public boost::static_visitor<Number>
         }
         var.id = id;
         symbols->variables.push_back(var);
+        (*this)(var.expression); //for adding dependecies
     }
 
     void AddUnit(UnitNode<Number> const& unit) const
