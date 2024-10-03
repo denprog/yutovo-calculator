@@ -384,14 +384,14 @@ TEST_F(CalcTestReal, variables18)
 {
     parser.SetLocale(Language::Russian);
     auto r = parser.Parse(ElementId{0, 0, 1}, U"G;");
-    ASSERT_TRUE(r.ToStdString(3, 3) == "6.674E-11((м^3)/(кг*сек^2))") << r.ToStdString(3, 3);
+    ASSERT_TRUE(r.ToStdString(3, 3) == "6.674E-11((м^3)/(кг*с^2))") << r.ToStdString(3, 3);
 }
 
 TEST_F(CalcTestReal, variables19)
 {
     parser.SetLocale(Language::Russian);
     auto r = parser.Parse(ElementId{0, 0, 1}, U"g_a;");
-    ASSERT_TRUE(r.ToStdString(3, 3) == "9.807E+0((м)/(сек^2))") << r.ToStdString(3, 3);
+    ASSERT_TRUE(r.ToStdString(3, 3) == "9.807E+0((м)/(с^2))") << r.ToStdString(3, 3);
 }
 
 TEST_F(CalcTestReal, symbols1)
@@ -734,8 +734,8 @@ TEST_F(CalcTestReal, units28)
 TEST_F(CalcTestReal, units29)
 {
     parser.SetLocale(Language::Russian);
-    std::string s = parser.Parse(ElementId{0, 0, 0, 0, 0, 0, 0, 2, 0}, U"2*(м/сек);").ToStdString(3, 3);
-    ASSERT_TRUE(s == "2.E+0((м)/(сек))") << s;
+    std::string s = parser.Parse(ElementId{0, 0, 0, 0, 0, 0, 0, 2, 0}, U"2*(м/с);").ToStdString(3, 3);
+    ASSERT_TRUE(s == "2.E+0((м)/(с))") << s;
     EXPECT_THROW(parser.Parse(ElementId{0, 0, 1}, U"2*(m/s);"), yutovo_calculator::SyntaxException);
 }
 
@@ -924,7 +924,7 @@ TEST_F(CalcTestReal, units47)
 TEST_F(CalcTestReal, units48)
 {
     parser.SetLocale(Language::Russian);
-    auto val = parser.Parse(ElementId{0, 0, 0, 0, 0, 0, 0, 2, 0}, U"5*(м/сек{SI});");
+    auto val = parser.Parse(ElementId{0, 0, 0, 0, 0, 0, 0, 2, 0}, U"5*(м/с{SI});");
     Unit u;
     ASSERT_TRUE(u.FromString(U"(км)/(час)"));
     std::string t = parser.CastToUnit(ElementId{0, 0, 0, 0, 0, 0, 0, 2, 0}, val, u).ToStdString(3, 3);
@@ -952,22 +952,22 @@ TEST_F(CalcTestReal, units51)
     parser.SetLocale(Language::Russian);
     auto val = parser.Parse(ElementId{0, 0, 0, 0, 0, 0, 0, 2, 0}, U"G;");
     Unit u;
-    ASSERT_TRUE(u.FromString(U"((м^3)/(кг*сек^2))"));
+    ASSERT_TRUE(u.FromString(U"((м^3)/(кг*с^2))"));
     std::string t = parser.CastToUnit(ElementId{0, 0, 0, 0, 0, 0, 0, 2, 0}, val, u).ToStdString(3, 3);
-    ASSERT_TRUE(t == "6.674E-11((м^3)/(кг*сек^2))") << t;
+    ASSERT_TRUE(t == "6.674E-11((м^3)/(кг*с^2))") << t;
 }
 
 TEST_F(CalcTestReal, units52)
 {
     parser.SetLocale(Language::Russian);
-    auto r = parser.Parse(ElementId{0, 0, 0, 0, 0, 0, 0, 2, 0}, U"((м/pow(сек,2))*pow(м,2))/(pow(м,3)/(кг*pow(сек,2)));");
+    auto r = parser.Parse(ElementId{0, 0, 0, 0, 0, 0, 0, 2, 0}, U"((м/pow(с,2))*pow(м,2))/(pow(м,3)/(кг*pow(с,2)));");
     ASSERT_TRUE(r.ToStdString(3, 3) == "1.E+0(кг)") << r.ToStdString(3, 3);
 }
 
 TEST_F(CalcTestReal, units53)
 {
     parser.SetLocale(Language::Russian);
-    auto r = parser.Parse(ElementId{0, 0, 0, 0, 0, 0, 0, 2, 0}, U"(м/сек)/(м/сек);");
+    auto r = parser.Parse(ElementId{0, 0, 0, 0, 0, 0, 0, 2, 0}, U"(м/с)/(м/с);");
     ASSERT_TRUE(r.ToStdString(3, 3) == "1.E+0") << r.ToStdString(3, 3);
 }
 
@@ -1066,7 +1066,7 @@ TEST_F(CalcTestReal, list_identifiers1)
     ASSERT_TRUE(std::find_if(variables.begin(), variables.end(), 
         [](auto& p)
         {
-            return p.first == U"с" && p.second == U"скорость света";
+            return p.first == U"ск_св" && p.second == U"скорость света";
         }) != variables.end());
 }
 
