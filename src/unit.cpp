@@ -3,7 +3,6 @@
 #include "real.h"
 #include "parser_exception.h"
 #include <boost/algorithm/string.hpp>
-#include <boost/lexical_cast.hpp>
 
 namespace yutovo_calculator
 {
@@ -381,9 +380,9 @@ bool Unit::FromString(const std::u32string& str)
             {
                 try
                 {
-                    power = boost::lexical_cast<int>(_arr[1]);
+                    power = std::stoi(ToBasicString(_arr[1]));
                 }
-                catch (std::bad_cast& ex)
+                catch (std::logic_error& ex)
                 {
                     return false;
                 }
@@ -415,9 +414,9 @@ bool Unit::FromString(const std::u32string& str)
             {
                 try
                 {
-                    power = -boost::lexical_cast<int>(_arr[1]);
+                    power = -std::stoi(ToBasicString(_arr[1]));
                 }
-                catch (std::bad_cast& ex)
+                catch (std::logic_error& ex)
                 {
                     return false;
                 }
