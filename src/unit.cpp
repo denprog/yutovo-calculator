@@ -426,7 +426,10 @@ bool Unit::FromString(const std::u32string& str)
     }
 
     unit = _unit;
-    system = _system;
+    if (_system.empty())
+        system = U"SI";
+    else
+        system = _system;
     description = U"";
 
     return true;

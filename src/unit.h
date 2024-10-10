@@ -13,26 +13,33 @@ class Real;
 class Unit
 {
 public:
-    Unit() = default;
+    Unit() :
+        system(U"SI")
+    {
+    }
 
     Unit(const std::u32string& name)
     {
+        system = U"SI";
         unit.push_back(std::make_pair(name, 1));
     }
 
     Unit(const std::u32string& name, const int power)
     {
+        system = U"SI";
         unit.push_back(std::make_pair(name, power));
     }
 
     Unit(const std::u32string& name, const std::u32string& _description, const int power) :
         description(_description)
     {
+        system = U"SI";
         unit.push_back(std::make_pair(name, power));
     }
 
     Unit(const std::u32string& numerator, const std::u32string& denomerator)
     {
+        system = U"SI";
         unit.push_back(std::make_pair(numerator, 1));
         unit.push_back(std::make_pair(denomerator, -1));
     }
@@ -72,12 +79,7 @@ public:
 
     bool operator==(const Unit& other) const
     {
-        std::u32string s1 = system, s2 = other.system;
-        if (s1 == U"")
-            s1 = U"SI";
-        if (s2 == U"")
-            s2 = U"SI";
-        if (s1 != s2)
+        if (system != other.system)
             return false;
         if (unit.size() != other.unit.size())
             return false;

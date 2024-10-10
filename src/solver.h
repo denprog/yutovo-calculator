@@ -789,7 +789,7 @@ struct Solver : public boost::static_visitor<Number>
             if (!custom_unit.buildin && !IsLess(custom_unit.id, _id))
                 continue;
             Number t = val;
-            if (custom_unit.system == system || (custom_unit.system == U"" && system == U"SI"))
+            if (custom_unit.system == system)
             {
                 if (custom_unit.Cast(t) && t.unit.unit.size() <= max_cast_unit_size)
                     GetCastUnitsImpl(_id, t, system, _cast_units);
@@ -804,14 +804,14 @@ struct Solver : public boost::static_visitor<Number>
 
         CheckBreak();
 
-        if (val.unit.system == system || (val.unit.system == U"" && system == U"SI"))
+        if (val.unit.system == system)
             _cast_units.push_back(val);
         for (size_t i = 0; i < symbols->units.size(); ++i)
         {
             CustomUnit<Number>& custom_unit = symbols->units[i];
             if (!custom_unit.buildin && !IsLess(custom_unit.id, _id))
                 continue;
-            if (custom_unit.system == system || (custom_unit.system == U"" && system == U"SI"))
+            if (custom_unit.system == system)
             {
                 Number t = val;
                 if (custom_unit.Cast(t) && t.unit.unit.size() <= max_cast_unit_size)
@@ -1041,7 +1041,7 @@ private:
             CheckBreak();
 
             Number unit_val;
-            if (unit.system == U"SI" || unit.system == U"")
+            if (unit.system == U"SI")
             {
                 Unit* base_unit = FindBuiltinUnit(p.first);
                 if (base_unit)
