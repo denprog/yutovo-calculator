@@ -259,6 +259,7 @@ struct Solver : public boost::static_visitor<Number>
             solver.id = id;
             solver.start_time = start_time;
             solver.cast_units = cast_units;
+            solver.max_cast_unit_size = max_cast_unit_size;
             solver.SetDependencies(dependencies);
             res = boost::apply_visitor(solver, op);
         }
@@ -743,6 +744,7 @@ struct Solver : public boost::static_visitor<Number>
             return;
         }
 
+        GetThreadTime(start_time);
         GetCastUnitsImpl(_id, val, system, _cast_units);
     }
 
@@ -755,6 +757,7 @@ struct Solver : public boost::static_visitor<Number>
             return;
         }
 
+        GetThreadTime(start_time);
         GetCastUnitsImpl(_id, val, system, _cast_units);
 
         cast_units[system] = _cast_units;
@@ -898,6 +901,11 @@ struct Solver : public boost::static_visitor<Number>
     void SetMaxTime(uint64_t _max_time)
     {
         max_time = _max_time;
+    }
+
+    void SetMaxCastUnitSize(int _max_cast_unit_size)
+    {
+        max_cast_unit_size = _max_cast_unit_size;
     }
 
 public:
@@ -1279,7 +1287,7 @@ private:
     clockid_t clock_id;
     mutable uint64_t max_time = 0; //in milliseconds
 
-    const int max_cast_unit_size = 3; //max size of each unit in the cast vector
+    int max_cast_unit_size = 2; //max size of each unit in the cast vector
 };
 
 };

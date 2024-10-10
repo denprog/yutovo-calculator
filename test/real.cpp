@@ -721,8 +721,15 @@ TEST_F(CalcTestReal, units26)
 
 TEST_F(CalcTestReal, units27)
 {
-    std::string s = parser.Parse(ElementId{0, 0, 0, 0, 0, 0, 0, 2, 0}, U"2(m/s);").ToStdString(3, 3);
+    ElementId id{0, 0, 0, 0, 0, 0, 0, 2, 0};
+    auto val = parser.Parse(id, U"2(m/s);");
+    std::string s = val.ToStdString(3, 3);
     ASSERT_TRUE(s == "2.E+0((m)/(s))") << s;
+    s = parser.GetSuitableUnit(id, val).ToStdString(3, 3);
+    ASSERT_TRUE(s == "2.E+0((m)/(s))") << s;
+    std::vector<Unit> cast_units;
+    parser.GetCastUnits(id, val, cast_units);
+    ASSERT_TRUE(FindUnit(cast_units, Unit(U"km", U"hour")));
 }
 
 TEST_F(CalcTestReal, units28)
@@ -1040,6 +1047,7 @@ TEST_F(CalcTestReal, prod2)
 TEST_F(CalcTestReal, max_time1)
 {
     parser.SetMaxTime(1000);
+    parser.SetMaxCastUnitSize(3);
     EXPECT_THROW(parser.GetSuitableUnit(ElementId{0, 0, 0, 0, 2}, parser.Parse(ElementId{0, 0, 0, 0, 2}, U"10kg*10m/(2*pow(s,2));")).ToStdString(3, 3), 
         yutovo_calculator::TimeExceedException);
     auto res = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"(1+2);");

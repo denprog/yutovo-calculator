@@ -217,6 +217,11 @@ struct Parser
         solver.SetMaxTime(max_time);
     }
 
+    void SetMaxCastUnitSize(int max_cast_unit_size)
+    {
+        solver.SetMaxCastUnitSize(max_cast_unit_size);
+    }
+
 private:
     void InitUnits()
     {
