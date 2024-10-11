@@ -991,6 +991,14 @@ TEST_F(CalcTestReal, units54)
     ASSERT_TRUE(t == "0.0864E+0((Дж)/(сутки*мА^2))") << t;
 }
 
+TEST_F(CalcTestReal, units55)
+{
+    parser.SetLocale(Language::Russian);
+    auto r = parser.Parse(ElementId{0, 0, 0, 0, 0, 0, 0, 2, 0}, U"кг*м*А/(pow(с,2));");
+    std::string s = parser.GetSuitableUnit(ElementId{0, 0, 0, 0, 0, 0, 0, 2, 0}, r).ToStdString(3, 3);
+    ASSERT_TRUE(s == "1.E+0(Н*А)") << s;
+}
+
 TEST_F(CalcTestReal, compare1)
 {
     std::string s = parser.Parse(ElementId{0, 0, 0, 0, 0, 0, 0, 2, 0}, U"(0<10);").ToStdString(3, 3);

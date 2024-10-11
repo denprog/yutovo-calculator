@@ -1021,6 +1021,8 @@ private:
                         if (i < c.unit.unit.size())
                             continue;
                     }
+                    else if (res_str.length() < c_str.length())
+                        continue;
                 }
 
                 res = c;
