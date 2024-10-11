@@ -25,7 +25,6 @@ if(EMSCRIPTEN)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fexceptions")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -s DISABLE_EXCEPTION_THROWING=0")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -s ALLOW_MEMORY_GROWTH=1")
-    target_compile_options(${PROJECT_NAME} PUBLIC -Wnooverloaded-shift-op-parentheses)
 endif()
 
 set(CMAKE_DEBUG_POSTFIX d)
@@ -52,6 +51,7 @@ if(EMSCRIPTEN)
         ${INSTALL_PATH}/wasm/libgmp.a
     )
     target_link_options(${PROJECT_NAME} PUBLIC "-fexceptions -s DISABLE_EXCEPTION_THROWING=0")
+    target_compile_options(${PROJECT_NAME} PUBLIC -Wno-overloaded-shift-op-parentheses)
 else()
     target_link_libraries(${PROJECT_NAME} PRIVATE 
         stdc++
