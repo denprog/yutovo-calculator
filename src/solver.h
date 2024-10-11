@@ -731,6 +731,7 @@ struct Solver : public boost::static_visitor<Number>
 
         GetCastUnits(_id, val, U"SI", _cast_units);
         GetCastUnits(_id, val, U"rus", _cast_units);
+        std::sort(_cast_units.begin(), _cast_units.end());
     }
 
     void GetCastUnits(const ElementId _id, const Number& val, const std::u32string& system, std::vector<Unit>& _cast_units)
@@ -781,7 +782,11 @@ struct Solver : public boost::static_visitor<Number>
                 break;
         }
         if (i == val.unit.unit.size())
-            _cast_units.push_back(val.unit);
+        {
+            Unit _unit = val.unit;
+            _unit.Sort();
+            _cast_units.push_back(_unit);
+        }
 
         for (size_t i = 0; i < symbols->units.size(); ++i)
         {

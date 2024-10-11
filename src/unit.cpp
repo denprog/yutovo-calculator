@@ -249,9 +249,57 @@ Unit root(const Unit& unit, const Real& val)
     return res;
 }
 
+bool Unit::operator==(const Unit& other) const
+{
+    if (system != other.system)
+        return false;
+    if (unit.size() != other.unit.size())
+        return false;
+    for (auto& u : other.unit)
+    {
+        auto it = std::find_if(unit.begin(), unit.end(), 
+            [u](auto& p)
+            {
+                return p.first == u.first && p.second == u.second;
+            });
+        if (it == unit.end())
+            return false;
+    }
+    return true;
+}
+
 bool Unit::operator==(const std::u32string& name) const
 {
     return unit.size() == 1 && unit[0].first == name && unit[0].second == 1;
+}
+
+bool Unit::operator!=(const Unit& other) const
+{
+    return !operator==(other);
+}
+
+bool Unit::operator<(const Unit& other) const
+{
+    if (system == other.system)
+    {
+        if (unit.size() == other.unit.size())
+        {
+            int p1 = GetPower();
+            int p2 = other.GetPower();
+            if (p1 == p2)
+            {
+                std::u32string s1, s2;
+                for (auto& u : unit)
+                    s1 += u.first;
+                for (auto& u : other.unit)
+                    s2 += u.first;
+                return s1.size() < s2.size();
+            }
+            return p1 < p2;
+        }
+        return unit.size() < other.unit.size();
+    }
+    return system < other.system;
 }
 
 int Unit::GetPower() const
@@ -277,6 +325,17 @@ int Unit::GetPower() const
 	}
 
 	return p;
+}
+
+void Unit::Sort()
+{
+    std::sort(unit.begin(), unit.end(), 
+        [](const auto& p1, const auto& p2)
+        {
+            if (p1.second == p2.second)
+                return p1.first < p2.first;
+            return p1.second > p2.second;
+        });
 }
 
 std::u32string Unit::ToString(bool f) const

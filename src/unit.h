@@ -76,30 +76,9 @@ public:
     friend Unit root(const Unit& unit, const Real& val);
 
     bool operator==(const std::u32string& name) const;
-
-    bool operator==(const Unit& other) const
-    {
-        if (system != other.system)
-            return false;
-        if (unit.size() != other.unit.size())
-            return false;
-        for (auto& u : other.unit)
-        {
-            auto it = std::find_if(unit.begin(), unit.end(), 
-                [u](auto& p)
-                {
-                    return p.first == u.first && p.second == u.second;
-                });
-            if (it == unit.end())
-                return false;
-        }
-        return true;
-    }
-
-    bool operator!=(const Unit& other) const
-    {
-        return !operator==(other);
-    }
+    bool operator==(const Unit& other) const;
+    bool operator!=(const Unit& other) const;
+    bool operator<(const Unit& other) const;
 
     int GetPower() const;
 
@@ -107,6 +86,8 @@ public:
     {
         return unit.empty();
     }
+
+    void Sort();
 
     std::u32string ToString(bool f = true) const;
     bool FromString(const std::u32string& str);
