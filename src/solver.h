@@ -49,16 +49,18 @@ struct CustomUnit
 
     bool Cast(Number& val) const
     {
+        Number _val = val;
+        Number res_val = val;
         Unit _val_unit = val.unit;
         Unit res_unit = value.unit;
         int power = 0;
         bool f = true;
+
         while (f)
         {
-            //try to find the right variant of the unit
             for (auto& u : res_unit.unit)
             {
-                auto it = std::find_if(val.unit.unit.begin(), val.unit.unit.end(), 
+                auto it = std::find_if(_val.unit.unit.begin(), _val.unit.unit.end(), 
                     [u](const auto& p)
                     {
                         if (p.first != u.first)
@@ -69,25 +71,36 @@ struct CustomUnit
                             return p.second <= u.second;
                         return false;
                     });
-                if (it == val.unit.unit.end())
+                if (it == _val.unit.unit.end())
                 {
                     f = false;
                     break;
                 }
-
                 it->second -= u.second;
             }
-
             if (f)
-                ++power;
-            
-            if (!f)
             {
-                f = true;
-                //try to find the backward variant of the unit
+                ++power;
+                for (size_t i = 0; i < _val.unit.unit.size(); ++i)
+                {
+                    auto& p = _val.unit.unit[i];
+                    if (p.second == 0)
+                        _val.unit.unit.erase(_val.unit.unit.begin() + i--);
+                }
+                res_val = _val;
+            }
+        }
+
+        if (power == 0)
+        {
+            //try to find the backward variant of the unit
+            f = true;
+            _val = val;
+            while (f)
+            {
                 for (auto& u : res_unit.unit)
                 {
-                    auto it = std::find_if(val.unit.unit.begin(), val.unit.unit.end(), 
+                    auto it = std::find_if(_val.unit.unit.begin(), _val.unit.unit.end(), 
                         [u](const auto& p)
                         {
                             if (p.first != u.first)
@@ -95,29 +108,26 @@ struct CustomUnit
                             if (p.second < 0 && u.second > 0)
                                 return abs(p.second) >= u.second;
                             if (p.second > 0 && u.second < 0)
-                                return p.second <= abs(u.second);
+                                return p.second >= abs(u.second);
                             return false;
                         });
-                    if (it == val.unit.unit.end())
+                    if (it == _val.unit.unit.end())
                     {
                         f = false;
                         break;
                     }
-
                     it->second += u.second;
                 }
-
                 if (f)
-                    --power;
-            }
-
-            if (f)
-            {
-                for (size_t i = 0; i < val.unit.unit.size(); ++i)
                 {
-                    auto& p = val.unit.unit[i];
-                    if (p.second == 0)
-                        val.unit.unit.erase(val.unit.unit.begin() + i--);
+                    --power;
+                    for (size_t i = 0; i < _val.unit.unit.size(); ++i)
+                    {
+                        auto& p = _val.unit.unit[i];
+                        if (p.second == 0)
+                            _val.unit.unit.erase(_val.unit.unit.begin() + i--);
+                    }
+                    res_val = _val;
                 }
             }
         }
@@ -125,16 +135,17 @@ struct CustomUnit
         if (power == 0)
             return false;
 
-        val.unit.unit.insert(val.unit.unit.begin(), std::make_pair(name, power));
-        auto u = val.unit;
+        res_val.unit.unit.insert(res_val.unit.unit.begin(), std::make_pair(name, power));
+        auto u = res_val.unit;
         if (power > 0)
-            val = val / pow(value, power);
+            res_val = res_val / pow(value, power);
         else
-            val = val * pow(value, -power);
-        val.unit = u;
-        val.unit.system = system;
-        if (_val_unit == val.unit)
+            res_val = res_val * pow(value, -power);
+        res_val.unit = u;
+        res_val.unit.system = system;
+        if (_val_unit == res_val.unit)
             return false;
+        val = res_val;
         return true;
     }
 

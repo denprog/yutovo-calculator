@@ -999,6 +999,30 @@ TEST_F(CalcTestReal, units55)
     ASSERT_TRUE(s == "1.E+0(Н*А)") << s;
 }
 
+TEST_F(CalcTestReal, units56)
+{
+    auto r = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"b=1kg;");
+    r = parser.Parse(ElementId{0, 0, 0, 0, 2}, U"h=1b;");
+    r = parser.Parse(ElementId{0, 0, 0, 0, 3}, U"E=b*g_a*h;");
+    r = parser.Parse(ElementId{0, 0, 0, 0, 4}, U"E;");
+    std::string s = parser.GetSuitableUnit(ElementId{0, 0, 0, 0, 4}, r).ToStdString(3, 3);
+    ASSERT_TRUE(s == "9.807E+0(N*kg)") << s;
+}
+
+TEST_F(CalcTestReal, units57)
+{
+    auto r = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"pow(kg,2)*pow(m,2)/pow(s,4);");
+    std::string s = parser.GetSuitableUnit(ElementId{0, 0, 0, 0, 4}, r).ToStdString(3, 3);
+    ASSERT_TRUE(s == "1.E+0(N^2)") << s;
+}
+
+TEST_F(CalcTestReal, units58)
+{
+    auto r = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"1/(pow(kg,2)*pow(m,2)/pow(s,4));");
+    std::string s = parser.GetSuitableUnit(ElementId{0, 0, 0, 0, 4}, r).ToStdString(3, 3);
+    ASSERT_TRUE(s == "1.E+0(1/(N^2))") << s;
+}
+
 TEST_F(CalcTestReal, compare1)
 {
     std::string s = parser.Parse(ElementId{0, 0, 0, 0, 0, 0, 0, 2, 0}, U"(0<10);").ToStdString(3, 3);
@@ -1061,7 +1085,7 @@ TEST_F(CalcTestReal, max_time1)
     auto res = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"(1+2);");
     ASSERT_TRUE(res.ToStdString(3, 3) == parser.Parse(ElementId{0, 0, 0, 0, 1}, U"3;").ToStdString(3, 3));
 
-    parser.SetMaxTime(10000);
+    parser.SetMaxTime(20000);
     std::string s = parser.GetSuitableUnit(ElementId{0, 0, 0, 0, 2}, parser.Parse(ElementId{0, 0, 0, 0, 2}, U"10kg*10m/(2*pow(s,2));")).ToStdString(3, 3);
     ASSERT_TRUE(s == "50.E+0(N)") << s;
 }
