@@ -74,7 +74,7 @@ Expression<Integer>::Expression(ElementId id, std::u32string& expr, Solver<Integ
 
     function_call_string = identifier >> '[' >> +(alnum | '_') > ']';
 
-    no_fences_function_call = (identifier >> '%' >> *(expression >> omit[',']) >> function_param);
+    no_fences_function_call = (identifier >> '$' >> *(expression >> omit[',']) >> function_param);
     
     function_param = number | identifier | '(' > expression > ')';
 
@@ -148,7 +148,7 @@ Expression<Real>::Expression(ElementId id, std::u32string& expr, Solver<Real>* _
     
     multiplication = unary >> *(multiply);
 
-    multiply = char_('*') > unary | char_('/') > unary | char_('%') > unary;
+    multiply = char_('*') > unary | char_('/') > unary | char_('%') >> unary;
     
     unary = loop | compare | implicit_function_mul | implicit_post_function_mul | postfix_operation | implicit_div_mul | implicit_string_mul | 
         implicit_fraction_mul | mixed_division | implicit_mul | number | function_call | no_fences_function_call | identifier | 
@@ -190,7 +190,7 @@ Expression<Real>::Expression(ElementId id, std::u32string& expr, Solver<Real>* _
     
     function_call = identifier >> '(' >> -(expression % ',') > ')';
     
-    no_fences_function_call = (identifier >> '%' >> *(expression >> omit[',']) >> function_param);
+    no_fences_function_call = (identifier >> '$' >> *(expression >> omit[',']) >> function_param);
     
     function_param = number | identifier | '(' > expression > ')';
 
@@ -281,7 +281,7 @@ Expression<yutovo_calculator::Rational>::Expression(ElementId id, std::u32string
     multiply = (char_('*') > unary) | (char_('/') > unary) | (char_('%') > unary);
     
     unary = loop | compare | implicit_function_mul | implicit_post_function_mul | implicit_div_mul | implicit_string_mul | implicit_fraction_mul | 
-        mixed_division | implicit_mul | number | function_call | no_fences_function_call | identifier | unary_operation | '(' > expression > ')';
+        mixed_division | implicit_mul | number | function_call | identifier | no_fences_function_call | unary_operation | '(' > expression > ')';
     
     number = digits_number;
 
@@ -311,7 +311,7 @@ Expression<yutovo_calculator::Rational>::Expression(ElementId id, std::u32string
     
     function_call = (identifier >> '(' >> -(expression % ',') > ')');
 
-    no_fences_function_call = (identifier >> '%' >> *(expression >> omit[',']) >> function_param);
+    no_fences_function_call = (identifier >> '$' >> *(expression >> omit[',']) >> function_param);
     
     function_param = number | identifier | '(' > expression > ')';
 
@@ -426,7 +426,7 @@ Expression<Complex>::Expression(ElementId id, std::u32string& expr, Solver<Compl
     
     function_call = identifier >> '(' >> -(expression % ',') > ')';
     
-    no_fences_function_call = (identifier >> '%' >> *(expression >> omit[',']) >> function_param);
+    no_fences_function_call = (identifier >> '$' >> *(expression >> omit[',']) >> function_param);
     
     function_param = number | identifier | '(' > expression > ')';
 

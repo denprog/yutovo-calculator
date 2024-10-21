@@ -97,25 +97,25 @@ TEST_F(CalcTestReal, arithmetic2)
 
 TEST_F(CalcTestReal, functions1)
 {
-    ASSERT_TRUE(parser.Parse(ElementId{0, 0, 1}, U"sin(1);").ToStdString(3, 3) == parser.Parse(ElementId{0, 0, 1}, U"0.841E+0;").ToStdString(3, 3)) << 
-        parser.Parse(ElementId{0, 0, 1}, U"sin(1);").ToStdString(3, 3);
+    Real r = parser.Parse(ElementId{0, 0, 1}, U"sin(1);");
+    ASSERT_TRUE(r.ToStdString(3, 3) == parser.Parse(ElementId{0, 0, 1}, U"0.841E+0;").ToStdString(3, 3)) << r.ToStdString(3, 3);
 
-    ASSERT_TRUE(parser.Parse(ElementId{0, 0, 1}, U"ln(4);").ToStdString(3, 3) == parser.Parse(ElementId{0, 0, 1}, U"1.386E+0;").ToStdString(3, 3)) << 
-        parser.Parse(ElementId{0, 0, 1}, U"ln(4);").ToStdString(3, 3);
+    r = parser.Parse(ElementId{0, 0, 1}, U"ln(4);");
+    ASSERT_TRUE(r.ToStdString(3, 3) == parser.Parse(ElementId{0, 0, 1}, U"1.386E+0;").ToStdString(3, 3)) << r.ToStdString(3, 3);
 
-    ASSERT_TRUE(parser.Parse(ElementId{0, 0, 1}, U"lg(4);").ToStdString(3, 3) == parser.Parse(ElementId{0, 0, 1}, U"0.602E+0;").ToStdString(3, 3)) << 
-        parser.Parse(ElementId{0, 0, 1}, U"lg(4);").ToStdString(3, 3);
+    r = parser.Parse(ElementId{0, 0, 1}, U"lg(4);");
+    ASSERT_TRUE(r.ToStdString(3, 3) == parser.Parse(ElementId{0, 0, 1}, U"0.602E+0;").ToStdString(3, 3)) << r.ToStdString(3, 3);
 
-    ASSERT_TRUE(parser.Parse(ElementId{0, 0, 1}, U"log(2, 4);").ToStdString(3, 3) == parser.Parse(ElementId{0, 0, 1}, U"2.0E+0;").ToStdString(3, 3)) << 
-        parser.Parse(ElementId{0, 0, 1}, U"log(2, 4);").ToStdString(3, 3);
-    ASSERT_TRUE(parser.Parse(ElementId{0, 0, 1}, U"log(2, 3);").ToStdString(3, 3) == parser.Parse(ElementId{0, 0, 1}, U"1.585E+0;").ToStdString(3, 3)) << 
-        parser.Parse(ElementId{0, 0, 1}, U"log(2, 3);").ToStdString(3, 3);
-    ASSERT_TRUE(parser.Parse(ElementId{0, 0, 1}, U"log%2,3;").ToStdString(3, 3) == parser.Parse(ElementId{0, 0, 1}, U"1.585E+0;").ToStdString(3, 3)) << 
-        parser.Parse(ElementId{0, 0, 1}, U"log%2,3;").ToStdString(3, 3);
-    ASSERT_TRUE(parser.Parse(ElementId{0, 0, 1}, U"log%2,1+3;").ToStdString(3, 3) == parser.Parse(ElementId{0, 0, 1}, U"3.E+0;").ToStdString(3, 3)) << 
-        parser.Parse(ElementId{0, 0, 1}, U"log%2,1+3;").ToStdString(3, 3);
-    ASSERT_TRUE(parser.Parse(ElementId{0, 0, 1}, U"log%2,(1+3);").ToStdString(3, 3) == parser.Parse(ElementId{0, 0, 1}, U"2.E+0;").ToStdString(3, 3)) << 
-        parser.Parse(ElementId{0, 0, 1}, U"log%2,(1+3);").ToStdString(3, 3);
+    r = parser.Parse(ElementId{0, 0, 1}, U"log(2, 4);");
+    ASSERT_TRUE(r.ToStdString(3, 3) == parser.Parse(ElementId{0, 0, 1}, U"2.0E+0;").ToStdString(3, 3)) << r.ToStdString(3, 3);
+    r = parser.Parse(ElementId{0, 0, 1}, U"log(2, 3);");
+    ASSERT_TRUE(r.ToStdString(3, 3) == parser.Parse(ElementId{0, 0, 1}, U"1.585E+0;").ToStdString(3, 3)) << r.ToStdString(3, 3);
+    r = parser.Parse(ElementId{0, 0, 1}, U"log$2,3;");
+    ASSERT_TRUE(r.ToStdString(3, 3) == parser.Parse(ElementId{0, 0, 1}, U"1.585E+0;").ToStdString(3, 3)) << r.ToStdString(3, 3);
+    r = parser.Parse(ElementId{0, 0, 1}, U"log$2,1+3;");
+    ASSERT_TRUE(r.ToStdString(3, 3) == parser.Parse(ElementId{0, 0, 1}, U"3.E+0;").ToStdString(3, 3)) << r.ToStdString(3, 3);
+    r = parser.Parse(ElementId{0, 0, 1}, U"log$2,(1+3);");
+    ASSERT_TRUE(r.ToStdString(3, 3) == parser.Parse(ElementId{0, 0, 1}, U"2.E+0;").ToStdString(3, 3)) << r.ToStdString(3, 3);
 }
 
 TEST_F(CalcTestReal, functions2)
@@ -392,6 +392,15 @@ TEST_F(CalcTestReal, variables19)
     parser.SetLocale(Language::Russian);
     auto r = parser.Parse(ElementId{0, 0, 1}, U"g_a;");
     ASSERT_TRUE(r.ToStdString(3, 3) == "9.807E+0((м)/(с^2))") << r.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestReal, variables20)
+{
+    parser.SetLocale(Language::Russian);
+    auto r = parser.Parse(ElementId{0, 0, 1}, U"A=5;");
+    r = parser.Parse(ElementId{0, 0, 2}, U"B=45;");
+    r = parser.Parse(ElementId{0, 0, 3}, U"A%B;");
+    ASSERT_TRUE(r.ToStdString(3, 3) == "2.25E+0") << r.ToStdString(3, 3);
 }
 
 TEST_F(CalcTestReal, symbols1)
