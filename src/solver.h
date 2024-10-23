@@ -142,6 +142,7 @@ struct CustomUnit
         else
             res_val = res_val * pow(value, -power);
         u.system = system;
+        u.description = U"";
         res_val.SetUnit(u);
         if (_val_unit == res_val.unit)
             return false;
@@ -782,21 +783,24 @@ struct Solver : public boost::static_visitor<Number>
 
         CheckBreak();
 
-        //add the cast unit if all of its parts have the same system
-        size_t i = 0;
-        for (; i < val.unit.unit.size(); ++i)
+        if (val.unit.system == system)
         {
-            auto& u = val.unit.unit[i];
-            if (system == U"SI" && FindBuiltinUnit(u.first))
-                continue;
-            if (FindUnit(u.first, system) == nullptr)
-                break;
-        }
-        if (i == val.unit.unit.size())
-        {
-            Unit _unit = val.unit;
-            _unit.Sort();
-            _cast_units.push_back(_unit);
+            //add the cast unit if all of its parts have the same system
+            size_t i = 0;
+            for (; i < val.unit.unit.size(); ++i)
+            {
+                auto& u = val.unit.unit[i];
+                if (system == U"SI" && FindBuiltinUnit(u.first))
+                    continue;
+                if (FindUnit(u.first, system) == nullptr)
+                    break;
+            }
+            if (i == val.unit.unit.size())
+            {
+                Unit _unit = val.unit;
+                _unit.Sort();
+                _cast_units.push_back(_unit);
+            }
         }
 
         for (size_t i = 0; i < symbols->units.size(); ++i)

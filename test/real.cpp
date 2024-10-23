@@ -1032,6 +1032,18 @@ TEST_F(CalcTestReal, units58)
     ASSERT_TRUE(s == "1.E+0(1/(N^2))") << s;
 }
 
+TEST_F(CalcTestReal, units59)
+{
+    parser.SetLocale(Language::Russian);
+    ElementId id{0, 0, 0, 0, 0, 0, 0, 2, 0};
+    auto r = parser.Parse(id, U"с;");
+    std::vector<Unit> cast_units;
+    parser.GetCastUnits(id, r, cast_units);
+    ASSERT_TRUE(std::adjacent_find(cast_units.begin(), cast_units.end()) == cast_units.end());
+    std::string s = parser.GetSuitableUnit(id, r).ToStdString(3, 3);
+    ASSERT_TRUE(s == "1.E+0(с)") << s;
+}
+
 TEST_F(CalcTestReal, compare1)
 {
     std::string s = parser.Parse(ElementId{0, 0, 0, 0, 0, 0, 0, 2, 0}, U"(0<10);").ToStdString(3, 3);
