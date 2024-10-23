@@ -1044,6 +1044,29 @@ TEST_F(CalcTestReal, units59)
     ASSERT_TRUE(s == "1.E+0(с)") << s;
 }
 
+TEST_F(CalcTestReal, units60)
+{
+    parser.SetLocale(Language::Russian);
+    ElementId id{0, 0, 0, 0, 0, 1};
+    auto r = parser.Parse(id, U"1км;");
+    std::string s = parser.GetSuitableUnit(id, r).ToStdString(3, 3);
+    ASSERT_TRUE(s == "1.E+0(км)") << s;
+    auto t = parser.CastToUnit(id, r, Unit(U"см")).ToStdString(3, 3);
+    ASSERT_TRUE(t == "1.E+5(см)") << t;
+    r = parser.Parse(id, U"1с;");
+    s = parser.GetSuitableUnit(id, r).ToStdString(3, 3);
+    ASSERT_TRUE(s == "1.E+0(с)") << s;
+}
+
+TEST_F(CalcTestReal, units61)
+{
+    parser.SetLocale(Language::Russian);
+    ElementId id{0, 0, 0, 0, 0, 1};
+    auto r = parser.Parse(id, U"кг*pow(м,2)/(pow(с,2)*моль*К);");
+    std::string s = parser.GetSuitableUnit(id, r).ToStdString(3, 3);
+    ASSERT_TRUE(s == "1.E+0((Дж)/(моль*К))") << s;
+}
+
 TEST_F(CalcTestReal, compare1)
 {
     std::string s = parser.Parse(ElementId{0, 0, 0, 0, 0, 0, 0, 2, 0}, U"(0<10);").ToStdString(3, 3);

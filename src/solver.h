@@ -811,8 +811,17 @@ struct Solver : public boost::static_visitor<Number>
             Number t = val;
             if (custom_unit.system == system)
             {
-                if (custom_unit.Cast(t) && t.unit.unit.size() <= max_cast_unit_size)
-                    GetCastUnitsImpl(_id, t, system, _cast_units);
+                if (custom_unit.Cast(t))
+                {
+                    if (t.unit.unit.size() <= max_cast_unit_size)
+                        GetCastUnitsImpl(_id, t, system, _cast_units);
+                    else
+                    {
+                        Unit _unit = t.unit;
+                        _unit.Sort();
+                        _cast_units.push_back(_unit);
+                    }
+                }
             }
         }
     }
@@ -834,8 +843,13 @@ struct Solver : public boost::static_visitor<Number>
             if (custom_unit.system == system)
             {
                 Number t = val;
-                if (custom_unit.Cast(t) && t.unit.unit.size() <= max_cast_unit_size)
-                    GetCastUnitsImpl(_id, t, system, _cast_units);
+                if (custom_unit.Cast(t))
+                {
+                    if (t.unit.unit.size() <= max_cast_unit_size)
+                        GetCastUnitsImpl(_id, t, system, _cast_units);
+                    else
+                        _cast_units.push_back(t);
+                }
             }
         }
     }
