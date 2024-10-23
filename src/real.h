@@ -331,6 +331,8 @@ public:
 
     Real GetNumber();
 
+    void SetUnit(const Unit& _unit);
+
 private:
     static void CheckUnit(Real& num);
 

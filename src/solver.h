@@ -141,8 +141,8 @@ struct CustomUnit
             res_val = res_val / pow(value, power);
         else
             res_val = res_val * pow(value, -power);
-        res_val.unit = u;
-        res_val.unit.system = system;
+        u.system = system;
+        res_val.SetUnit(u);
         if (_val_unit == res_val.unit)
             return false;
         val = res_val;

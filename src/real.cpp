@@ -2137,6 +2137,15 @@ Real Real::GetNumber()
     return res;
 }
 
+void Real::SetUnit(const Unit& _unit)
+{
+    unit = _unit;
+    
+#ifdef TRACE_OUTPUT
+    UpdateNumberStr();
+#endif
+}
+
 void Real::CheckUnit(Real& num)
 {
     if (!num.unit.IsEmpty())

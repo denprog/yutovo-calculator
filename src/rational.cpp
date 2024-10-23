@@ -593,6 +593,15 @@ void Rational::ToProper(Integer& integer, Integer& numerator, Integer& denomerat
     denomerator = d;
 }
 
+void Rational::SetUnit(const Unit& _unit)
+{
+    unit = _unit;
+    
+#ifdef TRACE_OUTPUT
+    UpdateNumberStr();
+#endif
+}
+
 #ifdef TRACE_OUTPUT
 void Rational::UpdateNumberStr()
 {
