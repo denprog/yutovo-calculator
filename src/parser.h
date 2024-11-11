@@ -494,10 +494,10 @@ private:
 
                     //electric conductance
                     U"S`siemens`~(1)/(Ohm);",
-                    U"mcS`microsiemens`~0.000001Ohm;",
-                    U"mS`millisiemens`~0.001Ohm;",
-                    U"kS`kilosiemens`~1000Ohm;",
-                    U"MS`megasiemens`~1000000Ohm;",
+                    U"mcS`microsiemens`~0.000001S;",
+                    U"mS`millisiemens`~0.001S;",
+                    U"kS`kilosiemens`~1000S;",
+                    U"MS`megasiemens`~1000000S;",
 
                     //ionizing radiation
                     U"Gy`gray`~(J)/(kg);",
