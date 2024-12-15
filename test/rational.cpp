@@ -68,6 +68,15 @@ TEST_F(CalcTestRational, functions2)
     ASSERT_TRUE(r.ToStdString() == "24") << r.ToStdString();
 }
 
+TEST_F(CalcTestRational, functions3)
+{
+    EXPECT_THROW(parser.Parse(ElementId{0, 0, 1}, U"pow(2,1/3);", 3), yutovo_calculator::MathException) << 
+        parser.Parse(ElementId{0, 0, 1}, U"pow(2,1/3);").ToStdString();
+
+    auto r = parser.Parse(ElementId{0, 0, 1}, U"pow(2,6/3);", 3);
+    ASSERT_TRUE(r.ToStdString() == "4") << r.ToStdString();
+}
+
 TEST_F(CalcTestRational, symbols1)
 {
     EXPECT_THROW(parser.Parse(ElementId{0, 0, 0, 0, 1}, U"•;"), yutovo_calculator::SyntaxException) << parser.Parse(ElementId{0, 0, 0, 0, 1}, U"•;").ToStdString();

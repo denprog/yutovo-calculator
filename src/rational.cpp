@@ -487,7 +487,7 @@ bool operator<=(const int num1, const Rational& num2)
 
 Rational pow(const Rational& num1, const Rational& num2)
 {
-    if (!num2.GetDenomerator())
+    if (!num2.GetDenomerator() || (num2.GetNumerator() % num2.GetDenomerator() != 0))
         throw MathException(ArgumentIsOver);
     Rational res(num1);
     Integer n = num2.GetNumerator();
