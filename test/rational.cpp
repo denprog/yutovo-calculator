@@ -90,6 +90,20 @@ TEST_F(CalcTestRational, errors1)
     EXPECT_THROW(parser.Parse(ElementId{0, 0, 0, 0, 3}, U"123+3;45"), yutovo_calculator::SyntaxException);
 }
 
+TEST_F(CalcTestRational, errors2)
+{
+    try
+    {
+        parser.Parse(ElementId{0, 0, 1}, U";");
+    }
+    catch (yutovo_calculator::SyntaxException& ex)
+    {
+        ASSERT_TRUE(ex.id == MakeElementId(ElementId{0, 0, 1}) && ex.ex_id == ParserExceptionCode::ExpressionExpected && ex.pos == 0) << ex.ex_id;
+        return;
+    }
+    ASSERT_FALSE(true);
+}
+
 TEST_F(CalcTestRational, rationals1)
 {
     ASSERT_TRUE(parser.Parse(ElementId{0, 0, 0, 0, 1}, U"2/4;") == parser.Parse(ElementId{0, 0, 0, 0, 2}, U"1/2;")) << 

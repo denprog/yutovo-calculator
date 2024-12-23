@@ -9,7 +9,36 @@ namespace yutovo_calculator
 {
 
 typedef unsigned int uint;
-typedef std::vector<int> ElementId;
+
+struct ElementId : std::vector<int>
+{
+    ElementId() = default;
+
+    ElementId(std::initializer_list<int> c) : 
+        std::vector<int>{c}
+    {
+    }
+
+    ElementId(const ElementId& source, const int size) : 
+        std::vector<int>(source.begin(), source.begin() + size)
+    {
+    }
+};
+
+struct LogicalId : std::vector<int> //logical Id does not include row id, so it does not depend on the formatting of rows
+{
+    LogicalId() = default;
+
+    LogicalId(std::initializer_list<int> c) : 
+        std::vector<int>{c}
+    {
+    }
+
+    LogicalId(const LogicalId& source, const int size) : 
+        std::vector<int>(source.begin(), source.begin() + size)
+    {
+    }
+};
 
 struct ParserContext
 {

@@ -3,11 +3,11 @@
 
 #include <string>
 #include <vector>
+#include "utils.h"
 
 namespace yutovo_calculator
 {
 	typedef unsigned int uint;
-	typedef std::vector<int> ElementId;
 
 	enum ParserExceptionCode
 	{

@@ -188,6 +188,20 @@ TEST_F(CalcTestInteger, error1)
     EXPECT_THROW(parser.Parse(ElementId{0, 0, 0, 0, 3}, U"123+3;45"), yutovo_calculator::SyntaxException);
 }
 
+TEST_F(CalcTestInteger, errors2)
+{
+    try
+    {
+        parser.Parse(ElementId{0, 0, 1}, U";");
+    }
+    catch (yutovo_calculator::SyntaxException& ex)
+    {
+        ASSERT_TRUE(ex.id == MakeElementId(ElementId{0, 0, 1}) && ex.ex_id == ParserExceptionCode::ExpressionExpected && ex.pos == 0) << ex.ex_id;
+        return;
+    }
+    ASSERT_FALSE(true);
+}
+
 TEST_F(CalcTestInteger, notation1)
 {
     Integer res = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"123;");

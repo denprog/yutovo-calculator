@@ -474,6 +474,20 @@ TEST_F(CalcTestReal, errors5)
     ASSERT_FALSE(true);
 }
 
+TEST_F(CalcTestReal, errors6)
+{
+    try
+    {
+        parser.Parse(ElementId{0, 0, 1}, U";");
+    }
+    catch (yutovo_calculator::SyntaxException& ex)
+    {
+        ASSERT_TRUE(ex.id == MakeElementId(ElementId{0, 0, 1}) && ex.ex_id == ParserExceptionCode::ExpressionExpected && ex.pos == 0) << ex.ex_id;
+        return;
+    }
+    ASSERT_FALSE(true);
+}
+
 TEST_F(CalcTestReal, trigonometric1)
 {
     Real res = parser.Parse(ElementId{0, 0, 1}, U"sin(0);");
