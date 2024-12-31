@@ -30,7 +30,7 @@ namespace yutovo_calculator
 			boost::recursive_wrapper<ExpressionNode<Number>>>
 			Operand;
 
-		Annotation(std::u32string::iterator _first, std::u32string::iterator _last, ElementId& _id) : 
+		Annotation(std::u32string::iterator _first, std::u32string::iterator _last, LogicalId& _id) : 
 			first(_first),
 			last(_last),
 			id(_id)
@@ -297,7 +297,7 @@ namespace yutovo_calculator
 			typedef void type;
 		};
 
-		ElementId id;
+		LogicalId id;
 		std::u32string::iterator first;
 		std::u32string::iterator last;
 	};

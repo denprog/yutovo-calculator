@@ -18,11 +18,6 @@ std::string ToBasicString(const std::u32string& str)
     return boost::locale::conv::utf_to_utf<char>(str);
 }
 
-ElementId MakeElementId(ElementId id)
-{
-    return id;
-}
-
 std::string ElementIdToString(const ElementId& id)
 {
 	std::string res;
@@ -35,7 +30,19 @@ std::string ElementIdToString(const ElementId& id)
 	return res;
 }
 
-bool IsLess(const ElementId& id1, const ElementId& id2)
+std::string LogicalIdToString(const LogicalId& id)
+{
+	std::string res;
+	for (size_t i = 0; i < id.size(); ++i)
+	{
+		res += std::to_string(id[i]);
+		if (i < id.size() - 1)
+			res += ",";
+	}
+	return res;
+}
+
+bool IsLess(const LogicalId& id1, const LogicalId& id2)
 {
 	for (size_t i = 0, j = 0; i < id1.size() && j < id2.size(); ++i, ++j)
 	{

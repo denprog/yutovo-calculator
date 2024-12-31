@@ -11,7 +11,7 @@ namespace yutovo_calculator
 template<typename Number>
 struct Definition : qi::grammar<std::u32string::iterator, DefinitionNode<Number>(), unicode::space_type>
 {
-	Definition(ElementId id, std::u32string& expr, Solver<Number>* solver) : 
+	Definition(LogicalId id, std::u32string& expr, Solver<Number>* solver) : 
 		Definition::base_type(definition), 
 		expression(id, expr, solver), 
 		return_expression(id, expr, solver)

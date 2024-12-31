@@ -8,7 +8,7 @@ namespace yutovo_calculator
 //Expression
 
 template<>
-Expression<Integer>::Expression(ElementId id, std::u32string& expr, Solver<Integer>* _solver) : 
+Expression<Integer>::Expression(LogicalId id, std::u32string& expr, Solver<Integer>* _solver) : 
     Expression::base_type(expression),
     solver(_solver)
 {
@@ -124,7 +124,7 @@ Expression<Integer>::Expression(ElementId id, std::u32string& expr, Solver<Integ
 }
 
 template<>
-Expression<Real>::Expression(ElementId id, std::u32string& expr, Solver<Real>* _solver) : 
+Expression<Real>::Expression(LogicalId id, std::u32string& expr, Solver<Real>* _solver) : 
     Expression::base_type(expression),
     solver(_solver)
 {
@@ -255,7 +255,7 @@ Expression<Real>::Expression(ElementId id, std::u32string& expr, Solver<Real>* _
 }
 
 template<>
-Expression<yutovo_calculator::Rational>::Expression(ElementId id, std::u32string& expr, Solver<Rational>* _solver) : 
+Expression<yutovo_calculator::Rational>::Expression(LogicalId id, std::u32string& expr, Solver<Rational>* _solver) : 
     Expression::base_type(expression),
     solver(_solver)
 {
@@ -360,7 +360,7 @@ Expression<yutovo_calculator::Rational>::Expression(ElementId id, std::u32string
 }
 
 template<>
-Expression<Complex>::Expression(ElementId id, std::u32string& expr, Solver<Complex>* _solver) : 
+Expression<Complex>::Expression(LogicalId id, std::u32string& expr, Solver<Complex>* _solver) : 
     Expression::base_type(expression),
     solver(_solver)
 {

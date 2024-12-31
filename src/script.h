@@ -15,7 +15,7 @@ namespace yutovo_calculator
 template<typename Number>
 struct Script : qi::grammar<std::u32string::iterator, ScriptNode<Number>(), unicode::space_type>
 {
-	Script(ElementId id, std::u32string& expr, Solver<Number>* solver) : 
+	Script(LogicalId id, std::u32string& expr, Solver<Number>* solver) : 
 		Script::base_type(script), 
 		definition(id, expr, solver), 
 		expression(id, expr, solver)

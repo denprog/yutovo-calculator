@@ -11,94 +11,108 @@ using namespace std::chrono_literals;
 
 TEST_F(CalcTestRational, arithmetic1)
 {
-    Rational res = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"10%75;");
+    Rational res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"10%75;");
     ASSERT_TRUE(res.ToString() == U"15/2") << res.ToStdString();
 }
 
 TEST_F(CalcTestRational, variables1)
 {
-    parser.Parse(ElementId{0, 0, 0, 0, 1}, U"п=3/2;");
-    ASSERT_TRUE(parser.Parse(ElementId{0, 0, 0, 0, 2}, U"п;") == parser.Parse(ElementId{0, 0, 0, 0, 2}, U"3/2;")) << 
-        parser.Parse(ElementId{0, 0, 0, 0, 1}, U"п;").ToStdString();
-    parser.Parse(ElementId{0, 0, 0, 0, 1}, U"пр=3/2;");
-    ASSERT_TRUE(parser.Parse(ElementId{0, 0, 1, 0, 1}, U"пр+5;") == parser.Parse(ElementId{0, 0, 1, 0, 1}, U"13/2;")) << 
-        parser.Parse(ElementId{0, 0, 1, 0, 1}, U"пр+5;").ToStdString();
+    parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"п=3/2;");
+    ASSERT_TRUE(parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"п;") == parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"3/2;")) << 
+        parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"п;").ToStdString();
+    parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"пр=3/2;");
+    ASSERT_TRUE(parser.Parse(LogicalId{0, 0, 1, 0, 1}, U"пр+5;") == parser.Parse(LogicalId{0, 0, 1, 0, 1}, U"13/2;")) << 
+        parser.Parse(LogicalId{0, 0, 1, 0, 1}, U"пр+5;").ToStdString();
 }
 
 TEST_F(CalcTestRational, variables2)
 {
-    parser.Parse(ElementId{0, 0, 1}, U"a=5;");
-    ASSERT_TRUE(parser.Parse(ElementId{0, 0, 2}, U"(3)/(4)a;") == parser.Parse(ElementId{0, 0, 2}, U"(15)/(4);")) << 
-        parser.Parse(ElementId{0, 0, 2}, U"(3)/(4)a;");
+    parser.Parse(LogicalId{0, 0, 1}, U"a=5;");
+    ASSERT_TRUE(parser.Parse(LogicalId{0, 0, 2}, U"(3)/(4)a;") == parser.Parse(LogicalId{0, 0, 2}, U"(15)/(4);")) << 
+        parser.Parse(LogicalId{0, 0, 2}, U"(3)/(4)a;");
 }
 
 TEST_F(CalcTestRational, variables3)
 {
-    parser.Parse(ElementId{0, 0, 1}, U"d=4;");
-    ASSERT_TRUE(parser.Parse(ElementId{0, 0, 2}, U"5d;") == parser.Parse(ElementId{0, 0, 2}, U"20;")) << 
-        parser.Parse(ElementId{0, 0, 2}, U"5d;");
-    parser.Parse(ElementId{0, 0, 3}, U"d2=5;");
-    ASSERT_TRUE(parser.Parse(ElementId{0, 0, 4}, U"5d+3d2;") == parser.Parse(ElementId{0, 0, 4}, U"35;")) << 
-        parser.Parse(ElementId{0, 0, 4}, U"5d+3d2;");
+    parser.Parse(LogicalId{0, 0, 1}, U"d=4;");
+    ASSERT_TRUE(parser.Parse(LogicalId{0, 0, 2}, U"5d;") == parser.Parse(LogicalId{0, 0, 2}, U"20;")) << 
+        parser.Parse(LogicalId{0, 0, 2}, U"5d;");
+    parser.Parse(LogicalId{0, 0, 3}, U"d2=5;");
+    ASSERT_TRUE(parser.Parse(LogicalId{0, 0, 4}, U"5d+3d2;") == parser.Parse(LogicalId{0, 0, 4}, U"35;")) << 
+        parser.Parse(LogicalId{0, 0, 4}, U"5d+3d2;");
 }
 
 TEST_F(CalcTestRational, variables4)
 {
-    parser.Parse(ElementId{0, 0, 1}, U"d=1/4;");
-    parser.Parse(ElementId{0, 0, 2}, U"d{2}=3/4;");
-    ASSERT_TRUE(parser.Parse(ElementId{0, 0, 3}, U"d+d{2};") == parser.Parse(ElementId{0, 0, 3}, U"1;")) << 
-        parser.Parse(ElementId{0, 0, 3}, U"d+d{2};");
-    parser.Parse(ElementId{0, 0, 4}, U"d{2}=5/2;");
-    ASSERT_TRUE(parser.Parse(ElementId{0, 0, 5}, U"5d{2}+3d;") == parser.Parse(ElementId{0, 0, 5}, U"13(1/4);")) << 
-        parser.Parse(ElementId{0, 0, 5}, U"5d{2}+3d;");
+    parser.Parse(LogicalId{0, 0, 1}, U"d=1/4;");
+    parser.Parse(LogicalId{0, 0, 2}, U"d{2}=3/4;");
+    ASSERT_TRUE(parser.Parse(LogicalId{0, 0, 3}, U"d+d{2};") == parser.Parse(LogicalId{0, 0, 3}, U"1;")) << 
+        parser.Parse(LogicalId{0, 0, 3}, U"d+d{2};");
+    parser.Parse(LogicalId{0, 0, 4}, U"d{2}=5/2;");
+    ASSERT_TRUE(parser.Parse(LogicalId{0, 0, 5}, U"5d{2}+3d;") == parser.Parse(LogicalId{0, 0, 5}, U"13(1/4);")) << 
+        parser.Parse(LogicalId{0, 0, 5}, U"5d{2}+3d;");
 }
 
 TEST_F(CalcTestRational, functions1)
 {
-    parser.Parse(ElementId{0, 0, 0, 0, 2}, U"f(x)=2*x/3;");
-    ASSERT_TRUE(parser.Parse(ElementId{0, 0, 0, 0, 3}, U"f(2);") == parser.Parse(ElementId{0, 0, 0, 0, 2, 0}, U"4/3;"));
-    parser.Parse(ElementId{0, 0, 0, 0, 1}, U"f(x)=x/4;");
-    ASSERT_TRUE(parser.Parse(ElementId{0, 0, 0, 2, 3, 1}, U"f(2);") == parser.Parse(ElementId{0, 0, 0, 2, 3, 1}, U"4/3;")) << 
-        parser.Parse(ElementId{0, 0, 0, 2, 3, 1}, U"f(2);").ToStdString();
+    parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"f(x)=2*x/3;");
+    ASSERT_TRUE(parser.Parse(LogicalId{0, 0, 0, 0, 3}, U"f(2);") == parser.Parse(LogicalId{0, 0, 0, 0, 2, 0}, U"4/3;"));
+    parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"f(x)=x/4;");
+    ASSERT_TRUE(parser.Parse(LogicalId{0, 0, 0, 2, 3, 1}, U"f(2);") == parser.Parse(LogicalId{0, 0, 0, 2, 3, 1}, U"4/3;")) << 
+        parser.Parse(LogicalId{0, 0, 0, 2, 3, 1}, U"f(2);").ToStdString();
 }
 
 TEST_F(CalcTestRational, functions2)
 {
-    auto r = parser.Parse(ElementId{0, 0, 1}, U"3pow(2,3);", 3);
+    auto r = parser.Parse(LogicalId{0, 0, 1}, U"3pow(2,3);", 3);
     ASSERT_TRUE(r.ToStdString() == "24") << r.ToStdString();
 }
 
 TEST_F(CalcTestRational, functions3)
 {
-    EXPECT_THROW(parser.Parse(ElementId{0, 0, 1}, U"pow(2,1/3);", 3), yutovo_calculator::MathException) << 
-        parser.Parse(ElementId{0, 0, 1}, U"pow(2,1/3);").ToStdString();
+    EXPECT_THROW(parser.Parse(LogicalId{0, 0, 1}, U"pow(2,1/3);", 3), yutovo_calculator::MathException) << 
+        parser.Parse(LogicalId{0, 0, 1}, U"pow(2,1/3);").ToStdString();
 
-    auto r = parser.Parse(ElementId{0, 0, 1}, U"pow(2,6/3);", 3);
+    auto r = parser.Parse(LogicalId{0, 0, 1}, U"pow(2,6/3);", 3);
     ASSERT_TRUE(r.ToStdString() == "4") << r.ToStdString();
 }
 
 TEST_F(CalcTestRational, symbols1)
 {
-    EXPECT_THROW(parser.Parse(ElementId{0, 0, 0, 0, 1}, U"•;"), yutovo_calculator::SyntaxException) << parser.Parse(ElementId{0, 0, 0, 0, 1}, U"•;").ToStdString();
-    EXPECT_THROW(parser.Parse(ElementId{0, 0, 0, 0, 1}, U"‣;"), yutovo_calculator::SyntaxException) << parser.Parse(ElementId{0, 0, 0, 0, 1}, U"‣;").ToStdString();
+    EXPECT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"•;"), yutovo_calculator::SyntaxException) << parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"•;").ToStdString();
+    EXPECT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"‣;"), yutovo_calculator::SyntaxException) << parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"‣;").ToStdString();
 }
 
 TEST_F(CalcTestRational, errors1)
 {
-    EXPECT_THROW(parser.Parse(ElementId{0, 0, 0, 0, 1}, U"123"), yutovo_calculator::SyntaxException);
-    EXPECT_THROW(parser.Parse(ElementId{0, 0, 0, 0, 2}, U"123+(2/3)"), yutovo_calculator::SyntaxException);
-    EXPECT_THROW(parser.Parse(ElementId{0, 0, 0, 0, 3}, U"123+3;45"), yutovo_calculator::SyntaxException);
+    EXPECT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"123"), yutovo_calculator::SyntaxException);
+    EXPECT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"123+(2/3)"), yutovo_calculator::SyntaxException);
+    EXPECT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 3}, U"123+3;45"), yutovo_calculator::SyntaxException);
 }
 
 TEST_F(CalcTestRational, errors2)
 {
     try
     {
-        parser.Parse(ElementId{0, 0, 1}, U";");
+        parser.Parse(LogicalId{0, 0, 1}, U";");
     }
     catch (yutovo_calculator::SyntaxException& ex)
     {
-        ASSERT_TRUE(ex.id == MakeElementId(ElementId{0, 0, 1}) && ex.ex_id == ParserExceptionCode::ExpressionExpected && ex.pos == 0) << ex.ex_id;
+        ASSERT_TRUE((ex.id == LogicalId{0, 0, 1}) && ex.ex_id == ParserExceptionCode::ExpressionExpected && ex.pos == 0) << ex.ex_id;
+        return;
+    }
+    ASSERT_FALSE(true);
+}
+
+TEST_F(CalcTestRational, errors3)
+{
+    try
+    {
+        parser.Parse(LogicalId{0, 0, 1}, U"func(3)+5;");
+    }
+    catch (yutovo_calculator::SyntaxException& ex)
+    {
+        ASSERT_TRUE((ex.id == LogicalId{0, 0, 1}) && ex.ex_id == ParserExceptionCode::UnknownIdentifier && ex.pos == 0 && ex.size == 4) << ex.ex_id;
         return;
     }
     ASSERT_FALSE(true);
@@ -106,60 +120,60 @@ TEST_F(CalcTestRational, errors2)
 
 TEST_F(CalcTestRational, rationals1)
 {
-    ASSERT_TRUE(parser.Parse(ElementId{0, 0, 0, 0, 1}, U"2/4;") == parser.Parse(ElementId{0, 0, 0, 0, 2}, U"1/2;")) << 
-        parser.Parse(ElementId{0, 0, 0, 0, 1}, U"2/4;").ToStdString();
+    ASSERT_TRUE(parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"2/4;") == parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"1/2;")) << 
+        parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"2/4;").ToStdString();
 }
 
 TEST_F(CalcTestRational, rationals2)
 {
-    ASSERT_TRUE(parser.Parse(ElementId{0, 0, 0, 0, 1}, U"2(1/4);") == parser.Parse(ElementId{0, 0, 0, 0, 2}, U"9/4;")) << 
-        parser.Parse(ElementId{0, 0, 0, 0, 1}, U"2(1/4);").ToStdString();
-    ASSERT_TRUE(parser.Parse(ElementId{0, 0, 0, 0, 1}, U"3*22(3/5);") == parser.Parse(ElementId{0, 0, 0, 0, 2}, U"339/5;")) << 
-        parser.Parse(ElementId{0, 0, 0, 0, 1}, U"3*22(3/5);").ToStdString();
+    ASSERT_TRUE(parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"2(1/4);") == parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"9/4;")) << 
+        parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"2(1/4);").ToStdString();
+    ASSERT_TRUE(parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"3*22(3/5);") == parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"339/5;")) << 
+        parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"3*22(3/5);").ToStdString();
 }
 
 TEST_F(CalcTestRational, rationals3)
 {
-    Rational res = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"+3/4;");
+    Rational res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"+3/4;");
     ASSERT_TRUE(res.ToStdString() == "3/4") << res.ToStdString();
-    res = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"-3/4;");
+    res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"-3/4;");
     ASSERT_TRUE(res.ToStdString() == "-3/4") << res.ToStdString();
 }
 
 TEST_F(CalcTestRational, rationals4)
 {
-    Rational res = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"2(5/(4*2));");
+    Rational res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"2(5/(4*2));");
     ASSERT_TRUE(res.ToStdString() == "5/4") << res.ToStdString();
 }
 
 TEST_F(CalcTestRational, rationals5)
 {
-    Rational res = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"2.5;");
+    Rational res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"2.5;");
     ASSERT_TRUE(res.ToStdString() == "5/2") << res.ToStdString();
-    res = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"22.12;");
+    res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"22.12;");
     ASSERT_TRUE(res.ToStdString() == "553/25") << res.ToStdString();
-    res = parser.Parse(ElementId{0, 0, 0, 0, 1}, U".12;");
+    res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U".12;");
     ASSERT_TRUE(res.ToStdString() == "3/25") << res.ToStdString();
-    res = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"0.12;");
+    res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"0.12;");
     ASSERT_TRUE(res.ToStdString() == "3/25") << res.ToStdString();
-    res = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"12.;");
+    res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"12.;");
     ASSERT_TRUE(res.ToStdString() == "12") << res.ToStdString();
-    res = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"12.0;");
+    res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"12.0;");
     ASSERT_TRUE(res.ToStdString() == "12") << res.ToStdString();
-    res = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"54.990;");
+    res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"54.990;");
     ASSERT_TRUE(res.ToStdString() == "5499/100") << res.ToStdString();
 }
 
 TEST_F(CalcTestRational, rationals6)
 {
     parser.SetLocale(Language::Russian);
-    Rational res = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"2.5;");
+    Rational res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"2.5;");
     ASSERT_TRUE(res.ToStdString() == "5/2") << res.ToStdString();
 }
 
 TEST_F(CalcTestRational, proper1)
 {
-    auto res = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"(5/4);");
+    auto res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"(5/4);");
     Integer i, n, d;
     res.ToProper(i, n, d);
     ASSERT_TRUE(i.ToStdString() == "1");
@@ -169,7 +183,7 @@ TEST_F(CalcTestRational, proper1)
 
 TEST_F(CalcTestRational, proper2)
 {
-    auto res = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"(3/4);");
+    auto res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"(3/4);");
     Integer i, n, d;
     res.ToProper(i, n, d);
     ASSERT_TRUE(i.ToStdString() == "0");
@@ -179,7 +193,7 @@ TEST_F(CalcTestRational, proper2)
 
 TEST_F(CalcTestRational, proper3)
 {
-    auto res = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"-(2/3);");
+    auto res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"-(2/3);");
     Integer i, n, d;
     res.ToProper(i, n, d);
     ASSERT_TRUE(i.ToStdString() == "0") << i.ToStdString();
@@ -189,7 +203,7 @@ TEST_F(CalcTestRational, proper3)
 
 TEST_F(CalcTestRational, proper4)
 {
-    auto res = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"-(2/(-3));");
+    auto res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"-(2/(-3));");
     Integer i, n, d;
     res.ToProper(i, n, d);
     ASSERT_TRUE(i.ToStdString() == "0") << i.ToStdString();
@@ -199,7 +213,7 @@ TEST_F(CalcTestRational, proper4)
 
 TEST_F(CalcTestRational, proper5)
 {
-    auto res = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"((-2)/(-3));");
+    auto res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"((-2)/(-3));");
     Integer i, n, d;
     res.ToProper(i, n, d);
     ASSERT_TRUE(i.ToStdString() == "0") << i.ToStdString();
@@ -209,7 +223,7 @@ TEST_F(CalcTestRational, proper5)
 
 TEST_F(CalcTestRational, proper6)
 {
-    auto res = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"((-7)/3);");
+    auto res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"((-7)/3);");
     Integer i, n, d;
     res.ToProper(i, n, d);
     ASSERT_TRUE(i.ToStdString() == "-2") << i.ToStdString();
@@ -219,7 +233,7 @@ TEST_F(CalcTestRational, proper6)
 
 TEST_F(CalcTestRational, proper7)
 {
-    auto res = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"(7/(-3));");
+    auto res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"(7/(-3));");
     Integer i, n, d;
     res.ToProper(i, n, d);
     ASSERT_TRUE(i.ToStdString() == "-2") << i.ToStdString();
@@ -229,7 +243,7 @@ TEST_F(CalcTestRational, proper7)
 
 TEST_F(CalcTestRational, proper8)
 {
-    auto res = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"(2/(-3));");
+    auto res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"(2/(-3));");
     Integer i, n, d;
     res.ToProper(i, n, d);
     ASSERT_TRUE(i.ToStdString() == "0") << i.ToStdString();
@@ -239,128 +253,128 @@ TEST_F(CalcTestRational, proper8)
 
 TEST_F(CalcTestRational, units1)
 {
-    std::string s = parser.GetSuitableUnit(ElementId{0, 0, 0, 0, 1}, parser.Parse(ElementId{0, 0, 0, 0, 1}, U"1m;")).ToStdString();
+    std::string s = parser.GetSuitableUnit(LogicalId{0, 0, 0, 0, 1}, parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"1m;")).ToStdString();
     ASSERT_TRUE(s == "1(m)") << s;
-    s = parser.GetSuitableUnit(ElementId{0, 0, 0, 0, 1}, parser.Parse(ElementId{0, 0, 0, 0, 1}, U"2/3*m;")).ToStdString();
+    s = parser.GetSuitableUnit(LogicalId{0, 0, 0, 0, 1}, parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"2/3*m;")).ToStdString();
     ASSERT_TRUE(s == "2/3(m)") << s;
-    s = parser.GetSuitableUnit(ElementId{0, 0, 0, 0, 1}, parser.Parse(ElementId{0, 0, 0, 0, 1}, U"(2)/(3)m*2m;")).ToStdString();
+    s = parser.GetSuitableUnit(LogicalId{0, 0, 0, 0, 1}, parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"(2)/(3)m*2m;")).ToStdString();
     ASSERT_TRUE(s == "4/3(m^2)") << s;
 }
 
 TEST_F(CalcTestRational, units2)
 {
-    std::string s = parser.GetSuitableUnit(ElementId{0, 0, 0, 0, 1}, parser.Parse(ElementId{0, 0, 0, 0, 1}, U"2/m;")).ToStdString();
+    std::string s = parser.GetSuitableUnit(LogicalId{0, 0, 0, 0, 1}, parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"2/m;")).ToStdString();
     ASSERT_TRUE(s == "2(1/(m))") << s;
-    s = parser.GetSuitableUnit(ElementId{0, 0, 0, 0, 1}, parser.Parse(ElementId{0, 0, 0, 0, 1}, U"2*(1/m);")).ToStdString();
+    s = parser.GetSuitableUnit(LogicalId{0, 0, 0, 0, 1}, parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"2*(1/m);")).ToStdString();
     ASSERT_TRUE(s == "2(1/(m))") << s;
-    s = parser.GetSuitableUnit(ElementId{0, 0, 0, 0, 1}, parser.Parse(ElementId{0, 0, 0, 0, 1}, U"2m*3*(1/m);")).ToStdString();
+    s = parser.GetSuitableUnit(LogicalId{0, 0, 0, 0, 1}, parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"2m*3*(1/m);")).ToStdString();
     ASSERT_TRUE(s == "6") << s;
 }
 
 TEST_F(CalcTestRational, units3)
 {
-    std::string s = parser.GetSuitableUnit(ElementId{0, 0, 0, 0, 1}, parser.Parse(ElementId{0, 0, 0, 0, 1}, U"3*(2)/(m);")).ToStdString();
+    std::string s = parser.GetSuitableUnit(LogicalId{0, 0, 0, 0, 1}, parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"3*(2)/(m);")).ToStdString();
     ASSERT_TRUE(s == "6(1/(m))") << s;
-    s = parser.GetSuitableUnit(ElementId{0, 0, 0, 0, 1}, parser.Parse(ElementId{0, 0, 0, 0, 1}, U"3*(6m)/(3s);")).ToStdString();
+    s = parser.GetSuitableUnit(LogicalId{0, 0, 0, 0, 1}, parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"3*(6m)/(3s);")).ToStdString();
     ASSERT_TRUE(s == "6((m)/(s))") << s;
 }
 
 TEST_F(CalcTestRational, units4)
 {
-    std::string s = parser.GetSuitableUnit(ElementId{0, 0, 0, 0, 1}, parser.Parse(ElementId{0, 0, 0, 0, 1}, U"(2)/(3)m+3m;")).ToStdString();
+    std::string s = parser.GetSuitableUnit(LogicalId{0, 0, 0, 0, 1}, parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"(2)/(3)m+3m;")).ToStdString();
     ASSERT_TRUE(s == "11/3(m)") << s;
-    EXPECT_THROW(parser.Parse(ElementId{0, 0, 1}, U"3m+4;"), yutovo_calculator::MathException);
-    EXPECT_THROW(parser.Parse(ElementId{0, 0, 1}, U"4/5+3m+4;"), yutovo_calculator::MathException);
+    EXPECT_THROW(parser.Parse(LogicalId{0, 0, 1}, U"3m+4;"), yutovo_calculator::MathException);
+    EXPECT_THROW(parser.Parse(LogicalId{0, 0, 1}, U"4/5+3m+4;"), yutovo_calculator::MathException);
 }
 
 TEST_F(CalcTestRational, units5)
 {
-    std::string s = parser.GetSuitableUnit(ElementId{0, 0, 0, 0, 1}, parser.Parse(ElementId{0, 0, 0, 0, 1}, U"(5)/(3)m-3m;")).ToStdString();
+    std::string s = parser.GetSuitableUnit(LogicalId{0, 0, 0, 0, 1}, parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"(5)/(3)m-3m;")).ToStdString();
     ASSERT_TRUE(s == "-4/3(m)") << s;
-    EXPECT_THROW(parser.Parse(ElementId{0, 0, 1}, U"3m-4;"), yutovo_calculator::MathException);
-    EXPECT_THROW(parser.Parse(ElementId{0, 0, 1}, U"4/5-3m-4;"), yutovo_calculator::MathException);
+    EXPECT_THROW(parser.Parse(LogicalId{0, 0, 1}, U"3m-4;"), yutovo_calculator::MathException);
+    EXPECT_THROW(parser.Parse(LogicalId{0, 0, 1}, U"4/5-3m-4;"), yutovo_calculator::MathException);
 }
 
 TEST_F(CalcTestRational, units6)
 {
-    std::string s = parser.GetSuitableUnit(ElementId{0, 0, 0, 0, 1}, parser.Parse(ElementId{0, 0, 0, 0, 1}, U"pow(3m,2);")).ToStdString();
+    std::string s = parser.GetSuitableUnit(LogicalId{0, 0, 0, 0, 1}, parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"pow(3m,2);")).ToStdString();
     ASSERT_TRUE(s == "9(m^2)") << s;
-    s = parser.GetSuitableUnit(ElementId{0, 0, 0, 0, 1}, parser.Parse(ElementId{0, 0, 0, 0, 1}, U"pow(3m/s,2);")).ToStdString();
+    s = parser.GetSuitableUnit(LogicalId{0, 0, 0, 0, 1}, parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"pow(3m/s,2);")).ToStdString();
     ASSERT_TRUE(s == "9(Gy)") << s;
-    s = parser.GetSuitableUnit(ElementId{0, 0, 0, 0, 1}, parser.Parse(ElementId{0, 0, 0, 0, 1}, U"5m/pow(s,2);")).ToStdString();
+    s = parser.GetSuitableUnit(LogicalId{0, 0, 0, 0, 1}, parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"5m/pow(s,2);")).ToStdString();
     ASSERT_TRUE(s == "5((m)/(s^2))") << s;
 }
 
 TEST_F(CalcTestRational, units7)
 {
-    parser.Parse(ElementId{0, 0, 0, 0, 0, 1}, U"km~1000m;");
-    std::string s = parser.GetSuitableUnit(ElementId{0, 0, 0, 0, 1}, parser.Parse(ElementId{0, 0, 0, 0, 2}, U"1km;")).ToStdString();
+    parser.Parse(LogicalId{0, 0, 0, 0, 0, 1}, U"km~1000m;");
+    std::string s = parser.GetSuitableUnit(LogicalId{0, 0, 0, 0, 1}, parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"1km;")).ToStdString();
     ASSERT_TRUE(s == "1(km)") << s;
 }
 
 TEST_F(CalcTestRational, units8)
 {
-    std::string s = parser.GetSuitableUnit(ElementId{0, 0, 0, 0, 1}, parser.Parse(ElementId{0, 0, 0, 0, 2}, U"2m;")).ToStdString();
+    std::string s = parser.GetSuitableUnit(LogicalId{0, 0, 0, 0, 1}, parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"2m;")).ToStdString();
     ASSERT_TRUE(s == "2(m)") << s;
-    s = parser.GetSuitableUnit(ElementId{0, 0, 0, 0, 1}, parser.Parse(ElementId{0, 0, 0, 0, 2}, U"2/100*m;")).ToStdString();
+    s = parser.GetSuitableUnit(LogicalId{0, 0, 0, 0, 1}, parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"2/100*m;")).ToStdString();
     ASSERT_TRUE(s == "2(cm)") << s;
-    s = parser.GetSuitableUnit(ElementId{0, 0, 0, 0, 1}, parser.Parse(ElementId{0, 0, 0, 0, 2}, U"(2)/(1000)m;")).ToStdString();
+    s = parser.GetSuitableUnit(LogicalId{0, 0, 0, 0, 1}, parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"(2)/(1000)m;")).ToStdString();
     ASSERT_TRUE(s == "2(mm)") << s;
-    s = parser.GetSuitableUnit(ElementId{0, 0, 0, 0, 1}, parser.Parse(ElementId{0, 0, 0, 0, 2}, U"200m;")).ToStdString();
+    s = parser.GetSuitableUnit(LogicalId{0, 0, 0, 0, 1}, parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"200m;")).ToStdString();
     ASSERT_TRUE(s == "200(m)") << s;
-    s = parser.GetSuitableUnit(ElementId{0, 0, 0, 0, 1}, parser.Parse(ElementId{0, 0, 0, 0, 2}, U"(3000)/(2)m;")).ToStdString();
+    s = parser.GetSuitableUnit(LogicalId{0, 0, 0, 0, 1}, parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"(3000)/(2)m;")).ToStdString();
     ASSERT_TRUE(s == "3/2(km)") << s;
 }
 
 TEST_F(CalcTestRational, units9)
 {
-    std::string s = parser.GetSuitableUnit(ElementId{0, 0, 0, 0, 1}, parser.Parse(ElementId{0, 0, 0, 0, 2}, U"(1)/(5)m/s;")).ToStdString();
+    std::string s = parser.GetSuitableUnit(LogicalId{0, 0, 0, 0, 1}, parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"(1)/(5)m/s;")).ToStdString();
     ASSERT_TRUE(s == "2((dm)/(s))") << s;
-    s = parser.GetSuitableUnit(ElementId{0, 0, 0, 0, 1}, parser.Parse(ElementId{0, 0, 0, 0, 2}, U"5000m/s;")).ToStdString();
+    s = parser.GetSuitableUnit(LogicalId{0, 0, 0, 0, 1}, parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"5000m/s;")).ToStdString();
     ASSERT_TRUE(s == "5((km)/(s))") << s;
 }
 
 TEST_F(CalcTestRational, units10)
 {
-    std::string s = parser.GetSuitableUnit(ElementId{0, 0, 0, 0, 1}, parser.Parse(ElementId{0, 0, 0, 0, 2}, U"1Hz;")).ToStdString();
+    std::string s = parser.GetSuitableUnit(LogicalId{0, 0, 0, 0, 1}, parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"1Hz;")).ToStdString();
     ASSERT_TRUE(s == "1(Hz)") << s;
-    s = parser.GetSuitableUnit(ElementId{0, 0, 0, 0, 1}, parser.Parse(ElementId{0, 0, 0, 0, 2}, U"2000Hz;")).ToStdString();
+    s = parser.GetSuitableUnit(LogicalId{0, 0, 0, 0, 1}, parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"2000Hz;")).ToStdString();
     ASSERT_TRUE(s == "2(kHz)") << s;
-    s = parser.GetSuitableUnit(ElementId{0, 0, 0, 0, 1}, parser.Parse(ElementId{0, 0, 0, 0, 2}, U"50*(1/s);")).ToStdString();
+    s = parser.GetSuitableUnit(LogicalId{0, 0, 0, 0, 1}, parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"50*(1/s);")).ToStdString();
     ASSERT_TRUE(s == "50(Hz)") << s;
-    s = parser.GetSuitableUnit(ElementId{0, 0, 0, 0, 1}, parser.Parse(ElementId{0, 0, 0, 0, 2}, U"50*(1)/(s);")).ToStdString();
+    s = parser.GetSuitableUnit(LogicalId{0, 0, 0, 0, 1}, parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"50*(1)/(s);")).ToStdString();
     ASSERT_TRUE(s == "50(Hz)") << s;
 }
 
 TEST_F(CalcTestRational, units11)
 {
-    std::string s = parser.GetSuitableUnit(ElementId{0, 0, 0, 0, 1}, parser.Parse(ElementId{0, 0, 0, 0, 2}, U"10kg*10m/(2*pow(s,2));")).ToStdString();
+    std::string s = parser.GetSuitableUnit(LogicalId{0, 0, 0, 0, 1}, parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"10kg*10m/(2*pow(s,2));")).ToStdString();
     ASSERT_TRUE(s == "50(N)") << s;
-    s = parser.GetSuitableUnit(ElementId{0, 0, 0, 0, 1}, parser.Parse(ElementId{0, 0, 0, 0, 2}, U"1000kg*10m/(2*pow(s,2));")).ToStdString();
+    s = parser.GetSuitableUnit(LogicalId{0, 0, 0, 0, 1}, parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"1000kg*10m/(2*pow(s,2));")).ToStdString();
     ASSERT_TRUE(s == "5(kN)") << s;
 }
 
 TEST_F(CalcTestRational, units12)
 {
-    std::string t = parser.GetSuitableUnit(ElementId{0, 0, 0, 0, 1}, parser.Parse(ElementId{0, 0, 0, 0, 2}, U"liniya{rus};")).ToStdString();
+    std::string t = parser.GetSuitableUnit(LogicalId{0, 0, 0, 0, 1}, parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"liniya{rus};")).ToStdString();
     ASSERT_TRUE(t == "1(liniya){rus}") << t;
 }
 
 TEST_F(CalcTestRational, units13)
 {
-    std::string t = parser.GetSuitableUnit(ElementId{0, 0, 0, 0, 1}, parser.Parse(ElementId{0, 0, 0, 0, 2}, U"2*km;")).ToStdString();
+    std::string t = parser.GetSuitableUnit(LogicalId{0, 0, 0, 0, 1}, parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"2*km;")).ToStdString();
     ASSERT_TRUE(t == "2(km)") << t;
 }
 
 TEST_F(CalcTestRational, units14)
 {
-    std::string t = parser.GetSuitableUnit(ElementId{0, 0, 0, 0, 1}, parser.Parse(ElementId{0, 0, 0, 0, 2}, U"7fut{rus};")).ToStdString();
+    std::string t = parser.GetSuitableUnit(LogicalId{0, 0, 0, 0, 1}, parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"7fut{rus};")).ToStdString();
     ASSERT_TRUE(t == "1(sazhen){rus}") << t;
 }
 
 TEST_F(CalcTestRational, units15)
 {
-    ElementId id{0, 0, 0, 0, 0, 0, 0, 2, 0};
+    LogicalId id{0, 0, 0, 0, 0, 0, 0, 2, 0};
     auto val = parser.Parse(id, U"5*(km/hour);");
     std::vector<Unit> cast_units;
     parser.GetCastUnits(id, val, cast_units);
@@ -372,82 +386,82 @@ TEST_F(CalcTestRational, units15)
 
 TEST_F(CalcTestRational, units16)
 {
-    std::string t = parser.GetSuitableUnit(ElementId{0, 0, 0, 0, 1}, parser.Parse(ElementId{0, 0, 0, 0, 2}, U"(10)/(4s);")).ToStdString();
+    std::string t = parser.GetSuitableUnit(LogicalId{0, 0, 0, 0, 1}, parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"(10)/(4s);")).ToStdString();
     ASSERT_TRUE(t == "5/2(Hz)") << t;
-    t = parser.GetSuitableUnit(ElementId{0, 0, 0, 0, 1}, parser.Parse(ElementId{0, 0, 0, 0, 2}, U"(50)/(4s);")).ToStdString();
+    t = parser.GetSuitableUnit(LogicalId{0, 0, 0, 0, 1}, parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"(50)/(4s);")).ToStdString();
     ASSERT_TRUE(t == "25/2(Hz)") << t;
 }
 
 TEST_F(CalcTestRational, units17)
 {
-    std::string t = parser.GetSuitableUnit(ElementId{0, 0, 0, 0, 1}, parser.Parse(ElementId{0, 0, 0, 0, 2}, U"(1m)/(3s);")).ToStdString();
+    std::string t = parser.GetSuitableUnit(LogicalId{0, 0, 0, 0, 1}, parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"(1m)/(3s);")).ToStdString();
     ASSERT_TRUE(t == "20((m)/(min))") << t;
 }
 
 TEST_F(CalcTestRational, units18)
 {
-    std::string t = parser.GetSuitableUnit(ElementId{0, 0, 0, 0, 1}, parser.Parse(ElementId{0, 0, 0, 0, 2}, U"(1/3)m;")).ToStdString();
+    std::string t = parser.GetSuitableUnit(LogicalId{0, 0, 0, 0, 1}, parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"(1/3)m;")).ToStdString();
     ASSERT_TRUE(t == "1/3(m)") << t;
 }
 
 TEST_F(CalcTestRational, units19)
 {
-    auto r = parser.Parse(ElementId{0, 0, 0, 0, 0, 0, 0, 2, 0}, U"-(1m-2m);");
-    std::string s = parser.GetSuitableUnit(ElementId{0, 0, 0, 0, 0, 0, 0, 2, 0}, r).ToStdString();
+    auto r = parser.Parse(LogicalId{0, 0, 0, 0, 0, 0, 0, 2, 0}, U"-(1m-2m);");
+    std::string s = parser.GetSuitableUnit(LogicalId{0, 0, 0, 0, 0, 0, 0, 2, 0}, r).ToStdString();
     ASSERT_TRUE(s == "1(m)") << s;
 
-    r = parser.Parse(ElementId{0, 0, 0, 0, 0, 0, 0, 2, 0}, U"+(2m-1m);");
-    s = parser.GetSuitableUnit(ElementId{0, 0, 0, 0, 0, 0, 0, 2, 0}, r).ToStdString();
+    r = parser.Parse(LogicalId{0, 0, 0, 0, 0, 0, 0, 2, 0}, U"+(2m-1m);");
+    s = parser.GetSuitableUnit(LogicalId{0, 0, 0, 0, 0, 0, 0, 2, 0}, r).ToStdString();
     ASSERT_TRUE(s == "1(m)") << s;
 }
 
 TEST_F(CalcTestRational, units20)
 {
-    auto r = parser.Parse(ElementId{0, 0, 1}, U"pow(2,3)m;", 3);
+    auto r = parser.Parse(LogicalId{0, 0, 1}, U"pow(2,3)m;", 3);
     ASSERT_TRUE(r.ToStdString() == "8(m)") << r.ToStdString();
 }
 
 TEST_F(CalcTestRational, compare1)
 {
-    std::string s = parser.Parse(ElementId{0, 0, 0, 0, 0, 0, 0, 2, 0}, U"(0<(2/3));").ToStdString();
+    std::string s = parser.Parse(LogicalId{0, 0, 0, 0, 0, 0, 0, 2, 0}, U"(0<(2/3));").ToStdString();
     ASSERT_TRUE(s == "1") << s;
-    s = parser.Parse(ElementId{0, 0, 0, 0, 0, 0, 0, 2, 0}, U"(2/3==2/3);").ToStdString();
+    s = parser.Parse(LogicalId{0, 0, 0, 0, 0, 0, 0, 2, 0}, U"(2/3==2/3);").ToStdString();
     ASSERT_TRUE(s == "1") << s;
-    s = parser.Parse(ElementId{0, 0, 0, 0, 0, 0, 0, 2, 0}, U"(4/3<>4/3);").ToStdString();
+    s = parser.Parse(LogicalId{0, 0, 0, 0, 0, 0, 0, 2, 0}, U"(4/3<>4/3);").ToStdString();
     ASSERT_TRUE(s == "0") << s;
 }
 
 TEST_F(CalcTestRational, compare2)
 {
-    parser.Parse(ElementId{0, 0, 0, 0, 0}, U"a=5/2;");
-    std::string s = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"(a<10);").ToStdString();
+    parser.Parse(LogicalId{0, 0, 0, 0, 0}, U"a=5/2;");
+    std::string s = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"(a<10);").ToStdString();
     ASSERT_TRUE(s == "1") << s;
-    s = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"(a>10);").ToStdString();
+    s = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"(a>10);").ToStdString();
     ASSERT_TRUE(s == "0") << s;
-    s = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"(a==5/2);").ToStdString();
+    s = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"(a==5/2);").ToStdString();
     ASSERT_TRUE(s == "1") << s;
-    s = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"(a<>10);").ToStdString();
+    s = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"(a<>10);").ToStdString();
     ASSERT_TRUE(s == "1") << s;
 }
 TEST_F(CalcTestRational, sum1)
 {
-    std::string s = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"loop(i=0,(i<=10),i=i+1,t=0,t=t+1);").ToStdString();
+    std::string s = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"loop(i=0,(i<=10),i=i+1,t=0,t=t+1);").ToStdString();
     ASSERT_TRUE(s == "11") << s;
-    s = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"loop(i=1,(i<=10),i=i+1,t=0,t=t+i);").ToStdString();
+    s = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"loop(i=1,(i<=10),i=i+1,t=0,t=t+i);").ToStdString();
     ASSERT_TRUE(s == "55") << s;
 }
 
 TEST_F(CalcTestRational, sum2)
 {
-    std::string s = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"loop(i=0,(i<=10),i=i+1,t1=0,t1=t1+loop(j=1,(j<=10),j=j+1,t2=0,t2=t2+i/j));").ToStdString();
+    std::string s = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"loop(i=0,(i<=10),i=i+1,t1=0,t1=t1+loop(j=1,(j<=10),j=j+1,t2=0,t2=t2+i/j));").ToStdString();
     ASSERT_TRUE(s == "81191/504") << s;
 }
 
 TEST_F(CalcTestRational, prod1)
 {
-    std::string s = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"loop(i=0,(i<=10),i=i+1,t=1,t=t*2/3);").ToStdString();
+    std::string s = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"loop(i=0,(i<=10),i=i+1,t=1,t=t*2/3);").ToStdString();
     ASSERT_TRUE(s == "2048/177147") << s;
-    s = parser.Parse(ElementId{0, 0, 0, 0, 1}, U"loop(i=1,(i<=10),i=i+1,t=1,t=t*i/5);").ToStdString();
+    s = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"loop(i=1,(i<=10),i=i+1,t=1,t=t*i/5);").ToStdString();
     ASSERT_TRUE(s == "145152/390625") << s;
 }
 

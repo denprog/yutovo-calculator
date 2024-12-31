@@ -15,7 +15,7 @@ template<typename Number> struct Solver;
 template<typename Number>
 struct Expression : qi::grammar<std::u32string::iterator, ExpressionNode<Number>(), unicode::space_type>
 {
-	Expression(ElementId id, std::u32string& expr, Solver<Number>* _solver);
+	Expression(LogicalId id, std::u32string& expr, Solver<Number>* _solver);
 
 	typedef boost::variant<
 		boost::recursive_wrapper<NumberNode<Number>>, 

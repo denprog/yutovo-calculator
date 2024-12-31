@@ -49,11 +49,10 @@ std::u32string ToUtfString(const std::string& str);
 std::u32string ToUtfString(const char* str);
 std::string ToBasicString(const std::u32string& str);
 
-ElementId MakeElementId(ElementId id);
-
 std::string ElementIdToString(const ElementId& id);
+std::string LogicalIdToString(const LogicalId& id);
 
-bool IsLess(const ElementId& id1, const ElementId& id2);
+bool IsLess(const LogicalId& id1, const LogicalId& id2);
 
 }
 

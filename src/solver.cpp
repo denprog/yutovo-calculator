@@ -65,7 +65,7 @@ Complex Solver<Complex>::operator()(UnitNode<Complex> const& op) const
 template<>
 Integer Solver<Integer>::operator()(UnitNode<Integer> const& op) const
 {
-    throw SyntaxException(op.id, SyntaxError, U"Identifier '" + op.name.name + U"' not found", op.pos, op.line);
+    throw SyntaxException(op.id, SyntaxError, U"Identifier '" + op.name.name + U"' not found", op.pos, op.name.name.length(), op.line);
 }
 
 template<>
@@ -83,7 +83,7 @@ Integer Solver<Integer>::operator()(UnaryOperationNode<Integer> const& op) const
     case '!':
         return !right;
     }
-    throw SyntaxException(op.id, SyntaxError, op.pos, op.line);
+    throw SyntaxException(op.id, SyntaxError, op.pos, 1, op.line);
 }
 
 template<>
@@ -99,7 +99,7 @@ Real Solver<Real>::operator()(UnaryOperationNode<Real> const& op) const
     case '-':
         return -right;
     }
-    throw SyntaxException(op.id, SyntaxError, op.pos, op.line);
+    throw SyntaxException(op.id, SyntaxError, op.pos, 1, op.line);
 }
 
 template<>
@@ -115,7 +115,7 @@ Rational Solver<Rational>::operator()(UnaryOperationNode<Rational> const& op) co
     case '-':
         return -right;
     }
-    throw SyntaxException(op.id, SyntaxError, op.pos, op.line);
+    throw SyntaxException(op.id, SyntaxError, op.pos, 1, op.line);
 }
 
 template<>
@@ -131,7 +131,7 @@ Complex Solver<Complex>::operator()(UnaryOperationNode<Complex> const& op) const
     case '-':
         return -right;
     }
-    throw SyntaxException(op.id, SyntaxError, op.pos, op.line);
+    throw SyntaxException(op.id, SyntaxError, op.pos, 1, op.line);
 }
 
 template<>
@@ -343,7 +343,7 @@ Integer Solver<Integer>::operator()(FunctionCallNode<Integer> const& op) const
             {
                 UnaryFunction u = boost::get<UnaryFunction>(*func);
                 if (op.arguments.size() != 1)
-                    throw SyntaxException(op.id, WrongArgumentsCount, U"Wrong arguments count in '" + op.name.name + U"'", op.pos, op.line);
+                    throw SyntaxException(op.id, WrongArgumentsCount, U"Wrong arguments count in '" + op.name.name + U"'", op.pos, op.name.name.length(), op.line);
                 
                 ExpressionNodesIter iter = op.arguments.begin();
                 Integer arg = (*this)(*iter);
@@ -357,7 +357,7 @@ Integer Solver<Integer>::operator()(FunctionCallNode<Integer> const& op) const
             {
                 BinaryFunction b = boost::get<BinaryFunction>(*func);
                 if (op.arguments.size() != 2)
-                    throw SyntaxException(op.id, WrongArgumentsCount, U"Wrong arguments count in '" + op.name.name + U"'", op.pos, op.line);
+                    throw SyntaxException(op.id, WrongArgumentsCount, U"Wrong arguments count in '" + op.name.name + U"'", op.pos, op.name.name.length(), op.line);
                 
                 ExpressionNodesIter iter = op.arguments.begin();
                 Integer arg1 = (*this)(*iter++);
@@ -375,7 +375,7 @@ Integer Solver<Integer>::operator()(FunctionCallNode<Integer> const& op) const
     }
 
     //there is no such a function		
-    throw SyntaxException(op.id, UnknownIdentifier, op.pos, op.line);
+    throw SyntaxException(op.id, UnknownIdentifier, op.pos, op.name.name.length(), op.line);
     
     return res;
 }
@@ -421,7 +421,7 @@ Rational Solver<Rational>::operator()(FunctionCallNode<Rational> const& op) cons
             {
                 UnaryFunction u = boost::get<UnaryFunction>(*func);
                 if (op.arguments.size() != 1)
-                    throw SyntaxException(op.id, WrongArgumentsCount, U"Wrong arguments count in '" + op.name.name + U"'", op.pos, op.line);
+                    throw SyntaxException(op.id, WrongArgumentsCount, U"Wrong arguments count in '" + op.name.name + U"'", op.pos, op.name.name.length(), op.line);
                 
                 ExpressionNodesIter iter = op.arguments.begin();
                 Rational arg = (*this)(*iter);
@@ -435,7 +435,7 @@ Rational Solver<Rational>::operator()(FunctionCallNode<Rational> const& op) cons
             {
                 BinaryFunction b = boost::get<BinaryFunction>(*func);
                 if (op.arguments.size() != 2)
-                    throw SyntaxException(op.id, WrongArgumentsCount, U"Wrong arguments count in '" + op.name.name + U"'", op.pos, op.line);
+                    throw SyntaxException(op.id, WrongArgumentsCount, U"Wrong arguments count in '" + op.name.name + U"'", op.pos, op.name.name.length(), op.line);
                 
                 ExpressionNodesIter iter = op.arguments.begin();
                 Rational arg1 = (*this)(*iter++);
@@ -453,7 +453,7 @@ Rational Solver<Rational>::operator()(FunctionCallNode<Rational> const& op) cons
     }
 
     //there is no such a function		
-    throw SyntaxException(op.id, UnknownIdentifier, U"Identifier '" + op.name.name + U"' not found", op.pos, op.line);
+    throw SyntaxException(op.id, UnknownIdentifier, U"Identifier '" + op.name.name + U"' not found", op.pos, op.name.name.length(), op.line);
     
     return res;
 }
@@ -485,7 +485,7 @@ Integer Solver<Integer>::operator()(FunctionCallStringNode<Integer> const& op) c
     }
 
     //there is no such a function		
-    throw SyntaxException(op.id, UnknownIdentifier, op.pos, op.line);
+    throw SyntaxException(op.id, UnknownIdentifier, op.pos, op.name.name.length(), op.line);
     
     return res;
 }
@@ -494,21 +494,21 @@ template<>
 Real Solver<Real>::operator()(FunctionCallStringNode<Real> const& op) const
 {
     //there is no such a function		
-    throw SyntaxException(op.id, UnknownIdentifier, op.pos, op.line);
+    throw SyntaxException(op.id, UnknownIdentifier, op.pos, op.name.name.length(), op.line);
 }
 
 template<>
 Rational Solver<Rational>::operator()(FunctionCallStringNode<Rational> const& op) const
 {
     //there is no such a function		
-    throw SyntaxException(op.id, UnknownIdentifier, op.pos, op.line);
+    throw SyntaxException(op.id, UnknownIdentifier, op.pos, op.name.name.length(), op.line);
 }
 
 template<>
 Complex Solver<Complex>::operator()(FunctionCallStringNode<Complex> const& op) const
 {
     //there is no such a function		
-    throw SyntaxException(op.id, UnknownIdentifier, op.pos, op.line);
+    throw SyntaxException(op.id, UnknownIdentifier, op.pos, op.name.name.length(), op.line);
 }
 
 template<>
@@ -555,7 +555,7 @@ Integer Solver<Integer>::operator()(IdentifierNode<Integer> const& op) const
     VariableNode<Integer>* v = FindVariable(op.name, op.subscript);
     if (v)
     {
-        ElementId _id = id;
+        LogicalId _id = id;
         id = v->id;
         Integer res = (*this)(v->expression);
         id = _id;
@@ -576,7 +576,7 @@ Integer Solver<Integer>::operator()(IdentifierNode<Integer> const& op) const
     }
     
     //there is no such an identifier
-    throw SyntaxException(op.id, UnknownIdentifier, U"Identifier '" + op.name + U"' not found", op.pos, op.line);
+    throw SyntaxException(op.id, UnknownIdentifier, U"Identifier '" + op.name + U"' not found", op.pos, op.name.length(), op.line);
     
     return 0;
 }
@@ -595,7 +595,7 @@ Real Solver<Real>::operator()(IdentifierNode<Real> const& op) const
     VariableNode<Real>* v = FindVariable(op.name, op.subscript);
     if (v)
     {
-        ElementId _id = id;
+        LogicalId _id = id;
         id = v->id;
         Real res = (*this)(v->expression);
         id = _id;
@@ -634,7 +634,7 @@ Real Solver<Real>::operator()(IdentifierNode<Real> const& op) const
     }
 
     //there is no such an identifier
-    throw SyntaxException(op.id, UnknownIdentifier, U"Identifier '" + op.name + U"' not found", op.pos, op.line);
+    throw SyntaxException(op.id, UnknownIdentifier, U"Identifier '" + op.name + U"' not found", op.pos, op.name.length(), op.line);
     
     return Real();
 }
@@ -653,7 +653,7 @@ Rational Solver<Rational>::operator()(IdentifierNode<Rational> const& op) const
     VariableNode<Rational>* v = FindVariable(op.name, op.subscript);
     if (v)
     {
-        ElementId _id = id;
+        LogicalId _id = id;
         id = v->id;
         Rational res = (*this)(v->expression);
         id = _id;
@@ -691,7 +691,7 @@ Rational Solver<Rational>::operator()(IdentifierNode<Rational> const& op) const
     }
 
     //there is no such an identifier
-    throw SyntaxException(op.id, UnknownIdentifier, U"Identifier '" + op.name + U"' not found", op.pos, op.line);
+    throw SyntaxException(op.id, UnknownIdentifier, U"Identifier '" + op.name + U"' not found", op.pos, op.name.length(), op.line);
     
     return 0;
 }
@@ -710,7 +710,7 @@ Complex Solver<Complex>::operator()(IdentifierNode<Complex> const& op) const
     VariableNode<Complex>* v = FindVariable(op.name, op.subscript);
     if (v)
     {
-        ElementId _id = id;
+        LogicalId _id = id;
         id = v->id;
         Complex res = (*this)(v->expression);
         id = _id;
@@ -735,7 +735,7 @@ Complex Solver<Complex>::operator()(IdentifierNode<Complex> const& op) const
         return Complex(MathHelper::ToBitPrecision(precision), 0, 1);
 
     //there is no such an identifier
-    throw SyntaxException(op.id, UnknownIdentifier, U"Identifier '" + op.name + U"' not found", op.pos, op.line);
+    throw SyntaxException(op.id, UnknownIdentifier, U"Identifier '" + op.name + U"' not found", op.pos, op.name.length(), op.line);
     
     return Complex();
 }
@@ -754,7 +754,7 @@ Integer Solver<Integer>::operator()(ImplicitStringMulNode<Integer> const& op) co
     VariableNode<Integer>* v = FindVariable(op.identifier.name, op.identifier.subscript);
     if (v)
     {
-        ElementId _id = id;
+        LogicalId _id = id;
         id = v->id;
         Integer res = (*this)(v->expression);
         id = _id;
@@ -775,7 +775,7 @@ Integer Solver<Integer>::operator()(ImplicitStringMulNode<Integer> const& op) co
     }
     
     //there is no such an identifier
-    throw SyntaxException(op.id, UnknownIdentifier, U"Identifier '" + op.identifier.name + U"' not found", op.pos, op.line);
+    throw SyntaxException(op.id, UnknownIdentifier, U"Identifier '" + op.identifier.name + U"' not found", op.pos, op.identifier.name.length(), op.line);
     
     return 0;
 }
@@ -794,7 +794,7 @@ Real Solver<Real>::operator()(ImplicitStringMulNode<Real> const& op) const
     VariableNode<Real>* v = FindVariable(op.identifier.name, op.identifier.subscript);
     if (v)
     {
-        ElementId _id = id;
+        LogicalId _id = id;
         id = v->id;
         Real res = (*this)(v->expression);
         id = _id;
@@ -833,7 +833,7 @@ Real Solver<Real>::operator()(ImplicitStringMulNode<Real> const& op) const
     }
 
     //there is no such an identifier
-    throw SyntaxException(op.id, UnknownIdentifier, U"Identifier '" + op.identifier.name + U"' not found", op.pos, op.line);
+    throw SyntaxException(op.id, UnknownIdentifier, U"Identifier '" + op.identifier.name + U"' not found", op.pos, op.identifier.name.length(), op.line);
     
     return Real();
 }
@@ -852,7 +852,7 @@ Rational Solver<Rational>::operator()(ImplicitStringMulNode<Rational> const& op)
     VariableNode<Rational>* v = FindVariable(op.identifier.name, op.identifier.subscript);
     if (v)
     {
-        ElementId _id = id;
+        LogicalId _id = id;
         id = v->id;
         Rational res = (*this)(v->expression);
         id = _id;
@@ -890,7 +890,7 @@ Rational Solver<Rational>::operator()(ImplicitStringMulNode<Rational> const& op)
     }
 
     //there is no such an identifier
-    throw SyntaxException(op.id, UnknownIdentifier, U"Identifier '" + op.identifier.name + U"' not found", op.pos, op.line);
+    throw SyntaxException(op.id, UnknownIdentifier, U"Identifier '" + op.identifier.name + U"' not found", op.pos, op.identifier.name.length(), op.line);
 
     return Rational();
 }
@@ -909,7 +909,7 @@ Complex Solver<Complex>::operator()(ImplicitStringMulNode<Complex> const& op) co
     VariableNode<Complex>* v = FindVariable(op.identifier.name, op.identifier.subscript);
     if (v)
     {
-        ElementId _id = id;
+        LogicalId _id = id;
         id = v->id;
         Complex res = (*this)(v->expression);
         id = _id;
@@ -934,7 +934,7 @@ Complex Solver<Complex>::operator()(ImplicitStringMulNode<Complex> const& op) co
         return (*this)(op.left) * Complex(MathHelper::ToBitPrecision(precision), 0, 1);
 
     //there is no such an identifier
-    throw SyntaxException(op.id, UnknownIdentifier, U"Identifier '" + op.identifier.name + U"' not found", op.pos, op.line);
+    throw SyntaxException(op.id, UnknownIdentifier, U"Identifier '" + op.identifier.name + U"' not found", op.pos, op.identifier.name.length(), op.line);
     
     return Complex();
 }
@@ -963,7 +963,7 @@ Real Solver<Real>::operator()(ImplicitDivMulNode<Real> const& op) const
     VariableNode<Real>* v = FindVariable(op.identifier.name, op.identifier.subscript);
     if (v)
     {
-        ElementId _id = id;
+        LogicalId _id = id;
         id = v->id;
         Real res = (*this)(v->expression);
         id = _id;
@@ -1010,7 +1010,7 @@ Real Solver<Real>::operator()(ImplicitDivMulNode<Real> const& op) const
     }
 
     //there is no such an identifier
-    throw SyntaxException(op.id, UnknownIdentifier, U"Identifier '" + op.identifier.name + U"' not found", op.pos, op.line);
+    throw SyntaxException(op.id, UnknownIdentifier, U"Identifier '" + op.identifier.name + U"' not found", op.pos, op.identifier.name.length(), op.line);
     
     return Real();
 }
@@ -1033,7 +1033,7 @@ Rational Solver<Rational>::operator()(ImplicitDivMulNode<Rational> const& op) co
     VariableNode<Rational>* v = FindVariable(op.identifier.name, op.identifier.subscript);
     if (v)
     {
-        ElementId _id = id;
+        LogicalId _id = id;
         id = v->id;
         Rational res = (*this)(v->expression);
         id = _id;
@@ -1080,7 +1080,7 @@ Rational Solver<Rational>::operator()(ImplicitDivMulNode<Rational> const& op) co
     }
 
     //there is no such an identifier
-    throw SyntaxException(op.id, UnknownIdentifier, U"Identifier '" + op.identifier.name + U"' not found", op.pos, op.line);
+    throw SyntaxException(op.id, UnknownIdentifier, U"Identifier '" + op.identifier.name + U"' not found", op.pos, op.identifier.name.length(), op.line);
     
     return Rational();
 }
@@ -1103,7 +1103,7 @@ Complex Solver<Complex>::operator()(ImplicitDivMulNode<Complex> const& op) const
     VariableNode<Complex>* v = FindVariable(op.identifier.name, op.identifier.subscript);
     if (v)
     {
-        ElementId _id = id;
+        LogicalId _id = id;
         id = v->id;
         Complex res = (*this)(v->expression);
         id = _id;
@@ -1132,17 +1132,17 @@ Complex Solver<Complex>::operator()(ImplicitDivMulNode<Complex> const& op) const
         return Complex(MathHelper::ToBitPrecision(precision), 0, 1);
 
     //there is no such an identifier
-    throw SyntaxException(op.id, UnknownIdentifier, U"Identifier '" + op.identifier.name + U"' not found", op.pos, op.line);
+    throw SyntaxException(op.id, UnknownIdentifier, U"Identifier '" + op.identifier.name + U"' not found", op.pos, op.identifier.name.length(), op.line);
     
     return Complex();
 }
 
 template<>
-Real Solver<Real>::operator()(ScriptNode<Real> const& script, ElementId _id, AngleMeasure _default_angle_measure, 
+Real Solver<Real>::operator()(ScriptNode<Real> const& script, LogicalId _id, AngleMeasure _default_angle_measure, 
     AngleMeasure _result_angle_measure, int _precision, Dependencies* _dependencies) const
 {
     if (script.list.empty())
-        throw SyntaxException(_id, ParserExceptionCode::ExpressionExpected);
+        throw SyntaxException(_id, ParserExceptionCode::ExpressionExpected, -1, 0, -1);
     
     id = _id;
     dependencies = _dependencies;
@@ -1177,11 +1177,11 @@ Real Solver<Real>::operator()(ScriptNode<Real> const& script, ElementId _id, Ang
 }
 
 template<>
-Integer Solver<Integer>::operator()(ScriptNode<Integer> const& script, ElementId _id, AngleMeasure _default_angle_measure, 
+Integer Solver<Integer>::operator()(ScriptNode<Integer> const& script, LogicalId _id, AngleMeasure _default_angle_measure, 
     AngleMeasure _result_angle_measure, int _precision, Dependencies* _dependencies) const
 {
     if (script.list.empty())
-        throw SyntaxException(_id, ParserExceptionCode::ExpressionExpected);
+        throw SyntaxException(_id, ParserExceptionCode::ExpressionExpected, -1, 0, -1);
     
     id = _id;
     dependencies = _dependencies;
@@ -1200,11 +1200,11 @@ Integer Solver<Integer>::operator()(ScriptNode<Integer> const& script, ElementId
 }
 
 template<>
-Rational Solver<Rational>::operator()(ScriptNode<Rational> const& script, ElementId _id, AngleMeasure _default_angle_measure, 
+Rational Solver<Rational>::operator()(ScriptNode<Rational> const& script, LogicalId _id, AngleMeasure _default_angle_measure, 
     AngleMeasure _result_angle_measure, int _precision, Dependencies* _dependencies) const
 {
     if (script.list.empty())
-        throw SyntaxException(_id, ParserExceptionCode::ExpressionExpected);
+        throw SyntaxException(_id, ParserExceptionCode::ExpressionExpected, -1, 0, -1);
     
     id = _id;
     dependencies = _dependencies;
@@ -1223,11 +1223,11 @@ Rational Solver<Rational>::operator()(ScriptNode<Rational> const& script, Elemen
 }
 
 template<>
-Complex Solver<Complex>::operator()(ScriptNode<Complex> const& script, ElementId _id, AngleMeasure _default_angle_measure, 
+Complex Solver<Complex>::operator()(ScriptNode<Complex> const& script, LogicalId _id, AngleMeasure _default_angle_measure, 
     AngleMeasure _result_angle_measure, int _precision, Dependencies* _dependencies) const
 {
     if (script.list.empty())
-        throw SyntaxException(_id, ParserExceptionCode::ExpressionExpected);
+        throw SyntaxException(_id, ParserExceptionCode::ExpressionExpected, -1, 0, -1);
     
     id = _id;
     dependencies = _dependencies;
@@ -1262,49 +1262,49 @@ Complex Solver<Complex>::operator()(ScriptNode<Complex> const& script, ElementId
 }
 
 template<>
-Real Solver<Real>::GetSuitableUnit(const ElementId _id, const Real& val, const std::u32string& system, const bool buildin) const
+Real Solver<Real>::GetSuitableUnit(const LogicalId _id, const Real& val, const std::u32string& system, const bool buildin) const
 {
     return GetSuitableUnitImpl(_id, val, system, buildin);
 }
 
 template<>
-Rational Solver<Rational>::GetSuitableUnit(const ElementId _id, const Rational& val, const std::u32string& system, const bool buildin) const
+Rational Solver<Rational>::GetSuitableUnit(const LogicalId _id, const Rational& val, const std::u32string& system, const bool buildin) const
 {
     return GetSuitableUnitImpl(_id, val, system, buildin);
 }
 
 template<>
-Integer Solver<Integer>::GetSuitableUnit(const ElementId _id, const Integer& val, const std::u32string& system, const bool buildin) const
+Integer Solver<Integer>::GetSuitableUnit(const LogicalId _id, const Integer& val, const std::u32string& system, const bool buildin) const
 {
     return val;
 }
 
 template<>
-Complex Solver<Complex>::GetSuitableUnit(const ElementId _id, const Complex& val, const std::u32string& system, const bool buildin) const
+Complex Solver<Complex>::GetSuitableUnit(const LogicalId _id, const Complex& val, const std::u32string& system, const bool buildin) const
 {
     throw MathException(id, ParserExceptionCode::CannotCastToUnit);
 }
 
 template<>
-Real Solver<Real>::CastToUnit(const ElementId id, const Real& val, const Unit& unit) const
+Real Solver<Real>::CastToUnit(const LogicalId id, const Real& val, const Unit& unit) const
 {
     return CastToUnitImpl(id, val, unit);
 }
 
 template<>
-Rational Solver<Rational>::CastToUnit(const ElementId id, const Rational& val, const Unit& unit) const
+Rational Solver<Rational>::CastToUnit(const LogicalId id, const Rational& val, const Unit& unit) const
 {
     return CastToUnitImpl(id, val, unit);
 }
 
 template<>
-Integer Solver<Integer>::CastToUnit(const ElementId id, const Integer& val, const Unit& unit) const
+Integer Solver<Integer>::CastToUnit(const LogicalId id, const Integer& val, const Unit& unit) const
 {
     throw MathException(id, ParserExceptionCode::CannotCastToUnit);
 }
 
 template<>
-Complex Solver<Complex>::CastToUnit(const ElementId id, const Complex& val, const Unit& unit) const
+Complex Solver<Complex>::CastToUnit(const LogicalId id, const Complex& val, const Unit& unit) const
 {
     throw MathException(id, ParserExceptionCode::CannotCastToUnit);
 }

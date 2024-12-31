@@ -27,7 +27,7 @@ struct Parser
 {
     Parser(const int precision, const Language _language, uint64_t _max_time);
     
-    Number Parse(ElementId id, std::u32string expression, Dependencies* dependencies, AngleMeasure default_angle_measure, AngleMeasure result_angle_measure, 
+    Number Parse(LogicalId id, std::u32string expression, Dependencies* dependencies, AngleMeasure default_angle_measure, AngleMeasure result_angle_measure, 
         Notation default_notation, const int precision = -1, ParserContext* _context = nullptr)
     {
         if (expression.empty() || expression == U";")
@@ -53,64 +53,64 @@ struct Parser
         return solver(script_node, id, default_angle_measure, result_angle_measure, precision, dependencies);
     }
 
-    Number Parse(ElementId id, std::u32string expression, AngleMeasure default_angle_measure, AngleMeasure result_angle_measure, const int precision = -1, 
+    Number Parse(LogicalId id, std::u32string expression, AngleMeasure default_angle_measure, AngleMeasure result_angle_measure, const int precision = -1, 
         ParserContext* _context = nullptr)
     {
         Dependencies dependencies;
         return Parse(id, expression, &dependencies, default_angle_measure, result_angle_measure, Notation::Decimal, precision, _context);
     }
 
-    Number Parse(ElementId id, std::string expression, Dependencies* dependencies, AngleMeasure default_angle_measure, AngleMeasure result_angle_measure, 
+    Number Parse(LogicalId id, std::string expression, Dependencies* dependencies, AngleMeasure default_angle_measure, AngleMeasure result_angle_measure, 
         const int precision = -1, ParserContext* _context = nullptr)
     {
         return Parse(id, ToUtfString(expression), dependencies, default_angle_measure, result_angle_measure, Notation::Decimal, precision, _context);
     }
 
-    Number Parse(ElementId id, std::u32string expression, Dependencies* dependencies, AngleMeasure default_angle_measure, AngleMeasure result_angle_measure, 
+    Number Parse(LogicalId id, std::u32string expression, Dependencies* dependencies, AngleMeasure default_angle_measure, AngleMeasure result_angle_measure, 
         const int precision = -1, ParserContext* _context = nullptr)
     {
         return Parse(id, expression, dependencies, default_angle_measure, result_angle_measure, Notation::Decimal, precision, _context);
     }
 
-    Number Parse(ElementId id, std::u32string expression, ParserContext* _context = nullptr)
+    Number Parse(LogicalId id, std::u32string expression, ParserContext* _context = nullptr)
     {
         Dependencies dependencies;
         return Parse(id, expression, &dependencies, AngleMeasure::Radian, AngleMeasure::None, Notation::Decimal, -1, _context);
     }
 
-    Number Parse(ElementId id, std::u32string expression, const int precision, ParserContext* _context = nullptr)
+    Number Parse(LogicalId id, std::u32string expression, const int precision, ParserContext* _context = nullptr)
     {
         Dependencies dependencies;
         return Parse(id, expression, &dependencies, AngleMeasure::Radian, AngleMeasure::None, Notation::Decimal, precision, _context);
     }
 
-    Number Parse(ElementId id, std::u32string expression, Dependencies* dependencies, ParserContext* _context = nullptr)
+    Number Parse(LogicalId id, std::u32string expression, Dependencies* dependencies, ParserContext* _context = nullptr)
     {
         return Parse(id, expression, dependencies, AngleMeasure::Radian, AngleMeasure::None, Notation::Decimal, -1, _context);
     }
 
-    Number Parse(ElementId id, std::u32string expression, Dependencies* dependencies, Notation default_notation, ParserContext* _context = nullptr)
+    Number Parse(LogicalId id, std::u32string expression, Dependencies* dependencies, Notation default_notation, ParserContext* _context = nullptr)
     {
         return Parse(id, expression, dependencies, AngleMeasure::Radian, AngleMeasure::None, default_notation, -1, _context);
     }
 
-    Number Parse(ElementId id, std::string expression, Dependencies* dependencies, Notation default_notation, ParserContext* _context = nullptr)
+    Number Parse(LogicalId id, std::string expression, Dependencies* dependencies, Notation default_notation, ParserContext* _context = nullptr)
     {
         return Parse(id, ToUtfString(expression), dependencies, AngleMeasure::Radian, AngleMeasure::None, default_notation, -1, _context);
     }
 
-    Number Parse(ElementId id, std::string expression, Dependencies* dependencies, ParserContext* _context = nullptr)
+    Number Parse(LogicalId id, std::string expression, Dependencies* dependencies, ParserContext* _context = nullptr)
     {
         return Parse(id, ToUtfString(expression), dependencies, AngleMeasure::Radian, AngleMeasure::None, -1, _context);
     }
 
-    Number Parse(ElementId id, std::u32string expression, Notation default_notation, ParserContext* _context = nullptr)
+    Number Parse(LogicalId id, std::u32string expression, Notation default_notation, ParserContext* _context = nullptr)
     {
         Dependencies dependencies;
         return Parse(id, expression, &dependencies, AngleMeasure::Radian, AngleMeasure::None, default_notation, -1, _context);
     }
 
-    Number Parse(ElementId id, std::u32string expression, Dependencies* dependencies, 
+    Number Parse(LogicalId id, std::u32string expression, Dependencies* dependencies, 
         AngleMeasure default_angle_measure, AngleMeasure result_angle_measure, const int precision, const int res_count, 
         std::vector<Number>& results, ParserContext* _context = nullptr)
     {
@@ -143,19 +143,19 @@ struct Parser
         return results[0];
     }
 
-    Number Parse(ElementId id, std::string expression, Dependencies* dependencies, 
+    Number Parse(LogicalId id, std::string expression, Dependencies* dependencies, 
         AngleMeasure default_angle_measure, AngleMeasure result_angle_measure, const int precision, const int res_count, 
         std::vector<Number>& results, ParserContext* _context = nullptr)
     {
         return Parse(id, ToUtfString(expression), dependencies, default_angle_measure, result_angle_measure, precision, res_count, results, _context);
     }
 
-    bool RemoveIdentifier(ElementId id, const std::u32string& name)
+    bool RemoveIdentifier(LogicalId id, const std::u32string& name)
     {
         return solver.RemoveIdentifier(id, name);
     }
 
-    bool RemoveIdentifier(ElementId id, const std::string& name)
+    bool RemoveIdentifier(LogicalId id, const std::string& name)
     {
         return RemoveIdentifier(id, ToUtfString(name));
     }
@@ -165,17 +165,17 @@ struct Parser
         solver.RemoveUserIdentifiers();
     }
 
-    Number GetSuitableUnit(ElementId id, const Number& val)
+    Number GetSuitableUnit(LogicalId id, const Number& val)
     {
         return solver.GetSuitableUnit(id, val, solver.symbols->last_unit_system, solver.symbols->buildin_elements);
     }
 
-    void GetCastUnits(const ElementId id, const Number& val, std::vector<Unit>& cast_units)
+    void GetCastUnits(const LogicalId id, const Number& val, std::vector<Unit>& cast_units)
     {
         solver.GetCastUnits(id, val, cast_units);
     }
 
-    Number CastToUnit(const ElementId id, const Number& val, const Unit& unit)
+    Number CastToUnit(const LogicalId id, const Number& val, const Unit& unit)
     {
         return solver.CastToUnit(id, val, unit);
     }
@@ -274,7 +274,7 @@ private:
         {
             int p = 0;
             for (auto& expr : it->second)
-                solver.RemoveIdentifier(ElementId{0, -2, 0, 0, p++});
+                solver.RemoveIdentifier(LogicalId{0, -2, 0, 0, p++});
         }
 
         it = si_units.find(language);
@@ -282,7 +282,7 @@ private:
             return;
         int p = 0;
         for (auto& expr : it->second)
-            Parse(ElementId{0, -2, 0, 0, p++}, expr);
+            Parse(LogicalId{0, -2, 0, 0, p++}, expr);
     }
 
     void InitOtherUnits()
@@ -292,7 +292,7 @@ private:
         {
             int p = 0;
             for (auto& expr : it->second)
-                solver.RemoveIdentifier(ElementId{0, -2, 1, 0, p++});
+                solver.RemoveIdentifier(LogicalId{0, -2, 1, 0, p++});
         }
 
         it = other_units.find(language);
@@ -300,7 +300,7 @@ private:
             return;
         int p = 0;
         for (auto& expr : it->second)
-            Parse(ElementId{0, -2, 1, 0, p++}, expr);
+            Parse(LogicalId{0, -2, 1, 0, p++}, expr);
     }
 
     void InitRussianUnits()
@@ -310,7 +310,7 @@ private:
         {
             int p = 0;
             for (auto& expr : it->second)
-                solver.RemoveIdentifier(ElementId{0, -2, 2, 0, p++});
+                solver.RemoveIdentifier(LogicalId{0, -2, 2, 0, p++});
         }
 
         it = russian_units.find(language);
@@ -318,7 +318,7 @@ private:
             return;
         int p = 0;
         for (auto& expr : it->second)
-            Parse(ElementId{0, -2, 2, 0, p++}, expr);
+            Parse(LogicalId{0, -2, 2, 0, p++}, expr);
     }
 
     void InitAngleUnits()
@@ -332,7 +332,7 @@ private:
         {
             int p = 0;
             for (auto& expr : it->second)
-                solver.RemoveIdentifier(ElementId{0, -1, 0, 0, p++});
+                solver.RemoveIdentifier(LogicalId{0, -1, 0, 0, p++});
         }
 
         it = phisical_constants.find(language);
@@ -340,7 +340,7 @@ private:
             return;
         int p = 0;
         for (auto& expr : it->second)
-            Parse(ElementId{0, -1, 0, 0, p++}, expr);
+            Parse(LogicalId{0, -1, 0, 0, p++}, expr);
     }
 
     Solver<Number> solver;

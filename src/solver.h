@@ -36,7 +36,7 @@ typedef std::vector<std::u32string> Dependencies;
 template<typename Number>
 struct CustomUnit
 {
-    CustomUnit(const ElementId _id, const std::u32string _name, const std::u32string _system, Number _value, bool _buildin) :
+    CustomUnit(const LogicalId _id, const std::u32string _name, const std::u32string _system, Number _value, bool _buildin) :
         id(_id),
         name(_name),
         system(_system),
@@ -150,7 +150,7 @@ struct CustomUnit
         return true;
     }
 
-    ElementId id;
+    LogicalId id;
     std::u32string name;
     std::u32string system;
     Number value;
@@ -395,7 +395,7 @@ struct Solver : public boost::static_visitor<Number>
     }
 
     //The beginning of the solving.
-    Number operator()(ScriptNode<Number> const& script, ElementId _id, AngleMeasure _default_angle_measure, 
+    Number operator()(ScriptNode<Number> const& script, LogicalId _id, AngleMeasure _default_angle_measure, 
         AngleMeasure _result_angle_measure, int _precision, Dependencies* _dependencies) const;
 
     void PushTempVariable(const std::u32string& name, Number& value) const
@@ -472,7 +472,7 @@ struct Solver : public boost::static_visitor<Number>
     VariableNode<Number>* FindVariable(const std::u32string& name, const std::u32string& subscript) const
     {
         VariableNode<Number>* res = nullptr;
-        ElementId var_id;
+        LogicalId var_id;
         for (int i = symbols->variables.size() - 1; i >= 0; --i)
         {
             auto& var = symbols->variables[i];
@@ -491,7 +491,7 @@ struct Solver : public boost::static_visitor<Number>
     FunctionNode<Number>* FindFunction(FunctionCallNode<Number> const& op) const
     {
         FunctionNode<Number>* res = nullptr;
-        ElementId func_id;
+        LogicalId func_id;
         for (int i = 0; i < (int)symbols->functions.size(); ++i)
         {
             auto& func = symbols->functions[i];
@@ -596,7 +596,7 @@ struct Solver : public boost::static_visitor<Number>
         return (BuiltinVariable*)&(*iter).second;
     }
 
-    bool RemoveIdentifier(ElementId id, const std::u32string& name)
+    bool RemoveIdentifier(LogicalId id, const std::u32string& name)
     {
         auto var_it = symbols->variables.erase(std::remove_if(symbols->variables.begin(), symbols->variables.end(), 
             [id, name](auto& var)
@@ -616,7 +616,7 @@ struct Solver : public boost::static_visitor<Number>
         return func_it != symbols->functions.end();
     }
 
-    bool RemoveIdentifier(ElementId id)
+    bool RemoveIdentifier(LogicalId id)
     {
         auto var_it = symbols->variables.erase(std::remove_if(symbols->variables.begin(), symbols->variables.end(), 
             [id](auto& var)
@@ -701,7 +701,7 @@ struct Solver : public boost::static_visitor<Number>
     CustomUnit<Number>* FindUnit(const std::u32string& name, const std::u32string& system) const
     {
         CustomUnit<Number>* res = nullptr;
-        ElementId unit_id;
+        LogicalId unit_id;
         auto _system = system;
         if (_system.empty())
             _system = U"SI";
@@ -736,7 +736,7 @@ struct Solver : public boost::static_visitor<Number>
         return res;
     }
 
-    void GetCastUnits(const ElementId _id, const Number& val, std::vector<Unit>& _cast_units)
+    void GetCastUnits(const LogicalId _id, const Number& val, std::vector<Unit>& _cast_units)
     {
         if (val.unit.IsEmpty())
             return;
@@ -746,7 +746,7 @@ struct Solver : public boost::static_visitor<Number>
         std::sort(_cast_units.begin(), _cast_units.end());
     }
 
-    void GetCastUnits(const ElementId _id, const Number& val, const std::u32string& system, std::vector<Unit>& _cast_units)
+    void GetCastUnits(const LogicalId _id, const Number& val, const std::u32string& system, std::vector<Unit>& _cast_units)
     {
         auto it = cast_units.find(system);
         if (it != cast_units.end())
@@ -761,7 +761,7 @@ struct Solver : public boost::static_visitor<Number>
         GetCastUnitsImpl(_id, val, system, _cast_units);
     }
 
-    void GetCastUnits(const ElementId _id, const Number& val, const std::u32string& system, std::vector<Number>& _cast_units) const
+    void GetCastUnits(const LogicalId _id, const Number& val, const std::u32string& system, std::vector<Number>& _cast_units) const
     {
         auto it = cast_units.find(system);
         if (it != cast_units.end())
@@ -776,7 +776,7 @@ struct Solver : public boost::static_visitor<Number>
         cast_units[system] = _cast_units;
     }
 
-    void GetCastUnitsImpl(const ElementId _id, const Number& val, const std::u32string& system, std::vector<Unit>& _cast_units)
+    void GetCastUnitsImpl(const LogicalId _id, const Number& val, const std::u32string& system, std::vector<Unit>& _cast_units)
     {
         if (val.unit.IsEmpty())
             return;
@@ -826,7 +826,7 @@ struct Solver : public boost::static_visitor<Number>
         }
     }
 
-    void GetCastUnitsImpl(const ElementId _id, const Number& val, const std::u32string& system, std::vector<Number>& _cast_units) const
+    void GetCastUnitsImpl(const LogicalId _id, const Number& val, const std::u32string& system, std::vector<Number>& _cast_units) const
     {
         if (val.unit.IsEmpty())
             return;
@@ -854,9 +854,9 @@ struct Solver : public boost::static_visitor<Number>
         }
     }
 
-    Number GetSuitableUnit(const ElementId _id, const Number& val, const std::u32string& system, const bool buildin) const;
+    Number GetSuitableUnit(const LogicalId _id, const Number& val, const std::u32string& system, const bool buildin) const;
 
-    Number CastToUnit(const ElementId id, const Number& val, const Unit& unit) const;
+    Number CastToUnit(const LogicalId id, const Number& val, const Unit& unit) const;
 
     void ClearCastUnits()
     {
@@ -899,7 +899,7 @@ struct Solver : public boost::static_visitor<Number>
     {
         for (auto& u : symbols->buildin_units)
         {
-            CustomUnit<Number> c(ElementId{0, 0, 1}, u.unit[0].first, u.system, Number(precision, u), true);
+            CustomUnit<Number> c(LogicalId{0, 0, 1}, u.unit[0].first, u.system, Number(precision, u), true);
             c.description = u.description;
             units.push_back(c);
         }
@@ -949,7 +949,7 @@ public:
     mutable int res_pos = 0;
 
 private:
-    Number GetSuitableUnitImpl(const ElementId _id, const Number& val, const std::u32string& system, const bool buildin) const
+    Number GetSuitableUnitImpl(const LogicalId _id, const Number& val, const std::u32string& system, const bool buildin) const
     {
         if (val.unit.IsEmpty())
             return val;
@@ -1065,7 +1065,7 @@ private:
         return res;
     }
 
-    Number CastToUnitImpl(const ElementId id, const Number& val, const Unit& unit) const
+    Number CastToUnitImpl(const LogicalId id, const Number& val, const Unit& unit) const
     {
         if (val.unit == unit)
             return val;
@@ -1311,7 +1311,7 @@ private:
 
     friend class Expression<Number>;
 
-    mutable ElementId id;
+    mutable LogicalId id;
     mutable int precision;
     mutable AngleMeasure default_angle_measure;
     mutable AngleMeasure result_angle_measure;
