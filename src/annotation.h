@@ -30,10 +30,11 @@ namespace yutovo_calculator
 			boost::recursive_wrapper<ExpressionNode<Number>>>
 			Operand;
 
-		Annotation(std::u32string::iterator _first, std::u32string::iterator _last, LogicalId& _id) : 
+		Annotation(std::u32string::iterator _first, std::u32string::iterator _last, LogicalId& _id, ParserContext** _parser_context) : 
+			id(_id),
 			first(_first),
 			last(_last),
-			id(_id)
+			parser_context(_parser_context)
 		{
 		}
 
@@ -46,6 +47,8 @@ namespace yutovo_calculator
 		//Updates the position in the expression.
 		void UpdatePosition(std::u32string::iterator p, ExpressionPosition& position) const
 		{
+			CheckBreak(*parser_context);
+
 			int i = 0, j = 0;
 			std::u32string::iterator k = first;
 			
@@ -300,6 +303,7 @@ namespace yutovo_calculator
 		LogicalId id;
 		std::u32string::iterator first;
 		std::u32string::iterator last;
+		ParserContext** parser_context;
 	};
 }
 

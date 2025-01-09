@@ -1,4 +1,6 @@
 #include "utils.h"
+#include "parser_exception.h"
+#include <chrono>
 
 namespace yutovo_calculator
 {
@@ -53,5 +55,35 @@ bool IsLess(const LogicalId& id1, const LogicalId& id2)
 	}
 	return id1.size() < id2.size();
 }
+
+void CheckBreak(ParserContext* parser_context)
+{
+	if (!parser_context)
+		return;
+    if (parser_context->break_solving)
+        throw BreakException();
+    if (parser_context->max_time == 0)
+        return;
+    
+    uint64_t now;
+    GetThreadTime(now);
+    if (now > parser_context->start_time && now - parser_context->start_time > parser_context->max_time)
+        throw TimeExceedException();
+}
+
+void GetThreadTime(uint64_t& time)
+{
+	static clockid_t clock_id = 0;
+	if (clock_id == 0)
+    	pthread_getcpuclockid(pthread_self(), &clock_id);
+#ifdef EMSCRIPTEN
+    time = (uint64_t)emscripten_get_now();
+#else
+    timespec s;
+    clock_gettime(clock_id, &s);
+    time = s.tv_sec * 1000 + s.tv_nsec / 1000000;
+#endif
+}
+
 
 }

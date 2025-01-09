@@ -43,6 +43,8 @@ struct LogicalId : std::vector<int> //logical Id does not include row id, so it 
 struct ParserContext
 {
     std::atomic<bool> break_solving{false};
+    uint64_t start_time = 0;
+    uint64_t max_time = 0; //in milliseconds
 };
 
 std::u32string ToUtfString(const std::string& str);
@@ -53,6 +55,10 @@ std::string ElementIdToString(const ElementId& id);
 std::string LogicalIdToString(const LogicalId& id);
 
 bool IsLess(const LogicalId& id1, const LogicalId& id2);
+
+void CheckBreak(ParserContext* parser_context);
+
+void GetThreadTime(uint64_t& time);
 
 }
 

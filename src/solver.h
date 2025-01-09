@@ -226,8 +226,10 @@ struct Solver : public boost::static_visitor<Number>
         im(_im),
         max_time(_max_time)
     {
-        pthread_getcpuclockid(pthread_self(), &clock_id);
         GetThreadTime(start_time);
+
+        if (parser_context)
+            parser_context->max_time = max_time;
         
         if (!symbols)
             symbols.reset(new SolverSymbols<Number>());
@@ -243,8 +245,10 @@ struct Solver : public boost::static_visitor<Number>
         im(ToUtfString(_im)),
         max_time(_max_time)
     {
-        pthread_getcpuclockid(pthread_self(), &clock_id);
         GetThreadTime(start_time);
+
+        if (parser_context)
+            parser_context->max_time = max_time;
 
         if (!symbols)
             symbols.reset(new SolverSymbols<Number>());
@@ -264,7 +268,7 @@ struct Solver : public boost::static_visitor<Number>
         Number res = boost::apply_visitor(*this, expr.first);
         BOOST_FOREACH(typename OperationNode<Number>::Operand const& op, expr.rest)
         {
-            CheckBreak();
+            CheckBreak(parser_context);
             
             Solver<Number> solver(precision, default_angle_measure, max_time, im, res, symbols);
             solver.parser_context = parser_context;
@@ -382,7 +386,7 @@ struct Solver : public boost::static_visitor<Number>
         PushTempVariable(op.loop_var.name.name, res);
         while (counter_max != 0)
         {
-            CheckBreak();
+            CheckBreak(parser_context);
 
             res = (*this)(op.loop_expression.expression);
             SetTempVariable(op.loop_expression.name.name, res);
@@ -781,7 +785,7 @@ struct Solver : public boost::static_visitor<Number>
         if (val.unit.IsEmpty())
             return;
 
-        CheckBreak();
+        CheckBreak(parser_context);
 
         if (val.unit.system == system)
         {
@@ -831,7 +835,7 @@ struct Solver : public boost::static_visitor<Number>
         if (val.unit.IsEmpty())
             return;
 
-        CheckBreak();
+        CheckBreak(parser_context);
 
         if (val.unit.system == system)
             _cast_units.push_back(val);
@@ -935,11 +939,23 @@ struct Solver : public boost::static_visitor<Number>
     void SetMaxTime(uint64_t _max_time)
     {
         max_time = _max_time;
+        if (parser_context)
+            parser_context->max_time = max_time;
     }
 
     void SetMaxCastUnitSize(int _max_cast_unit_size)
     {
         max_cast_unit_size = _max_cast_unit_size;
+    }
+
+    void SetParserContext(ParserContext* _context)
+    {
+        parser_context = _context;
+        if (parser_context)
+        {
+            parser_context->start_time = start_time;
+            parser_context->max_time = max_time;
+        }
     }
 
 public:
@@ -969,7 +985,7 @@ private:
 
         for (Number& c : _cast_units)
         {
-            CheckBreak();
+            CheckBreak(parser_context);
 
             if (c.unit.unit.size() <= s) //a unit should have minimal size
             {
@@ -1074,7 +1090,7 @@ private:
         Number u(precision, 1);
         for (auto& p : unit.unit)
         {
-            CheckBreak();
+            CheckBreak(parser_context);
 
             Number unit_val;
             if (unit.system == U"SI")
@@ -1117,7 +1133,7 @@ private:
 
     Number FunctionCall(FunctionCallNode<Number> const& op) const
     {
-        CheckBreak();
+        CheckBreak(parser_context);
 
         AddDependency(op.name.name);
 
@@ -1285,30 +1301,6 @@ private:
         return res;
     }
 
-    void CheckBreak() const
-    {
-        if (parser_context && parser_context->break_solving)
-            throw BreakException();
-        if (max_time == 0)
-            return;
-        
-        uint64_t now;
-        GetThreadTime(now);
-        if (now > start_time && now - start_time > max_time)
-            throw TimeExceedException();
-    }
-
-    void GetThreadTime(uint64_t& time) const
-    {
-#ifdef EMSCRIPTEN
-        time = (uint64_t)emscripten_get_now();
-#else
-        timespec s;
-        clock_gettime(clock_id, &s);
-        time = s.tv_sec * 1000 + s.tv_nsec / 1000000;
-#endif
-    }
-
     friend class Expression<Number>;
 
     mutable LogicalId id;
@@ -1320,7 +1312,6 @@ private:
     mutable Dependencies* dependencies = nullptr;
     mutable std::map<std::u32string, std::vector<Number>> cast_units;
     mutable uint64_t start_time = 0;
-    clockid_t clock_id;
     mutable uint64_t max_time = 0; //in milliseconds
 
     int max_cast_unit_size = 2; //max size of each unit in the cast vector

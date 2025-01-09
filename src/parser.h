@@ -44,7 +44,7 @@ struct Parser
         solver.ClearTempVariables();
         solver.ClearCastUnits();
         solver.SetDefaultNotation(default_notation);
-        solver.parser_context = context;
+        solver.SetParserContext(context);
 
         Script<Number> script(id, expression, &solver);
         ScriptNode<Number> script_node;

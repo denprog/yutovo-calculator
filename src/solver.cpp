@@ -71,7 +71,7 @@ Integer Solver<Integer>::operator()(UnitNode<Integer> const& op) const
 template<>
 Integer Solver<Integer>::operator()(UnaryOperationNode<Integer> const& op) const
 {
-    CheckBreak();
+    CheckBreak(parser_context);
 
     Integer right = boost::apply_visitor(*this, op.operand);
     switch (op.op)
@@ -89,7 +89,7 @@ Integer Solver<Integer>::operator()(UnaryOperationNode<Integer> const& op) const
 template<>
 Real Solver<Real>::operator()(UnaryOperationNode<Real> const& op) const
 {
-    CheckBreak();
+    CheckBreak(parser_context);
 
     Real right = boost::apply_visitor(*this, op.operand);
     switch (op.op)
@@ -105,7 +105,7 @@ Real Solver<Real>::operator()(UnaryOperationNode<Real> const& op) const
 template<>
 Rational Solver<Rational>::operator()(UnaryOperationNode<Rational> const& op) const
 {
-    CheckBreak();
+    CheckBreak(parser_context);
 
     Rational right = boost::apply_visitor(*this, op.operand);
     switch (op.op)
@@ -121,7 +121,7 @@ Rational Solver<Rational>::operator()(UnaryOperationNode<Rational> const& op) co
 template<>
 Complex Solver<Complex>::operator()(UnaryOperationNode<Complex> const& op) const
 {
-    CheckBreak();
+    CheckBreak(parser_context);
 
     Complex right = boost::apply_visitor(*this, op.operand);
     switch (op.op)
@@ -137,7 +137,7 @@ Complex Solver<Complex>::operator()(UnaryOperationNode<Complex> const& op) const
 template<>
 Integer Solver<Integer>::operator()(OperationNode<Integer> const& op) const
 {
-    CheckBreak();
+    CheckBreak(parser_context);
 
     Integer right = boost::apply_visitor(*this, op.operand);
     
@@ -173,7 +173,7 @@ Integer Solver<Integer>::operator()(OperationNode<Integer> const& op) const
 template<>
 Real Solver<Real>::operator()(OperationNode<Real> const& op) const
 {
-    CheckBreak();
+    CheckBreak(parser_context);
 
     Real right = boost::apply_visitor(*this, op.operand);
     
@@ -205,7 +205,7 @@ Real Solver<Real>::operator()(OperationNode<Real> const& op) const
 template<>
 Rational Solver<Rational>::operator()(OperationNode<Rational> const& op) const
 {
-    CheckBreak();
+    CheckBreak(parser_context);
 
     Rational right = boost::apply_visitor(*this, op.operand);
     
@@ -237,7 +237,7 @@ Rational Solver<Rational>::operator()(OperationNode<Rational> const& op) const
 template<>
 Complex Solver<Complex>::operator()(OperationNode<Complex> const& op) const
 {
-    CheckBreak();
+    CheckBreak(parser_context);
 
     Complex right = boost::apply_visitor(*this, op.operand);
     
@@ -324,7 +324,7 @@ Integer Solver<Integer>::operator()(FunctionCallNode<Integer> const& op) const
             IdentifierNodesIter funcIter = user_func->arguments.begin();
             for (ExpressionNodesIter iter = op.arguments.begin(); iter != op.arguments.end(); ++iter, ++funcIter)
             {
-                CheckBreak();
+                CheckBreak(parser_context);
 
                 Integer arg = (*this)(*iter);
                 PushTempVariable(funcIter->name, arg);
@@ -402,7 +402,7 @@ Rational Solver<Rational>::operator()(FunctionCallNode<Rational> const& op) cons
             IdentifierNodesIter funcIter = user_func->arguments.begin();
             for (ExpressionNodesIter iter = op.arguments.begin(); iter != op.arguments.end(); ++iter, ++funcIter)
             {
-                CheckBreak();
+                CheckBreak(parser_context);
 
                 Rational arg = (*this)(*iter);
                 PushTempVariable(funcIter->name, arg);
@@ -544,7 +544,7 @@ Complex Solver<Complex>::operator()(NoFencesFunctionCallNode<Complex> const& op)
 template<>
 Integer Solver<Integer>::operator()(IdentifierNode<Integer> const& op) const
 {
-    CheckBreak();
+    CheckBreak(parser_context);
     AddDependency(op.name);
 
     TempVariable* t = FindTempVariable(op.name);
@@ -584,7 +584,7 @@ Integer Solver<Integer>::operator()(IdentifierNode<Integer> const& op) const
 template<>
 Real Solver<Real>::operator()(IdentifierNode<Real> const& op) const
 {
-    CheckBreak();
+    CheckBreak(parser_context);
     AddDependency(op.name);
 
     TempVariable* t = FindTempVariable(op.name);
@@ -642,7 +642,7 @@ Real Solver<Real>::operator()(IdentifierNode<Real> const& op) const
 template<>
 Rational Solver<Rational>::operator()(IdentifierNode<Rational> const& op) const
 {
-    CheckBreak();
+    CheckBreak(parser_context);
     AddDependency(op.name);
 
     TempVariable* t = FindTempVariable(op.name);
@@ -699,7 +699,7 @@ Rational Solver<Rational>::operator()(IdentifierNode<Rational> const& op) const
 template<>
 Complex Solver<Complex>::operator()(IdentifierNode<Complex> const& op) const
 {
-    CheckBreak();
+    CheckBreak(parser_context);
     AddDependency(op.name);
 
     TempVariable* t = FindTempVariable(op.name);
@@ -743,7 +743,7 @@ Complex Solver<Complex>::operator()(IdentifierNode<Complex> const& op) const
 template<>
 Integer Solver<Integer>::operator()(ImplicitStringMulNode<Integer> const& op) const
 {
-    CheckBreak();
+    CheckBreak(parser_context);
     AddDependency(op.identifier.name);
 
     TempVariable* t = FindTempVariable(op.identifier.name);
@@ -783,7 +783,7 @@ Integer Solver<Integer>::operator()(ImplicitStringMulNode<Integer> const& op) co
 template<>
 Real Solver<Real>::operator()(ImplicitStringMulNode<Real> const& op) const
 {
-    CheckBreak();
+    CheckBreak(parser_context);
     AddDependency(op.identifier.name);
 
     TempVariable* t = FindTempVariable(op.identifier.name);
@@ -841,7 +841,7 @@ Real Solver<Real>::operator()(ImplicitStringMulNode<Real> const& op) const
 template<>
 Rational Solver<Rational>::operator()(ImplicitStringMulNode<Rational> const& op) const
 {
-    CheckBreak();
+    CheckBreak(parser_context);
     AddDependency(op.identifier.name);
 
     TempVariable* t = FindTempVariable(op.identifier.name);
@@ -898,7 +898,7 @@ Rational Solver<Rational>::operator()(ImplicitStringMulNode<Rational> const& op)
 template<>
 Complex Solver<Complex>::operator()(ImplicitStringMulNode<Complex> const& op) const
 {
-    CheckBreak();
+    CheckBreak(parser_context);
     AddDependency(op.identifier.name);
 
     TempVariable* t = FindTempVariable(op.identifier.name);
@@ -948,7 +948,7 @@ Integer Solver<Integer>::operator()(ImplicitDivMulNode<Integer> const& op) const
 template<>
 Real Solver<Real>::operator()(ImplicitDivMulNode<Real> const& op) const
 {
-    CheckBreak();
+    CheckBreak(parser_context);
     AddDependency(op.identifier.name);
 
     TempVariable* t = FindTempVariable(op.identifier.name);
@@ -1018,7 +1018,7 @@ Real Solver<Real>::operator()(ImplicitDivMulNode<Real> const& op) const
 template<>
 Rational Solver<Rational>::operator()(ImplicitDivMulNode<Rational> const& op) const
 {
-    CheckBreak();
+    CheckBreak(parser_context);
     AddDependency(op.identifier.name);
 
     TempVariable* t = FindTempVariable(op.identifier.name);
@@ -1088,7 +1088,7 @@ Rational Solver<Rational>::operator()(ImplicitDivMulNode<Rational> const& op) co
 template<>
 Complex Solver<Complex>::operator()(ImplicitDivMulNode<Complex> const& op) const
 {
-    CheckBreak();
+    CheckBreak(parser_context);
     AddDependency(op.identifier.name);
 
     TempVariable* t = FindTempVariable(op.identifier.name);
@@ -1151,11 +1151,17 @@ Real Solver<Real>::operator()(ScriptNode<Real> const& script, LogicalId _id, Ang
     precision = _precision;
     GetThreadTime(start_time);
     
+    if (parser_context)
+    {
+        parser_context->start_time = start_time;
+        parser_context->max_time = max_time;
+    }
+
     Real res;
     //calculate all the script nodes
     BOOST_FOREACH(typename ScriptNode<Real>::Operand const& op, script.list)
     {
-        CheckBreak();
+        CheckBreak(parser_context);
         res = boost::apply_visitor(*this, op);
     }
     
@@ -1192,7 +1198,7 @@ Integer Solver<Integer>::operator()(ScriptNode<Integer> const& script, LogicalId
     //calculate all the script nodes
     BOOST_FOREACH(typename ScriptNode<Integer>::Operand const& op, script.list)
     {
-        CheckBreak();
+        CheckBreak(parser_context);
         res = boost::apply_visitor(*this, op);
     }
 
@@ -1215,7 +1221,7 @@ Rational Solver<Rational>::operator()(ScriptNode<Rational> const& script, Logica
     //calculate all the script nodes
     BOOST_FOREACH(typename ScriptNode<Rational>::Operand const& op, script.list)
     {
-        CheckBreak();
+        CheckBreak(parser_context);
         res = boost::apply_visitor(*this, op);
     }
 
@@ -1240,7 +1246,7 @@ Complex Solver<Complex>::operator()(ScriptNode<Complex> const& script, LogicalId
     //calculate all the script nodes
     BOOST_FOREACH(typename ScriptNode<Complex>::Operand const& op, script.list)
     {
-        CheckBreak();
+        CheckBreak(parser_context);
         res = boost::apply_visitor(*this, op);
     }
     
