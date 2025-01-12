@@ -25,18 +25,16 @@ namespace yutovo_calculator
 template<typename Number>
 struct Parser
 {
-    Parser(const int precision, const Language _language, uint64_t _max_time);
+    Parser(const int precision, const Language _language);
     
     Number Parse(LogicalId id, std::u32string expression, Dependencies* dependencies, AngleMeasure default_angle_measure, AngleMeasure result_angle_measure, 
         Notation default_notation, const int precision = -1, ParserContext* _context = nullptr)
     {
+        pthread_getcpuclockid(pthread_self(), &thread_clock_id);
+
         if (expression.empty() || expression == U";")
             throw SyntaxException(id, ExpressionExpected, 0, 0);
 
-        context = _context;
-        if (context)
-            context->break_solving = false;
-        
         std::u32string::iterator iter = expression.begin();
         std::u32string::iterator end = expression.end();
         unicode::space_type space;
@@ -44,7 +42,7 @@ struct Parser
         solver.ClearTempVariables();
         solver.ClearCastUnits();
         solver.SetDefaultNotation(default_notation);
-        solver.SetParserContext(context);
+        solver.SetParserContext(_context);
 
         Script<Number> script(id, expression, &solver);
         ScriptNode<Number> script_node;
@@ -114,12 +112,10 @@ struct Parser
         AngleMeasure default_angle_measure, AngleMeasure result_angle_measure, const int precision, const int res_count, 
         std::vector<Number>& results, ParserContext* _context = nullptr)
     {
+        pthread_getcpuclockid(pthread_self(), &thread_clock_id);
+
         if (expression.empty() || expression == U";")
             throw SyntaxException(id, ExpressionExpected, 0, 0);
-        
-        context = _context;
-        if (context)
-            context->break_solving = false;
         
         std::u32string::iterator iter = expression.begin();
         std::u32string::iterator end = expression.end();
@@ -167,16 +163,19 @@ struct Parser
 
     Number GetSuitableUnit(LogicalId id, const Number& val)
     {
+        pthread_getcpuclockid(pthread_self(), &thread_clock_id);
         return solver.GetSuitableUnit(id, val, solver.symbols->last_unit_system, solver.symbols->buildin_elements);
     }
 
     void GetCastUnits(const LogicalId id, const Number& val, std::vector<Unit>& cast_units)
     {
+        pthread_getcpuclockid(pthread_self(), &thread_clock_id);
         solver.GetCastUnits(id, val, cast_units);
     }
 
     Number CastToUnit(const LogicalId id, const Number& val, const Unit& unit)
     {
+        pthread_getcpuclockid(pthread_self(), &thread_clock_id);
         return solver.CastToUnit(id, val, unit);
     }
 
@@ -210,11 +209,6 @@ struct Parser
     void ListUserUnits(std::vector<CustomUnit<Number>>& units)
     {
         solver.ListUserUnits(units);
-    }
-
-    void SetMaxTime(uint64_t max_time)
-    {
-        solver.SetMaxTime(max_time);
     }
 
     void SetMaxCastUnitSize(int max_cast_unit_size)
@@ -345,12 +339,8 @@ private:
 
     Solver<Number> solver;
 
-    ParserContext* context = nullptr;
-
     Language language = Language::English;
     Language last_language = Language::None;
-
-    uint64_t max_time = 0;
 
     std::map<Language, std::vector<std::u32string>> si_units = 
         {

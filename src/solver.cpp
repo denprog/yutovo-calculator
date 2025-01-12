@@ -1149,13 +1149,6 @@ Real Solver<Real>::operator()(ScriptNode<Real> const& script, LogicalId _id, Ang
     default_angle_measure = _default_angle_measure;
     result_angle_measure = _result_angle_measure;
     precision = _precision;
-    GetThreadTime(start_time);
-    
-    if (parser_context)
-    {
-        parser_context->start_time = start_time;
-        parser_context->max_time = max_time;
-    }
 
     Real res;
     //calculate all the script nodes
@@ -1191,7 +1184,6 @@ Integer Solver<Integer>::operator()(ScriptNode<Integer> const& script, LogicalId
     
     id = _id;
     dependencies = _dependencies;
-    GetThreadTime(start_time);
     
     Integer res;
 
@@ -1214,7 +1206,6 @@ Rational Solver<Rational>::operator()(ScriptNode<Rational> const& script, Logica
     
     id = _id;
     dependencies = _dependencies;
-    GetThreadTime(start_time);
    
     Rational res;
 
@@ -1240,7 +1231,6 @@ Complex Solver<Complex>::operator()(ScriptNode<Complex> const& script, LogicalId
     default_angle_measure = _default_angle_measure;
     result_angle_measure = _result_angle_measure;
     precision = _precision;
-    GetThreadTime(start_time);
 
     Complex res;
     //calculate all the script nodes

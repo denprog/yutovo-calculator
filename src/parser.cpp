@@ -101,10 +101,12 @@ Complex second(const Complex& num, int& res_pos);
 Complex grad(const Complex& num, int& res_pos);
 
 template<>
-Parser<yutovo_calculator::Integer>::Parser(const int precision, const Language _language, uint64_t _max_time) : 
-    solver(precision, AngleMeasure::Radian, _max_time),
+Parser<yutovo_calculator::Integer>::Parser(const int precision, const Language _language) : 
+    solver(precision, AngleMeasure::Radian),
     language(_language)
 {
+    pthread_getcpuclockid(pthread_self(), &thread_clock_id);
+    
     IntegerBinaryFunc binary_func = &pow;
     solver.AddBuiltinFunction("pow", binary_func);
 
@@ -119,10 +121,12 @@ Parser<yutovo_calculator::Integer>::Parser(const int precision, const Language _
 }
 
 template<>
-Parser<yutovo_calculator::Real>::Parser(const int precision, const Language _language, uint64_t _max_time) : 
-    solver(precision, AngleMeasure::Radian, _max_time),
+Parser<yutovo_calculator::Real>::Parser(const int precision, const Language _language) : 
+    solver(precision, AngleMeasure::Radian),
     language(_language)
 {
+    pthread_getcpuclockid(pthread_self(), &thread_clock_id);
+    
     RealPrecisionVariable var;
     var = &pi;
     solver.AddBuiltinVariable("pi", var);
@@ -213,10 +217,12 @@ Parser<yutovo_calculator::Real>::Parser(const int precision, const Language _lan
 }
 
 template<>
-Parser<yutovo_calculator::Rational>::Parser(const int precision, const Language _language, uint64_t _max_time) : 
-    solver(precision, AngleMeasure::Radian, _max_time),
+Parser<yutovo_calculator::Rational>::Parser(const int precision, const Language _language) : 
+    solver(precision, AngleMeasure::Radian),
     language(_language)
 {
+    pthread_getcpuclockid(pthread_self(), &thread_clock_id);
+
     RationalBinaryFunc binary_func = &pow;
     solver.AddBuiltinFunction("pow", binary_func);
 
@@ -224,10 +230,12 @@ Parser<yutovo_calculator::Rational>::Parser(const int precision, const Language 
 }
 
 template<>
-Parser<yutovo_calculator::Complex>::Parser(const int precision, const Language _language, uint64_t _max_time) : 
-    solver(precision, AngleMeasure::Radian, _max_time),
+Parser<yutovo_calculator::Complex>::Parser(const int precision, const Language _language) : 
+    solver(precision, AngleMeasure::Radian),
     language(_language)
 {
+    pthread_getcpuclockid(pthread_self(), &thread_clock_id);
+    
     ComplexPrecisionVariable var;
     var = &pi_complex;
     solver.AddBuiltinVariable("pi", var);

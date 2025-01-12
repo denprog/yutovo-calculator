@@ -10,6 +10,8 @@ namespace yutovo_calculator
 
 typedef unsigned int uint;
 
+extern clockid_t thread_clock_id;
+
 struct ElementId : std::vector<int>
 {
     ElementId() = default;
@@ -40,11 +42,27 @@ struct LogicalId : std::vector<int> //logical Id does not include row id, so it 
     }
 };
 
+void GetThreadTime(uint64_t& time);
+
 struct ParserContext
 {
+    void Init(uint64_t max_time)
+    {
+        break_solving = false;
+
+        if (max_time == 0)
+        {
+            end_time = 0;
+            return;
+        }
+
+        uint64_t now;
+        GetThreadTime(now);
+        end_time = now + max_time;
+    }
+
     std::atomic<bool> break_solving{false};
-    uint64_t start_time = 0;
-    uint64_t max_time = 0; //in milliseconds
+    uint64_t end_time = 0; //solve before this time or rise TimeExceedException
 };
 
 std::u32string ToUtfString(const std::string& str);
@@ -57,8 +75,6 @@ std::string LogicalIdToString(const LogicalId& id);
 bool IsLess(const LogicalId& id1, const LogicalId& id2);
 
 void CheckBreak(ParserContext* parser_context);
-
-void GetThreadTime(uint64_t& time);
 
 }
 

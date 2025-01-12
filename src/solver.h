@@ -217,39 +217,27 @@ struct Solver : public boost::static_visitor<Number>
     
     std::shared_ptr<SolverSymbols<Number>> symbols;
     
-    Solver(int _precision, AngleMeasure _default_angle_measure, uint64_t _max_time, std::u32string _im = U"i", Number _left_value = Number(), 
+    Solver(int _precision, AngleMeasure _default_angle_measure, std::u32string _im = U"i", Number _left_value = Number(), 
         std::shared_ptr<SolverSymbols<Number>> _symbols = nullptr) :
         precision(_precision),
         default_angle_measure(_default_angle_measure),
         left_value(_left_value),
         symbols(_symbols),
-        im(_im),
-        max_time(_max_time)
+        im(_im)
     {
-        GetThreadTime(start_time);
-
-        if (parser_context)
-            parser_context->max_time = max_time;
-        
         if (!symbols)
             symbols.reset(new SolverSymbols<Number>());
     }
 
     Solver(int _precision, AngleMeasure _default_angle_measure, AngleMeasure _result_angle_measure, int _default_notation, std::string _im, 
-        uint64_t _max_time, Number _left_value = Number(), std::shared_ptr<SolverSymbols<Number>> _symbols = nullptr) :
+        Number _left_value = Number(), std::shared_ptr<SolverSymbols<Number>> _symbols = nullptr) :
         precision(_precision),
         default_angle_measure(_default_angle_measure),
         result_angle_measure(_result_angle_measure),
         left_value(_left_value),
         symbols(_symbols),
-        im(ToUtfString(_im)),
-        max_time(_max_time)
+        im(ToUtfString(_im))
     {
-        GetThreadTime(start_time);
-
-        if (parser_context)
-            parser_context->max_time = max_time;
-
         if (!symbols)
             symbols.reset(new SolverSymbols<Number>());
     }
@@ -270,10 +258,9 @@ struct Solver : public boost::static_visitor<Number>
         {
             CheckBreak(parser_context);
             
-            Solver<Number> solver(precision, default_angle_measure, max_time, im, res, symbols);
+            Solver<Number> solver(precision, default_angle_measure, im, res, symbols);
             solver.parser_context = parser_context;
             solver.id = id;
-            solver.start_time = start_time;
             solver.cast_units = cast_units;
             solver.max_cast_unit_size = max_cast_unit_size;
             solver.SetDependencies(dependencies);
@@ -761,7 +748,6 @@ struct Solver : public boost::static_visitor<Number>
             return;
         }
 
-        GetThreadTime(start_time);
         GetCastUnitsImpl(_id, val, system, _cast_units);
     }
 
@@ -774,7 +760,6 @@ struct Solver : public boost::static_visitor<Number>
             return;
         }
 
-        GetThreadTime(start_time);
         GetCastUnitsImpl(_id, val, system, _cast_units);
 
         cast_units[system] = _cast_units;
@@ -936,13 +921,6 @@ struct Solver : public boost::static_visitor<Number>
         }
     }
 
-    void SetMaxTime(uint64_t _max_time)
-    {
-        max_time = _max_time;
-        if (parser_context)
-            parser_context->max_time = max_time;
-    }
-
     void SetMaxCastUnitSize(int _max_cast_unit_size)
     {
         max_cast_unit_size = _max_cast_unit_size;
@@ -951,11 +929,6 @@ struct Solver : public boost::static_visitor<Number>
     void SetParserContext(ParserContext* _context)
     {
         parser_context = _context;
-        if (parser_context)
-        {
-            parser_context->start_time = start_time;
-            parser_context->max_time = max_time;
-        }
     }
 
 public:
@@ -1311,8 +1284,6 @@ private:
     Number left_value; //left solved value
     mutable Dependencies* dependencies = nullptr;
     mutable std::map<std::u32string, std::vector<Number>> cast_units;
-    mutable uint64_t start_time = 0;
-    mutable uint64_t max_time = 0; //in milliseconds
 
     int max_cast_unit_size = 2; //max size of each unit in the cast vector
 };

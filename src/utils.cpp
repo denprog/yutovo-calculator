@@ -5,6 +5,8 @@
 namespace yutovo_calculator
 {
 
+clockid_t thread_clock_id = 0;
+
 std::u32string ToUtfString(const std::string& str)
 {
     return boost::locale::conv::utf_to_utf<char32_t>(str);
@@ -62,28 +64,24 @@ void CheckBreak(ParserContext* parser_context)
 		return;
     if (parser_context->break_solving)
         throw BreakException();
-    if (parser_context->max_time == 0)
+    if (parser_context->end_time == 0)
         return;
     
     uint64_t now;
     GetThreadTime(now);
-    if (now > parser_context->start_time && now - parser_context->start_time > parser_context->max_time)
-        throw TimeExceedException();
+	if (now > parser_context->end_time)
+		throw TimeExceedException();
 }
 
 void GetThreadTime(uint64_t& time)
 {
-	static clockid_t clock_id = 0;
-	if (clock_id == 0)
-    	pthread_getcpuclockid(pthread_self(), &clock_id);
 #ifdef EMSCRIPTEN
     time = (uint64_t)emscripten_get_now();
 #else
     timespec s;
-    clock_gettime(clock_id, &s);
+    clock_gettime(thread_clock_id, &s);
     time = s.tv_sec * 1000 + s.tv_nsec / 1000000;
 #endif
 }
-
 
 }

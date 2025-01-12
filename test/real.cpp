@@ -1151,14 +1151,14 @@ TEST_F(CalcTestReal, prod2)
 TEST_F(CalcTestReal, max_time1)
 {
     yutovo_calculator::ParserContext parser_context;
-    parser.SetMaxTime(1000);
+    parser_context.Init(1000);
     parser.SetMaxCastUnitSize(3);
     EXPECT_THROW(parser.GetSuitableUnit(LogicalId{0, 0, 0, 0, 2}, parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"10kg*10m/(2*pow(s,2));", 
         &parser_context)).ToStdString(3, 3), yutovo_calculator::TimeExceedException);
     auto res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"(1+2);");
     ASSERT_TRUE(res.ToStdString(3, 3) == parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"3;").ToStdString(3, 3));
 
-    parser.SetMaxTime(20000);
+    parser_context.Init(20000);
     std::string s = parser.GetSuitableUnit(LogicalId{0, 0, 0, 0, 2}, parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"10kg*10m/(2*pow(s,2));")).ToStdString(3, 3);
     ASSERT_TRUE(s == "50.E+0(N)") << s;
 }
@@ -1166,9 +1166,12 @@ TEST_F(CalcTestReal, max_time1)
 TEST_F(CalcTestReal, max_time2)
 {
     yutovo_calculator::ParserContext parser_context;
-    parser.SetMaxTime(5000);
+    parser_context.Init(5000);
     EXPECT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"(234)/((3)/((4)/((6)/((7)/((6)/((7)/((2)/(4))))))));", &parser_context), 
         yutovo_calculator::TimeExceedException);
+    parser_context.Init(0);
+    std::string s = parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"123;", &parser_context).ToStdString(3, 3);
+    ASSERT_TRUE(s == "123.E+0") << s;
 }
 
 TEST_F(CalcTestReal, list_identifiers1)
