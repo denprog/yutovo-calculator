@@ -5,9 +5,6 @@
 #include "script.h"
 #include "utils.h"
 #include <chrono>
-#ifdef EMSCRIPTEN
-#include <emscripten.h>
-#endif
 
 namespace yutovo_calculator
 {

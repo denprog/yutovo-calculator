@@ -1,6 +1,9 @@
 #include "utils.h"
 #include "parser_exception.h"
 #include <chrono>
+#ifdef EMSCRIPTEN
+#include <emscripten.h>
+#endif
 
 namespace yutovo_calculator
 {
