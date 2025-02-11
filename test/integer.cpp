@@ -293,6 +293,18 @@ TEST_F(CalcTestInteger, notation10)
     ASSERT_TRUE(res.ToString(10) == U"22280") << res.ToStdString(10);
 }
 
+TEST_F(CalcTestInteger, notation11)
+{
+    Integer res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"hex[da]+1011;", Notation::Binary);
+    ASSERT_TRUE(res.ToString(10) == U"229") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestInteger, notation12)
+{
+    Integer res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"hex[da]+1011;", Notation::Decimal);
+    ASSERT_TRUE(res.ToString(10) == U"1229") << res.ToStdString(10);
+}
+
 TEST_F(CalcTestInteger, builtin_functions1)
 {
     Integer res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"1!;");
