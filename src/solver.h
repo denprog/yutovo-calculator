@@ -23,7 +23,7 @@ typedef Real (*RealPrecisionVariable)(const int precision);
 typedef Complex (*ComplexUnaryFunc)(const Complex& num, int& res_pos);
 typedef Complex (*ComplexBinaryFunc)(const Complex& num1, const Complex& num2, int& res_pos);
 typedef Complex (*ComplexTrigonometricFunc)(const Complex& num, int& res_pos);
-typedef Complex (*ComplexPrecisionVariable)(const int precision);
+typedef Complex (*ComplexPrecisionVariable)(const int precision, AngleMeasure angle_measure);
 
 typedef Rational (*RationalBinaryFunc)(const Rational& num1, const Rational& num2);
 typedef Rational (*RationalVariable)();
@@ -175,7 +175,7 @@ struct SolverSymbols
     //build-in variables' typedefs
     typedef Number (*Variable)();
     typedef Number (*PrecisionVariable)(const int precision);
-    typedef boost::variant<Variable, PrecisionVariable> BuiltinVariable;
+    typedef boost::variant<Variable, PrecisionVariable, ComplexPrecisionVariable> BuiltinVariable;
 
     mutable deque<TempVariable> temp_variables;
     mutable deque<VariableNode<Number>> variables; //user variables
@@ -573,6 +573,11 @@ struct Solver : public boost::static_visitor<Number>
     }
 
     void AddBuiltinVariable(const char* name, PrecisionVariable& var)
+    {
+        symbols->buildin_variables[ToUtfString(name)] = var;
+    }
+
+    void AddBuiltinVariable(const char* name, ComplexPrecisionVariable& var)
     {
         symbols->buildin_variables[ToUtfString(name)] = var;
     }

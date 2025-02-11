@@ -723,8 +723,8 @@ Complex Solver<Complex>::operator()(IdentifierNode<Complex> const& op) const
     {
         try
         {
-            ComplexPrecisionVariable v = boost::get<PrecisionVariable>(*var);
-            return (*v)(precision);
+            ComplexPrecisionVariable v = boost::get<ComplexPrecisionVariable>(*var);
+            return (*v)(precision, default_angle_measure);
         }
         catch (boost::bad_get)
         {
@@ -922,8 +922,8 @@ Complex Solver<Complex>::operator()(ImplicitStringMulNode<Complex> const& op) co
     {
         try
         {
-            ComplexPrecisionVariable v = boost::get<PrecisionVariable>(*var);
-            return (*this)(op.left) * (*v)(precision);
+            ComplexPrecisionVariable v = boost::get<ComplexPrecisionVariable>(*var);
+            return (*this)(op.left) * (*v)(precision, default_angle_measure);
         }
         catch (boost::bad_get)
         {
@@ -1118,10 +1118,10 @@ Complex Solver<Complex>::operator()(ImplicitDivMulNode<Complex> const& op) const
     {
         try
         {
-            ComplexPrecisionVariable v = boost::get<PrecisionVariable>(*var);
+            ComplexPrecisionVariable v = boost::get<ComplexPrecisionVariable>(*var);
             Complex arg1 = (*this)(op.upper);
             Complex arg2 = (*this)(op.lower);
-            return (arg1 / arg2) * (*v)(precision);
+            return (arg1 / arg2) * (*v)(precision, default_angle_measure);
         }
         catch (boost::bad_get)
         {

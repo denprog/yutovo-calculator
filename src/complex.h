@@ -185,8 +185,8 @@ public:
     friend Real argument(const Complex& num);
 
 public:
-    friend Complex exp_complex(const int precision);
-    friend Complex pi_complex(const int precision);
+    friend Complex exp_complex(const int precision, AngleMeasure angle_measure);
+    friend Complex pi_complex(const int precision, AngleMeasure angle_measure);
     friend Complex j(const int precision);
 
 public:

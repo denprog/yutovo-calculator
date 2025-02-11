@@ -431,6 +431,13 @@ TEST_F(CalcTestComplex, variables2)
     ASSERT_TRUE(s == "2.5E+0") << s;
 }
 
+TEST_F(CalcTestComplex, variables3)
+{
+    parser.Parse(LogicalId{0, 0, 1}, U"y=pow(e,2);");
+    std::string s = parser.Parse(LogicalId{0, 0, 2}, U"y;").ToStdString(3, 3);
+    ASSERT_TRUE(s == "7.389E+0") << s;
+}
+
 TEST_F(CalcTestComplex, compare1)
 {
     std::string s = parser.Parse(LogicalId{0, 0, 0, 0, 0, 0, 0, 2, 0}, U"(0<3);").ToStdString(3, 3);

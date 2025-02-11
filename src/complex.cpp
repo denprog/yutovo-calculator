@@ -841,13 +841,15 @@ Real argument(const Complex& num)
     return res;
 }
 
-Complex exp_complex(const int precision)
+Complex exp_complex(const int precision, AngleMeasure angle_measure)
 {
     int res_pos = 0;
-    return exp(Complex(precision, 1), res_pos);
+    Complex v(precision, 1);
+    v.SetAngleMeasure(angle_measure);
+    return exp(v, res_pos);
 }
 
-Complex pi_complex(const int precision)
+Complex pi_complex(const int precision, AngleMeasure angle_measure)
 {
     return Complex(pi(precision));
 }

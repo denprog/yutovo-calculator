@@ -83,8 +83,8 @@ Complex arcth(const Complex& num, int& res_pos);
 Complex arsch(const Complex& num, int& res_pos);
 Complex arcsch(const Complex& num, int& res_pos);
 
-Complex pi_complex(const int precision);
-Complex exp_complex(const int precision);
+Complex pi_complex(const int precision, AngleMeasure angle_measure);
+Complex exp_complex(const int precision, AngleMeasure angle_measure);
 
 Complex exp(const Complex& num, int& res_pos);
 
