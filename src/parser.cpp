@@ -100,6 +100,11 @@ Complex minute(const Complex& num, int& res_pos);
 Complex second(const Complex& num, int& res_pos);
 Complex grad(const Complex& num, int& res_pos);
 
+Complex re(const Complex& num);
+Complex im(const Complex& num);
+Complex mod(const Complex& num);
+Complex arg(const Complex& num);
+
 template<>
 Parser<yutovo_calculator::Integer>::Parser(const int precision, const Language _language) : 
     solver(precision, AngleMeasure::Radian),
@@ -262,6 +267,16 @@ Parser<yutovo_calculator::Complex>::Parser(const int precision, const Language _
     solver.AddBuiltinFunction("second", unary_func);
     unary_func = &grad;
     solver.AddBuiltinFunction("grad", unary_func);
+
+    ComplexFunc func;
+    func = &re;
+    solver.AddBuiltinFunction("re", func);
+    func = &im;
+    solver.AddBuiltinFunction("im", func);
+    func = &mod;
+    solver.AddBuiltinFunction("mod", func);
+    func = &arg;
+    solver.AddBuiltinFunction("arg", func);
 
     ComplexTrigonometricFunc trigonometric_func;
     trigonometric_func = &sin;

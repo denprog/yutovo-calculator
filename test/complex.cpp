@@ -371,6 +371,42 @@ TEST_F(CalcTestComplex, functions4)
     ASSERT_TRUE(r.ToStdString(3, 3) == "40.E+0") << r.ToStdString(3, 3);
 }
 
+TEST_F(CalcTestComplex, functions5)
+{
+    auto r = parser.Parse(LogicalId{0, 0, 1}, U"re(2);", 3);
+    ASSERT_TRUE(r.ToStdString(3, 3) == "2.E+0") << r.ToStdString(3, 3);
+    r = parser.Parse(LogicalId{0, 0, 1}, U"re(4+5*i);", 3);
+    ASSERT_TRUE(r.ToStdString(3, 3) == "4.E+0") << r.ToStdString(3, 3);
+    r = parser.Parse(LogicalId{0, 0, 1}, U"re(5*i);", 3);
+    ASSERT_TRUE(r.ToStdString(3, 3) == "0.E+0") << r.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestComplex, functions6)
+{
+    auto r = parser.Parse(LogicalId{0, 0, 1}, U"im(2);", 3);
+    ASSERT_TRUE(r.ToStdString(3, 3) == "0.E+0") << r.ToStdString(3, 3);
+    r = parser.Parse(LogicalId{0, 0, 1}, U"im(4+5*i);", 3);
+    ASSERT_TRUE(r.ToStdString(3, 3) == "5.E+0") << r.ToStdString(3, 3);
+    r = parser.Parse(LogicalId{0, 0, 1}, U"im(5*i);", 3);
+    ASSERT_TRUE(r.ToStdString(3, 3) == "5.E+0") << r.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestComplex, functions7)
+{
+    auto r = parser.Parse(LogicalId{0, 0, 1}, U"mod(2);", 3);
+    ASSERT_TRUE(r.ToStdString(3, 3) == "2.E+0") << r.ToStdString(3, 3);
+    r = parser.Parse(LogicalId{0, 0, 1}, U"mod(-6+3*i);", 3);
+    auto r1 = parser.Parse(LogicalId{0, 0, 1}, U"sqrt(45);", 3);
+    ASSERT_TRUE(r.ToStdString(3, 3) == r1.ToStdString(3, 3)) << r.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestComplex, functions8)
+{
+    auto r = parser.Parse(LogicalId{0, 0, 1}, U"arg(5+4i);", 3);
+    auto r1 = parser.Parse(LogicalId{0, 0, 1}, U"arctg(4/5);", 3);
+    ASSERT_TRUE(r.ToStdString(3, 3) == r1.ToStdString(3, 3)) << r.ToStdString(3, 3) << " " << r1.ToStdString(3, 3);
+}
+
 TEST_F(CalcTestComplex, sqrt1)
 {
     Dependencies dependencies;

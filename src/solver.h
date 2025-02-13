@@ -24,6 +24,7 @@ typedef Complex (*ComplexUnaryFunc)(const Complex& num, int& res_pos);
 typedef Complex (*ComplexBinaryFunc)(const Complex& num1, const Complex& num2, int& res_pos);
 typedef Complex (*ComplexTrigonometricFunc)(const Complex& num, int& res_pos);
 typedef Complex (*ComplexPrecisionVariable)(const int precision, AngleMeasure angle_measure);
+typedef Complex (*ComplexFunc)(const Complex& num);
 
 typedef Rational (*RationalBinaryFunc)(const Rational& num1, const Rational& num2);
 typedef Rational (*RationalVariable)();
@@ -169,7 +170,8 @@ struct SolverSymbols
     typedef Number (*ComplexTrigonometricFunction)(const Number& num, int& res_pos);
     typedef Number (*ComplexBinaryFunction)(const Number& num1, const Number& num2, int& res_pos);
 
-    typedef boost::variant<UnaryFunction, BinaryFunction, StringFunction, ComplexUnaryFunction, ComplexTrigonometricFunction, ComplexBinaryFunction> BuiltinFunction;
+    typedef boost::variant<UnaryFunction, BinaryFunction, StringFunction, ComplexUnaryFunction, ComplexTrigonometricFunction, 
+        ComplexBinaryFunction> BuiltinFunction;
     typedef boost::variant<TrigonometricFunction, ComplexTrigonometricFunction> BuiltinTrigonometricFunction;
     
     //build-in variables' typedefs
