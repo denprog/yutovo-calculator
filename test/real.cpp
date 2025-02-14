@@ -1185,6 +1185,19 @@ TEST_F(CalcTestReal, units61)
     ASSERT_TRUE(s == "1.E+0((Дж)/(моль*К))") << s;
 }
 
+TEST_F(CalcTestReal, units62)
+{
+    parser.SetLocale(Language::Russian);
+    std::vector<std::u32string> dependencies;
+    LogicalId id{0, 0, 1};
+    parser.Parse(id, U"d_m~10м;");
+    auto r = parser.Parse(LogicalId{0, 0, 2}, U"10м;", &dependencies);
+    ASSERT_TRUE(r.ToStdString(3, 3) == "10.E+0(м)") << r.ToStdString(3, 3);
+    std::string s = parser.GetSuitableUnit(LogicalId{0, 0, 2}, r).ToStdString(3, 3);
+    ASSERT_TRUE(s == "1.E+0(d_m)") << s;
+    ASSERT_TRUE(std::find(dependencies.begin(), dependencies.end(), U"м") != dependencies.end());
+}
+
 TEST_F(CalcTestReal, compare1)
 {
     std::string s = parser.Parse(LogicalId{0, 0, 0, 0, 0, 0, 0, 2, 0}, U"(0<10);").ToStdString(3, 3);
