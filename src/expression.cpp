@@ -37,7 +37,7 @@ Expression<Integer>::Expression(LogicalId id, std::u32string& expr, Solver<Integ
     if (solver->default_notation == 16)
     {
         unary = loop | compare | postfix_operation | implicit_mul | function_call | function_call_string | 
-            no_fences_function_call | identifier | number | implicit_string_mul | unary_operation | '(' > expression > ')';
+            no_fences_function_call | number | identifier | implicit_string_mul | unary_operation | '(' > expression > ')';
     }
     else
     {

@@ -305,6 +305,12 @@ TEST_F(CalcTestInteger, notation12)
     ASSERT_TRUE(res.ToString(10) == U"1229") << res.ToStdString(10);
 }
 
+TEST_F(CalcTestInteger, notation13)
+{
+    Integer res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"da;", Notation::Hexadecimal);
+    ASSERT_TRUE(res.ToString(10) == U"218") << res.ToStdString(10);
+}
+
 TEST_F(CalcTestInteger, builtin_functions1)
 {
     Integer res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"1!;");
