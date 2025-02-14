@@ -197,6 +197,47 @@ TEST_F(CalcTestReal, user_functions3)
     ASSERT_TRUE(std::find(dependencies.begin(), dependencies.end(), U"f") != dependencies.end());
 }
 
+TEST_F(CalcTestReal, user_functions4)
+{
+    parser.Parse(LogicalId{0, 0, 1}, U"f(x)=x;");
+    Real res = parser.Parse(LogicalId{0, 0, 2}, U"f(5);");
+    ASSERT_TRUE(res.ToStdString(3, 3) == "5.E+0") << res.ToStdString(3, 3);
+
+    parser.Parse(LogicalId{0, 0, 3}, U"f(x,y)=x+y;");
+    res = parser.Parse(LogicalId{0, 0, 4}, U"f(5,4);");
+    ASSERT_TRUE(res.ToStdString(3, 3) == "9.E+0") << res.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestReal, user_functions5)
+{
+    parser.Parse(LogicalId{0, 0, 5}, U"p(a)=a+1;");
+    parser.Parse(LogicalId{0, 0, 1}, U"p(a)=a+5;");
+    Real res = parser.Parse(LogicalId{0, 0, 6}, U"p(5);");
+    ASSERT_TRUE(res.ToStdString(3, 3) == "6.E+0") << res.ToStdString(3, 3);
+    res = parser.Parse(LogicalId{0, 0, 2}, U"p(5);");
+    ASSERT_TRUE(res.ToStdString(3, 3) == "10.E+0") << res.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestReal, user_functions6)
+{
+    parser.Parse(LogicalId{0, 0, 8}, U"p(a)=a+15;");
+    Real res = parser.Parse(LogicalId{0, 0, 9}, U"p(5);");
+    ASSERT_TRUE(res.ToStdString(3, 3) == "20.E+0") << res.ToStdString(3, 3);
+    parser.Parse(LogicalId{0, 0, 5}, U"p(a)=a+1;");
+    parser.Parse(LogicalId{0, 0, 1}, U"p(a)=a+5;");
+    res = parser.Parse(LogicalId{0, 0, 2}, U"p(5);");
+    ASSERT_TRUE(res.ToStdString(3, 3) == "10.E+0") << res.ToStdString(3, 3);
+    res = parser.Parse(LogicalId{0, 0, 6}, U"p(5);");
+    ASSERT_TRUE(res.ToStdString(3, 3) == "6.E+0") << res.ToStdString(3, 3);
+    res = parser.Parse(LogicalId{0, 0, 2}, U"p(5);");
+    ASSERT_TRUE(res.ToStdString(3, 3) == "10.E+0") << res.ToStdString(3, 3);
+    res = parser.Parse(LogicalId{0, 0, 9}, U"p(5);");
+    ASSERT_TRUE(res.ToStdString(3, 3) == "20.E+0") << res.ToStdString(3, 3);
+    parser.Parse(LogicalId{0, 0, 12}, U"p(a)=a+25;");
+    res = parser.Parse(LogicalId{0, 0, 9}, U"p(5);");
+    ASSERT_TRUE(res.ToStdString(3, 3) == "20.E+0") << res.ToStdString(3, 3);
+}
+
 TEST_F(CalcTestReal, str1)
 {
     EXPECT_THROW(parser.Parse(LogicalId{0, 0, 1}, U"в;"), yutovo_calculator::SyntaxException);
@@ -401,6 +442,55 @@ TEST_F(CalcTestReal, variables20)
     r = parser.Parse(LogicalId{0, 0, 2}, U"B=45;");
     r = parser.Parse(LogicalId{0, 0, 3}, U"A%B;");
     ASSERT_TRUE(r.ToStdString(3, 3) == "2.25E+0") << r.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestReal, variables21)
+{
+    try
+    {
+        parser.Parse(LogicalId{0, 0, 1}, U"sin;");
+        ASSERT_FALSE(true);
+    }
+    catch (yutovo_calculator::SyntaxException& ex)
+    {
+        ASSERT_TRUE((ex.id == LogicalId{0, 0, 1}) && ex.ex_id == ParserExceptionCode::UnknownIdentifier && ex.pos == 0) << LogicalIdToString(ex.id);
+    }
+
+    parser.Parse(LogicalId{0, 0, 1}, U"sin=2;");
+    Real res = parser.Parse(LogicalId{0, 0, 2}, U"sin;");
+    ASSERT_TRUE(res.ToStdString(3, 3) == "2.E+0") << res.ToStdString(3, 3);
+
+    res = parser.Parse(LogicalId{0, 0, 3}, U"sin(2);");
+    ASSERT_TRUE(res.ToStdString(3, 3) == "0.909E+0") << res.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestReal, variables22)
+{
+    parser.Parse(LogicalId{0, 0, 5}, U"b=4;");
+    parser.Parse(LogicalId{0, 0, 3}, U"b=3;");
+    parser.Parse(LogicalId{0, 0, 1}, U"b=2;");
+    Real res = parser.Parse(LogicalId{0, 0, 6}, U"b;");
+    ASSERT_TRUE(res.ToStdString(3, 3) == "4.E+0") << res.ToStdString(3, 3);
+    res = parser.Parse(LogicalId{0, 0, 4}, U"b;");
+    ASSERT_TRUE(res.ToStdString(3, 3) == "3.E+0") << res.ToStdString(3, 3);
+    res = parser.Parse(LogicalId{0, 0, 2}, U"b;");
+    ASSERT_TRUE(res.ToStdString(3, 3) == "2.E+0") << res.ToStdString(3, 3);
+
+    parser.Parse(LogicalId{0, 0, 1}, U"b=5;");
+    res = parser.Parse(LogicalId{0, 0, 2}, U"b;");
+    ASSERT_TRUE(res.ToStdString(3, 3) == "5.E+0") << res.ToStdString(3, 3);
+    res = parser.Parse(LogicalId{0, 0, 4}, U"b;");
+    ASSERT_TRUE(res.ToStdString(3, 3) == "3.E+0") << res.ToStdString(3, 3);
+    res = parser.Parse(LogicalId{0, 0, 6}, U"b;");
+    ASSERT_TRUE(res.ToStdString(3, 3) == "4.E+0") << res.ToStdString(3, 3);
+
+    parser.Parse(LogicalId{0, 0, 5}, U"b=6;");
+    res = parser.Parse(LogicalId{0, 0, 6}, U"b;");
+    ASSERT_TRUE(res.ToStdString(3, 3) == "6.E+0") << res.ToStdString(3, 3);
+    res = parser.Parse(LogicalId{0, 0, 2}, U"b;");
+    ASSERT_TRUE(res.ToStdString(3, 3) == "5.E+0") << res.ToStdString(3, 3);
+    res = parser.Parse(LogicalId{0, 0, 4}, U"b;");
+    ASSERT_TRUE(res.ToStdString(3, 3) == "3.E+0") << res.ToStdString(3, 3);
 }
 
 TEST_F(CalcTestReal, symbols1)

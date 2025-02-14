@@ -429,17 +429,45 @@ struct Solver : public boost::static_visitor<Number>
 
     void AddVariable(VariableNode<Number> const& var) const
     {
-        for (auto& v : symbols->variables)
+        int j = -1;
+        LogicalId min_same_name_id;
+        for (size_t i = 0; i < symbols->variables.size(); ++i)
         {
+            auto& v = symbols->variables[i];
             if (v.id == id)
             {
                 v = var;
                 v.id = id;
                 return;
             }
+            if (v.name.name == var.name.name)
+            {
+                if (IsLess(v.id, id))
+                    j = i + 1;
+                else
+                {
+                    if (!min_same_name_id.empty())
+                    {
+                        if (IsLess(v.id, min_same_name_id))
+                        {
+                            min_same_name_id = v.id;
+                            j = i;
+                        }
+                    }
+                    else
+                    {
+                        min_same_name_id = v.id;
+                        j = i;
+                    }
+                }
+            }
         }
         var.id = id;
-        symbols->variables.push_back(var);
+        if (j == -1)
+            symbols->variables.push_back(var);
+        else
+            symbols->variables.insert(symbols->variables.begin() + j, var);
+
         (*this)(var.expression); //for adding dependencies
     }
 
@@ -462,47 +490,35 @@ struct Solver : public boost::static_visitor<Number>
 
     VariableNode<Number>* FindVariable(const std::u32string& name, const std::u32string& subscript) const
     {
-        VariableNode<Number>* res = nullptr;
-        LogicalId var_id;
         for (int i = symbols->variables.size() - 1; i >= 0; --i)
         {
             auto& var = symbols->variables[i];
-            if (var.name.name == name && var.name.subscript == subscript && IsLess(var.id, id))
-            {
-                if (!var_id.empty() && IsLess(var.id, var_id))
-                    continue;
-                res = &var;
-                var_id = var.id;
-            }
+            if (IsLess(var.id, id) && var.name.name == name && var.name.subscript == subscript)
+                return &var;
         }
-        
-        return res;
+        return nullptr;
     }
 
     FunctionNode<Number>* FindFunction(FunctionCallNode<Number> const& op) const
     {
-        FunctionNode<Number>* res = nullptr;
-        LogicalId func_id;
-        for (int i = 0; i < (int)symbols->functions.size(); ++i)
+        for (int i = (int)symbols->functions.size() - 1; i >= 0; --i)
         {
             auto& func = symbols->functions[i];
-            if (func.name.name == op.name.name && IsLess(func.id, id))
+            if (IsLess(func.id, id) && func.name.name == op.name.name)
             {
                 if (func.arguments.size() != op.arguments.size())
                     throw SyntaxException(op.id, WrongArgumentsCount, U"Wrong arguments count in '" + op.name.name + U"'", op.pos, op.line);
-                if (!func_id.empty() && IsLess(func.id, func_id))
-                    continue;
-                res = &func;
-                func_id = func.id;
+                return &func;
             }
         }
-    
-        return res;
+        return nullptr;
     }
 
     void AddFunction(FunctionNode<Number> const& func) const
     {
-        for (int i = 0; i < symbols->functions.size(); ++i)
+        int j = -1;
+        LogicalId min_same_name_id;
+        for (size_t i = 0; i < symbols->functions.size(); ++i)
         {
             auto& f = symbols->functions[i];
             if (f.id == id)
@@ -511,9 +527,33 @@ struct Solver : public boost::static_visitor<Number>
                 f.id = id;
                 return;
             }
+            if (f.name.name == func.name.name)
+            {
+                if (IsLess(f.id, id))
+                    j = i + 1;
+                else
+                {
+                    if (!min_same_name_id.empty())
+                    {
+                        if (IsLess(f.id, min_same_name_id))
+                        {
+                            min_same_name_id = f.id;
+                            j = i;
+                        }
+                    }
+                    else
+                    {
+                        min_same_name_id = f.id;
+                        j = i;
+                    }
+                }
+            }
         }
         func.id = id;
-        symbols->functions.push_back((FunctionNode<Number>&)func);
+        if (j == -1)
+            symbols->functions.push_back((FunctionNode<Number>&)func);
+        else
+            symbols->functions.insert(symbols->functions.begin() + j, (FunctionNode<Number>&)func);
 
         //parse for adding dependencies
         Number arg;
