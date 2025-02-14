@@ -60,7 +60,7 @@ Expression<Integer>::Expression(LogicalId id, std::u32string& expr, Solver<Integ
 
     unary_operation = (char_('+') > unary) | (char_('-') > unary) | (char_('!') > unary);
 
-    postfix_operation = ((number | '(' > expression > ')') >> char_('!'));
+    postfix_operation = (identifier >> char_('!')) | ((number | '(' > expression > ')') >> char_('!'));
 
     implicit_string_mul = (number >> identifier);
     
@@ -131,6 +131,7 @@ Expression<Integer>::Expression(LogicalId id, std::u32string& expr, Solver<Integ
     // BOOST_SPIRIT_DEBUG_NODE(function_call);
     // BOOST_SPIRIT_DEBUG_NODE(identifier);
     // BOOST_SPIRIT_DEBUG_NODE(unary);
+    // BOOST_SPIRIT_DEBUG_NODE(unary_operation);
     // BOOST_SPIRIT_DEBUG_NODE(postfix_operation);
 }
 

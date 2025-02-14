@@ -321,6 +321,13 @@ TEST_F(CalcTestInteger, builtin_functions1)
     ASSERT_TRUE(res.ToString(10) == U"5040") << res.ToStdString(10);
 }
 
+TEST_F(CalcTestInteger, builtin_functions2)
+{
+    parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"a=2;");
+    Integer res = parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"a!;");
+    ASSERT_TRUE(res.ToString(10) == U"2") << res.ToStdString(10);
+}
+
 TEST_F(CalcTestInteger, compare1)
 {
     std::string s = parser.Parse(LogicalId{0, 0, 0, 0, 0, 0, 0, 2, 0}, U"(0<10);").ToStdString();
