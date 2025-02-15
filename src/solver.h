@@ -649,7 +649,16 @@ struct Solver : public boost::static_visitor<Number>
                 return func.name.name == name && func.id == id;;
             }), 
             symbols->functions.end());
-        return func_it != symbols->functions.end();
+        if (func_it != symbols->functions.end())
+            return true;
+
+        auto unit_it = symbols->units.erase(std::remove_if(symbols->units.begin(), symbols->units.end(), 
+            [id, name](auto& unit)
+            {
+                return unit.name == name && unit.id == id;;
+            }), 
+            symbols->units.end());
+        return unit_it != symbols->units.end();
     }
 
     bool RemoveIdentifier(LogicalId id)
@@ -669,7 +678,16 @@ struct Solver : public boost::static_visitor<Number>
                 return func.id == id;;
             }), 
             symbols->functions.end());
-        return func_it != symbols->functions.end();
+        if (func_it != symbols->functions.end())
+            return true;
+
+        auto unit_it = symbols->units.erase(std::remove_if(symbols->units.begin(), symbols->units.end(), 
+            [id](auto& unit)
+            {
+                return unit.id == id;;
+            }), 
+            symbols->units.end());
+        return unit_it != symbols->units.end();
     }
 
     void AddBuiltinUnit(const Unit& unit)

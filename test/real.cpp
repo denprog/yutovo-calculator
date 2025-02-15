@@ -1198,6 +1198,23 @@ TEST_F(CalcTestReal, units62)
     ASSERT_TRUE(std::find(dependencies.begin(), dependencies.end(), U"м") != dependencies.end());
 }
 
+TEST_F(CalcTestReal, units63)
+{
+    parser.SetLocale(Language::Russian);
+    LogicalId id{0, 0, 1};
+    parser.Parse(id, U"d_m~10м;");
+    auto r = parser.Parse(LogicalId{0, 0, 2}, U"10м;");
+    ASSERT_TRUE(r.ToStdString(3, 3) == "10.E+0(м)") << r.ToStdString(3, 3);
+    std::string s = parser.GetSuitableUnit(LogicalId{0, 0, 2}, r).ToStdString(3, 3);
+    ASSERT_TRUE(s == "1.E+0(d_m)") << s;
+
+    parser.RemoveIdentifier(id, U"d_m");
+    r = parser.Parse(LogicalId{0, 0, 2}, U"10м;");
+    ASSERT_TRUE(r.ToStdString(3, 3) == "10.E+0(м)") << r.ToStdString(3, 3);
+    s = parser.GetSuitableUnit(LogicalId{0, 0, 2}, r).ToStdString(3, 3);
+    ASSERT_TRUE(s == "100.E+0(дм)") << s;
+}
+
 TEST_F(CalcTestReal, compare1)
 {
     std::string s = parser.Parse(LogicalId{0, 0, 0, 0, 0, 0, 0, 2, 0}, U"(0<10);").ToStdString(3, 3);
