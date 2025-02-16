@@ -407,6 +407,12 @@ TEST_F(CalcTestComplex, functions8)
     ASSERT_TRUE(r.ToStdString(3, 3) == r1.ToStdString(3, 3)) << r.ToStdString(3, 3) << " " << r1.ToStdString(3, 3);
 }
 
+TEST_F(CalcTestComplex, functions9)
+{
+    auto r = parser.Parse(LogicalId{0, 0, 1}, U"arcsin(10);", 3);
+    ASSERT_TRUE(r.ToStdString(3, 3) == "1.571E+0+i*-2.993E+0") << r.ToStdString(3, 3);
+}
+
 TEST_F(CalcTestComplex, sqrt1)
 {
     Dependencies dependencies;

@@ -572,7 +572,7 @@ Complex sqrt(const Complex& num, int& res_pos)
 	int cur_pos = res_pos % 2;
 	res_pos /= 2;
 
-    if (num.GetIm() == 0)
+    if (num.GetIm() == 0 && num.GetRe() > 0)
     {
         if (cur_pos == 0)
             return Complex(sqrt(num.GetRe()), Real(num.GetBitPrecision(), 0));
