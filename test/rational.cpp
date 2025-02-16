@@ -77,6 +77,13 @@ TEST_F(CalcTestRational, functions3)
     ASSERT_TRUE(r.ToStdString() == "4") << r.ToStdString();
 }
 
+TEST_F(CalcTestRational, functions4)
+{
+    parser.Parse(LogicalId{0, 0, 0, 2}, U"f(x)=(x)/(3);");
+    auto r = parser.Parse(LogicalId{0, 0, 0, 3}, U"f(4);", 3);
+    ASSERT_TRUE(r.ToStdString() == "4/3") << r.ToStdString();
+}
+
 TEST_F(CalcTestRational, symbols1)
 {
     EXPECT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"•;"), yutovo_calculator::SyntaxException) << parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"•;").ToStdString();
