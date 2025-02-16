@@ -1215,6 +1215,19 @@ TEST_F(CalcTestReal, units63)
     ASSERT_TRUE(s == "100.E+0(дм)") << s;
 }
 
+TEST_F(CalcTestReal, units64)
+{
+    parser.SetLocale(Language::Russian);
+    LogicalId id{0, 0, 0, 1};
+    auto r = parser.Parse(id, U"кг*м/с;");
+    std::vector<Unit> cast_units;
+    parser.GetCastUnits(id, r, cast_units);
+    Unit u(U"кг", U"с");
+    u.system = U"rus";
+    u.unit.push_back(std::make_pair(U"м", 1));
+    ASSERT_FALSE(FindUnit(cast_units, u));
+}
+
 TEST_F(CalcTestReal, compare1)
 {
     std::string s = parser.Parse(LogicalId{0, 0, 0, 0, 0, 0, 0, 2, 0}, U"(0<10);").ToStdString(3, 3);

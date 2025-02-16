@@ -865,6 +865,27 @@ struct Solver : public boost::static_visitor<Number>
             {
                 if (custom_unit.Cast(t))
                 {
+                    if (system != U"SI")
+                    {
+                        //check all the unit parts are present in this system
+                        size_t j = 0;
+                        for (; j < t.unit.unit.size(); ++j)
+                        {
+                            std::pair<std::u32string, int>& p = t.unit.unit[j];
+                            if (std::find_if(symbols->units.begin(), symbols->units.end(), 
+                                [system, p](const CustomUnit<Number>& c)
+                                {
+                                    return c.system == system && c.name == p.first;
+                                }
+                                ) == symbols->units.end())
+                            {
+                                break;
+                            }
+                        }
+                        if (j != t.unit.unit.size())
+                            continue;
+                    }
+                    
                     if (t.unit.unit.size() <= max_cast_unit_size)
                         GetCastUnitsImpl(_id, t, system, _cast_units);
                     else
