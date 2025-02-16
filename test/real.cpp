@@ -167,6 +167,13 @@ TEST_F(CalcTestReal, functions7)
     ASSERT_TRUE(r.ToStdString(3, 3) == "24.E+0") << r.ToStdString(3, 3);
 }
 
+TEST_F(CalcTestReal, functions8)
+{
+    parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"a=2;");
+    Real res = parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"a!;");
+    ASSERT_TRUE(res.ToString(3, 3) == U"2.E+0") << res.ToStdString(3, 3);
+}
+
 TEST_F(CalcTestReal, user_functions1)
 {
     parser.Parse(LogicalId{0, 0, 1}, U"f(x)=5;");

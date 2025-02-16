@@ -198,7 +198,7 @@ Expression<Real>::Expression(LogicalId id, std::u32string& expr, Solver<Real>* _
 
     unary_operation = (char_('+') > unary) | (char_('-') > unary);
 
-    postfix_operation = ((number | '(' > expression > ')') >> char_('!'));
+    postfix_operation = (identifier >> char_('!')) | ((number | '(' > expression > ')') >> char_('!'));
     
     function_call = identifier >> '(' >> -(expression % ',') > ')';
     
