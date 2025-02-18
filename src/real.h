@@ -198,17 +198,15 @@ public:
 
     friend Real trunc(const Real& num);
 
-    friend Real fract(const Real& num);
-
     friend Real ceil(const Real& num);
 
     friend Real round(const Real& num);
 
     friend Real integer(const Real& num);
 
-    friend Real fraction(const Real& num);
+    friend Real fract(const Real &num);
 
-    friend Real fact(const Real& num);
+    friend Real fact(const Real &num);
 
     friend Real roundoff(const Real& num);
 

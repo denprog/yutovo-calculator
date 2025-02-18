@@ -174,6 +174,82 @@ TEST_F(CalcTestReal, functions8)
     ASSERT_TRUE(res.ToString(3, 3) == U"2.E+0") << res.ToStdString(3, 3);
 }
 
+TEST_F(CalcTestReal, functions9)
+{
+    auto r = parser.Parse(LogicalId{0, 0, 1}, U"abs(-2.3);", 3);
+    ASSERT_TRUE(r.ToStdString(3, 3) == "2.3E+0") << r.ToStdString(3, 3);
+    r = parser.Parse(LogicalId{0, 0, 1}, U"abs(2.3);", 3);
+    ASSERT_TRUE(r.ToStdString(3, 3) == "2.3E+0") << r.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestReal, functions10)
+{
+    auto r = parser.Parse(LogicalId{0, 0, 1}, U"integer(-2.3);", 3);
+    ASSERT_TRUE(r.ToStdString(3, 3) == "-2.E+0") << r.ToStdString(3, 3);
+    r = parser.Parse(LogicalId{0, 0, 1}, U"integer(-2.7);", 3);
+    ASSERT_TRUE(r.ToStdString(3, 3) == "-2.E+0") << r.ToStdString(3, 3);
+    r = parser.Parse(LogicalId{0, 0, 1}, U"integer(2.3);", 3);
+    ASSERT_TRUE(r.ToStdString(3, 3) == "2.E+0") << r.ToStdString(3, 3);
+    r = parser.Parse(LogicalId{0, 0, 1}, U"integer(2.6);", 3);
+    ASSERT_TRUE(r.ToStdString(3, 3) == "2.E+0") << r.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestReal, functions11)
+{
+    auto r = parser.Parse(LogicalId{0, 0, 1}, U"fract(-2.3);", 3);
+    ASSERT_TRUE(r.ToStdString(3, 3) == "-0.3E+0") << r.ToStdString(3, 3);
+    r = parser.Parse(LogicalId{0, 0, 1}, U"fract(2.3);", 3);
+    ASSERT_TRUE(r.ToStdString(3, 3) == "0.3E+0") << r.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestReal, functions12)
+{
+    auto r = parser.Parse(LogicalId{0, 0, 1}, U"ceil(-2.6);", 3);
+    ASSERT_TRUE(r.ToStdString(3, 3) == "-2.E+0") << r.ToStdString(3, 3);
+    r = parser.Parse(LogicalId{0, 0, 1}, U"ceil(-2.3);", 3);
+    ASSERT_TRUE(r.ToStdString(3, 3) == "-2.E+0") << r.ToStdString(3, 3);
+    r = parser.Parse(LogicalId{0, 0, 1}, U"ceil(2.3);", 3);
+    ASSERT_TRUE(r.ToStdString(3, 3) == "3.E+0") << r.ToStdString(3, 3);
+    r = parser.Parse(LogicalId{0, 0, 1}, U"ceil(2.5);", 3);
+    ASSERT_TRUE(r.ToStdString(3, 3) == "3.E+0") << r.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestReal, functions13)
+{
+    auto r = parser.Parse(LogicalId{0, 0, 1}, U"floor(-2.6);", 3);
+    ASSERT_TRUE(r.ToStdString(3, 3) == "-3.E+0") << r.ToStdString(3, 3);
+    r = parser.Parse(LogicalId{0, 0, 1}, U"floor(-2.3);", 3);
+    ASSERT_TRUE(r.ToStdString(3, 3) == "-3.E+0") << r.ToStdString(3, 3);
+    r = parser.Parse(LogicalId{0, 0, 1}, U"floor(2.3);", 3);
+    ASSERT_TRUE(r.ToStdString(3, 3) == "2.E+0") << r.ToStdString(3, 3);
+    r = parser.Parse(LogicalId{0, 0, 1}, U"floor(2.5);", 3);
+    ASSERT_TRUE(r.ToStdString(3, 3) == "2.E+0") << r.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestReal, functions14)
+{
+    auto r = parser.Parse(LogicalId{0, 0, 1}, U"round(-2.3);", 3);
+    ASSERT_TRUE(r.ToStdString(3, 3) == "-2.E+0") << r.ToStdString(3, 3);
+    r = parser.Parse(LogicalId{0, 0, 1}, U"round(-2.5);", 3);
+    ASSERT_TRUE(r.ToStdString(3, 3) == "-3.E+0") << r.ToStdString(3, 3);
+    r = parser.Parse(LogicalId{0, 0, 1}, U"round(2.3);", 3);
+    ASSERT_TRUE(r.ToStdString(3, 3) == "2.E+0") << r.ToStdString(3, 3);
+    r = parser.Parse(LogicalId{0, 0, 1}, U"round(2.5);", 3);
+    ASSERT_TRUE(r.ToStdString(3, 3) == "3.E+0") << r.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestReal, functions15)
+{
+    auto r = parser.Parse(LogicalId{0, 0, 1}, U"trunc(-2.3);", 3);
+    ASSERT_TRUE(r.ToStdString(3, 3) == "-2.E+0") << r.ToStdString(3, 3);
+    r = parser.Parse(LogicalId{0, 0, 1}, U"trunc(-2.5);", 3);
+    ASSERT_TRUE(r.ToStdString(3, 3) == "-2.E+0") << r.ToStdString(3, 3);
+    r = parser.Parse(LogicalId{0, 0, 1}, U"trunc(2.5);", 3);
+    ASSERT_TRUE(r.ToStdString(3, 3) == "2.E+0") << r.ToStdString(3, 3);
+    r = parser.Parse(LogicalId{0, 0, 1}, U"trunc(2.1);", 3);
+    ASSERT_TRUE(r.ToStdString(3, 3) == "2.E+0") << r.ToStdString(3, 3);
+}
+
 TEST_F(CalcTestReal, user_functions1)
 {
     parser.Parse(LogicalId{0, 0, 1}, U"f(x)=5;");

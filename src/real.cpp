@@ -1621,18 +1621,6 @@ Real floor(const Real& num)
     return res;
 }
 
-Real fract(const Real& num)
-{
-    Real res(num.GetBitPrecision(), num.angle_measure);
-
-    mpfr_frac(res.number, num.number, DEFAULT_RND);
-
-#ifdef TRACE_OUTPUT
-    res.UpdateNumberStr();
-#endif
-    return res;
-}
-
 Real trunc(const Real& num)
 {
     Real res(num.GetBitPrecision(), num.angle_measure);
@@ -1674,9 +1662,16 @@ Real integer(const Real& num)
     return trunc(num);
 }
 
-Real fraction(const Real& num)
+Real fract(const Real &num)
 {
-    return fract(num);
+    Real res(num.GetBitPrecision(), num.angle_measure);
+
+    mpfr_frac(res.number, num.number, DEFAULT_RND);
+
+#ifdef TRACE_OUTPUT
+    res.UpdateNumberStr();
+#endif
+    return res;
 }
 
 Real fact(const Real& num)

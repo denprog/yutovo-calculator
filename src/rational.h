@@ -92,6 +92,8 @@ public:
     friend Rational pow(const Rational& num1, const Rational& num2);
     friend Rational pow(const Rational& num1, const int num2);
 
+    friend Rational abs(const Rational &num);
+
 public:
     Integer GetNumerator() const;
     Integer GetDenomerator() const;

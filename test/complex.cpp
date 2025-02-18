@@ -419,6 +419,15 @@ TEST_F(CalcTestComplex, functions10)
     ASSERT_TRUE(r.ToStdString(3, 3) == "0.E+0") << r.ToStdString(3, 3);
 }
 
+TEST_F(CalcTestComplex, functions11)
+{
+    auto r = parser.Parse(LogicalId{0, 0, 1}, U"abs(2);", 3);
+    ASSERT_TRUE(r.ToStdString(3, 3) == "2.E+0") << r.ToStdString(3, 3);
+    r = parser.Parse(LogicalId{0, 0, 1}, U"abs(-6+3*i);", 3);
+    auto r1 = parser.Parse(LogicalId{0, 0, 1}, U"sqrt(45);", 3);
+    ASSERT_TRUE(r.ToStdString(3, 3) == r1.ToStdString(3, 3)) << r.ToStdString(3, 3);
+}
+
 TEST_F(CalcTestComplex, sqrt1)
 {
     Dependencies dependencies;

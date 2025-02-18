@@ -328,6 +328,14 @@ TEST_F(CalcTestInteger, builtin_functions2)
     ASSERT_TRUE(res.ToString(10) == U"2") << res.ToStdString(10);
 }
 
+TEST_F(CalcTestInteger, builtin_functions3)
+{
+    auto r = parser.Parse(LogicalId{0, 0, 1}, U"abs(-2);", 3);
+    ASSERT_TRUE(r.ToStdString(10) == "2") << r.ToStdString(10);
+    r = parser.Parse(LogicalId{0, 0, 1}, U"abs(2);", 3);
+    ASSERT_TRUE(r.ToStdString(10) == "2") << r.ToStdString(10);
+}
+
 TEST_F(CalcTestInteger, compare1)
 {
     std::string s = parser.Parse(LogicalId{0, 0, 0, 0, 0, 0, 0, 2, 0}, U"(0<10);").ToStdString();

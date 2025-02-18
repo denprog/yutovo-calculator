@@ -15,6 +15,12 @@ TEST_F(CalcTestRational, arithmetic1)
     ASSERT_TRUE(res.ToString() == U"15/2") << res.ToStdString();
 }
 
+TEST_F(CalcTestRational, arithmetic2)
+{
+    Rational res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"-(1)/(3);");
+    ASSERT_TRUE(res.ToString() == U"-1/3") << res.ToStdString();
+}
+
 TEST_F(CalcTestRational, variables1)
 {
     parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"п=3/2;");
@@ -82,6 +88,14 @@ TEST_F(CalcTestRational, functions4)
     parser.Parse(LogicalId{0, 0, 0, 2}, U"f(x)=(x)/(3);");
     auto r = parser.Parse(LogicalId{0, 0, 0, 3}, U"f(4);", 3);
     ASSERT_TRUE(r.ToStdString() == "4/3") << r.ToStdString();
+}
+
+TEST_F(CalcTestRational, functions5)
+{
+    auto r = parser.Parse(LogicalId{0, 0, 1}, U"abs(-(2)/(3));", 3);
+    ASSERT_TRUE(r.ToStdString() == "2/3") << r.ToStdString();
+    r = parser.Parse(LogicalId{0, 0, 1}, U"abs((2)/(3));", 3);
+    ASSERT_TRUE(r.ToStdString() == "2/3") << r.ToStdString();
 }
 
 TEST_F(CalcTestRational, symbols1)

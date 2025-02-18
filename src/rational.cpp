@@ -516,6 +516,16 @@ Rational pow(const Rational& num1, const int num2)
     return res;
 }
 
+Rational abs(const Rational &num)
+{
+    if (num < 0)
+    {
+        Rational r(num);
+        return -r;
+    }
+    return num;
+}
+
 Integer Rational::GetNumerator() const
 {
     Integer numerator;

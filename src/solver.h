@@ -11,6 +11,7 @@ namespace yutovo_calculator
 
 using namespace std::chrono;
 
+typedef Integer (*IntegerUnaryFunc)(const Integer &num);
 typedef Integer (*IntegerBinaryFunc)(const Integer& num1, const Integer& num2);
 typedef Integer (*IntegerStringFunc)(const std::u32string& str);
 typedef Integer (*IntegerVariable)();
@@ -26,6 +27,7 @@ typedef Complex (*ComplexTrigonometricFunc)(const Complex& num, int& res_pos);
 typedef Complex (*ComplexPrecisionVariable)(const int precision, AngleMeasure angle_measure);
 typedef Complex (*ComplexFunc)(const Complex& num);
 
+typedef Rational (*RationalUnaryFunc)(const Rational &num);
 typedef Rational (*RationalBinaryFunc)(const Rational& num1, const Rational& num2);
 typedef Rational (*RationalVariable)();
 

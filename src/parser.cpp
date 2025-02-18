@@ -11,10 +11,14 @@ Integer hex(const std::u32string& str);
 
 Integer pow(const Integer& num1, const Integer& num2);
 
+Integer abs(const Integer &num);
+
 Real pow(const Real& num1, const Real& num2);
 Complex pow(const Complex& num1, const Complex& num2, int& res_pos);
 
 Rational pow(const Rational& num1, const Rational& num2);
+
+Rational abs(const Rational &num);
 
 Real sin(const Real& num);
 Real cos(const Real& num);
@@ -51,6 +55,14 @@ Real lg(const Real& num);
 Real log(const Real& num1, const Real& num2);
 Real sqrt(const Real& num);
 Real root(const Real& num1, const Real& num2);
+
+Real integer(const Real &num);
+Real fract(const Real &num);
+Real abs(const Real &num);
+Real ceil(const Real &num);
+Real floor(const Real &num);
+Real round(const Real &num);
+Real trunc(const Real &num);
 
 Real rad(const Real& num);
 Real deg(const Real& num);
@@ -94,6 +106,8 @@ Complex log(const Complex& num1, const Complex& num2, int& res_pos);
 Complex sqrt(const Complex& num, int& res_pos);
 Complex root(const Complex& num1, const Complex& num2, int& res_pos);
 
+Complex abs(const Complex &num);
+
 Complex rad(const Complex& num, int& res_pos);
 Complex deg(const Complex& num, int& res_pos);
 Complex minute(const Complex& num, int& res_pos);
@@ -123,6 +137,9 @@ Parser<yutovo_calculator::Integer>::Parser(const int precision, const Language _
     solver.AddBuiltinFunction("dec", string_func);
     string_func = &hex;
     solver.AddBuiltinFunction("hex", string_func);
+
+    IntegerUnaryFunc unary_func = &abs;
+    solver.AddBuiltinFunction("abs", unary_func);
 }
 
 template<>
@@ -148,6 +165,20 @@ Parser<yutovo_calculator::Real>::Parser(const int precision, const Language _lan
     solver.AddBuiltinFunction("lg", unary_func);
     unary_func = &sqrt;
     solver.AddBuiltinFunction("sqrt", unary_func);
+    unary_func = &integer;
+    solver.AddBuiltinFunction("integer", unary_func);
+    unary_func = &fract;
+    solver.AddBuiltinFunction("fract", unary_func);
+    unary_func = &abs;
+    solver.AddBuiltinFunction("abs", unary_func);
+    unary_func = &ceil;
+    solver.AddBuiltinFunction("ceil", unary_func);
+    unary_func = &floor;
+    solver.AddBuiltinFunction("floor", unary_func);
+    unary_func = &round;
+    solver.AddBuiltinFunction("round", unary_func);
+    unary_func = &trunc;
+    solver.AddBuiltinFunction("trunc", unary_func);
 
     unary_func = &rad;
     solver.AddBuiltinFunction("rad", unary_func);
@@ -231,6 +262,9 @@ Parser<yutovo_calculator::Rational>::Parser(const int precision, const Language 
     RationalBinaryFunc binary_func = &pow;
     solver.AddBuiltinFunction("pow", binary_func);
 
+    RationalUnaryFunc unary_func = &abs;
+    solver.AddBuiltinFunction("abs", unary_func);
+
     InitUnits();
 }
 
@@ -277,6 +311,8 @@ Parser<yutovo_calculator::Complex>::Parser(const int precision, const Language _
     solver.AddBuiltinFunction("mod", func);
     func = &arg;
     solver.AddBuiltinFunction("arg", func);
+    func = &abs;
+    solver.AddBuiltinFunction("abs", func);
 
     ComplexTrigonometricFunc trigonometric_func;
     trigonometric_func = &sin;
