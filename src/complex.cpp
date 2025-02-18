@@ -795,7 +795,9 @@ Complex arth(const Complex& num, int& res_pos)
 
 Complex arcth(const Complex& num, int& res_pos)
 {
-    return arth(1 / num, res_pos);
+    Complex r = (ln((num + 1) / (num - 1), res_pos)) / 2;
+    r.SetAngleMeasure(AngleMeasure::None);
+    return r;
 }
 
 Complex arsch(const Complex& num, int& res_pos)

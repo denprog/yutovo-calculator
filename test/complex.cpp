@@ -316,6 +316,9 @@ TEST_F(CalcTestComplex, trigonometric22)
 
     res = parser.Parse(LogicalId{0, 0, 1}, U"arcth(2+3i);");
     ASSERT_TRUE(res.GetAngleMeasure() == AngleMeasure::None && res.ToStdString(3, 3) == "0.147E+0+i*-0.232E+0") << res.ToStdString(3, 3);
+
+    res = parser.Parse(LogicalId{0, 0, 1}, U"arcth(0.5);", AngleMeasure::Radian, AngleMeasure::Radian);
+    ASSERT_TRUE(res.ToStdString(3, 3) == "0.549E+0+i*1.571E+0") << res.ToStdString(3, 3);
 }
 
 TEST_F(CalcTestComplex, trigonometric23)
