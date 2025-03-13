@@ -733,12 +733,12 @@ private:
                     U"funt{rus}~0.4095124*kg;",
                     U"batman{rus}~10funt{rus};",
                     U"pud{rus}~40funt{rus};",
-                    U"bezmen{rus}~(1)/(16pud{rus});",
+                    U"bezmen{rus}~(1)/(16)pud{rus};",
                     U"kongar{rus}~40.95kg;",
                     U"pirog{rus}~43mg;",
                     U"zolotnik{rus}~4.266g;",
-                    U"dolya{rus}~(1)/(96zolotnik{rus});",
-                    U"pochka{rus}~(1)/(25zolotnik{rus});",
+                    U"dolya{rus}~(1)/(96)zolotnik{rus};",
+                    U"pochka{rus}~(1)/(25)zolotnik{rus};",
                     U"lot{rus}~zolotnik{rus};",
 
                     //time
