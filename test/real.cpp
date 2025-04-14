@@ -1342,6 +1342,17 @@ TEST_F(CalcTestReal, sum1)
     ASSERT_TRUE(s == "11.E+0") << s;
     s = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"loop(i=1,(i<=10),i=i+1,t=0,t=t+i);").ToStdString(3, 3);
     ASSERT_TRUE(s == "55.E+0") << s;
+
+    try
+    {
+        parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"i;");
+    }
+    catch (yutovo_calculator::SyntaxException& ex)
+    {
+        ASSERT_TRUE((ex.id == LogicalId{0, 0, 0, 0, 2}) && ex.ex_id == ParserExceptionCode::UnknownIdentifier && ex.pos == 0) << LogicalIdToString(ex.id);
+        return;
+    }
+    ASSERT_FALSE(true);
 }
 
 TEST_F(CalcTestReal, sum2)
