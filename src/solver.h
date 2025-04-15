@@ -370,18 +370,36 @@ struct Solver : public boost::static_visitor<Number>
     {
         Number counter = (*this)(op.counter.expression);
         PushTempVariable(op.counter.name.name, counter);
-        Number counter_max = (*this)(op.counter_max);
-        Number res = (*this)(op.loop_var.expression);
+        Number counter_max;
+        Number res;
+        try
+        {
+            counter_max = (*this)(op.counter_max);
+            res = (*this)(op.loop_var.expression);
+        }
+        catch (...)
+        {
+            PopTempVariables(1);
+            throw;
+        }
         PushTempVariable(op.loop_var.name.name, res);
         while (counter_max != 0)
         {
             CheckBreak(parser_context);
 
-            res = (*this)(op.loop_expression.expression);
-            SetTempVariable(op.loop_expression.name.name, res);
-            counter = (*this)(op.counter_increment.expression);
-            SetTempVariable(op.counter.name.name, counter);
-            counter_max = (*this)(op.counter_max);
+            try
+            {
+                res = (*this)(op.loop_expression.expression);
+                SetTempVariable(op.loop_expression.name.name, res);
+                counter = (*this)(op.counter_increment.expression);
+                SetTempVariable(op.counter.name.name, counter);
+                counter_max = (*this)(op.counter_max);
+            }
+            catch (...)
+            {
+                PopTempVariables(2);
+                throw;
+            }
         }
         PopTempVariables(2);
         return res;
@@ -407,9 +425,9 @@ struct Solver : public boost::static_visitor<Number>
             it->second = value;
     }
 
-    void PopTempVariables(int count = 1) const
+    void PopTempVariables(int count) const
     {
-        for (int i = 0; i < count; ++i)
+        for (int i = 0; i < count && !symbols->temp_variables.empty(); ++i)
             symbols->temp_variables.pop_back();
     }
 
