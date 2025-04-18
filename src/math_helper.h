@@ -4,8 +4,6 @@
 #include <string>
 #include <map>
 
-using namespace std;
-
 #define DEFAULT_BASE 10
 #define DEFAULT_INCREASE_PRECISION 5
 #define DEFAULT_RND MPFR_RNDN
@@ -69,9 +67,9 @@ public:
 	static TNumber GetMisc(const TNumber& num);
 	
 private:
-	static map<int, int> bit_precisions; //the bit precisions cache
-	static map<int, int> decimal_precisions; //the decimal precisions cache
-	static map<int, Real> real_miscs;	//the real miscs cache
+	static std::map<int, int> bit_precisions; //the bit precisions cache
+	static std::map<int, int> decimal_precisions; //the decimal precisions cache
+	static std::map<int, Real> real_miscs;	//the real miscs cache
 };
 
 }

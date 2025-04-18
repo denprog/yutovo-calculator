@@ -4,13 +4,20 @@
 #include <boost/locale.hpp>
 #include <vector>
 #include <atomic>
+#ifdef _WIN32
+#include <windows.h>
+#endif
 
 namespace yutovo_calculator
 {
 
 typedef unsigned int uint;
 
+#ifdef _WIN32
+extern HANDLE thread_handle;
+#else
 extern clockid_t thread_clock_id;
+#endif
 
 struct ElementId : std::vector<int>
 {
@@ -42,6 +49,7 @@ struct LogicalId : std::vector<int> //logical Id does not include row id, so it 
     }
 };
 
+void InitThreadTime();
 void GetThreadTime(uint64_t& time);
 
 struct ParserContext

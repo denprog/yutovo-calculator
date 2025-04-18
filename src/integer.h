@@ -5,8 +5,6 @@
 #include "math_helper.h"
 #include "parser_exception.h"
 
-using namespace std;
-
 namespace yutovo_calculator
 {
 

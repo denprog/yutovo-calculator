@@ -8,12 +8,20 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(Boost_USE_STATIC_LIBS ON)
 set(Boost_USE_MULTITHREADED ON)
 
+if(WIN32)
+    find_package(PkgConfig)
+    pkg_check_modules(mpfr REQUIRED IMPORTED_TARGET mpfr)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /bigobj")
+endif()
+
 if(EMSCRIPTEN)
     set(CMAKE_FIND_ROOT_PATH ${INSTALL_PATH}/wasm/cmake/)
 else()
     find_package(Boost 1.81.0 REQUIRED PATHS ${INSTALL_PATH}/lib/cmake/)
     if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0")
+        if (NOT WIN32)
+            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0")
+        endif()
     else()
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2")
     endif()
@@ -47,6 +55,24 @@ add_library(${PROJECT_NAME}
     solver.cpp
     utils.cpp
     unit.cpp
+
+    stdafx.h
+    utils.h
+    script.h
+    solver.h
+    unit.h
+    real.h
+    rational.h
+    parser.h
+    parser_exception.h
+    math_helper.h
+    integer.h
+    expression.h
+    error_handler.h
+    definition.h
+    complex.h
+    ast.h
+    annotation.h
 )
 
 if(EMSCRIPTEN)
@@ -58,11 +84,15 @@ if(EMSCRIPTEN)
     target_link_options(${PROJECT_NAME} PUBLIC "-fexceptions -s DISABLE_EXCEPTION_THROWING=0")
     target_compile_options(${PROJECT_NAME} PUBLIC -Wno-overloaded-shift-op-parentheses)
 else()
-    target_link_libraries(${PROJECT_NAME} PRIVATE 
-        stdc++
-        mpfr
-        gmp
+    if(WIN32)
+        target_link_libraries(${PROJECT_NAME} PRIVATE PkgConfig::mpfr)
+    else()
+        target_link_libraries(${PROJECT_NAME} PRIVATE 
+            stdc++
+            mpfr
+            gmp
     )
+    endif()
 endif()
 
 target_include_directories(${PROJECT_NAME} PUBLIC

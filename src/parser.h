@@ -12,8 +12,6 @@
 #include "error_handler.h"
 #include "utils.h"
 
-using namespace std;
-
 namespace spirit = boost::spirit;
 namespace qi = spirit::qi;
 namespace fusion = boost::fusion;
@@ -30,7 +28,7 @@ struct Parser
     Number Parse(LogicalId id, std::u32string expression, Dependencies* dependencies, AngleMeasure default_angle_measure, AngleMeasure result_angle_measure, 
         Notation default_notation, const int precision = -1, ParserContext* _context = nullptr)
     {
-        pthread_getcpuclockid(pthread_self(), &thread_clock_id);
+        InitThreadTime();
 
         if (expression.empty() || expression == U";")
             throw SyntaxException(id, ExpressionExpected, 0, 0);
@@ -112,7 +110,7 @@ struct Parser
         AngleMeasure default_angle_measure, AngleMeasure result_angle_measure, const int precision, const int res_count, 
         std::vector<Number>& results, ParserContext* _context = nullptr)
     {
-        pthread_getcpuclockid(pthread_self(), &thread_clock_id);
+        InitThreadTime();
 
         if (expression.empty() || expression == U";")
             throw SyntaxException(id, ExpressionExpected, 0, 0);
@@ -163,19 +161,19 @@ struct Parser
 
     Number GetSuitableUnit(LogicalId id, const Number& val)
     {
-        pthread_getcpuclockid(pthread_self(), &thread_clock_id);
+        InitThreadTime();
         return solver.GetSuitableUnit(id, val, solver.symbols->last_unit_system, solver.symbols->buildin_elements);
     }
 
     void GetCastUnits(const LogicalId id, const Number& val, std::vector<Unit>& cast_units)
     {
-        pthread_getcpuclockid(pthread_self(), &thread_clock_id);
+        InitThreadTime();
         solver.GetCastUnits(id, val, cast_units);
     }
 
     Number CastToUnit(const LogicalId id, const Number& val, const Unit& unit)
     {
-        pthread_getcpuclockid(pthread_self(), &thread_clock_id);
+        InitThreadTime();
         return solver.CastToUnit(id, val, unit);
     }
 

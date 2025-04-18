@@ -5,7 +5,11 @@
 #define BOOST_SPIRIT_UNICODE
 
 #if defined(_MSC_VER)
-# pragma warning(disable: 4345)
+#pragma warning(disable: 4345)
+#endif
+
+#ifdef _WIN32
+#include <windows.h>
 #endif
 
 #include <boost/config/warning_disable.hpp>

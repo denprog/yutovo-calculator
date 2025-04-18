@@ -1,0 +1,18 @@
+Install vcpkg:
+git clone https://github.com/microsoft/vcpkg.git
+cd vcpkg; .\bootstrap-vcpkg.bat
+
+$env:VCPKG_ROOT = "c:\Lang\vcpkg\"
+$env:PATH = "$env:VCPKG_ROOT;$env:PATH"
+
+Install libraries:
+./vcpkg install mpfr --triplet=x64-windows
+./vcpkg install boost
+./vcpkg install pkgconf
+./vcpkg install gtest
+
+Configure the project:
+cd c:\Lang\Programs\yutovo\yutovo_calculator\build\debug\
+cmake -G "Visual Studio 16 2019" -A x64 -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=c:\\Lang\\Programs\\yutovo\\deploy -DCMAKE_TOOLCHAIN_FILE=C:\Lang\vcpkg\scripts\buildsystems\vcpkg.cmake ../..
+c:\Lang\Programs\yutovo\yutovo_calculator\build\RelWithDebugInfo\
+cmake -G "Visual Studio 16 2019" -A x64 -DCMAKE_BUILD_TYPE=RelWithDebugInfo -DCMAKE_INSTALL_PREFIX=c:\\Lang\\Programs\\yutovo\\deploy -DCMAKE_TOOLCHAIN_FILE=C:\Lang\vcpkg\scripts\buildsystems\vcpkg.cmake ../..

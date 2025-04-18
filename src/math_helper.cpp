@@ -7,9 +7,10 @@
 
 namespace yutovo_calculator
 {
-map<int, int> MathHelper::bit_precisions;
-map<int, int> MathHelper::decimal_precisions;
-map<int, Real> MathHelper::real_miscs;
+
+std::map<int, int> MathHelper::bit_precisions;
+std::map<int, int> MathHelper::decimal_precisions;
+std::map<int, Real> MathHelper::real_miscs;
 
 struct Widen
 {
@@ -63,7 +64,7 @@ int MathHelper::ToDecimalPrecision(const int precision)
 template<>
 Real MathHelper::GetMisc(const Real& num)
 {
-	map<int, Real>::iterator iter = real_miscs.find(num.GetBitPrecision());
+	std::map<int, Real>::iterator iter = real_miscs.find(num.GetBitPrecision());
 
 	if (iter == real_miscs.end())
 	{

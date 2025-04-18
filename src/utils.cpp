@@ -4,11 +4,19 @@
 #ifdef EMSCRIPTEN
 #include <emscripten.h>
 #endif
+#ifdef _WIN32
+#include <processthreadsapi.h>
+#include <timezoneapi.h>
+#endif
 
 namespace yutovo_calculator
 {
 
+#ifdef _WIN32
+HANDLE thread_handle = 0;
+#else
 clockid_t thread_clock_id = 0;
+#endif
 
 std::u32string ToUtfString(const std::string& str)
 {
@@ -76,10 +84,27 @@ void CheckBreak(ParserContext* parser_context)
 		throw TimeExceedException();
 }
 
+void InitThreadTime()
+{
+#ifdef _WIN32
+    thread_handle = GetCurrentThread();
+#else
+    pthread_getcpuclockid(pthread_self(), &thread_clock_id);
+#endif
+}
+
 void GetThreadTime(uint64_t& time)
 {
 #ifdef EMSCRIPTEN
     time = (uint64_t)emscripten_get_now();
+#elif _WIN32
+    FILETIME creation_time, exit_time, kernel_time, user_time;
+    if (GetThreadTimes(thread_handle, &creation_time, &exit_time, &kernel_time, &user_time))
+    {
+        SYSTEMTIME s1, s2;
+        if (FileTimeToSystemTime(&kernel_time, &s1) && FileTimeToSystemTime(&user_time, &s2))
+            time = s1.wMilliseconds + s1.wSecond * 1000 + s1.wMinute * 60 * 1000 + s2.wMilliseconds + s2.wSecond * 1000 + s2.wMinute * 60 * 1000;
+    }
 #else
     timespec s;
     clock_gettime(thread_clock_id, &s);

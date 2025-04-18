@@ -211,7 +211,7 @@ public:
 
     int GetBitPrecision() const
     {
-        return max(re.GetBitPrecision(), im.GetBitPrecision());
+        return std::max(re.GetBitPrecision(), im.GetBitPrecision());
     }
 
     int GetPrecision() const;

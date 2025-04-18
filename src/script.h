@@ -6,8 +6,6 @@
 #include "definition.h"
 #include "error_handler.h"
 
-using namespace std;
-
 namespace yutovo_calculator
 {
 

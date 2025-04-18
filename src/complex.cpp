@@ -140,7 +140,7 @@ Complex Complex::operator-()
 
 Complex operator+(const Complex& num1, const Complex& num2)
 {
-    Complex res(max(num1.GetBitPrecision(), num2.GetBitPrecision()));
+    Complex res(std::max(num1.GetBitPrecision(), num2.GetBitPrecision()));
 
     res.re = num1.re + num2.re;
     res.im = num1.im + num2.im;
@@ -178,7 +178,7 @@ Complex operator+(const float num1, const Complex& num2)
 
 Complex operator-(const Complex& num1, const Complex& num2)
 {
-    Complex res(max(num1.GetBitPrecision(), num2.GetBitPrecision()));
+    Complex res(std::max(num1.GetBitPrecision(), num2.GetBitPrecision()));
 
     res.re = num1.re - num2.re;
     res.im = num1.im - num2.im;
@@ -216,7 +216,7 @@ Complex operator-(const float num1, const Complex& num2)
 
 Complex operator*(const Complex& num1, const Complex& num2)
 {
-    Complex res(max(num1.GetBitPrecision(), num2.GetBitPrecision()));
+    Complex res(std::max(num1.GetBitPrecision(), num2.GetBitPrecision()));
 
     //res.re = num1.re * num2.re - num1.im * num2.im;
     //res.im = num1.im * num2.im + num1.im * num2.re;
@@ -257,7 +257,7 @@ Complex operator*(const float num1, const Complex& num2)
 
 Complex operator/(const Complex& num1, const Complex& num2)
 {
-    Complex res(max(num1.GetBitPrecision(), num2.GetBitPrecision()));
+    Complex res(std::max(num1.GetBitPrecision(), num2.GetBitPrecision()));
 
     Real r = num1.re * num2.re + num1.im * num2.im;
     Real n = pow(num2.re, 2) + pow(num2.im, 2);
@@ -601,7 +601,7 @@ Complex root(const Complex& num1, const Complex& num2, int& res_pos)
     if (num1.IsZero())
         return Complex(num1.GetBitPrecision(), 0);
 
-    Complex res(max(num1.GetBitPrecision(), num2.GetBitPrecision()));
+    Complex res(std::max(num1.GetBitPrecision(), num2.GetBitPrecision()));
 
     if (num2.IsReal() && num2.re.IsInteger())
     {
@@ -909,7 +909,7 @@ void Complex::GetPolarForm(Real& mod, Real& arg)
 
 int Complex::GetPrecision() const
 {
-    return min(re.GetPrecision(), im.GetPrecision());
+    return std::min(re.GetPrecision(), im.GetPrecision());
 }
 
 void Complex::SetPrecision(int prec)

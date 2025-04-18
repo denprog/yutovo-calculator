@@ -21,7 +21,7 @@ Real::Real()
 
 Real::Real(int precision)
 {
-    mpfr_init2(number, max((int)mpfr_get_default_prec(), precision));
+    mpfr_init2(number, std::max((int)mpfr_get_default_prec(), precision));
     mpfr_set_si(number, 0, GMP_RNDN);
 
 #ifdef TRACE_OUTPUT
@@ -32,7 +32,7 @@ Real::Real(int precision)
 Real::Real(int precision, Unit& _unit) :
     unit(_unit)
 {
-    mpfr_init2(number, max((int)mpfr_get_default_prec(), precision));
+    mpfr_init2(number, std::max((int)mpfr_get_default_prec(), precision));
     mpfr_set_si(number, 1, GMP_RNDN);
 
 #ifdef TRACE_OUTPUT
@@ -43,7 +43,7 @@ Real::Real(int precision, Unit& _unit) :
 Real::Real(int precision, AngleMeasure _angle_measure) :
     angle_measure(_angle_measure)
 {
-    mpfr_init2(number, max((int)mpfr_get_default_prec(), precision));
+    mpfr_init2(number, std::max((int)mpfr_get_default_prec(), precision));
     mpfr_set_si(number, 0, GMP_RNDN);
 
 #ifdef TRACE_OUTPUT
@@ -53,7 +53,7 @@ Real::Real(int precision, AngleMeasure _angle_measure) :
 
 Real::Real(int precision, const char* num)
 {
-    mpfr_init2(number, max((int)mpfr_get_default_prec(), precision));
+    mpfr_init2(number, std::max((int)mpfr_get_default_prec(), precision));
     //mpfr_init2(number, strlen(num) + 1);
     mpfr_set_str(number, num, DEFAULT_BASE, MPFR_RNDZ);
     string_number = ToUtfString(num);
@@ -71,7 +71,7 @@ Real::Real(int precision, const char* num)
 
 Real::Real(int precision, int num)
 {
-    mpfr_init2(number, max((int)mpfr_get_default_prec(), precision));
+    mpfr_init2(number, std::max((int)mpfr_get_default_prec(), precision));
     //mpfr_init2(number, precision);
     mpfr_set_si(number, num, GMP_RNDN);
 
@@ -82,7 +82,7 @@ Real::Real(int precision, int num)
 
 Real::Real(int precision, float num)
 {
-    mpfr_init2(number, max((int)mpfr_get_default_prec(), precision));
+    mpfr_init2(number, std::max((int)mpfr_get_default_prec(), precision));
     //mpfr_init2(number, precision);
     mpfr_set_d(number, num, GMP_RNDN);
 
@@ -94,7 +94,7 @@ Real::Real(int precision, float num)
 Real::Real(const std::u32string& num)
 {
     string_number = num;
-    mpfr_init2(number, max((int)mpfr_get_default_prec(), MathHelper::ToBitPrecision(num.length() * 2)) + 1);
+    mpfr_init2(number, std::max((int)mpfr_get_default_prec(), MathHelper::ToBitPrecision(num.length() * 2)) + 1);
     mpfr_set_str(number, ToBasicString(num).c_str(), DEFAULT_BASE, MPFR_RNDA);
     SetPrecision(GetPrecision() + GetExp());
 
@@ -252,7 +252,7 @@ Real operator+(const Real& num1, const Real& num2)
     Real _num1 = num1;
     Real _num2 = num2;
     ToCommonAngleMeasure(_num1, _num2);
-    Real res(max(_num1.GetBitPrecision() + 2, _num2.GetBitPrecision()) + 2, _num1.angle_measure);
+    Real res(std::max(_num1.GetBitPrecision() + 2, _num2.GetBitPrecision()) + 2, _num1.angle_measure);
 
     while (mpfr_add(res.number, _num1.number, _num2.number, DEFAULT_RND) != 0)
     {
@@ -340,7 +340,7 @@ Real operator-(const Real& num1, const Real& num2)
     Real _num1 = num1;
     Real _num2 = num2;
     ToCommonAngleMeasure(_num1, _num2);
-    Real res(max(_num1.GetBitPrecision(), _num2.GetBitPrecision()) + 1, _num1.angle_measure);
+    Real res(std::max(_num1.GetBitPrecision(), _num2.GetBitPrecision()) + 1, _num1.angle_measure);
 
     mpfr_sub(res.number, _num1.number, _num2.number, GMP_RNDN);
 
@@ -402,7 +402,7 @@ Real operator*(const Real& num1, const Real& num2)
     Real _num1 = num1;
     Real _num2 = num2;
     ToCommonAngleMeasure(_num1, _num2);
-    Real res(max(_num1.GetBitPrecision() * 2, _num2.GetBitPrecision()) * 2, _num1.angle_measure);
+    Real res(std::max(_num1.GetBitPrecision() * 2, _num2.GetBitPrecision()) * 2, _num1.angle_measure);
 
     while (mpfr_mul(res.number, num1.number, num2.number, DEFAULT_RND) != 0)
     {
@@ -505,7 +505,7 @@ Real operator/(const Real& num1, const Real& num2)
     Real _num1 = num1;
     Real _num2 = num2;
     ToCommonAngleMeasure(_num1, _num2);
-    Real res(max(_num1.GetBitPrecision() + 2, _num2.GetBitPrecision() + 2), _num1.angle_measure);
+    Real res(std::max(_num1.GetBitPrecision() + 2, _num2.GetBitPrecision() + 2), _num1.angle_measure);
 
     mpfr_div(res.number, _num1.number, _num2.number, GMP_RNDN);
 
@@ -1491,7 +1491,7 @@ Real arcsch(const Real& num)
 
 Real pow(const Real& num1, const Real& num2)
 {
-    Real res(max(num1.GetBitPrecision() + 2, num2.GetBitPrecision() + 2));
+    Real res(std::max(num1.GetBitPrecision() + 2, num2.GetBitPrecision() + 2));
 
     while (mpfr_pow(res.number, num1.number, num2.number, DEFAULT_RND) < 0)
     {
@@ -1504,7 +1504,7 @@ Real pow(const Real& num1, const Real& num2)
     if (res.IsInfinity() || res.IsNaN())
         throw MathException(Overflow);
 
-    res.Round(max(num1.GetBitPrecision(), num2.GetBitPrecision()));
+    res.Round(std::max(num1.GetBitPrecision(), num2.GetBitPrecision()));
 
     res.unit = pow(num1.unit, num2);
 
@@ -1875,10 +1875,10 @@ int Real::GetPrecision() const
 void Real::SetPrecision(int precision)
 {
     if (string_number.empty())
-        SetBitPrecision(max((int)mpfr_get_default_prec(), MathHelper::ToBitPrecision(precision + 2)));
+        SetBitPrecision(std::max((int)mpfr_get_default_prec(), MathHelper::ToBitPrecision(precision + 2)));
     else
     {
-        SetBitPrecision(max((int)mpfr_get_default_prec(), MathHelper::ToBitPrecision(precision + 2)));
+        SetBitPrecision(std::max((int)mpfr_get_default_prec(), MathHelper::ToBitPrecision(precision + 2)));
         //renew the number because of not being precios getting by std::u32string
         mpfr_set_str(number, ToBasicString(string_number).c_str(), DEFAULT_BASE, MPFR_RNDA);
     }

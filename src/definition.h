@@ -24,7 +24,6 @@ struct Definition : qi::grammar<std::u32string::iterator, DefinitionNode<Number>
 		using unicode::alpha;
 		using boost::spirit::qi::on_error;
 		using boost::spirit::qi::fail;
-		qi::_1_type _1;
 		qi::_3_type _3;
 		
 		//definition is a variable or a function or a unit

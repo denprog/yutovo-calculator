@@ -16,17 +16,24 @@ add_executable(${PROJECT_NAME}_tests
 	complex.cpp
 )
 
-target_link_libraries(${PROJECT_NAME}_tests PRIVATE
-	stdc++
-    pthread
-	gtest
-	gtest_main
-	gmock
-	gmock_main
-	m
-	dl
-	${PROJECT_NAME}
-)
+if(WIN32)
+	target_link_libraries(${PROJECT_NAME}_tests PRIVATE
+		${PROJECT_NAME}
+	)
+	target_link_libraries(${PROJECT_NAME}_tests PRIVATE GTest::gtest GTest::gtest_main GTest::gmock GTest::gmock_main)
+else()
+	target_link_libraries(${PROJECT_NAME}_tests PRIVATE
+		stdc++
+	    pthread
+		gtest
+		gtest_main
+		gmock
+		gmock_main
+		m
+		dl
+		${PROJECT_NAME}
+	)
+endif()
 
 target_include_directories(${PROJECT_NAME}_tests PRIVATE
     ../src

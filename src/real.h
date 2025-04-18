@@ -7,8 +7,6 @@
 #include "parser_exception.h"
 #include "unit.h"
 
-using namespace std;
-
 namespace yutovo_calculator
 {
 
@@ -295,7 +293,7 @@ public:
 
     void SetBitPrecision(const int precision)
     {
-        //mpfr_prec_round(number, max((int)mpfr_get_default_prec(), precision), DEFAULT_RND);
+        //mpfr_prec_round(number, std::max((int)mpfr_get_default_prec(), precision), DEFAULT_RND);
         mpfr_prec_round(number, precision, DEFAULT_RND);
 
 #ifdef TRACE_OUTPUT

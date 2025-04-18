@@ -124,22 +124,22 @@ Parser<yutovo_calculator::Integer>::Parser(const int precision, const Language _
     solver(precision, AngleMeasure::Radian),
     language(_language)
 {
-    pthread_getcpuclockid(pthread_self(), &thread_clock_id);
+    InitThreadTime();
     
     IntegerBinaryFunc binary_func = &pow;
-    solver.AddBuiltinFunction("pow", binary_func);
+    solver.AddBuiltinFunction(U"pow", binary_func);
 
     IntegerStringFunc string_func = &bin;
-    solver.AddBuiltinFunction("bin", string_func);
+    solver.AddBuiltinFunction(U"bin", string_func);
     string_func = &oct;
-    solver.AddBuiltinFunction("oct", string_func);
+    solver.AddBuiltinFunction(U"oct", string_func);
     string_func = &dec;
-    solver.AddBuiltinFunction("dec", string_func);
+    solver.AddBuiltinFunction(U"dec", string_func);
     string_func = &hex;
-    solver.AddBuiltinFunction("hex", string_func);
+    solver.AddBuiltinFunction(U"hex", string_func);
 
     IntegerUnaryFunc unary_func = &abs;
-    solver.AddBuiltinFunction("abs", unary_func);
+    solver.AddBuiltinFunction(U"abs", unary_func);
 }
 
 template<>
@@ -147,124 +147,124 @@ Parser<yutovo_calculator::Real>::Parser(const int precision, const Language _lan
     solver(precision, AngleMeasure::Radian),
     language(_language)
 {
-    pthread_getcpuclockid(pthread_self(), &thread_clock_id);
+    InitThreadTime();
     
     RealPrecisionVariable var;
     var = &pi;
-    solver.AddBuiltinVariable("pi", var);
-    solver.AddBuiltinVariable("π", var);
+    solver.AddBuiltinVariable(U"pi", var);
+    solver.AddBuiltinVariable(U"π", var);
     var = &exp;
-    solver.AddBuiltinVariable("e", var);
+    solver.AddBuiltinVariable(U"e", var);
     
     RealUnaryFunc unary_func;
     unary_func = &exp;
-    solver.AddBuiltinFunction("exp", unary_func);
+    solver.AddBuiltinFunction(U"exp", unary_func);
     unary_func = &ln;
-    solver.AddBuiltinFunction("ln", unary_func);
+    solver.AddBuiltinFunction(U"ln", unary_func);
     unary_func = &lg;
-    solver.AddBuiltinFunction("lg", unary_func);
+    solver.AddBuiltinFunction(U"lg", unary_func);
     unary_func = &sqrt;
-    solver.AddBuiltinFunction("sqrt", unary_func);
+    solver.AddBuiltinFunction(U"sqrt", unary_func);
     unary_func = &integer;
-    solver.AddBuiltinFunction("integer", unary_func);
+    solver.AddBuiltinFunction(U"integer", unary_func);
     unary_func = &fract;
-    solver.AddBuiltinFunction("fract", unary_func);
+    solver.AddBuiltinFunction(U"fract", unary_func);
     unary_func = &abs;
-    solver.AddBuiltinFunction("abs", unary_func);
+    solver.AddBuiltinFunction(U"abs", unary_func);
     unary_func = &ceil;
-    solver.AddBuiltinFunction("ceil", unary_func);
+    solver.AddBuiltinFunction(U"ceil", unary_func);
     unary_func = &floor;
-    solver.AddBuiltinFunction("floor", unary_func);
+    solver.AddBuiltinFunction(U"floor", unary_func);
     unary_func = &round;
-    solver.AddBuiltinFunction("round", unary_func);
+    solver.AddBuiltinFunction(U"round", unary_func);
     unary_func = &trunc;
-    solver.AddBuiltinFunction("trunc", unary_func);
+    solver.AddBuiltinFunction(U"trunc", unary_func);
 
     unary_func = &rad;
-    solver.AddBuiltinFunction("rad", unary_func);
+    solver.AddBuiltinFunction(U"rad", unary_func);
     unary_func = &deg;
-    solver.AddBuiltinFunction("deg", unary_func);
+    solver.AddBuiltinFunction(U"deg", unary_func);
     unary_func = &minute;
-    solver.AddBuiltinFunction("minute", unary_func);
+    solver.AddBuiltinFunction(U"minute", unary_func);
     unary_func = &second;
-    solver.AddBuiltinFunction("second", unary_func);
+    solver.AddBuiltinFunction(U"second", unary_func);
     unary_func = &grad;
-    solver.AddBuiltinFunction("grad", unary_func);
+    solver.AddBuiltinFunction(U"grad", unary_func);
 
     RealTrigonometricFunc trigonometric_func;
     trigonometric_func = &sin;
-    solver.AddTrigonometricFunction("sin", trigonometric_func);
+    solver.AddTrigonometricFunction(U"sin", trigonometric_func);
     trigonometric_func = &cos;
-    solver.AddTrigonometricFunction("cos", trigonometric_func);
+    solver.AddTrigonometricFunction(U"cos", trigonometric_func);
     trigonometric_func = &tg;
-    solver.AddTrigonometricFunction("tg", trigonometric_func);
-    solver.AddTrigonometricFunction("tan", trigonometric_func);
+    solver.AddTrigonometricFunction(U"tg", trigonometric_func);
+    solver.AddTrigonometricFunction(U"tan", trigonometric_func);
     trigonometric_func = &ctg;
-    solver.AddTrigonometricFunction("ctg", trigonometric_func);
-    solver.AddTrigonometricFunction("cot", trigonometric_func);
+    solver.AddTrigonometricFunction(U"ctg", trigonometric_func);
+    solver.AddTrigonometricFunction(U"cot", trigonometric_func);
     trigonometric_func = &sec;
-    solver.AddTrigonometricFunction("sec", trigonometric_func);
+    solver.AddTrigonometricFunction(U"sec", trigonometric_func);
     trigonometric_func = &cosec;
-    solver.AddTrigonometricFunction("cosec", trigonometric_func);
-    solver.AddTrigonometricFunction("csc", trigonometric_func);
+    solver.AddTrigonometricFunction(U"cosec", trigonometric_func);
+    solver.AddTrigonometricFunction(U"csc", trigonometric_func);
     trigonometric_func = &arcsin;
-    solver.AddBuiltinFunction("arcsin", trigonometric_func);
+    solver.AddBuiltinFunction(U"arcsin", trigonometric_func);
     trigonometric_func = &arccos;
-    solver.AddBuiltinFunction("arccos", trigonometric_func);
+    solver.AddBuiltinFunction(U"arccos", trigonometric_func);
     trigonometric_func = &arctg;
-    solver.AddBuiltinFunction("arctg", trigonometric_func);
-    solver.AddBuiltinFunction("arctan", trigonometric_func);
+    solver.AddBuiltinFunction(U"arctg", trigonometric_func);
+    solver.AddBuiltinFunction(U"arctan", trigonometric_func);
     trigonometric_func = &arcctg;
-    solver.AddBuiltinFunction("arcctg", trigonometric_func);
-    solver.AddBuiltinFunction("arccot", trigonometric_func);
+    solver.AddBuiltinFunction(U"arcctg", trigonometric_func);
+    solver.AddBuiltinFunction(U"arccot", trigonometric_func);
     trigonometric_func = &arcsec;
-    solver.AddBuiltinFunction("arcsec", trigonometric_func);
+    solver.AddBuiltinFunction(U"arcsec", trigonometric_func);
     trigonometric_func = &arccosec;
-    solver.AddBuiltinFunction("arccosec", trigonometric_func);
-    solver.AddBuiltinFunction("arccsc", trigonometric_func);
+    solver.AddBuiltinFunction(U"arccosec", trigonometric_func);
+    solver.AddBuiltinFunction(U"arccsc", trigonometric_func);
     trigonometric_func = &sh;
-    solver.AddTrigonometricFunction("sh", trigonometric_func);
-    solver.AddTrigonometricFunction("sinh", trigonometric_func);
+    solver.AddTrigonometricFunction(U"sh", trigonometric_func);
+    solver.AddTrigonometricFunction(U"sinh", trigonometric_func);
     trigonometric_func = &ch;
-    solver.AddTrigonometricFunction("ch", trigonometric_func);
-    solver.AddTrigonometricFunction("cosh", trigonometric_func);
+    solver.AddTrigonometricFunction(U"ch", trigonometric_func);
+    solver.AddTrigonometricFunction(U"cosh", trigonometric_func);
     trigonometric_func = &th;
-    solver.AddTrigonometricFunction("th", trigonometric_func);
-    solver.AddTrigonometricFunction("tanh", trigonometric_func);
+    solver.AddTrigonometricFunction(U"th", trigonometric_func);
+    solver.AddTrigonometricFunction(U"tanh", trigonometric_func);
     trigonometric_func = &cth;
-    solver.AddTrigonometricFunction("cth", trigonometric_func);
-    solver.AddTrigonometricFunction("coth", trigonometric_func);
+    solver.AddTrigonometricFunction(U"cth", trigonometric_func);
+    solver.AddTrigonometricFunction(U"coth", trigonometric_func);
     trigonometric_func = &sch;
-    solver.AddTrigonometricFunction("sch", trigonometric_func);
-    solver.AddTrigonometricFunction("sech", trigonometric_func);
+    solver.AddTrigonometricFunction(U"sch", trigonometric_func);
+    solver.AddTrigonometricFunction(U"sech", trigonometric_func);
     trigonometric_func = &csch;
-    solver.AddTrigonometricFunction("csch", trigonometric_func);
-    solver.AddTrigonometricFunction("cosech", trigonometric_func);
+    solver.AddTrigonometricFunction(U"csch", trigonometric_func);
+    solver.AddTrigonometricFunction(U"cosech", trigonometric_func);
     trigonometric_func = &arsh;
-    solver.AddBuiltinFunction("arsh", trigonometric_func);
-    solver.AddBuiltinFunction("arsinh", trigonometric_func);
+    solver.AddBuiltinFunction(U"arsh", trigonometric_func);
+    solver.AddBuiltinFunction(U"arsinh", trigonometric_func);
     trigonometric_func = &arch;
-    solver.AddBuiltinFunction("arch", trigonometric_func);
-    solver.AddBuiltinFunction("arcosh", trigonometric_func);
+    solver.AddBuiltinFunction(U"arch", trigonometric_func);
+    solver.AddBuiltinFunction(U"arcosh", trigonometric_func);
     trigonometric_func = &arth;
-    solver.AddBuiltinFunction("arth", trigonometric_func);
-    solver.AddBuiltinFunction("artanh", trigonometric_func);
+    solver.AddBuiltinFunction(U"arth", trigonometric_func);
+    solver.AddBuiltinFunction(U"artanh", trigonometric_func);
     trigonometric_func = &arcth;
-    solver.AddBuiltinFunction("arcth", trigonometric_func);
-    solver.AddBuiltinFunction("arcoth", trigonometric_func);
+    solver.AddBuiltinFunction(U"arcth", trigonometric_func);
+    solver.AddBuiltinFunction(U"arcoth", trigonometric_func);
     trigonometric_func = &arsch;
-    solver.AddBuiltinFunction("arsch", trigonometric_func);
-    solver.AddBuiltinFunction("arsech", trigonometric_func);
+    solver.AddBuiltinFunction(U"arsch", trigonometric_func);
+    solver.AddBuiltinFunction(U"arsech", trigonometric_func);
     trigonometric_func = &arcsch;
-    solver.AddBuiltinFunction("arcsch", trigonometric_func);
-    solver.AddBuiltinFunction("arcosech", trigonometric_func);
+    solver.AddBuiltinFunction(U"arcsch", trigonometric_func);
+    solver.AddBuiltinFunction(U"arcosech", trigonometric_func);
 
     RealBinaryFunc binary_func = &pow;
-    solver.AddBuiltinFunction("pow", binary_func);
+    solver.AddBuiltinFunction(U"pow", binary_func);
     binary_func = &log;
-    solver.AddBuiltinFunction("log", binary_func);
+    solver.AddBuiltinFunction(U"log", binary_func);
     binary_func = &root;
-    solver.AddBuiltinFunction("root", binary_func);
+    solver.AddBuiltinFunction(U"root", binary_func);
 
     InitUnits();
     InitPhisicalConstants();
@@ -275,13 +275,13 @@ Parser<yutovo_calculator::Rational>::Parser(const int precision, const Language 
     solver(precision, AngleMeasure::Radian),
     language(_language)
 {
-    pthread_getcpuclockid(pthread_self(), &thread_clock_id);
+    InitThreadTime();
 
     RationalBinaryFunc binary_func = &pow;
-    solver.AddBuiltinFunction("pow", binary_func);
+    solver.AddBuiltinFunction(U"pow", binary_func);
 
     RationalUnaryFunc unary_func = &abs;
-    solver.AddBuiltinFunction("abs", unary_func);
+    solver.AddBuiltinFunction(U"abs", unary_func);
 
     InitUnits();
 }
@@ -291,103 +291,103 @@ Parser<yutovo_calculator::Complex>::Parser(const int precision, const Language _
     solver(precision, AngleMeasure::Radian),
     language(_language)
 {
-    pthread_getcpuclockid(pthread_self(), &thread_clock_id);
+    InitThreadTime();
     
     ComplexPrecisionVariable var;
     var = &pi_complex;
-    solver.AddBuiltinVariable("pi", var);
+    solver.AddBuiltinVariable(U"pi", var);
     var = &exp_complex;
-    solver.AddBuiltinVariable("e", var);
+    solver.AddBuiltinVariable(U"e", var);
     
     ComplexUnaryFunc unary_func;
     unary_func = &exp;
-    solver.AddBuiltinFunction("exp", unary_func);
+    solver.AddBuiltinFunction(U"exp", unary_func);
     unary_func = &ln;
-    solver.AddBuiltinFunction("ln", unary_func);
+    solver.AddBuiltinFunction(U"ln", unary_func);
     unary_func = &lg;
-    solver.AddBuiltinFunction("lg", unary_func);
+    solver.AddBuiltinFunction(U"lg", unary_func);
     unary_func = &sqrt;
-    solver.AddBuiltinFunction("sqrt", unary_func);
+    solver.AddBuiltinFunction(U"sqrt", unary_func);
 
     unary_func = &rad;
-    solver.AddBuiltinFunction("rad", unary_func);
+    solver.AddBuiltinFunction(U"rad", unary_func);
     unary_func = &deg;
-    solver.AddBuiltinFunction("deg", unary_func);
+    solver.AddBuiltinFunction(U"deg", unary_func);
     unary_func = &minute;
-    solver.AddBuiltinFunction("minute", unary_func);
+    solver.AddBuiltinFunction(U"minute", unary_func);
     unary_func = &second;
-    solver.AddBuiltinFunction("second", unary_func);
+    solver.AddBuiltinFunction(U"second", unary_func);
     unary_func = &grad;
-    solver.AddBuiltinFunction("grad", unary_func);
+    solver.AddBuiltinFunction(U"grad", unary_func);
 
     ComplexFunc func;
     func = &re;
-    solver.AddBuiltinFunction("re", func);
+    solver.AddBuiltinFunction(U"re", func);
     func = &im;
-    solver.AddBuiltinFunction("im", func);
+    solver.AddBuiltinFunction(U"im", func);
     func = &mod;
-    solver.AddBuiltinFunction("mod", func);
+    solver.AddBuiltinFunction(U"mod", func);
     func = &arg;
-    solver.AddBuiltinFunction("arg", func);
+    solver.AddBuiltinFunction(U"arg", func);
     func = &abs;
-    solver.AddBuiltinFunction("abs", func);
+    solver.AddBuiltinFunction(U"abs", func);
 
     ComplexTrigonometricFunc trigonometric_func;
     trigonometric_func = &sin;
-    solver.AddTrigonometricFunction("sin", trigonometric_func);
+    solver.AddTrigonometricFunction(U"sin", trigonometric_func);
     trigonometric_func = &cos;
-    solver.AddTrigonometricFunction("cos", trigonometric_func);
+    solver.AddTrigonometricFunction(U"cos", trigonometric_func);
     trigonometric_func = &tg;
-    solver.AddTrigonometricFunction("tg", trigonometric_func);
+    solver.AddTrigonometricFunction(U"tg", trigonometric_func);
     trigonometric_func = &ctg;
-    solver.AddTrigonometricFunction("ctg", trigonometric_func);
+    solver.AddTrigonometricFunction(U"ctg", trigonometric_func);
     trigonometric_func = &sec;
-    solver.AddTrigonometricFunction("sec", trigonometric_func);
+    solver.AddTrigonometricFunction(U"sec", trigonometric_func);
     trigonometric_func = &cosec;
-    solver.AddTrigonometricFunction("cosec", trigonometric_func);
+    solver.AddTrigonometricFunction(U"cosec", trigonometric_func);
     trigonometric_func = &arcsin;
-    solver.AddBuiltinFunction("arcsin", trigonometric_func);
+    solver.AddBuiltinFunction(U"arcsin", trigonometric_func);
     trigonometric_func = &arccos;
-    solver.AddBuiltinFunction("arccos", trigonometric_func);
+    solver.AddBuiltinFunction(U"arccos", trigonometric_func);
     trigonometric_func = &arctg;
-    solver.AddBuiltinFunction("arctg", trigonometric_func);
+    solver.AddBuiltinFunction(U"arctg", trigonometric_func);
     trigonometric_func = &arcctg;
-    solver.AddBuiltinFunction("arcctg", trigonometric_func);
+    solver.AddBuiltinFunction(U"arcctg", trigonometric_func);
     trigonometric_func = &arcsec;
-    solver.AddBuiltinFunction("arcsec", trigonometric_func);
+    solver.AddBuiltinFunction(U"arcsec", trigonometric_func);
     trigonometric_func = &arccosec;
-    solver.AddBuiltinFunction("arccosec", trigonometric_func);
+    solver.AddBuiltinFunction(U"arccosec", trigonometric_func);
     trigonometric_func = &sh;
-    solver.AddTrigonometricFunction("sh", trigonometric_func);
+    solver.AddTrigonometricFunction(U"sh", trigonometric_func);
     trigonometric_func = &ch;
-    solver.AddTrigonometricFunction("ch", trigonometric_func);
+    solver.AddTrigonometricFunction(U"ch", trigonometric_func);
     trigonometric_func = &th;
-    solver.AddTrigonometricFunction("th", trigonometric_func);
+    solver.AddTrigonometricFunction(U"th", trigonometric_func);
     trigonometric_func = &cth;
-    solver.AddTrigonometricFunction("cth", trigonometric_func);
+    solver.AddTrigonometricFunction(U"cth", trigonometric_func);
     trigonometric_func = &sch;
-    solver.AddTrigonometricFunction("sch", trigonometric_func);
+    solver.AddTrigonometricFunction(U"sch", trigonometric_func);
     trigonometric_func = &csch;
-    solver.AddTrigonometricFunction("csch", trigonometric_func);
+    solver.AddTrigonometricFunction(U"csch", trigonometric_func);
     trigonometric_func = &arsh;
-    solver.AddBuiltinFunction("arsh", trigonometric_func);
+    solver.AddBuiltinFunction(U"arsh", trigonometric_func);
     trigonometric_func = &arch;
-    solver.AddBuiltinFunction("arch", trigonometric_func);
+    solver.AddBuiltinFunction(U"arch", trigonometric_func);
     trigonometric_func = &arth;
-    solver.AddBuiltinFunction("arth", trigonometric_func);
+    solver.AddBuiltinFunction(U"arth", trigonometric_func);
     trigonometric_func = &arcth;
-    solver.AddBuiltinFunction("arcth", trigonometric_func);
+    solver.AddBuiltinFunction(U"arcth", trigonometric_func);
     trigonometric_func = &arsch;
-    solver.AddBuiltinFunction("arsch", trigonometric_func);
+    solver.AddBuiltinFunction(U"arsch", trigonometric_func);
     trigonometric_func = &arcsch;
-    solver.AddBuiltinFunction("arcsch", trigonometric_func);
+    solver.AddBuiltinFunction(U"arcsch", trigonometric_func);
 
     ComplexBinaryFunc binary_func = &pow;
-    solver.AddBuiltinFunction("pow", binary_func);
+    solver.AddBuiltinFunction(U"pow", binary_func);
     binary_func = &log;
-    solver.AddBuiltinFunction("log", binary_func);
+    solver.AddBuiltinFunction(U"log", binary_func);
     binary_func = &root;
-    solver.AddBuiltinFunction("root", binary_func);
+    solver.AddBuiltinFunction(U"root", binary_func);
 
     switch (language)
     {

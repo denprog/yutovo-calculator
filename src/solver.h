@@ -106,9 +106,9 @@ struct CustomUnit
                             if (p.first != u.first)
                                 return false;
                             if (p.second < 0 && u.second > 0)
-                                return abs(p.second) >= u.second;
+                                return ::abs(p.second) >= u.second;
                             if (p.second > 0 && u.second < 0)
-                                return p.second >= abs(u.second);
+                                return p.second >= ::abs(u.second);
                             return false;
                         });
                     if (it == _val.unit.unit.end())
@@ -161,7 +161,7 @@ struct CustomUnit
 template<typename Number>
 struct SolverSymbols
 {
-    typedef pair<std::u32string, Number> TempVariable;
+    typedef std::pair<std::u32string, Number> TempVariable;
 
     //build-in functions' typedefs
     typedef Number (*UnaryFunction)(const Number& num);
@@ -181,13 +181,13 @@ struct SolverSymbols
     typedef Number (*PrecisionVariable)(const int precision);
     typedef boost::variant<Variable, PrecisionVariable, ComplexPrecisionVariable> BuiltinVariable;
 
-    mutable deque<TempVariable> temp_variables;
-    mutable deque<VariableNode<Number>> variables; //user variables
-    mutable vector<FunctionNode<Number>> functions; //user functions
+    mutable std::deque<TempVariable> temp_variables;
+    mutable std::deque<VariableNode<Number>> variables; //user variables
+    mutable std::vector<FunctionNode<Number>> functions; //user functions
 
-    map<std::u32string, BuiltinFunction> buildin_functions;
-    map<std::u32string, BuiltinTrigonometricFunction> trigonometric_functions;
-    map<std::u32string, BuiltinVariable> buildin_variables;
+    std::map<std::u32string, BuiltinFunction> buildin_functions;
+    std::map<std::u32string, BuiltinTrigonometricFunction> trigonometric_functions;
+    std::map<std::u32string, BuiltinVariable> buildin_variables;
     std::vector<Unit> buildin_units;
     std::vector<CustomUnit<Number>> units;
 
@@ -425,7 +425,7 @@ struct Solver : public boost::static_visitor<Number>
             it->second = value;
     }
 
-    void PopTempVariables(int count) const
+    void PopTempVariables(size_t count) const
     {
         for (int i = 0; i < count && !symbols->temp_variables.empty(); ++i)
             symbols->temp_variables.pop_back();
@@ -438,7 +438,7 @@ struct Solver : public boost::static_visitor<Number>
 
     TempVariable* FindTempVariable(const std::u32string& name) const
     {
-        for (int i = symbols->temp_variables.size() - 1; i >= 0; --i)
+        for (int i = (int)symbols->temp_variables.size() - 1; i >= 0; --i)
         {
             if (symbols->temp_variables[i].first == name)
                 return &symbols->temp_variables[i];
@@ -510,7 +510,7 @@ struct Solver : public boost::static_visitor<Number>
 
     VariableNode<Number>* FindVariable(const std::u32string& name, const std::u32string& subscript) const
     {
-        for (int i = symbols->variables.size() - 1; i >= 0; --i)
+        for (int i = (int)symbols->variables.size() - 1; i >= 0; --i)
         {
             auto& var = symbols->variables[i];
             if (IsLess(var.id, id) && var.name.name == name && var.name.subscript == subscript)
@@ -583,44 +583,44 @@ struct Solver : public boost::static_visitor<Number>
         PopTempVariables(func.arguments.size());
     }
 
-    void AddBuiltinFunction(const char* name, UnaryFunction& func)
+    void AddBuiltinFunction(const char32_t* name, UnaryFunction& func)
     {
-        symbols->buildin_functions[ToUtfString(name)] = func;
+        symbols->buildin_functions[name] = func;
     }
 
-    void AddBuiltinFunction(const char* name, BinaryFunction& func)
+    void AddBuiltinFunction(const char32_t* name, BinaryFunction& func)
     {
-        symbols->buildin_functions[ToUtfString(name)] = func;
+        symbols->buildin_functions[name] = func;
     }
 
-    void AddBuiltinFunction(const char* name, StringFunction& func)
+    void AddBuiltinFunction(const char32_t* name, StringFunction& func)
     {
-        symbols->buildin_functions[ToUtfString(name)] = func;
+        symbols->buildin_functions[name] = func;
     }
 
-    void AddTrigonometricFunction(const char* name, TrigonometricFunction& func)
+    void AddTrigonometricFunction(const char32_t* name, TrigonometricFunction& func)
     {
-        symbols->trigonometric_functions[ToUtfString(name)] = func;
+        symbols->trigonometric_functions[name] = func;
     }
 
-    void AddBuiltinFunction(const char* name, ComplexUnaryFunction& func)
+    void AddBuiltinFunction(const char32_t* name, ComplexUnaryFunction& func)
     {
-        symbols->buildin_functions[ToUtfString(name)] = func;
+        symbols->buildin_functions[name] = func;
     }
 
-    void AddTrigonometricFunction(const char* name, ComplexTrigonometricFunction& func)
+    void AddTrigonometricFunction(const char32_t* name, ComplexTrigonometricFunction& func)
     {
-        symbols->trigonometric_functions[ToUtfString(name)] = func;
+        symbols->trigonometric_functions[name] = func;
     }
 
-    void AddBuiltinFunction(const char* name, ComplexBinaryFunction& func)
+    void AddBuiltinFunction(const char32_t* name, ComplexBinaryFunction& func)
     {
-        symbols->buildin_functions[ToUtfString(name)] = func;
+        symbols->buildin_functions[name] = func;
     }
 
     BuiltinFunction* FindBuiltinFunction(const std::u32string& name) const
     {
-        typename map<std::u32string, BuiltinFunction>::const_iterator iter = symbols->buildin_functions.find(name);
+        typename std::map<std::u32string, BuiltinFunction>::const_iterator iter = symbols->buildin_functions.find(name);
         if (iter == symbols->buildin_functions.end())
             return nullptr;
         return (BuiltinFunction*)&(*iter).second;
@@ -628,25 +628,25 @@ struct Solver : public boost::static_visitor<Number>
 
     BuiltinTrigonometricFunction* FindTrigonometricFunction(const std::u32string& name) const
     {
-        typename map<std::u32string, BuiltinTrigonometricFunction>::const_iterator iter = symbols->trigonometric_functions.find(name);
+        typename std::map<std::u32string, BuiltinTrigonometricFunction>::const_iterator iter = symbols->trigonometric_functions.find(name);
         if (iter == symbols->trigonometric_functions.end())
             return nullptr;
         return (BuiltinTrigonometricFunction*)&(*iter).second;
     }
-
-    void AddBuiltinVariable(const char* name, PrecisionVariable& var)
+    
+    void AddBuiltinVariable(const char32_t* name, PrecisionVariable& var)
     {
-        symbols->buildin_variables[ToUtfString(name)] = var;
+        symbols->buildin_variables[name] = var;
     }
 
-    void AddBuiltinVariable(const char* name, ComplexPrecisionVariable& var)
+    void AddBuiltinVariable(const char32_t* name, ComplexPrecisionVariable& var)
     {
-        symbols->buildin_variables[ToUtfString(name)] = var;
+        symbols->buildin_variables[name] = var;
     }
 
     BuiltinVariable* FindBuiltinVariable(const std::u32string& name) const
     {
-        typename map<std::u32string, BuiltinVariable>::const_iterator iter = symbols->buildin_variables.find(name);
+        typename std::map<std::u32string, BuiltinVariable>::const_iterator iter = symbols->buildin_variables.find(name);
         if (iter == symbols->buildin_variables.end())
             return nullptr;
         return (BuiltinVariable*)&(*iter).second;
@@ -1066,7 +1066,7 @@ private:
 
             if (c.unit.unit.size() <= s) //a unit should have minimal size
             {
-                size_t m2 = c.ToString(abs(c.GetExp()) + 1, abs(c.GetExp()) + 1, false).length();
+                size_t m2 = c.ToString(::abs(c.GetExp()) + 1, ::abs(c.GetExp()) + 1, false).length();
                 if (c.unit.unit.size() == 1 && c.unit.unit[0].second == 1) //choose the simplest one
                 {
                     if (s > 1 || m2 < m || res.unit.unit[0].second < 1 || (m2 == m && (c < res || res < 1) && c >= 1))
@@ -1378,7 +1378,7 @@ private:
         return res;
     }
 
-    friend class Expression<Number>;
+    friend struct Expression<Number>;
 
     mutable LogicalId id;
     mutable int precision;
@@ -1389,7 +1389,7 @@ private:
     mutable Dependencies* dependencies = nullptr;
     mutable std::map<std::u32string, std::vector<Number>> cast_units;
 
-    int max_cast_unit_size = 2; //max size of each unit in the cast vector
+    int max_cast_unit_size = 2; //std::max size of each unit in the cast vector
 };
 
 };

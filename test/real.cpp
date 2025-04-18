@@ -501,21 +501,21 @@ TEST_F(CalcTestReal, variables17)
     parser.Parse(LogicalId{0, 0, 3}, U"b=2см;");
     parser.Parse(LogicalId{0, 0, 4}, U"S=a*b*sin(α);");
     auto r = parser.GetSuitableUnit(LogicalId{0, 0, 5}, parser.Parse(LogicalId{0, 0, 5}, U"S;"));
-    ASSERT_TRUE(r.ToStdString(3, 3) == "1.683E+0(см^2)") << r.ToStdString(3, 3);
+    ASSERT_TRUE(r.ToStdString(3, 3) == u8"1.683E+0(см^2)") << r.ToStdString(3, 3);
 }
 
 TEST_F(CalcTestReal, variables18)
 {
     parser.SetLocale(Language::Russian);
     auto r = parser.Parse(LogicalId{0, 0, 1}, U"G;");
-    ASSERT_TRUE(r.ToStdString(3, 3) == "6.674E-11((м^3)/(кг*с^2))") << r.ToStdString(3, 3);
+    ASSERT_TRUE(r.ToStdString(3, 3) == u8"6.674E-11((м^3)/(кг*с^2))") << r.ToStdString(3, 3);
 }
 
 TEST_F(CalcTestReal, variables19)
 {
     parser.SetLocale(Language::Russian);
     auto r = parser.Parse(LogicalId{0, 0, 1}, U"g_a;");
-    ASSERT_TRUE(r.ToStdString(3, 3) == "9.807E+0((м)/(с^2))") << r.ToStdString(3, 3);
+    ASSERT_TRUE(r.ToStdString(3, 3) == u8"9.807E+0((м)/(с^2))") << r.ToStdString(3, 3);
 }
 
 TEST_F(CalcTestReal, variables20)
@@ -952,31 +952,31 @@ TEST_F(CalcTestReal, units29)
 {
     parser.SetLocale(Language::Russian);
     std::string s = parser.Parse(LogicalId{0, 0, 0, 0, 0, 0, 0, 2, 0}, U"2*(м/с);").ToStdString(3, 3);
-    ASSERT_TRUE(s == "2.E+0((м)/(с))") << s;
+    ASSERT_TRUE(s == u8"2.E+0((м)/(с))") << s;
     EXPECT_THROW(parser.Parse(LogicalId{0, 0, 1}, U"2*(m/s);"), yutovo_calculator::SyntaxException);
 }
 
 TEST_F(CalcTestReal, units30)
 {
     std::string s = parser.Parse(LogicalId{0, 0, 0, 0, 0, 0, 0, 2, 0}, U"(1/2)m;").ToStdString(3, 3);
-    ASSERT_TRUE(s == "0.5E+0(m)") << s;
+    ASSERT_TRUE(s == u8"0.5E+0(m)") << s;
 }
 
 TEST_F(CalcTestReal, units31)
 {
     std::string s = parser.Parse(LogicalId{0, 0, 0, 0, 0, 0, 0, 2, 0}, U"(2.4/2)m;").ToStdString(3, 3);
-    ASSERT_TRUE(s == "1.2E+0(m)") << s;
+    ASSERT_TRUE(s == u8"1.2E+0(m)") << s;
 }
 
 TEST_F(CalcTestReal, units32)
 {
     auto r = parser.Parse(LogicalId{0, 0, 0, 0, 0, 0, 0, 2, 0}, U"5mm;");
     std::string s = parser.GetSuitableUnit(LogicalId{0, 0, 0, 0, 0, 0, 0, 2, 0}, r).ToStdString(3, 3);
-    ASSERT_TRUE(s == "5.E+0(mm)") << s;
+    ASSERT_TRUE(s == u8"5.E+0(mm)") << s;
 
     r = parser.Parse(LogicalId{0, 0, 0, 0, 0, 0, 0, 2, 0}, U"50mm;");
     s = parser.GetSuitableUnit(LogicalId{0, 0, 0, 0, 0, 0, 0, 2, 0}, r).ToStdString(3, 3);
-    ASSERT_TRUE(s == "5.E+0(cm)") << s;
+    ASSERT_TRUE(s == u8"5.E+0(cm)") << s;
 }
 
 TEST_F(CalcTestReal, units33)
@@ -984,7 +984,7 @@ TEST_F(CalcTestReal, units33)
     parser.SetLocale(Language::Russian);
     auto r = parser.Parse(LogicalId{0, 0, 0, 0, 0, 0, 0, 2, 0}, U"500сажень{rus};");
     std::string s = parser.GetSuitableUnit(LogicalId{0, 0, 0, 0, 0, 0, 0, 2, 0}, r).ToStdString(3, 3);
-    ASSERT_TRUE(s == "1.E+0(верста){rus}") << s;
+    ASSERT_TRUE(s == u8"1.E+0(верста){rus}") << s;
 }
 
 TEST_F(CalcTestReal, units34)
@@ -995,7 +995,7 @@ TEST_F(CalcTestReal, units34)
 
     r = parser.Parse(LogicalId{0, 0, 0, 0, 0, 0, 0, 2, 0}, U"1°;");
     s = parser.GetSuitableUnit(LogicalId{0, 0, 0, 0, 0, 0, 0, 2, 0}, r).ToStdString(3, 3);
-    ASSERT_TRUE(s == "1.E+0(°)") << s;
+    ASSERT_TRUE(s == u8"1.E+0(°)") << s;
 
     r = parser.Parse(LogicalId{0, 0, 0, 0, 0, 0, 0, 2, 0}, U"1';");
     s = parser.GetSuitableUnit(LogicalId{0, 0, 0, 0, 0, 0, 0, 2, 0}, r).ToStdString(3, 3);
@@ -1049,7 +1049,7 @@ TEST_F(CalcTestReal, units38)
     EXPECT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 0, 0, 0, 2, 0}, U"5mm;"), yutovo_calculator::SyntaxException);
     r = parser.Parse(LogicalId{0, 0, 0, 0, 0, 0, 0, 2, 0}, U"5мм;");
     s = parser.GetSuitableUnit(LogicalId{0, 0, 0, 0, 0, 0, 0, 2, 0}, r).ToStdString(3, 3);
-    ASSERT_TRUE(s == "5.E+0(мм)") << s;
+    ASSERT_TRUE(s == u8"5.E+0(мм)") << s;
 }
 
 TEST_F(CalcTestReal, units39)
@@ -1145,7 +1145,7 @@ TEST_F(CalcTestReal, units48)
     Unit u;
     ASSERT_TRUE(u.FromString(U"(км)/(час)"));
     std::string t = parser.CastToUnit(LogicalId{0, 0, 0, 0, 0, 0, 0, 2, 0}, val, u).ToStdString(3, 3);
-    ASSERT_TRUE(t == "18.E+0((км)/(час))") << t;
+    ASSERT_TRUE(t == u8"18.E+0((км)/(час))") << t;
 }
 
 TEST_F(CalcTestReal, units49)
@@ -1155,7 +1155,7 @@ TEST_F(CalcTestReal, units49)
     Unit u;
     ASSERT_TRUE(u.FromString(U"сотка{rus}"));
     std::string t = parser.CastToUnit(LogicalId{0, 0, 0, 0, 0, 0, 0, 2, 0}, val, u).ToStdString(3, 3);
-    ASSERT_TRUE(t == "234.346E+0(сотка){rus}") << t;
+    ASSERT_TRUE(t == u8"234.346E+0(сотка){rus}") << t;
 }
 
 TEST_F(CalcTestReal, units50)
@@ -1171,14 +1171,14 @@ TEST_F(CalcTestReal, units51)
     Unit u;
     ASSERT_TRUE(u.FromString(U"((м^3)/(кг*с^2))"));
     std::string t = parser.CastToUnit(LogicalId{0, 0, 0, 0, 0, 0, 0, 2, 0}, val, u).ToStdString(3, 3);
-    ASSERT_TRUE(t == "6.674E-11((м^3)/(кг*с^2))") << t;
+    ASSERT_TRUE(t == u8"6.674E-11((м^3)/(кг*с^2))") << t;
 }
 
 TEST_F(CalcTestReal, units52)
 {
     parser.SetLocale(Language::Russian);
     auto r = parser.Parse(LogicalId{0, 0, 0, 0, 0, 0, 0, 2, 0}, U"((м/pow(с,2))*pow(м,2))/(pow(м,3)/(кг*pow(с,2)));");
-    ASSERT_TRUE(r.ToStdString(3, 3) == "1.E+0(кг)") << r.ToStdString(3, 3);
+    ASSERT_TRUE(r.ToStdString(3, 3) == u8"1.E+0(кг)") << r.ToStdString(3, 3);
 }
 
 TEST_F(CalcTestReal, units53)
@@ -1195,10 +1195,10 @@ TEST_F(CalcTestReal, units54)
     Unit u;
     ASSERT_TRUE(u.FromString(U"((Дж)/(нс*мкА^2))"));
     std::string t = parser.CastToUnit(LogicalId{0, 0, 0, 0, 0, 0, 0, 2, 0}, val, u).ToStdString(3, 3);
-    ASSERT_TRUE(t == "1.E-21((Дж)/(нс*мкА^2))") << t;
+    ASSERT_TRUE(t == u8"1.E-21((Дж)/(нс*мкА^2))") << t;
     ASSERT_TRUE(u.FromString(U"((Дж)/(сутки*мА^2))"));
     t = parser.CastToUnit(LogicalId{0, 0, 0, 0, 0, 0, 0, 2, 0}, val, u).ToStdString(3, 3);
-    ASSERT_TRUE(t == "0.0864E+0((Дж)/(сутки*мА^2))") << t;
+    ASSERT_TRUE(t == u8"0.0864E+0((Дж)/(сутки*мА^2))") << t;
 }
 
 TEST_F(CalcTestReal, units55)
@@ -1206,7 +1206,7 @@ TEST_F(CalcTestReal, units55)
     parser.SetLocale(Language::Russian);
     auto r = parser.Parse(LogicalId{0, 0, 0, 0, 0, 0, 0, 2, 0}, U"кг*м*А/(pow(с,2));");
     std::string s = parser.GetSuitableUnit(LogicalId{0, 0, 0, 0, 0, 0, 0, 2, 0}, r).ToStdString(3, 3);
-    ASSERT_TRUE(s == "1.E+0(Н*А)") << s;
+    ASSERT_TRUE(s == u8"1.E+0(Н*А)") << s;
 }
 
 TEST_F(CalcTestReal, units56)
@@ -1242,7 +1242,7 @@ TEST_F(CalcTestReal, units59)
     parser.GetCastUnits(id, r, cast_units);
     ASSERT_TRUE(std::adjacent_find(cast_units.begin(), cast_units.end()) == cast_units.end());
     std::string s = parser.GetSuitableUnit(id, r).ToStdString(3, 3);
-    ASSERT_TRUE(s == "1.E+0(с)") << s;
+    ASSERT_TRUE(s == u8"1.E+0(с)") << s;
 }
 
 TEST_F(CalcTestReal, units60)
@@ -1251,12 +1251,12 @@ TEST_F(CalcTestReal, units60)
     LogicalId id{0, 0, 0, 0, 0, 1};
     auto r = parser.Parse(id, U"1км;");
     std::string s = parser.GetSuitableUnit(id, r).ToStdString(3, 3);
-    ASSERT_TRUE(s == "1.E+0(км)") << s;
+    ASSERT_TRUE(s == u8"1.E+0(км)") << s;
     auto t = parser.CastToUnit(id, r, Unit(U"см")).ToStdString(3, 3);
-    ASSERT_TRUE(t == "1.E+5(см)") << t;
+    ASSERT_TRUE(t == u8"1.E+5(см)") << t;
     r = parser.Parse(id, U"1с;");
     s = parser.GetSuitableUnit(id, r).ToStdString(3, 3);
-    ASSERT_TRUE(s == "1.E+0(с)") << s;
+    ASSERT_TRUE(s == u8"1.E+0(с)") << s;
 }
 
 TEST_F(CalcTestReal, units61)
@@ -1265,7 +1265,7 @@ TEST_F(CalcTestReal, units61)
     LogicalId id{0, 0, 0, 0, 0, 1};
     auto r = parser.Parse(id, U"кг*pow(м,2)/(pow(с,2)*моль*К);");
     std::string s = parser.GetSuitableUnit(id, r).ToStdString(3, 3);
-    ASSERT_TRUE(s == "1.E+0((Дж)/(моль*К))") << s;
+    ASSERT_TRUE(s == u8"1.E+0((Дж)/(моль*К))") << s;
 }
 
 TEST_F(CalcTestReal, units62)
@@ -1275,7 +1275,7 @@ TEST_F(CalcTestReal, units62)
     LogicalId id{0, 0, 1};
     parser.Parse(id, U"d_m~10м;");
     auto r = parser.Parse(LogicalId{0, 0, 2}, U"10м;", &dependencies);
-    ASSERT_TRUE(r.ToStdString(3, 3) == "10.E+0(м)") << r.ToStdString(3, 3);
+    ASSERT_TRUE(r.ToStdString(3, 3) == u8"10.E+0(м)") << r.ToStdString(3, 3);
     std::string s = parser.GetSuitableUnit(LogicalId{0, 0, 2}, r).ToStdString(3, 3);
     ASSERT_TRUE(s == "1.E+0(d_m)") << s;
     ASSERT_TRUE(std::find(dependencies.begin(), dependencies.end(), U"м") != dependencies.end());
@@ -1287,15 +1287,15 @@ TEST_F(CalcTestReal, units63)
     LogicalId id{0, 0, 1};
     parser.Parse(id, U"d_m~10м;");
     auto r = parser.Parse(LogicalId{0, 0, 2}, U"10м;");
-    ASSERT_TRUE(r.ToStdString(3, 3) == "10.E+0(м)") << r.ToStdString(3, 3);
+    ASSERT_TRUE(r.ToStdString(3, 3) == u8"10.E+0(м)") << r.ToStdString(3, 3);
     std::string s = parser.GetSuitableUnit(LogicalId{0, 0, 2}, r).ToStdString(3, 3);
     ASSERT_TRUE(s == "1.E+0(d_m)") << s;
 
     parser.RemoveIdentifier(id, U"d_m");
     r = parser.Parse(LogicalId{0, 0, 2}, U"10м;");
-    ASSERT_TRUE(r.ToStdString(3, 3) == "10.E+0(м)") << r.ToStdString(3, 3);
+    ASSERT_TRUE(r.ToStdString(3, 3) == u8"10.E+0(м)") << r.ToStdString(3, 3);
     s = parser.GetSuitableUnit(LogicalId{0, 0, 2}, r).ToStdString(3, 3);
-    ASSERT_TRUE(s == "100.E+0(дм)") << s;
+    ASSERT_TRUE(s == u8"100.E+0(дм)") << s;
 }
 
 TEST_F(CalcTestReal, units64)
@@ -1378,7 +1378,11 @@ TEST_F(CalcTestReal, prod2)
 TEST_F(CalcTestReal, max_time1)
 {
     yutovo_calculator::ParserContext parser_context;
+#ifdef _WIN32
+    parser_context.Init(200);
+#else
     parser_context.Init(1000);
+#endif
     parser.SetMaxCastUnitSize(3);
     EXPECT_THROW(parser.GetSuitableUnit(LogicalId{0, 0, 0, 0, 2}, parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"10kg*10m/(2*pow(s,2));", 
         &parser_context)).ToStdString(3, 3), yutovo_calculator::TimeExceedException);
@@ -1386,7 +1390,8 @@ TEST_F(CalcTestReal, max_time1)
     ASSERT_TRUE(res.ToStdString(3, 3) == parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"3;").ToStdString(3, 3));
 
     parser_context.Init(20000);
-    std::string s = parser.GetSuitableUnit(LogicalId{0, 0, 0, 0, 2}, parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"10kg*10m/(2*pow(s,2));")).ToStdString(3, 3);
+    std::string s = parser.GetSuitableUnit(LogicalId{0, 0, 0, 0, 2}, parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"10kg*10m/(2*pow(s,2));", 
+        &parser_context)).ToStdString(3, 3);
     ASSERT_TRUE(s == "50.E+0(N)") << s;
 }
 

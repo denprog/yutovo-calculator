@@ -311,8 +311,8 @@ int Unit::GetPower() const
     int j, k, l = 0;
 	for (int i = 0; i < (int)unit.size() - 1; ++i)
 	{
-		j = abs(p);
-		k = abs(unit[i + 1].second);
+		j = ::abs(p);
+		k = ::abs(unit[i + 1].second);
 
 		while (k > 0)
 		{
@@ -321,7 +321,7 @@ int Unit::GetPower() const
 			k = l;
 		}
 
-		p = abs(j);
+		p = ::abs(j);
 	}
 
 	return p;
@@ -347,8 +347,8 @@ std::u32string Unit::ToString(bool f) const
     for (auto p : unit)
     {
         auto s = p.first;
-        if (abs(p.second) > 1)
-            s += U"^" + ToUtfString(std::to_string(abs(p.second)));
+        if (::abs(p.second) > 1)
+            s += U"^" + ToUtfString(std::to_string(::abs(p.second)));
         if (p.second > 0)
         {
             if (upper.empty())

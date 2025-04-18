@@ -6,8 +6,6 @@
 #include "integer.h"
 #include "unit.h"
 
-using namespace std;
-
 namespace yutovo_calculator
 {
 
