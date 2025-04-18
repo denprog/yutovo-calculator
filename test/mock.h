@@ -1,4 +1,4 @@
-#ifndef __MOCK_H__
+﻿#ifndef __MOCK_H__
 #define __MOCK_H__
 
 #include <gmock/gmock.h>

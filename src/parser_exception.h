@@ -1,4 +1,4 @@
-#ifndef PARSEREXCEPTION_H
+﻿#ifndef PARSEREXCEPTION_H
 #define PARSEREXCEPTION_H
 
 #include <string>

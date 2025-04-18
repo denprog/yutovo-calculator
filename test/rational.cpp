@@ -1,4 +1,4 @@
-#include <gtest/gtest.h>
+﻿#include <gtest/gtest.h>
 #include "mock.h"
 #include <chrono>
 #include "parser_exception.h"

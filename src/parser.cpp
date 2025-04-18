@@ -1,4 +1,4 @@
-#include "stdafx.h"
+﻿#include "stdafx.h"
 #include "parser.h"
 
 namespace yutovo_calculator

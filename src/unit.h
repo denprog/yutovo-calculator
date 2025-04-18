@@ -1,4 +1,4 @@
-#ifndef __MEASURE_H__
+﻿#ifndef __MEASURE_H__
 #define __MEASURE_H__
 
 #include <vector>

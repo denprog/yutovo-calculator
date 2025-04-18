@@ -1,4 +1,4 @@
-#include "stdafx.h"
+﻿#include "stdafx.h"
 #include "math_helper.h"
 #include <algorithm>
 #include "integer.h"

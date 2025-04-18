@@ -1,4 +1,4 @@
-#ifndef STDAFX_H
+﻿#ifndef STDAFX_H
 #define STDAFX_H
 
 #define BOOST_SPIRIT_DEBUG

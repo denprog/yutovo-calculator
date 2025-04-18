@@ -1,4 +1,4 @@
-#ifndef ERRORHANDLER_H
+﻿#ifndef ERRORHANDLER_H
 #define ERRORHANDLER_H
 
 #include "parser_exception.h"

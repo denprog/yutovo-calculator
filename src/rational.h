@@ -1,4 +1,4 @@
-#ifndef RATIONAL_H
+﻿#ifndef RATIONAL_H
 #define RATIONAL_H
 
 #include <string>

@@ -1,4 +1,4 @@
-#ifndef DEFINITION_H
+﻿#ifndef DEFINITION_H
 #define DEFINITION_H
 
 #include "ast.h"

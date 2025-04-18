@@ -1,4 +1,4 @@
-#ifndef REAL_H
+﻿#ifndef REAL_H
 #define REAL_H
 
 #include <string>

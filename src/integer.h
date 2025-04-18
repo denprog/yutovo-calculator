@@ -1,4 +1,4 @@
-#ifndef INTEGER_H
+﻿#ifndef INTEGER_H
 #define INTEGER_H
 
 #include <string>

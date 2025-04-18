@@ -1,4 +1,4 @@
-#ifndef ANNOTATION_H
+﻿#ifndef ANNOTATION_H
 #define ANNOTATION_H
 
 #include "ast.h"

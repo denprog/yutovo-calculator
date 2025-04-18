@@ -1,4 +1,4 @@
-#include "utils.h"
+﻿#include "utils.h"
 #include "parser_exception.h"
 #include <chrono>
 #ifdef EMSCRIPTEN

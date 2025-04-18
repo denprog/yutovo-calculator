@@ -1,4 +1,4 @@
-#ifndef MATHHELPER_H
+﻿#ifndef MATHHELPER_H
 #define MATHHELPER_H
 
 #include <string>
