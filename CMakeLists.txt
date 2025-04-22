@@ -5,9 +5,7 @@ project(yutovo_calculator
     LANGUAGES CXX
 )
 
-if(WIN32)
-    set(INSTALL_PATH "c:/Lang/vcpkg/installed/x64-windows")
-else()
+if(NOT WIN32)
     set(INSTALL_PATH "$ENV{YUTOVO_DEPLOY}")
 endif()
 
