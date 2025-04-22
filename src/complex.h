@@ -2,9 +2,12 @@
 #define __COMPLEX_H__
 
 #include "real.h"
+#include <algorithm>
 
 namespace yutovo_calculator
 {
+
+#undef max
 
 extern Real exp(const int precision);
 extern Real pi(const int precision);

@@ -1,4 +1,4 @@
-﻿#ifndef SOLVER_H
+#ifndef SOLVER_H
 #define SOLVER_H
 
 #include "ast.h"
@@ -1389,7 +1389,7 @@ private:
     mutable Dependencies* dependencies = nullptr;
     mutable std::map<std::u32string, std::vector<Number>> cast_units;
 
-    int max_cast_unit_size = 2; //std::max size of each unit in the cast vector
+    int max_cast_unit_size = 2; //max size of each unit in the cast vector
 };
 
 };
