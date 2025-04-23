@@ -2,6 +2,10 @@
 #include "real.h"
 #include "utils.h"
 
+#ifdef max
+#undef max
+#endif
+
 namespace yutovo_calculator
 {
 

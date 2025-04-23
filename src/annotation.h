@@ -55,11 +55,11 @@ struct Annotation
 		
 		while (k != p)
 		{
-			char ch = *k;
-			if (ch == '\r')
+			char32_t ch = *k;
+			if (ch == U'\r')
 			{
 				++k;
-				if (ch == '\n')
+				if (ch == U'\n')
 					++k;
 				++j;
 			}

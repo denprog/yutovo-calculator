@@ -10,6 +10,7 @@ set(Boost_USE_MULTITHREADED ON)
 
 if(WIN32)
     find_package(PkgConfig)
+	set(CMAKE_PREFIX_PATH "${INSTALL_PATH}")
     pkg_check_modules(mpfr REQUIRED IMPORTED_TARGET mpfr)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /bigobj")
 endif()

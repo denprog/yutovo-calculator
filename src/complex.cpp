@@ -1,5 +1,13 @@
 ﻿#include "complex.h"
 
+#ifdef max
+#undef max
+#endif
+
+#ifdef min
+#undef min
+#endif
+
 namespace yutovo_calculator
 {
 

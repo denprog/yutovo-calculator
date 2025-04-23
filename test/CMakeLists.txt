@@ -6,7 +6,7 @@ set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 enable_testing()
-find_package(GTest REQUIRED)
+find_package(GTest REQUIRED PATHS ${INSTALL_PATH}/share/gtest)
 
 add_executable(${PROJECT_NAME}_tests
 	main.cpp
@@ -39,7 +39,10 @@ target_include_directories(${PROJECT_NAME}_tests PRIVATE
     ../src
 )
 
-gtest_discover_tests(${PROJECT_NAME}_tests)
+if(NOT WIN32)
+	include(GoogleTest)
+	gtest_discover_tests(${PROJECT_NAME}_tests)
+endif()
 
 install(
     TARGETS ${PROJECT_NAME}_tests
