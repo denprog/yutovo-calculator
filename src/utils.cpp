@@ -33,6 +33,11 @@ std::string ToBasicString(const std::u32string& str)
     return boost::locale::conv::utf_to_utf<char>(str);
 }
 
+std::wstring ToWString(const std::string& str)
+{
+	return boost::locale::conv::utf_to_utf<wchar_t>(str);
+}
+
 std::string ElementIdToString(const ElementId& id)
 {
 	std::string res;

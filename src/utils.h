@@ -76,6 +76,7 @@ struct ParserContext
 std::u32string ToUtfString(const std::string& str);
 std::u32string ToUtfString(const char* str);
 std::string ToBasicString(const std::u32string& str);
+std::wstring ToWString(const std::string& str);
 
 std::string ElementIdToString(const ElementId& id);
 std::string LogicalIdToString(const LogicalId& id);
