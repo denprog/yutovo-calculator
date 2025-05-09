@@ -1054,7 +1054,7 @@ TEST_F(CalcTestReal, units38)
 
 TEST_F(CalcTestReal, units39)
 {
-    auto r = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"d_m`decimeter`~10mm;");
+    auto r = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"d_m`dmeter`~1.5mm;");
     r = parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"d_m;");
     std::string s = parser.GetSuitableUnit(LogicalId{0, 0, 0, 0, 2}, r).ToStdString(3, 3);
     ASSERT_TRUE(s == "1.E+0(d_m)") << s;
@@ -1295,7 +1295,7 @@ TEST_F(CalcTestReal, units63)
     r = parser.Parse(LogicalId{0, 0, 2}, U"10м;");
     ASSERT_TRUE(r.ToStdString(3, 3) == u8"10.E+0(м)") << r.ToStdString(3, 3);
     s = parser.GetSuitableUnit(LogicalId{0, 0, 2}, r).ToStdString(3, 3);
-    ASSERT_TRUE(s == u8"100.E+0(дм)") << s;
+    ASSERT_TRUE(s == u8"10.E+0(м)") << s;
 }
 
 TEST_F(CalcTestReal, units64)
@@ -1309,6 +1309,15 @@ TEST_F(CalcTestReal, units64)
     u.system = U"rus";
     u.unit.push_back(std::make_pair(U"м", 1));
     ASSERT_FALSE(FindUnit(cast_units, u));
+}
+
+TEST_F(CalcTestReal, units65)
+{
+    parser.SetLocale(Language::Russian);
+    LogicalId id{0, 0, 0, 1};
+    auto r = parser.Parse(id, U"10Вт;");
+    auto s = parser.GetSuitableUnit(LogicalId{0, 0, 0, 2}, r).ToStdString(3, 3);
+    ASSERT_TRUE(s == u8"10.E+0(Вт)") << s;
 }
 
 TEST_F(CalcTestReal, compare1)

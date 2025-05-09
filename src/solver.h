@@ -1069,13 +1069,16 @@ private:
                 size_t m2 = c.ToString(::abs(c.GetExp()) + 1, ::abs(c.GetExp()) + 1, false).length();
                 if (c.unit.unit.size() == 1 && c.unit.unit[0].second == 1) //choose the simplest one
                 {
-                    if (s > 1 || m2 < m || res.unit.unit[0].second < 1 || (m2 == m && (c < res || res < 1) && c >= 1))
+                    if (!(res.unit.unit.size() == 1 && res.unit.unit[0].first.size() < c.unit.unit[0].first.size()))
                     {
-                        res = c;
-                        m = m2;
-                        s = c.unit.unit.size();
+                        if (s > 1 || m2 < m || res.unit.unit[0].second < 1 || (m2 == m && (c < res || res < 1) && c >= 1))
+                        {
+                            res = c;
+                            m = m2;
+                            s = c.unit.unit.size();
+                        }
+                        continue;
                     }
-                    continue;
                 }
 
                 //result string should have minimal length and should have the simpliest unit
