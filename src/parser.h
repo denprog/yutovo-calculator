@@ -133,7 +133,10 @@ struct Parser
             results.push_back(r);
         }
         if (results.empty())
+        {
+            _context->no_result = true;
             return Number();
+        }
         return results[0];
     }
 

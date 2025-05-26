@@ -71,6 +71,7 @@ struct ParserContext
 
     std::atomic<bool> break_solving{false};
     uint64_t end_time = 0; //solve before this time or rise TimeExceedException
+    bool no_result = false;
 };
 
 std::u32string ToUtfString(const std::string& str);

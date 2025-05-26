@@ -268,7 +268,8 @@ struct Solver : public boost::static_visitor<Number>
             solver.SetDependencies(dependencies);
             res = boost::apply_visitor(solver, op);
         }
-        
+        if (parser_context)
+            parser_context->no_result = false;
         return res;
     }
     
@@ -276,6 +277,8 @@ struct Solver : public boost::static_visitor<Number>
     {
         //pass the definition to the special functor
         boost::apply_visitor(*this, op.definition);
+        if (parser_context)
+            parser_context->no_result = true;
         return Number();
     }
 

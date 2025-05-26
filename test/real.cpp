@@ -585,6 +585,15 @@ TEST_F(CalcTestReal, variables23)
     ASSERT_TRUE(std::find(dependencies.begin(), dependencies.end(), U"v{12}") != dependencies.end());
 }
 
+TEST_F(CalcTestReal, variables24)
+{
+    yutovo_calculator::ParserContext parser_context;
+    parser.Parse(LogicalId{0, 0, 1}, U"v=555;", &parser_context);
+    ASSERT_TRUE(parser_context.no_result == true);
+    parser.Parse(LogicalId{0, 0, 2}, U"v;", &parser_context);
+    ASSERT_TRUE(parser_context.no_result == false);
+}
+
 TEST_F(CalcTestReal, symbols1)
 {
     EXPECT_THROW(parser.Parse(LogicalId{0, 0, 1}, U"•;"), yutovo_calculator::SyntaxException) << parser.Parse(LogicalId{0, 0, 1}, U"•;").ToStdString(3, 3);
