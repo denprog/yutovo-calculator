@@ -311,7 +311,7 @@ Complex Solver<Complex>::operator()(PostfixOperationNode<Complex> const& op) con
 template<>
 Integer Solver<Integer>::operator()(FunctionCallNode<Integer> const& op) const
 {
-    AddDependency(op.name.name);
+    AddDependency(op.name);
 
     Integer res;
     
@@ -389,7 +389,7 @@ Real Solver<Real>::operator()(FunctionCallNode<Real> const& op) const
 template<>
 Rational Solver<Rational>::operator()(FunctionCallNode<Rational> const& op) const
 {
-    AddDependency(op.name.name);
+    AddDependency(op.name);
 
     Rational res;
     
@@ -467,7 +467,7 @@ Complex Solver<Complex>::operator()(FunctionCallNode<Complex> const& op) const
 template<>
 Integer Solver<Integer>::operator()(FunctionCallStringNode<Integer> const& op) const
 {
-    AddDependency(op.name.name);
+    AddDependency(op.name);
 
     Integer res;
 
@@ -514,7 +514,7 @@ Complex Solver<Complex>::operator()(FunctionCallStringNode<Complex> const& op) c
 template<>
 Integer Solver<Integer>::operator()(NoFencesFunctionCallNode<Integer> const& op) const
 {
-    AddDependency(op.name.name);
+    AddDependency(op.name);
 
     Integer res;
     return res;
@@ -529,7 +529,7 @@ Real Solver<Real>::operator()(NoFencesFunctionCallNode<Real> const& op) const
 template<>
 Rational Solver<Rational>::operator()(NoFencesFunctionCallNode<Rational> const& op) const
 {
-    AddDependency(op.name.name);
+    AddDependency(op.name);
 
     Rational res;
     return res;
@@ -545,7 +545,7 @@ template<>
 Integer Solver<Integer>::operator()(IdentifierNode<Integer> const& op) const
 {
     CheckBreak(parser_context);
-    AddDependency(op.name);
+    AddDependency(op);
 
     TempVariable* t = FindTempVariable(op.name);
     if (t)
@@ -585,7 +585,7 @@ template<>
 Real Solver<Real>::operator()(IdentifierNode<Real> const& op) const
 {
     CheckBreak(parser_context);
-    AddDependency(op.name);
+    AddDependency(op);
 
     TempVariable* t = FindTempVariable(op.name);
     if (t)
@@ -643,7 +643,7 @@ template<>
 Rational Solver<Rational>::operator()(IdentifierNode<Rational> const& op) const
 {
     CheckBreak(parser_context);
-    AddDependency(op.name);
+    AddDependency(op);
 
     TempVariable* t = FindTempVariable(op.name);
     if (t)
@@ -700,7 +700,7 @@ template<>
 Complex Solver<Complex>::operator()(IdentifierNode<Complex> const& op) const
 {
     CheckBreak(parser_context);
-    AddDependency(op.name);
+    AddDependency(op);
 
     TempVariable* t = FindTempVariable(op.name);
     if (t)
@@ -744,7 +744,7 @@ template<>
 Integer Solver<Integer>::operator()(ImplicitStringMulNode<Integer> const& op) const
 {
     CheckBreak(parser_context);
-    AddDependency(op.identifier.name);
+    AddDependency(op.identifier);
 
     TempVariable* t = FindTempVariable(op.identifier.name);
     if (t)
@@ -784,7 +784,7 @@ template<>
 Real Solver<Real>::operator()(ImplicitStringMulNode<Real> const& op) const
 {
     CheckBreak(parser_context);
-    AddDependency(op.identifier.name);
+    AddDependency(op.identifier);
 
     TempVariable* t = FindTempVariable(op.identifier.name);
     if (t)
@@ -842,7 +842,7 @@ template<>
 Rational Solver<Rational>::operator()(ImplicitStringMulNode<Rational> const& op) const
 {
     CheckBreak(parser_context);
-    AddDependency(op.identifier.name);
+    AddDependency(op.identifier);
 
     TempVariable* t = FindTempVariable(op.identifier.name);
     if (t)
@@ -899,7 +899,7 @@ template<>
 Complex Solver<Complex>::operator()(ImplicitStringMulNode<Complex> const& op) const
 {
     CheckBreak(parser_context);
-    AddDependency(op.identifier.name);
+    AddDependency(op.identifier);
 
     TempVariable* t = FindTempVariable(op.identifier.name);
     if (t)
@@ -949,7 +949,7 @@ template<>
 Real Solver<Real>::operator()(ImplicitDivMulNode<Real> const& op) const
 {
     CheckBreak(parser_context);
-    AddDependency(op.identifier.name);
+    AddDependency(op.identifier);
 
     TempVariable* t = FindTempVariable(op.identifier.name);
     if (t)
@@ -1019,7 +1019,7 @@ template<>
 Rational Solver<Rational>::operator()(ImplicitDivMulNode<Rational> const& op) const
 {
     CheckBreak(parser_context);
-    AddDependency(op.identifier.name);
+    AddDependency(op.identifier);
 
     TempVariable* t = FindTempVariable(op.identifier.name);
     if (t)
@@ -1089,7 +1089,7 @@ template<>
 Complex Solver<Complex>::operator()(ImplicitDivMulNode<Complex> const& op) const
 {
     CheckBreak(parser_context);
-    AddDependency(op.identifier.name);
+    AddDependency(op.identifier);
 
     TempVariable* t = FindTempVariable(op.identifier.name);
     if (t)

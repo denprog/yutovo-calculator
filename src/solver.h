@@ -501,7 +501,7 @@ struct Solver : public boost::static_visitor<Number>
         if (it != symbols->units.end())
             symbols->units.erase(it);
 
-        AddDependency(unit.name.name);
+        AddDependency(unit.name);
         Number res = (*this)(unit.expression);
         auto c = CustomUnit<Number>(id, unit.name.name, unit.name.subscript, res, symbols->buildin_elements);
         c.description = unit.name.description;
@@ -1205,17 +1205,26 @@ private:
         return res;
     }
 
-    void AddDependency(const std::u32string& name) const
+    void AddDependency(const IdentifierNode<Number>& identifier) const
     {
-        if (std::find(dependencies->begin(), dependencies->end(), name) == dependencies->end())
-            dependencies->push_back(name);
+        if (identifier.subscript.empty())
+        {
+            if (std::find(dependencies->begin(), dependencies->end(), identifier.name) == dependencies->end())
+                dependencies->push_back(identifier.name);
+        }
+        else
+        {
+            auto name = identifier.name + U"{" + identifier.subscript + U"}";
+            if (std::find(dependencies->begin(), dependencies->end(), name) == dependencies->end())
+                dependencies->push_back(name);
+        }
     }
 
     Number FunctionCall(FunctionCallNode<Number> const& op) const
     {
         CheckBreak(parser_context);
 
-        AddDependency(op.name.name);
+        AddDependency(op.name);
 
         Number res;
         
@@ -1351,7 +1360,7 @@ private:
 
     Number NoFencesFunctionCall(NoFencesFunctionCallNode<Number> const& op) const
     {
-        AddDependency(op.name.name);
+        AddDependency(op.name);
 
         Number res;
         

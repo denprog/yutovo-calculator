@@ -576,6 +576,15 @@ TEST_F(CalcTestReal, variables22)
     ASSERT_TRUE(res.ToStdString(3, 3) == "3.E+0") << res.ToStdString(3, 3);
 }
 
+TEST_F(CalcTestReal, variables23)
+{
+    std::vector<std::u32string> dependencies;
+    parser.Parse(LogicalId{0, 0, 1}, U"v{12}=555;");
+    auto res = parser.Parse(LogicalId{0, 0, 2}, U"v{12};", &dependencies).ToStdString(3, 3);
+    ASSERT_TRUE(res == "555.E+0") << res;
+    ASSERT_TRUE(std::find(dependencies.begin(), dependencies.end(), U"v{12}") != dependencies.end());
+}
+
 TEST_F(CalcTestReal, symbols1)
 {
     EXPECT_THROW(parser.Parse(LogicalId{0, 0, 1}, U"•;"), yutovo_calculator::SyntaxException) << parser.Parse(LogicalId{0, 0, 1}, U"•;").ToStdString(3, 3);
