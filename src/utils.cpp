@@ -67,6 +67,32 @@ std::string LogicalIdToString(const LogicalId& id)
 	return res;
 }
 
+ElementId ElementIdFromString(const std::string& id)
+{
+    ElementId res;
+    std::stringstream s(id);
+    for (int i; s >> i;)
+    {
+        res.push_back(i);
+        if (s.peek() == ',')
+            s.ignore();
+    }
+    return res;
+}
+
+LogicalId LogicalIdFromString(const std::string& id)
+{
+    LogicalId res;
+    std::stringstream s(id);
+    for (int i; s >> i;)
+    {
+        res.push_back(i);
+        if (s.peek() == ',')
+            s.ignore();
+    }
+    return res;
+}
+
 bool IsLess(const LogicalId& id1, const LogicalId& id2)
 {
 	for (size_t i = 0, j = 0; i < id1.size() && j < id2.size(); ++i, ++j)

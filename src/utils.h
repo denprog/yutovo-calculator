@@ -83,6 +83,9 @@ std::string ToBasicString(const std::wstring& str);
 std::string ElementIdToString(const ElementId& id);
 std::string LogicalIdToString(const LogicalId& id);
 
+ElementId ElementIdFromString(const std::string& id);
+LogicalId LogicalIdFromString(const std::string& id);
+
 bool IsLess(const LogicalId& id1, const LogicalId& id2);
 
 void CheckBreak(ParserContext* parser_context);
