@@ -661,7 +661,11 @@ struct Solver : public boost::static_visitor<Number>
         auto var_it = symbols->variables.erase(std::remove_if(symbols->variables.begin(), symbols->variables.end(), 
             [id, name](auto& var)
             {
-                return var.name.name == name && var.id == id;
+                if (var.id != id)
+                    return false;
+                if (var.name.subscript.empty())
+                    return var.name.name == name;
+                return var.name.name + U"{" + var.name.subscript + U"}" == name;
             }), 
             symbols->variables.end());
         if (var_it != symbols->variables.end())
@@ -670,7 +674,11 @@ struct Solver : public boost::static_visitor<Number>
         auto func_it = symbols->functions.erase(std::remove_if(symbols->functions.begin(), symbols->functions.end(), 
             [id, name](auto& func)
             {
-                return func.name.name == name && func.id == id;;
+                if (func.id != id)
+                    return false;
+                if (func.name.subscript.empty())
+                    return func.name.name == name && func.id == id;;
+                return func.name.name + U"{" + func.name.subscript + U"}" == name;
             }), 
             symbols->functions.end());
         if (func_it != symbols->functions.end())
@@ -679,7 +687,7 @@ struct Solver : public boost::static_visitor<Number>
         auto unit_it = symbols->units.erase(std::remove_if(symbols->units.begin(), symbols->units.end(), 
             [id, name](auto& unit)
             {
-                return unit.name == name && unit.id == id;;
+                return unit.name == name && unit.id == id;
             }), 
             symbols->units.end());
         return unit_it != symbols->units.end();

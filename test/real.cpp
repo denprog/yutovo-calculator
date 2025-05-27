@@ -613,6 +613,20 @@ TEST_F(CalcTestReal, variables25)
     ASSERT_TRUE(parser_context.no_result == false);
 }
 
+TEST_F(CalcTestReal, variables26)
+{
+    parser.SetLocale(Language::Russian);
+    yutovo_calculator::ParserContext parser_context;
+    auto res = parser.Parse(LogicalId{0, 0, 1}, U"k{e}=1м;", &parser_context);
+    ASSERT_TRUE(parser_context.no_result == true);
+    res = parser.Parse(LogicalId{0, 0, 2}, U"k{e};", &parser_context);
+    ASSERT_TRUE(res == "1.E+0(м)") << res;
+    ASSERT_TRUE(parser_context.no_result == false);
+
+    parser.RemoveIdentifier(LogicalId{0, 0, 1}, U"k{e}");
+    EXPECT_THROW(parser.Parse(LogicalId{0, 0, 2}, U"k{e};"), yutovo_calculator::SyntaxException);
+}
+
 TEST_F(CalcTestReal, symbols1)
 {
     EXPECT_THROW(parser.Parse(LogicalId{0, 0, 1}, U"•;"), yutovo_calculator::SyntaxException) << parser.Parse(LogicalId{0, 0, 1}, U"•;").ToStdString(3, 3);
