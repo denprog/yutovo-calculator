@@ -461,6 +461,7 @@ struct Solver : public boost::static_visitor<Number>
             {
                 v = var;
                 v.id = id;
+                (*this)(var.expression); //for adding dependencies and throwing exceptions
                 return;
             }
             if (v.name.name == var.name.name)
@@ -491,7 +492,7 @@ struct Solver : public boost::static_visitor<Number>
         else
             symbols->variables.insert(symbols->variables.begin() + j, var);
 
-        (*this)(var.expression); //for adding dependencies
+        (*this)(var.expression); //for adding dependencies and throwing exceptions
     }
 
     void AddUnit(UnitNode<Number> const& unit) const
