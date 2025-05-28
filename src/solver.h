@@ -985,13 +985,23 @@ struct Solver : public boost::static_visitor<Number>
     void ListUserVariables(std::vector<std::pair<std::u32string, std::u32string>>& variables)
     {
         for (auto& var : symbols->variables)
-            variables.push_back(std::make_pair(var.name.name, var.name.description));
+        {
+            if (var.name.subscript.empty())
+                variables.push_back(std::make_pair(var.name.name, var.name.description));
+            else
+                variables.push_back(std::make_pair(var.name.name + var.name.subscript, var.name.description));
+        }
     }
 
     void ListUserFunctions(std::vector<std::u32string>& functions)
     {
         for (auto& func : symbols->functions)
-            functions.push_back(func.name.name);
+        {
+            if (func.name.subscript.empty())
+                functions.push_back(func.name.name);
+            else
+                functions.push_back(func.name.name + func.name.subscript);
+        }
     }
 
     void ListBuiltinUnits(std::vector<std::pair<std::u32string, std::u32string>>& units)
