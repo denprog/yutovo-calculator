@@ -90,8 +90,8 @@ else()
     else()
         target_link_libraries(${PROJECT_NAME} PRIVATE 
             stdc++
-            mpfr
-            gmp
+            libmpfr.a
+            libgmp.a
     )
     endif()
 endif()
