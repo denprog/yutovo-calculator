@@ -8,6 +8,8 @@
 #include <processthreadsapi.h>
 #include <timezoneapi.h>
 #endif
+#include "real.h"
+#include "export.h"
 
 namespace yutovo_calculator
 {
@@ -146,6 +148,13 @@ void GetThreadTime(uint64_t& time)
     clock_gettime(thread_clock_id, &s);
     time = s.tv_sec * 1000 + s.tv_nsec / 1000000;
 #endif
+}
+
+//ParserContext
+
+ParserContext::ParserContext() :
+    exports(new Export())
+{
 }
 
 }

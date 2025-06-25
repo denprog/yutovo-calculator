@@ -72,6 +72,11 @@ struct ExpressionPosition
 template<typename Number>
 struct IdentifierNode : public ExpressionPosition
 {
+	bool operator==(const IdentifierNode& other) const
+	{
+		return name == other.name && subscript == other.subscript;
+	}
+
 	std::u32string name;
 	std::u32string subscript;
 	std::u32string description;

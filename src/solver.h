@@ -4,6 +4,7 @@
 #include "ast.h"
 #include "script.h"
 #include "utils.h"
+#include "export.h"
 #include <chrono>
 
 namespace yutovo_calculator
@@ -32,131 +33,6 @@ typedef Rational (*RationalBinaryFunc)(const Rational& num1, const Rational& num
 typedef Rational (*RationalVariable)();
 
 typedef std::vector<std::u32string> Dependencies;
-
-template<typename Number>
-struct CustomUnit
-{
-    CustomUnit(const LogicalId _id, const std::u32string _name, const std::u32string _system, Number _value, bool _buildin) :
-        id(_id),
-        name(_name),
-        system(_system),
-        value(_value),
-        buildin(_buildin)
-    {
-        if (system.empty())
-            system = U"SI";
-    }
-
-    bool Cast(Number& val) const
-    {
-        Number _val = val;
-        Number res_val = val;
-        Unit _val_unit = val.unit;
-        Unit res_unit = value.unit;
-        int power = 0;
-        bool f = true;
-
-        while (f)
-        {
-            for (auto& u : res_unit.unit)
-            {
-                auto it = std::find_if(_val.unit.unit.begin(), _val.unit.unit.end(), 
-                    [u](const auto& p)
-                    {
-                        if (p.first != u.first)
-                            return false;
-                        if (p.second > 0 && u.second > 0)
-                            return p.second >= u.second;
-                        if (p.second < 0 && u.second < 0)
-                            return p.second <= u.second;
-                        return false;
-                    });
-                if (it == _val.unit.unit.end())
-                {
-                    f = false;
-                    break;
-                }
-                it->second -= u.second;
-            }
-            if (f)
-            {
-                ++power;
-                for (size_t i = 0; i < _val.unit.unit.size(); ++i)
-                {
-                    auto& p = _val.unit.unit[i];
-                    if (p.second == 0)
-                        _val.unit.unit.erase(_val.unit.unit.begin() + i--);
-                }
-                res_val = _val;
-            }
-        }
-
-        if (power == 0)
-        {
-            //try to find the backward variant of the unit
-            f = true;
-            _val = val;
-            while (f)
-            {
-                for (auto& u : res_unit.unit)
-                {
-                    auto it = std::find_if(_val.unit.unit.begin(), _val.unit.unit.end(), 
-                        [u](const auto& p)
-                        {
-                            if (p.first != u.first)
-                                return false;
-                            if (p.second < 0 && u.second > 0)
-                                return ::abs(p.second) >= u.second;
-                            if (p.second > 0 && u.second < 0)
-                                return p.second >= ::abs(u.second);
-                            return false;
-                        });
-                    if (it == _val.unit.unit.end())
-                    {
-                        f = false;
-                        break;
-                    }
-                    it->second += u.second;
-                }
-                if (f)
-                {
-                    --power;
-                    for (size_t i = 0; i < _val.unit.unit.size(); ++i)
-                    {
-                        auto& p = _val.unit.unit[i];
-                        if (p.second == 0)
-                            _val.unit.unit.erase(_val.unit.unit.begin() + i--);
-                    }
-                    res_val = _val;
-                }
-            }
-        }
-
-        if (power == 0)
-            return false;
-
-        res_val.unit.unit.insert(res_val.unit.unit.begin(), std::make_pair(name, power));
-        auto u = res_val.unit;
-        if (power > 0)
-            res_val = res_val / pow(value, power);
-        else
-            res_val = res_val * pow(value, -power);
-        u.system = system;
-        u.description = U"";
-        res_val.SetUnit(u);
-        if (_val_unit == res_val.unit)
-            return false;
-        val = res_val;
-        return true;
-    }
-
-    LogicalId id;
-    std::u32string name;
-    std::u32string system;
-    Number value;
-    bool buildin;
-    std::u32string description;
-};
 
 template<typename Number>
 struct SolverSymbols
@@ -462,6 +338,8 @@ struct Solver : public boost::static_visitor<Number>
                 v = var;
                 v.id = id;
                 (*this)(var.expression); //for adding dependencies and throwing exceptions
+                if (parser_context && parser_context->exports)
+                    parser_context->exports->AddVariable<Number>(var);
                 return;
             }
             if (v.name.name == var.name.name)
@@ -493,6 +371,8 @@ struct Solver : public boost::static_visitor<Number>
             symbols->variables.insert(symbols->variables.begin() + j, var);
 
         (*this)(var.expression); //for adding dependencies and throwing exceptions
+        if (parser_context && parser_context->exports)
+            parser_context->exports->AddVariable<Number>(var);
     }
 
     void AddUnit(UnitNode<Number> const& unit) const
@@ -510,6 +390,9 @@ struct Solver : public boost::static_visitor<Number>
         auto c = CustomUnit<Number>(id, unit.name.name, unit.name.subscript, res, symbols->buildin_elements);
         c.description = unit.name.description;
         symbols->units.emplace_back(c);
+
+        if (parser_context && parser_context->exports)
+            parser_context->exports->AddUnit<Number>(c);
     }
 
     VariableNode<Number>* FindVariable(const std::u32string& name, const std::u32string& subscript) const
@@ -520,8 +403,11 @@ struct Solver : public boost::static_visitor<Number>
             if (IsLess(var.id, id) && var.name.name == name && var.name.subscript == subscript)
                 return &var;
         }
-        return nullptr;
+
+        return FindExportVariable(name, subscript);
     }
+
+    VariableNode<Number>* FindExportVariable(const std::u32string& name, const std::u32string& subscript) const;
 
     FunctionNode<Number>* FindFunction(FunctionCallNode<Number> const& op) const
     {
@@ -535,8 +421,10 @@ struct Solver : public boost::static_visitor<Number>
                 return &func;
             }
         }
-        return nullptr;
+        return FindExportFunction(op);
     }
+
+    FunctionNode<Number>* FindExportFunction(FunctionCallNode<Number> const& op) const;
 
     void AddFunction(FunctionNode<Number> const& func) const
     {
@@ -578,6 +466,9 @@ struct Solver : public boost::static_visitor<Number>
             symbols->functions.push_back((FunctionNode<Number>&)func);
         else
             symbols->functions.insert(symbols->functions.begin() + j, (FunctionNode<Number>&)func);
+
+        if (parser_context && parser_context->exports)
+            parser_context->exports->AddFunction<Number>(func);
 
         //parse for adding dependencies
         Number arg;
@@ -819,8 +710,12 @@ struct Solver : public boost::static_visitor<Number>
                 }
             }
         }
+        if (!res)
+            return FindExportUnit(name, system);
         return res;
     }
+
+    CustomUnit<Number>* FindExportUnit(const std::u32string& name, const std::u32string& system) const;
 
     void GetCastUnits(const LogicalId _id, const Number& val, std::vector<Unit>& _cast_units)
     {
@@ -957,7 +852,11 @@ struct Solver : public boost::static_visitor<Number>
                 }
             }
         }
+
+        GetCastExportUnitsImpl(_id, val, system, _cast_units);
     }
+
+    void GetCastExportUnitsImpl(const LogicalId _id, const Number& val, const std::u32string& system, std::vector<Number>& _cast_units) const;
 
     Number GetSuitableUnit(const LogicalId _id, const Number& val, const std::u32string& system, const bool buildin) const;
 

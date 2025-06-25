@@ -56,6 +56,7 @@ add_library(${PROJECT_NAME}
     solver.cpp
     utils.cpp
     unit.cpp
+    export.cpp
 
     stdafx.h
     utils.h
@@ -68,12 +69,14 @@ add_library(${PROJECT_NAME}
     parser_exception.h
     math_helper.h
     integer.h
+    custom_unit.h
     expression.h
     error_handler.h
     definition.h
     complex.h
     ast.h
     annotation.h
+    export.h
 )
 
 if(EMSCRIPTEN)
@@ -136,11 +139,13 @@ install(
         rational.h
         real.h
         complex.h
+        custom_unit.h
         script.h
         solver.h
         stdafx.h
         utils.h
         unit.h
+        export.h
     DESTINATION ${INSTALL_PATH}/include/${PROJECT_NAME}
     COMPONENT ${PROJECT_NAME}
 )

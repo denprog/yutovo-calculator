@@ -1258,6 +1258,212 @@ Complex Solver<Complex>::operator()(ScriptNode<Complex> const& script, LogicalId
 }
 
 template<>
+VariableNode<Real>* Solver<Real>::FindExportVariable(const std::u32string& name, const std::u32string& subscript) const
+{
+    if (!parser_context)
+        return nullptr;
+    for (size_t i = 0; i < parser_context->exports->variables_real.size(); ++i)
+    {
+        auto& var = parser_context->exports->variables_real[i];
+        if (var.name.name == name && var.name.subscript == subscript)
+            return &var;
+    }
+    return nullptr;
+}
+
+template<>
+VariableNode<Integer>* Solver<Integer>::FindExportVariable(const std::u32string& name, const std::u32string& subscript) const
+{
+    if (!parser_context)
+        return nullptr;
+    for (size_t i = 0; i < parser_context->exports->variables_integer.size(); ++i)
+    {
+        auto& var = parser_context->exports->variables_integer[i];
+        if (var.name.name == name && var.name.subscript == subscript)
+            return &var;
+    }
+    return nullptr;
+}
+
+template<>
+VariableNode<Rational>* Solver<Rational>::FindExportVariable(const std::u32string& name, const std::u32string& subscript) const
+{
+    if (!parser_context)
+        return nullptr;
+    for (size_t i = 0; i < parser_context->exports->variables_rational.size(); ++i)
+    {
+        auto& var = parser_context->exports->variables_rational[i];
+        if (var.name.name == name && var.name.subscript == subscript)
+            return &var;
+    }
+    return nullptr;
+}
+
+template<>
+VariableNode<Complex>* Solver<Complex>::FindExportVariable(const std::u32string& name, const std::u32string& subscript) const
+{
+    if (!parser_context)
+        return nullptr;
+    for (size_t i = 0; i < parser_context->exports->variables_complex.size(); ++i)
+    {
+        auto& var = parser_context->exports->variables_complex[i];
+        if (var.name.name == name && var.name.subscript == subscript)
+            return &var;
+    }
+    return nullptr;
+}
+
+template<>
+FunctionNode<Integer>* Solver<Integer>::FindExportFunction(FunctionCallNode<Integer> const& op) const
+{
+    if (!parser_context)
+        return nullptr;
+    for (size_t i = 0; i < parser_context->exports->functions_integer.size(); ++i)
+    {
+        auto& func = parser_context->exports->functions_integer[i];
+        if (func.name.name == op.name.name)
+            return &func;
+    }
+    return nullptr;
+}
+
+template<>
+FunctionNode<Real>* Solver<Real>::FindExportFunction(FunctionCallNode<Real> const& op) const
+{
+    if (!parser_context)
+        return nullptr;
+    for (size_t i = 0; i < parser_context->exports->functions_real.size(); ++i)
+    {
+        auto& func = parser_context->exports->functions_real[i];
+        if (func.name.name == op.name.name)
+            return &func;
+    }
+    return nullptr;
+}
+
+template<>
+FunctionNode<Rational>* Solver<Rational>::FindExportFunction(FunctionCallNode<Rational> const& op) const
+{
+    if (!parser_context)
+        return nullptr;
+    for (size_t i = 0; i < parser_context->exports->functions_rational.size(); ++i)
+    {
+        auto& func = parser_context->exports->functions_rational[i];
+        if (func.name.name == op.name.name)
+            return &func;
+    }
+    return nullptr;
+}
+
+template<>
+FunctionNode<Complex>* Solver<Complex>::FindExportFunction(FunctionCallNode<Complex> const& op) const
+{
+    if (!parser_context)
+        return nullptr;
+    for (size_t i = 0; i < parser_context->exports->functions_complex.size(); ++i)
+    {
+        auto& func = parser_context->exports->functions_complex[i];
+        if (func.name.name == op.name.name)
+            return &func;
+    }
+    return nullptr;
+}
+
+template<>
+CustomUnit<Integer>* Solver<Integer>::FindExportUnit(const std::u32string& name, const std::u32string& system) const
+{
+    return nullptr;
+}
+
+template<>
+CustomUnit<Real>* Solver<Real>::FindExportUnit(const std::u32string& name, const std::u32string& system) const
+{
+    if (!parser_context)
+        return nullptr;
+    for (size_t i = 0; i < parser_context->exports->units_real.size(); ++i)
+    {
+        auto& unit = parser_context->exports->units_real[i];
+        if (unit.name == name && (unit.system == system || (unit.system == U"SI" && system.empty())))
+            return &unit;
+    }
+    return nullptr;
+}
+
+template<>
+CustomUnit<Rational>* Solver<Rational>::FindExportUnit(const std::u32string& name, const std::u32string& system) const
+{
+    if (!parser_context)
+        return nullptr;
+    for (size_t i = 0; i < parser_context->exports->units_rational.size(); ++i)
+    {
+        auto& unit = parser_context->exports->units_rational[i];
+        if (unit.name == name && unit.system == system)
+            return &unit;
+    }
+    return nullptr;
+}
+
+template<>
+CustomUnit<Complex>* Solver<Complex>::FindExportUnit(const std::u32string& name, const std::u32string& system) const
+{
+    return nullptr;
+}
+
+template<>
+void Solver<Real>::GetCastExportUnitsImpl(const LogicalId _id, const Real& val, const std::u32string& system, std::vector<Real>& _cast_units) const
+{
+    if (!parser_context)
+        return;
+    for (size_t i = 0; i < parser_context->exports->units_real.size(); ++i)
+    {
+        CustomUnit<Real>& custom_unit = parser_context->exports->units_real[i];
+        if (custom_unit.system == system)
+        {
+            Real t = val;
+            if (custom_unit.Cast(t))
+            {
+                if (t.unit.unit.size() <= max_cast_unit_size)
+                    GetCastUnitsImpl(_id, t, system, _cast_units);
+                else
+                    _cast_units.push_back(t);
+            }
+        }
+    }
+}
+
+template<>
+void Solver<Integer>::GetCastExportUnitsImpl(const LogicalId _id, const Integer& val, const std::u32string& system, std::vector<Integer>& _cast_units) const
+{
+}
+
+template<>
+void Solver<Rational>::GetCastExportUnitsImpl(const LogicalId _id, const Rational& val, const std::u32string& system, std::vector<Rational>& _cast_units) const
+{
+    if (!parser_context)
+        return;
+    for (size_t i = 0; i < parser_context->exports->units_rational.size(); ++i)
+    {
+        CustomUnit<Rational>& custom_unit = parser_context->exports->units_rational[i];
+        if (custom_unit.system == system)
+        {
+            Rational t = val;
+            if (custom_unit.Cast(t))
+            {
+                if (t.unit.unit.size() <= max_cast_unit_size)
+                    GetCastUnitsImpl(_id, t, system, _cast_units);
+                else
+                    _cast_units.push_back(t);
+            }
+        }
+    }
+}
+
+template<>
+void Solver<Complex>::GetCastExportUnitsImpl(const LogicalId _id, const Complex& val, const std::u32string& system, std::vector<Complex>& _cast_units) const
+{
+}
+
+template<>
 Real Solver<Real>::GetSuitableUnit(const LogicalId _id, const Real& val, const std::u32string& system, const bool buildin) const
 {
     return GetSuitableUnitImpl(_id, val, system, buildin);

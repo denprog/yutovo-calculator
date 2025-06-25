@@ -52,8 +52,12 @@ struct LogicalId : std::vector<int> //logical Id does not include row id, so it 
 void InitThreadTime();
 void GetThreadTime(uint64_t& time);
 
+struct Export;
+
 struct ParserContext
 {
+    ParserContext();
+
     void Init(uint64_t max_time)
     {
         break_solving = false;
@@ -72,6 +76,7 @@ struct ParserContext
     std::atomic<bool> break_solving{false};
     uint64_t end_time = 0; //solve before this time or rise TimeExceedException
     bool no_result = false;
+    std::shared_ptr<Export> exports;
 };
 
 std::u32string ToUtfString(const std::string& str);
