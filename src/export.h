@@ -10,6 +10,7 @@ namespace yutovo_calculator
 
 struct Export
 {
+public:
     template<typename Number>
     void AddVariable(const VariableNode<Number>& var);
 
@@ -19,6 +20,21 @@ struct Export
     template<typename Number>
     void AddUnit(const CustomUnit<Number>& unit);
 
+    template<typename Number>
+    VariableNode<Number>* FindVariable(const std::u32string& name, const std::u32string& subscript);
+
+    template<typename Number>
+    FunctionNode<Number>* FindFunction(const std::u32string& name);
+
+    template<typename Number>
+    CustomUnit<Number>* FindUnit(const std::u32string& name, const std::u32string& system);
+
+    template<typename Number>
+    void GetUnits(const std::u32string& system, std::vector<CustomUnit<Number>>& units);
+
+    void Clear();
+
+private:
     std::vector<VariableNode<Integer>> variables_integer;
     std::vector<VariableNode<Real>> variables_real;
     std::vector<VariableNode<Rational>> variables_rational;

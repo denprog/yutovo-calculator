@@ -175,4 +175,172 @@ void Export::AddUnit(const CustomUnit<Complex>& unit)
 {
 }
 
+template<>
+VariableNode<Integer>* Export::FindVariable<Integer>(const std::u32string& name, const std::u32string& subscript)
+{
+    for (auto& var : variables_integer)
+    {
+        if (var.name.name == name && var.name.subscript == subscript)
+            return &var;
+    }
+    return nullptr;
+}
+
+template<>
+VariableNode<Real>* Export::FindVariable<Real>(const std::u32string& name, const std::u32string& subscript)
+{
+    for (auto& var : variables_real)
+    {
+        if (var.name.name == name && var.name.subscript == subscript)
+            return &var;
+    }
+    return nullptr;
+}
+
+template<>
+VariableNode<Rational>* Export::FindVariable<Rational>(const std::u32string& name, const std::u32string& subscript)
+{
+    for (auto& var : variables_rational)
+    {
+        if (var.name.name == name && var.name.subscript == subscript)
+            return &var;
+    }
+    return nullptr;
+}
+
+template<>
+VariableNode<Complex>* Export::FindVariable<Complex>(const std::u32string& name, const std::u32string& subscript)
+{
+    for (auto& var : variables_complex)
+    {
+        if (var.name.name == name && var.name.subscript == subscript)
+            return &var;
+    }
+    return nullptr;
+}
+
+template<>
+FunctionNode<Integer>* Export::FindFunction<Integer>(const std::u32string& name)
+{
+    for (auto& func : functions_integer)
+    {
+        if (func.name.name == name)
+            return &func;
+    }
+    return nullptr;
+}
+
+template<>
+FunctionNode<Real>* Export::FindFunction<Real>(const std::u32string& name)
+{
+    for (auto& func : functions_real)
+    {
+        if (func.name.name == name)
+            return &func;
+    }
+    return nullptr;
+}
+
+template<>
+FunctionNode<Rational>* Export::FindFunction<Rational>(const std::u32string& name)
+{
+    for (auto& func : functions_rational)
+    {
+        if (func.name.name == name)
+            return &func;
+    }
+    return nullptr;
+}
+
+template<>
+FunctionNode<Complex>* Export::FindFunction<Complex>(const std::u32string& name)
+{
+    for (auto& func : functions_complex)
+    {
+        if (func.name.name == name)
+            return &func;
+    }
+    return nullptr;
+}
+
+template<>
+CustomUnit<Integer>* Export::FindUnit<Integer>(const std::u32string& name, const std::u32string& system)
+{
+    return nullptr;
+}
+
+template<>
+CustomUnit<Real>* Export::FindUnit<Real>(const std::u32string& name, const std::u32string& system)
+{
+    for (auto& unit : units_real)
+    {
+        if (unit.name == name && (unit.system == system || (unit.system == U"SI" && system.empty())))
+            return &unit;
+    }
+    return nullptr;
+}
+
+template<>
+CustomUnit<Rational>* Export::FindUnit<Rational>(const std::u32string& name, const std::u32string& system)
+{
+    for (auto& unit : units_rational)
+    {
+        if (unit.name == name && (unit.system == system || (unit.system == U"SI" && system.empty())))
+            return &unit;
+    }
+    return nullptr;
+}
+
+template<>
+CustomUnit<Complex>* Export::FindUnit<Complex>(const std::u32string& name, const std::u32string& system)
+{
+    return nullptr;
+}
+
+template<>
+void Export::GetUnits(const std::u32string& system, std::vector<CustomUnit<Real>>& units)
+{
+    for (auto& unit : units_real)
+    {
+        if (unit.system == system)
+            units.push_back(unit);
+    }
+}
+
+template<>
+void Export::GetUnits(const std::u32string& system, std::vector<CustomUnit<Integer>>& units)
+{
+}
+
+template<>
+void Export::GetUnits(const std::u32string& system, std::vector<CustomUnit<Rational>>& units)
+{
+    for (auto& unit : units_rational)
+    {
+        if (unit.system == system)
+            units.push_back(unit);
+    }
+}
+
+template<>
+void Export::GetUnits(const std::u32string& system, std::vector<CustomUnit<Complex>>& units)
+{
+}
+
+void Export::Clear()
+{
+    variables_integer.clear();
+    variables_real.clear();
+    variables_rational.clear();
+    variables_complex.clear();
+
+    functions_integer.clear();
+    functions_real.clear();
+    functions_rational.clear();
+    functions_complex.clear();
+
+    units_real.clear();
+    units_rational.clear();
+}
+
 }

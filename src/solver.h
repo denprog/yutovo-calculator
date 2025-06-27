@@ -338,7 +338,7 @@ struct Solver : public boost::static_visitor<Number>
                 v = var;
                 v.id = id;
                 (*this)(var.expression); //for adding dependencies and throwing exceptions
-                if (parser_context && parser_context->exports)
+                if (parser_context && parser_context->exports && parser_context->include_document)
                     parser_context->exports->AddVariable<Number>(var);
                 return;
             }
@@ -371,7 +371,7 @@ struct Solver : public boost::static_visitor<Number>
             symbols->variables.insert(symbols->variables.begin() + j, var);
 
         (*this)(var.expression); //for adding dependencies and throwing exceptions
-        if (parser_context && parser_context->exports)
+        if (parser_context && parser_context->exports && parser_context->include_document)
             parser_context->exports->AddVariable<Number>(var);
     }
 
@@ -391,7 +391,7 @@ struct Solver : public boost::static_visitor<Number>
         c.description = unit.name.description;
         symbols->units.emplace_back(c);
 
-        if (parser_context && parser_context->exports)
+        if (parser_context && parser_context->exports && parser_context->include_document)
             parser_context->exports->AddUnit<Number>(c);
     }
 
@@ -407,7 +407,12 @@ struct Solver : public boost::static_visitor<Number>
         return FindExportVariable(name, subscript);
     }
 
-    VariableNode<Number>* FindExportVariable(const std::u32string& name, const std::u32string& subscript) const;
+    VariableNode<Number>* FindExportVariable(const std::u32string& name, const std::u32string& subscript) const
+    {
+        if (!parser_context)
+            return nullptr;
+        return parser_context->exports->FindVariable<Number>(name, subscript);
+    }
 
     FunctionNode<Number>* FindFunction(FunctionCallNode<Number> const& op) const
     {
@@ -424,7 +429,12 @@ struct Solver : public boost::static_visitor<Number>
         return FindExportFunction(op);
     }
 
-    FunctionNode<Number>* FindExportFunction(FunctionCallNode<Number> const& op) const;
+    FunctionNode<Number>* FindExportFunction(FunctionCallNode<Number> const& op) const
+    {
+        if (!parser_context)
+            return nullptr;
+        return parser_context->exports->FindFunction<Number>(op.name.name);
+    }
 
     void AddFunction(FunctionNode<Number> const& func) const
     {
@@ -467,7 +477,7 @@ struct Solver : public boost::static_visitor<Number>
         else
             symbols->functions.insert(symbols->functions.begin() + j, (FunctionNode<Number>&)func);
 
-        if (parser_context && parser_context->exports)
+        if (parser_context && parser_context->exports && parser_context->include_document)
             parser_context->exports->AddFunction<Number>(func);
 
         //parse for adding dependencies
@@ -715,7 +725,12 @@ struct Solver : public boost::static_visitor<Number>
         return res;
     }
 
-    CustomUnit<Number>* FindExportUnit(const std::u32string& name, const std::u32string& system) const;
+    CustomUnit<Number>* FindExportUnit(const std::u32string& name, const std::u32string& system) const
+    {
+        if (!parser_context)
+            return nullptr;
+        return parser_context->exports->FindUnit<Number>(name, system);
+    }
 
     void GetCastUnits(const LogicalId _id, const Number& val, std::vector<Unit>& _cast_units)
     {
@@ -856,7 +871,24 @@ struct Solver : public boost::static_visitor<Number>
         GetCastExportUnitsImpl(_id, val, system, _cast_units);
     }
 
-    void GetCastExportUnitsImpl(const LogicalId _id, const Number& val, const std::u32string& system, std::vector<Number>& _cast_units) const;
+    void GetCastExportUnitsImpl(const LogicalId _id, const Number& val, const std::u32string& system, std::vector<Number>& _cast_units) const
+    {
+        if (!parser_context)
+            return;
+        std::vector<CustomUnit<Number>> units;
+        parser_context->exports->GetUnits(system, units);
+        for (auto& unit : units)
+        {
+            Number t = val;
+            if (unit.Cast(t))
+            {
+                if (t.unit.unit.size() <= max_cast_unit_size)
+                    GetCastUnitsImpl(_id, t, system, _cast_units);
+                else
+                    _cast_units.push_back(t);
+            }
+        }
+    }
 
     Number GetSuitableUnit(const LogicalId _id, const Number& val, const std::u32string& system, const bool buildin) const;
 

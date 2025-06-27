@@ -76,6 +76,7 @@ struct ParserContext
     std::atomic<bool> break_solving{false};
     uint64_t end_time = 0; //solve before this time or rise TimeExceedException
     bool no_result = false;
+    bool include_document = false;
     std::shared_ptr<Export> exports;
 };
 
