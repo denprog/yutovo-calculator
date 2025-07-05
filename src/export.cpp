@@ -8,6 +8,7 @@ namespace yutovo_calculator
 template<>
 void Export::AddVariable<Integer>(const VariableNode<Integer>& var)
 {
+    std::scoped_lock<std::mutex> lock(export_mutex);
     auto it = std::find_if(variables_integer.begin(), variables_integer.end(), 
         [var](auto& v)
         {
@@ -24,6 +25,7 @@ void Export::AddVariable<Integer>(const VariableNode<Integer>& var)
 template<>
 void Export::AddVariable<Real>(const VariableNode<Real>& var)
 {
+    std::scoped_lock<std::mutex> lock(export_mutex);
     auto it = std::find_if(variables_real.begin(), variables_real.end(), 
         [var](auto& v)
         {
@@ -40,6 +42,7 @@ void Export::AddVariable<Real>(const VariableNode<Real>& var)
 template<>
 void Export::AddVariable<Rational>(const VariableNode<Rational>& var)
 {
+    std::scoped_lock<std::mutex> lock(export_mutex);
     auto it = std::find_if(variables_rational.begin(), variables_rational.end(), 
         [var](auto& v)
         {
@@ -56,6 +59,7 @@ void Export::AddVariable<Rational>(const VariableNode<Rational>& var)
 template<>
 void Export::AddVariable<Complex>(const VariableNode<Complex>& var)
 {
+    std::scoped_lock<std::mutex> lock(export_mutex);
     auto it = std::find_if(variables_complex.begin(), variables_complex.end(), 
         [var](auto& v)
         {
@@ -72,6 +76,7 @@ void Export::AddVariable<Complex>(const VariableNode<Complex>& var)
 template<>
 void Export::AddFunction(const FunctionNode<Integer>& func)
 {
+    std::scoped_lock<std::mutex> lock(export_mutex);
     auto it = std::find_if(functions_integer.begin(), functions_integer.end(), 
         [func](auto& v)
         {
@@ -88,6 +93,7 @@ void Export::AddFunction(const FunctionNode<Integer>& func)
 template<>
 void Export::AddFunction(const FunctionNode<Real>& func)
 {
+    std::scoped_lock<std::mutex> lock(export_mutex);
     auto it = std::find_if(functions_real.begin(), functions_real.end(), 
         [func](auto& v)
         {
@@ -104,6 +110,7 @@ void Export::AddFunction(const FunctionNode<Real>& func)
 template<>
 void Export::AddFunction(const FunctionNode<Rational>& func)
 {
+    std::scoped_lock<std::mutex> lock(export_mutex);
     auto it = std::find_if(functions_rational.begin(), functions_rational.end(), 
         [func](auto& v)
         {
@@ -120,6 +127,7 @@ void Export::AddFunction(const FunctionNode<Rational>& func)
 template<>
 void Export::AddFunction(const FunctionNode<Complex>& func)
 {
+    std::scoped_lock<std::mutex> lock(export_mutex);
     auto it = std::find_if(functions_complex.begin(), functions_complex.end(), 
         [func](auto& v)
         {
@@ -141,6 +149,7 @@ void Export::AddUnit(const CustomUnit<Integer>& unit)
 template<>
 void Export::AddUnit(const CustomUnit<Real>& unit)
 {
+    std::scoped_lock<std::mutex> lock(export_mutex);
     auto it = std::find_if(units_real.begin(), units_real.end(), 
         [unit](auto& v)
         {
@@ -157,6 +166,7 @@ void Export::AddUnit(const CustomUnit<Real>& unit)
 template<>
 void Export::AddUnit(const CustomUnit<Rational>& unit)
 {
+    std::scoped_lock<std::mutex> lock(export_mutex);
     auto it = std::find_if(units_rational.begin(), units_rational.end(), 
         [unit](auto& v)
         {
@@ -178,6 +188,7 @@ void Export::AddUnit(const CustomUnit<Complex>& unit)
 template<>
 VariableNode<Integer>* Export::FindVariable<Integer>(const std::u32string& name, const std::u32string& subscript)
 {
+    std::scoped_lock<std::mutex> lock(export_mutex);
     for (auto& var : variables_integer)
     {
         if (var.name.name == name && var.name.subscript == subscript)
@@ -189,6 +200,7 @@ VariableNode<Integer>* Export::FindVariable<Integer>(const std::u32string& name,
 template<>
 VariableNode<Real>* Export::FindVariable<Real>(const std::u32string& name, const std::u32string& subscript)
 {
+    std::scoped_lock<std::mutex> lock(export_mutex);
     for (auto& var : variables_real)
     {
         if (var.name.name == name && var.name.subscript == subscript)
@@ -200,6 +212,7 @@ VariableNode<Real>* Export::FindVariable<Real>(const std::u32string& name, const
 template<>
 VariableNode<Rational>* Export::FindVariable<Rational>(const std::u32string& name, const std::u32string& subscript)
 {
+    std::scoped_lock<std::mutex> lock(export_mutex);
     for (auto& var : variables_rational)
     {
         if (var.name.name == name && var.name.subscript == subscript)
@@ -211,6 +224,7 @@ VariableNode<Rational>* Export::FindVariable<Rational>(const std::u32string& nam
 template<>
 VariableNode<Complex>* Export::FindVariable<Complex>(const std::u32string& name, const std::u32string& subscript)
 {
+    std::scoped_lock<std::mutex> lock(export_mutex);
     for (auto& var : variables_complex)
     {
         if (var.name.name == name && var.name.subscript == subscript)
@@ -222,6 +236,7 @@ VariableNode<Complex>* Export::FindVariable<Complex>(const std::u32string& name,
 template<>
 FunctionNode<Integer>* Export::FindFunction<Integer>(const std::u32string& name)
 {
+    std::scoped_lock<std::mutex> lock(export_mutex);
     for (auto& func : functions_integer)
     {
         if (func.name.name == name)
@@ -233,6 +248,7 @@ FunctionNode<Integer>* Export::FindFunction<Integer>(const std::u32string& name)
 template<>
 FunctionNode<Real>* Export::FindFunction<Real>(const std::u32string& name)
 {
+    std::scoped_lock<std::mutex> lock(export_mutex);
     for (auto& func : functions_real)
     {
         if (func.name.name == name)
@@ -244,6 +260,7 @@ FunctionNode<Real>* Export::FindFunction<Real>(const std::u32string& name)
 template<>
 FunctionNode<Rational>* Export::FindFunction<Rational>(const std::u32string& name)
 {
+    std::scoped_lock<std::mutex> lock(export_mutex);
     for (auto& func : functions_rational)
     {
         if (func.name.name == name)
@@ -255,6 +272,7 @@ FunctionNode<Rational>* Export::FindFunction<Rational>(const std::u32string& nam
 template<>
 FunctionNode<Complex>* Export::FindFunction<Complex>(const std::u32string& name)
 {
+    std::scoped_lock<std::mutex> lock(export_mutex);
     for (auto& func : functions_complex)
     {
         if (func.name.name == name)
@@ -272,6 +290,7 @@ CustomUnit<Integer>* Export::FindUnit<Integer>(const std::u32string& name, const
 template<>
 CustomUnit<Real>* Export::FindUnit<Real>(const std::u32string& name, const std::u32string& system)
 {
+    std::scoped_lock<std::mutex> lock(export_mutex);
     for (auto& unit : units_real)
     {
         if (unit.name == name && (unit.system == system || (unit.system == U"SI" && system.empty())))
@@ -283,6 +302,7 @@ CustomUnit<Real>* Export::FindUnit<Real>(const std::u32string& name, const std::
 template<>
 CustomUnit<Rational>* Export::FindUnit<Rational>(const std::u32string& name, const std::u32string& system)
 {
+    std::scoped_lock<std::mutex> lock(export_mutex);
     for (auto& unit : units_rational)
     {
         if (unit.name == name && (unit.system == system || (unit.system == U"SI" && system.empty())))
@@ -300,6 +320,7 @@ CustomUnit<Complex>* Export::FindUnit<Complex>(const std::u32string& name, const
 template<>
 void Export::GetUnits(const std::u32string& system, std::vector<CustomUnit<Real>>& units)
 {
+    std::scoped_lock<std::mutex> lock(export_mutex);
     for (auto& unit : units_real)
     {
         if (unit.system == system)
@@ -315,6 +336,7 @@ void Export::GetUnits(const std::u32string& system, std::vector<CustomUnit<Integ
 template<>
 void Export::GetUnits(const std::u32string& system, std::vector<CustomUnit<Rational>>& units)
 {
+    std::scoped_lock<std::mutex> lock(export_mutex);
     for (auto& unit : units_rational)
     {
         if (unit.system == system)
@@ -329,6 +351,7 @@ void Export::GetUnits(const std::u32string& system, std::vector<CustomUnit<Compl
 
 void Export::Clear()
 {
+    std::scoped_lock<std::mutex> lock(export_mutex);
     variables_integer.clear();
     variables_real.clear();
     variables_rational.clear();

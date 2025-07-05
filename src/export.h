@@ -2,6 +2,7 @@
 #define __EXPORT_H__
 
 #include <vector>
+#include <mutex>
 #include "ast.h"
 #include "custom_unit.h"
 
@@ -35,6 +36,8 @@ public:
     void Clear();
 
 private:
+    std::mutex export_mutex;
+
     std::vector<VariableNode<Integer>> variables_integer;
     std::vector<VariableNode<Real>> variables_real;
     std::vector<VariableNode<Rational>> variables_rational;
