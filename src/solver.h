@@ -1074,7 +1074,7 @@ private:
                 {
                     if (res.unit.unit.size() == c.unit.unit.size())
                     {
-                        if (res.unit.GetPower() > c.unit.GetPower())
+                        if (res.unit.GetPower() < c.unit.GetPower())
                             continue;
                     }
                 }

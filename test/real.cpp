@@ -1371,6 +1371,16 @@ TEST_F(CalcTestReal, units65)
     ASSERT_TRUE(s == u8"10.E+0(Вт)") << s;
 }
 
+TEST_F(CalcTestReal, units66)
+{
+    LogicalId id{0, 0, 0, 1};
+    auto r = parser.Parse({0, 0, 0, 1}, U"x=50*(pow(m,3));");
+    r = parser.Parse({0, 0, 0, 2}, U"cube_m~50*(pow(m,3));");
+    r = parser.Parse({0, 0, 0, 3}, U"4*x;");
+    auto s = parser.GetSuitableUnit(LogicalId{0, 0, 0, 4}, r).ToStdString(3, 3);
+    ASSERT_TRUE(s == u8"4.E+0(cube_m)") << s;
+}
+
 TEST_F(CalcTestReal, compare1)
 {
     std::string s = parser.Parse(LogicalId{0, 0, 0, 0, 0, 0, 0, 2, 0}, U"(0<10);").ToStdString(3, 3);
