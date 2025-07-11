@@ -11,6 +11,10 @@ else()
     set(INSTALL_PATH "$ENV{YUTOVO_DEPLOY}")
 endif()
 
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    add_compile_definitions(DEBUG)
+endif()
+
 add_subdirectory(src)
 if(NOT DEFINED EMSCRIPTEN)
     add_subdirectory(test)

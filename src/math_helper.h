@@ -9,7 +9,7 @@
 #define DEFAULT_RND MPFR_RNDN
 #define DEFAULT_INCREASE_PRECISION 5
 
-#ifndef NDEBUG
+#ifdef DEBUG
 #define TRACE_OUTPUT
 #endif
 
