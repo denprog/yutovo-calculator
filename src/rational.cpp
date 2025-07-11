@@ -489,30 +489,33 @@ Rational pow(const Rational& num1, const Rational& num2)
 {
     if (!num2.GetDenomerator() || (num2.GetNumerator() % num2.GetDenomerator() != 0))
         throw MathException(ArgumentIsOver);
-    Rational res(num1);
-    Integer n = num2.GetNumerator();
-    if (n < 1)
-        throw MathException(ArgumentIsOver);
-    Integer i = 1;
-    while (i < n)
-    {
-        res = res * num1;
-        i += 1;
-    }
-    return res;
+    if (!num2.unit.IsEmpty())
+        throw MathException(UnitsAreIncompatible);
+    Integer p = num2.GetNumerator() / num2.GetDenomerator();
+    if (abs(p) >= INT_MAX)
+        throw MathException(ParserExceptionCode::Overflow);
+    return pow(num1, (int)p);
 }
 
 Rational pow(const Rational& num1, const int num2)
 {
-    Rational res(num1);
     if (num2 < 1)
         throw MathException(ArgumentIsOver);
-    Integer i = 1;
-    while (i < num2)
-    {
-        res = res * num1;
-        i += 1;
-    }
+    Rational res;
+    mpz_t num, den;
+    mpz_init(num);
+    mpz_init(den);
+    mpz_pow_ui(num, mpq_numref(num1.number), num2);
+    mpz_pow_ui(den, mpq_denref(num1.number), num2);
+    mpq_set_num(res.number, num);
+    mpq_set_den(res.number, den);
+    mpq_canonicalize(res.number);
+    mpz_clear(num);
+    mpz_clear(den);
+    res.unit = pow(num1.unit, num2);
+#ifdef TRACE_OUTPUT
+    res.UpdateNumberStr();
+#endif
     return res;
 }
 

@@ -139,6 +139,20 @@ TEST_F(CalcTestRational, errors3)
     ASSERT_FALSE(true);
 }
 
+TEST_F(CalcTestRational, errors4)
+{
+    try
+    {
+        parser.Parse(LogicalId{0, 0, 1}, U"pow(23423423,234234234234234);");
+    }
+    catch (yutovo_calculator::MathException& ex)
+    {
+        ASSERT_TRUE((ex.id == LogicalId{0, 0, 1}) && ex.ex_id == ParserExceptionCode::Overflow && ex.pos == 0) << ex.ex_id;
+        return;
+    }
+    ASSERT_FALSE(true);
+}
+
 TEST_F(CalcTestRational, rationals1)
 {
     ASSERT_TRUE(parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"2/4;") == parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"1/2;")) << 
