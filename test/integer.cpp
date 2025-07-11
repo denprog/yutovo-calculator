@@ -216,6 +216,20 @@ TEST_F(CalcTestInteger, errors3)
     ASSERT_FALSE(true);
 }
 
+TEST_F(CalcTestInteger, errors4)
+{
+    try
+    {
+        parser.Parse(LogicalId{0, 0, 1}, U"pow(23423423,234234234234234);");
+    }
+    catch (yutovo_calculator::MathException& ex)
+    {
+        ASSERT_TRUE((ex.id == LogicalId{0, 0, 1}) && ex.ex_id == ParserExceptionCode::Overflow && ex.pos == 0) << ex.ex_id;
+        return;
+    }
+    ASSERT_FALSE(true);
+}
+
 TEST_F(CalcTestInteger, notation1)
 {
     Integer res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"123;");

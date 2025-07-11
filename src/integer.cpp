@@ -464,6 +464,8 @@ Integer pow(const Integer& num1, const Integer& num2)
 {
     Integer res;
 
+    if (abs(num2) >= INT_MAX)
+        throw MathException(ParserExceptionCode::Overflow);
     mpz_pow_ui(res.number, num1.number, (int)num2);
 
     return res;
