@@ -98,6 +98,18 @@ TEST_F(CalcTestRational, functions5)
     ASSERT_TRUE(r.ToStdString() == "2/3") << r.ToStdString();
 }
 
+TEST_F(CalcTestRational, functions6)
+{
+    Rational res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"pow((5)/(2),-3);");
+    ASSERT_TRUE(res.ToString() == U"8/125") << res.ToStdString();
+}
+
+TEST_F(CalcTestRational, functions7)
+{
+    Rational res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"pow((5)/(2),0);");
+    ASSERT_TRUE(res.ToString() == U"1") << res.ToStdString();
+}
+
 TEST_F(CalcTestRational, symbols1)
 {
     EXPECT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"•;"), yutovo_calculator::SyntaxException) << parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"•;").ToStdString();
