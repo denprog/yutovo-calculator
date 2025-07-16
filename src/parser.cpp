@@ -122,7 +122,8 @@ Complex arg(const Complex& num);
 template<>
 Parser<yutovo_calculator::Integer>::Parser(const int precision, const Language _language) : 
     solver(precision, AngleMeasure::Radian),
-    language(_language)
+    language(_language),
+    last_language(_language)
 {
     InitThreadTime();
     
@@ -145,7 +146,8 @@ Parser<yutovo_calculator::Integer>::Parser(const int precision, const Language _
 template<>
 Parser<yutovo_calculator::Real>::Parser(const int precision, const Language _language) : 
     solver(precision, AngleMeasure::Radian),
-    language(_language)
+    language(_language),
+    last_language(_language)
 {
     InitThreadTime();
     
@@ -273,7 +275,8 @@ Parser<yutovo_calculator::Real>::Parser(const int precision, const Language _lan
 template<>
 Parser<yutovo_calculator::Rational>::Parser(const int precision, const Language _language) : 
     solver(precision, AngleMeasure::Radian),
-    language(_language)
+    language(_language),
+    last_language(_language)
 {
     InitThreadTime();
 
@@ -289,7 +292,8 @@ Parser<yutovo_calculator::Rational>::Parser(const int precision, const Language 
 template<>
 Parser<yutovo_calculator::Complex>::Parser(const int precision, const Language _language) : 
     solver(precision, AngleMeasure::Radian),
-    language(_language)
+    language(_language),
+    last_language(_language)
 {
     InitThreadTime();
     

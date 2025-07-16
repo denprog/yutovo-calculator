@@ -235,6 +235,9 @@ private:
             solver.AddBuiltinUnit(Unit(U"rad", U"radian", 1)); //radian (angle)
             solver.AddBuiltinUnit(Unit(U"sr", U"steradian", 1)); //steradian (solid angle)
             solver.AddBuiltinUnit(Unit(U"bit")); //bit (data)
+            solver.AddBuiltinUnit(Unit(U"₽", U"ruble", 1));
+            solver.AddBuiltinUnit(Unit(U"$", U"dollar", 1));
+            solver.AddBuiltinUnit(Unit(U"€", U"euro", 1));
             break;
         case Language::Russian:
             solver.AddBuiltinUnit(Unit(U"м", U"метр", 1)); //meter (length)
@@ -247,6 +250,9 @@ private:
             solver.AddBuiltinUnit(Unit(U"рад", U"радиан", 1)); //radian (angle)
             solver.AddBuiltinUnit(Unit(U"ср", U"стерадиан", 1)); //steradian (solid angle)
             solver.AddBuiltinUnit(Unit(U"бит")); //bit (data)
+            solver.AddBuiltinUnit(Unit(U"₽", U"рубль", 1));
+            solver.AddBuiltinUnit(Unit(U"$", U"доллар", 1));
+            solver.AddBuiltinUnit(Unit(U"€", U"евро", 1));
             break;
         default:
             throw ParserException({}, ParserExceptionCode::UnknownLanguage);
@@ -680,7 +686,16 @@ private:
                     U"ml`millilitre`~0.001l;",
                     U"dl`decilitre`~0.1l;",
                     U"dal~10l;",
-                    U"hl`hectolitre`~100l;"
+                    U"hl`hectolitre`~100l;",
+
+                    //money
+                    U"kop~0.01₽;", //kopeck
+                    U"dollar~$;",
+                    U"¢~0.01$;", //cent
+                    U"cent~¢;",
+                    U"euro~€;",
+                    U"ct~0.01€;", //eurocent
+                    U"eurocent~0.01€;"
                 }
             },
             {
@@ -708,7 +723,15 @@ private:
                     U"мл`миллилитр`~0.001л;",
                     U"дл`децилитр`~0.1л;",
                     U"дал~10л;",
-                    U"гл`гекталитр`~100л;"
+                    U"гл`гекталитр`~100л;",
+
+                    //money
+                    U"коп~0.01₽;",
+                    U"копейка~коп;",
+                    U"доллар~$;",
+                    U"цент~0.01$;",
+                    U"евро~€;",
+                    U"евроцент~0.01€;"
                 }
             }
         };
