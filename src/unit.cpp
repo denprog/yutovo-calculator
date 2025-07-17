@@ -193,6 +193,8 @@ Unit operator/(const Unit& unit1, const float)
 
 Unit pow(const Unit& unit1, const Real& val)
 {
+    if (!val.unit.IsEmpty())
+        throw MathException(UnitsAreIncompatible);
     if (unit1.IsEmpty())
         return Unit();
     if (!val.IsInteger())
@@ -200,9 +202,7 @@ Unit pow(const Unit& unit1, const Real& val)
     int p = (int)val;
     Unit res(unit1);
     for (auto& u : res.unit)
-    {
         u.second *= p;
-    }
     return res;
 }
 

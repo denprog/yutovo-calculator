@@ -1381,6 +1381,21 @@ TEST_F(CalcTestReal, units66)
     ASSERT_TRUE(s == u8"4.E+0(cube_m)") << s;
 }
 
+TEST_F(CalcTestReal, units67)
+{
+    parser.SetLocale(Language::Russian);
+    try
+    {
+        parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"pow(1.008,с);");
+    }
+    catch (yutovo_calculator::MathException& ex)
+    {
+        ASSERT_TRUE((ex.id == LogicalId{0, 0, 0, 0, 2}) && ex.ex_id == ParserExceptionCode::UnitsAreIncompatible && ex.pos == 0) << LogicalIdToString(ex.id);
+        return;
+    }
+    ASSERT_FALSE(true);
+}
+
 TEST_F(CalcTestReal, compare1)
 {
     std::string s = parser.Parse(LogicalId{0, 0, 0, 0, 0, 0, 0, 2, 0}, U"(0<10);").ToStdString(3, 3);
