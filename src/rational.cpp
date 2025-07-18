@@ -384,15 +384,15 @@ void Rational::operator/=(const Rational& num)
 
 void Rational::operator=(const int num)
 {
-    *this = num;
+    mpq_set_si(number, num, 1);
 }
 
 Rational::operator int() const
 {
-    mpz_t numer;
-    mpz_init(numer);
-    mpq_get_num(numer, number);
-    return mpz_get_si(numer);
+    mpz_t num;
+    mpz_init(num);
+    mpq_get_num(num, number);
+    return mpz_get_si(num);
 }
 
 bool operator==(const Rational& num1, const Rational& num2)
@@ -499,6 +499,8 @@ Rational pow(const Rational& num1, const Rational& num2)
 
 Rational pow(const Rational& num1, const int num2)
 {
+    if (num1.IsZero() && num2 <= 0)
+        throw MathException(Overflow);
     Rational res;
     mpz_t num, den;
     mpz_init(num);

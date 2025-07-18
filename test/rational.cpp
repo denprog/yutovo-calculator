@@ -110,6 +110,40 @@ TEST_F(CalcTestRational, functions7)
     ASSERT_TRUE(res.ToString() == U"1") << res.ToStdString();
 }
 
+TEST_F(CalcTestRational, functions8)
+{
+    try
+    {
+        parser.Parse(LogicalId{0, 0, 1}, U"pow(0,0);");
+    }
+    catch (yutovo_calculator::MathException& ex)
+    {
+        ASSERT_TRUE((ex.id == LogicalId{0, 0, 1}) && ex.ex_id == ParserExceptionCode::Overflow && ex.pos == 0) << ex.ex_id;
+        return;
+    }
+    ASSERT_FALSE(true);
+}
+
+TEST_F(CalcTestRational, functions9)
+{
+    Rational res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"pow(0, 2);");
+    ASSERT_TRUE(res.ToString() == U"0") << res.ToStdString();
+}
+
+TEST_F(CalcTestRational, functions10)
+{
+    try
+    {
+        parser.Parse(LogicalId{0, 0, 1}, U"pow(0,-2);");
+    }
+    catch (yutovo_calculator::MathException& ex)
+    {
+        ASSERT_TRUE((ex.id == LogicalId{0, 0, 1}) && ex.ex_id == ParserExceptionCode::Overflow && ex.pos == 0) << ex.ex_id;
+        return;
+    }
+    ASSERT_FALSE(true);
+}
+
 TEST_F(CalcTestRational, symbols1)
 {
     EXPECT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"•;"), yutovo_calculator::SyntaxException) << parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"•;").ToStdString();

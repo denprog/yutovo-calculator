@@ -482,6 +482,7 @@ struct Solver : public boost::static_visitor<Number>
 
         //parse for adding dependencies
         Number arg;
+        arg = 1;
         for (IdentifierNodesIter iter = func.arguments.begin(); iter != func.arguments.end(); ++iter)
             PushTempVariable(iter->name, arg);
         (*this)(func.return_expression);
