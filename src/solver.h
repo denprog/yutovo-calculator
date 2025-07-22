@@ -284,6 +284,12 @@ struct Solver : public boost::static_visitor<Number>
         return res;
     }
 
+    Number operator()(ArrayNode<Number> const& op) const
+    {
+        Number res;
+        return res;
+    }
+
     //The beginning of the solving.
     Number operator()(ScriptNode<Number> const& script, LogicalId _id, AngleMeasure _default_angle_measure, 
         AngleMeasure _result_angle_measure, int _precision, Dependencies* _dependencies) const;

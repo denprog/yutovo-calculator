@@ -77,6 +77,17 @@ struct CalcTestComplex : public testing::Test
     Parser<Complex> parser;
 };
 
+template<class Number>
+struct CalcTestArray : public testing::Test
+{
+    CalcTestArray() :
+        parser(0, Language::English)
+    {
+    }
+
+    Parser<Array<Number>> parser;
+};
+
 }
 
 #endif

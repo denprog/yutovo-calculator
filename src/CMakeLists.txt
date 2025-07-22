@@ -77,6 +77,7 @@ add_library(${PROJECT_NAME}
     ast.h
     annotation.h
     export.h
+    array.h
 )
 
 if(EMSCRIPTEN)

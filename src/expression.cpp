@@ -36,12 +36,12 @@ Expression<Integer>::Expression(LogicalId id, std::u32string& expr, Solver<Integ
 
     if (solver->default_notation == 16)
     {
-        unary = loop | compare | postfix_operation | implicit_mul | function_call | function_call_string | 
+        unary = loop | array | compare | postfix_operation | implicit_mul | function_call | function_call_string | 
             no_fences_function_call | number | identifier | implicit_string_mul | unary_operation | '(' > expression > ')';
     }
     else
     {
-        unary = loop | compare | implicit_function_mul | implicit_post_function_mul | postfix_operation | implicit_string_mul | implicit_mul | 
+        unary = loop | array | compare | implicit_function_mul | implicit_post_function_mul | postfix_operation | implicit_string_mul | implicit_mul | 
             number | function_call | function_call_string | identifier | no_fences_function_call | unary_operation | '(' > expression > ')';
     }
     
@@ -82,6 +82,8 @@ Expression<Integer>::Expression(LogicalId id, std::u32string& expr, Solver<Integ
         raw[lexeme["<"]] | raw[lexeme[">"]]) >> expression >> ')';
 
     loop = "loop(" > variable > ',' > compare > ',' > variable > ',' > variable > ',' > variable > ')';
+
+    array = '[' >> -(expression % ',') > ']';
 
     variable = identifier >> ('=' > expression);
 
@@ -162,7 +164,7 @@ Expression<Real>::Expression(LogicalId id, std::u32string& expr, Solver<Real>* _
 
     multiply = char_('*') > unary | char_('/') > unary | char_('%') >> unary;
     
-    unary = loop | compare | implicit_function_mul | implicit_post_function_mul | postfix_operation | implicit_div_mul | implicit_string_mul | 
+    unary = loop | array | compare | implicit_function_mul | implicit_post_function_mul | postfix_operation | implicit_div_mul | implicit_string_mul | 
         implicit_fraction_mul | mixed_division | implicit_mul | number | function_call | no_fences_function_call | identifier | 
         unary_operation | '(' > expression > ')';
     
@@ -210,6 +212,8 @@ Expression<Real>::Expression(LogicalId id, std::u32string& expr, Solver<Real>* _
         raw[lexeme["<"]] | raw[lexeme[">"]]) >> expression >> ')';
 
     loop = "loop(" > variable > ',' > compare > ',' > variable > ',' > variable > ',' > variable > ')';
+
+    array = '[' >> -(expression % ',') > ']';
 
     variable = identifier >> ('=' > expression);
 
@@ -306,7 +310,7 @@ Expression<yutovo_calculator::Rational>::Expression(LogicalId id, std::u32string
 
     multiply = (char_('*') > unary) | (char_('/') > unary) | (char_('%') > unary);
     
-    unary = loop | compare | implicit_function_mul | implicit_post_function_mul | implicit_div_mul | implicit_string_mul | implicit_fraction_mul | 
+    unary = loop | array | compare | implicit_function_mul | implicit_post_function_mul | implicit_div_mul | implicit_string_mul | implicit_fraction_mul | 
         mixed_division | implicit_mul | number | function_call | identifier | no_fences_function_call | unary_operation | '(' > expression > ')';
     
     number = digits_number;
@@ -345,6 +349,8 @@ Expression<yutovo_calculator::Rational>::Expression(LogicalId id, std::u32string
         raw[lexeme["<"]] | raw[lexeme[">"]]) >> expression >> ')';
 
     loop = "loop(" > variable > ',' > compare > ',' > variable > ',' > variable > ',' > variable > ')';
+
+    array = '[' >> -(expression % ',') > ']';
 
     variable = identifier >> ('=' > expression);
 
@@ -413,7 +419,7 @@ Expression<Complex>::Expression(LogicalId id, std::u32string& expr, Solver<Compl
 
     multiply = char_('*') > unary | char_('/') > unary | char_('%') > unary;
     
-    unary = loop | compare | implicit_function_mul | implicit_post_function_mul | postfix_operation | implicit_div_mul | implicit_string_mul | 
+    unary = loop | array | compare | implicit_function_mul | implicit_post_function_mul | postfix_operation | implicit_div_mul | implicit_string_mul | 
         implicit_fraction_mul | mixed_division | implicit_mul | number | function_call | no_fences_function_call | identifier | 
         unary_operation | '(' > expression > ')';
     
@@ -461,6 +467,8 @@ Expression<Complex>::Expression(LogicalId id, std::u32string& expr, Solver<Compl
         raw[lexeme["<"]] | raw[lexeme[">"]]) >> expression >> ')';
 
     loop = "loop(" > variable > ',' > compare > ',' > variable > ',' > variable > ',' > variable > ')';
+
+    array = '[' >> -(expression % ',') > ']';
 
     variable = identifier >> ('=' > expression);
 

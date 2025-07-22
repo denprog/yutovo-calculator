@@ -28,6 +28,7 @@ struct Annotation
 		boost::recursive_wrapper<NoFencesFunctionCallNode<Number>>, 
 		boost::recursive_wrapper<CompareNode<Number>>, 
 		boost::recursive_wrapper<LoopNode<Number>>, 
+		boost::recursive_wrapper<ArrayNode<Number>>, 
 		boost::recursive_wrapper<ExpressionNode<Number>>>
 		Operand;
 
@@ -168,6 +169,11 @@ struct Annotation
 		UpdatePosition(pos, op);
 	}
 
+	void operator()(ArrayNode<Number>& op, std::u32string::iterator pos) const
+	{
+		UpdatePosition(pos, op);
+	}
+
 	void operator()(VariableNode<Number>& op, std::u32string::iterator pos) const
 	{
 		UpdatePosition(pos, op);
@@ -266,6 +272,11 @@ struct Annotation
 		}
 
 		void operator()(LoopNode<Num> const& op) const
+		{
+			annotation->UpdatePosition(iter, op);
+		}
+
+		void operator()(ArrayNode<Num> const& op) const
 		{
 			annotation->UpdatePosition(iter, op);
 		}

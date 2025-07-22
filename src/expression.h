@@ -35,6 +35,7 @@ struct Expression : qi::grammar<std::u32string::iterator, ExpressionNode<Number>
 		boost::recursive_wrapper<NoFencesFunctionCallNode<Number>>, 
 		boost::recursive_wrapper<CompareNode<Number>>, 
 		boost::recursive_wrapper<LoopNode<Number>>, 
+		boost::recursive_wrapper<ArrayNode<Number>>, 
 		boost::recursive_wrapper<ExpressionNode<Number>>>
 		Operand;
 	
@@ -57,6 +58,7 @@ struct Expression : qi::grammar<std::u32string::iterator, ExpressionNode<Number>
 	qi::rule<std::u32string::iterator, FunctionParamNode<Number>(), unicode::space_type> function_param;
 	qi::rule<std::u32string::iterator, CompareNode<Number>(), unicode::space_type> compare;
 	qi::rule<std::u32string::iterator, LoopNode<Number>(), unicode::space_type> loop;
+	qi::rule<std::u32string::iterator, ArrayNode<Number>(), unicode::space_type> array;
 	qi::rule<std::u32string::iterator, std::u32string(), unicode::space_type> dec_number, hex_number, digits_number, exp_number, integer_number_str;
 	qi::rule<std::u32string::iterator, std::u32string(), unicode::space_type> name;
 	qi::rule<std::u32string::iterator, NumberNode<Number>(), unicode::space_type> number, real_number, integer_number;
