@@ -123,6 +123,11 @@ public:
 
     void SetUnit(const Unit& _unit);
 
+    bool IsZero() const
+    {
+        return mpq_sgn(number) == 0;
+    }
+
 public:
     Unit unit;
 

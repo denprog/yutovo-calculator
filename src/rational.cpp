@@ -384,15 +384,15 @@ void Rational::operator/=(const Rational& num)
 
 void Rational::operator=(const int num)
 {
-    *this = num;
+    mpq_set_si(number, num, 1);
 }
 
 Rational::operator int() const
 {
-    mpz_t numer;
-    mpz_init(numer);
-    mpq_get_num(numer, number);
-    return mpz_get_si(numer);
+    mpz_t num;
+    mpz_init(num);
+    mpq_get_num(num, number);
+    return mpz_get_si(num);
 }
 
 bool operator==(const Rational& num1, const Rational& num2)
@@ -499,14 +499,26 @@ Rational pow(const Rational& num1, const Rational& num2)
 
 Rational pow(const Rational& num1, const int num2)
 {
-    if (num2 < 1)
-        throw MathException(ArgumentIsOver);
+    if (num1.IsZero() && num2 <= 0)
+        throw MathException(Overflow);
     Rational res;
     mpz_t num, den;
     mpz_init(num);
     mpz_init(den);
-    mpz_pow_ui(num, mpq_numref(num1.number), num2);
-    mpz_pow_ui(den, mpq_denref(num1.number), num2);
+    if (num2 > 0)
+    {
+        mpz_pow_ui(num, mpq_numref(num1.number), num2);
+        mpz_pow_ui(den, mpq_denref(num1.number), num2);
+    }
+    else
+    {
+        mpq_t tmp;
+        mpq_init(tmp);
+        mpq_inv(tmp, num1.number);
+        mpz_pow_ui(num, mpq_numref(tmp), -num2);
+        mpz_pow_ui(den, mpq_denref(tmp), -num2);
+        mpq_clear(tmp);
+    }
     mpq_set_num(res.number, num);
     mpq_set_den(res.number, den);
     mpq_canonicalize(res.number);

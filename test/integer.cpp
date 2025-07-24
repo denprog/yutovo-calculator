@@ -169,6 +169,40 @@ TEST_F(CalcTestInteger, functions3)
     ASSERT_TRUE(r.ToStdString() == "40") << r.ToStdString();
 }
 
+TEST_F(CalcTestInteger, functions4)
+{
+    try
+    {
+        parser.Parse(LogicalId{0, 0, 1}, U"pow(0,0);");
+    }
+    catch (yutovo_calculator::MathException& ex)
+    {
+        ASSERT_TRUE((ex.id == LogicalId{0, 0, 1}) && ex.ex_id == ParserExceptionCode::Overflow && ex.pos == 0) << ex.ex_id;
+        return;
+    }
+    ASSERT_FALSE(true);
+}
+
+TEST_F(CalcTestInteger, functions5)
+{
+    Integer res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"pow(0, 2);");
+    ASSERT_TRUE(res.ToStdString() == "0") << res.ToStdString();
+}
+
+TEST_F(CalcTestInteger, functions6)
+{
+    try
+    {
+        parser.Parse(LogicalId{0, 0, 1}, U"pow(0,-2);");
+    }
+    catch (yutovo_calculator::MathException& ex)
+    {
+        ASSERT_TRUE((ex.id == LogicalId{0, 0, 1}) && ex.ex_id == ParserExceptionCode::Overflow && ex.pos == 0) << ex.ex_id;
+        return;
+    }
+    ASSERT_FALSE(true);
+}
+
 TEST_F(CalcTestInteger, symbols1)
 {
     EXPECT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"•"), yutovo_calculator::SyntaxException) << parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"•").ToStdString();
@@ -393,6 +427,91 @@ TEST_F(CalcTestInteger, prod1)
     ASSERT_TRUE(s == "2048") << s;
     s = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"loop(i=1,(i<=10),i=i+1,t=1,t=t*i);").ToStdString();
     ASSERT_TRUE(s == "3628800") << s;
+}
+
+TEST_F(CalcTestInteger, user_functions1)
+{
+    parser.Parse(LogicalId{0, 0, 1}, U"f(x)=5;");
+    parser.Parse(LogicalId{0, 0, 2}, U"f(x)=x+5;");
+    ASSERT_TRUE(parser.Parse(LogicalId{0, 0, 3}, U"f(2);") == parser.Parse(LogicalId{0, 0, 3}, U"7;")) << 
+        parser.Parse(LogicalId{0, 0, 3}, U"f(2);").ToStdString();
+}
+
+TEST_F(CalcTestInteger, user_functions2)
+{
+    parser.Parse(LogicalId{0, 0, 1}, U"f(x)=x;");
+    ASSERT_TRUE(parser.Parse(LogicalId{0, 0, 2}, U"f(2);") == parser.Parse(LogicalId{0, 0, 2}, U"2;")) << 
+        parser.Parse(LogicalId{0, 0, 2}, U"f(2);").ToStdString();
+    parser.Parse(LogicalId{0, 0, 3}, U"f(x)=x+7;");
+    ASSERT_TRUE(parser.Parse(LogicalId{0, 0, 4}, U"f(2);") == parser.Parse(LogicalId{0, 0, 4}, U"9;")) << 
+        parser.Parse(LogicalId{0, 0, 4}, U"f(2);").ToStdString();
+    ASSERT_TRUE(parser.Parse(LogicalId{0, 0, 2}, U"f(3);") == parser.Parse(LogicalId{0, 0, 2}, U"3;")) << 
+        parser.Parse(LogicalId{0, 0, 2}, U"f(3);").ToStdString();
+    ASSERT_TRUE(parser.Parse(LogicalId{0, 0, 4}, U"f(3);") == parser.Parse(LogicalId{0, 0, 4}, U"10;")) << 
+        parser.Parse(LogicalId{0, 0, 4}, U"f(10);").ToStdString();
+}
+
+TEST_F(CalcTestInteger, user_functions3)
+{
+    std::vector<std::u32string> dependencies;
+    parser.Parse(LogicalId{0, 0, 1}, U"f(x)=x*2;");
+    parser.Parse(LogicalId{0, 0, 2}, U"f(5);", &dependencies);
+    ASSERT_TRUE(std::find(dependencies.begin(), dependencies.end(), U"f") != dependencies.end());
+}
+
+TEST_F(CalcTestInteger, user_functions4)
+{
+    parser.Parse(LogicalId{0, 0, 1}, U"f(x)=x;");
+    Integer res = parser.Parse(LogicalId{0, 0, 2}, U"f(5);");
+    ASSERT_TRUE(res.ToStdString() == "5") << res.ToStdString();
+
+    parser.Parse(LogicalId{0, 0, 3}, U"f(x,y)=x+y;");
+    res = parser.Parse(LogicalId{0, 0, 4}, U"f(5,4);");
+    ASSERT_TRUE(res.ToStdString() == "9") << res.ToStdString();
+}
+
+TEST_F(CalcTestInteger, user_functions5)
+{
+    parser.Parse(LogicalId{0, 0, 5}, U"p(a)=a+1;");
+    parser.Parse(LogicalId{0, 0, 1}, U"p(a)=a+5;");
+    Integer res = parser.Parse(LogicalId{0, 0, 6}, U"p(5);");
+    ASSERT_TRUE(res.ToStdString() == "6") << res.ToStdString();
+    res = parser.Parse(LogicalId{0, 0, 2}, U"p(5);");
+    ASSERT_TRUE(res.ToStdString() == "10") << res.ToStdString();
+}
+
+TEST_F(CalcTestInteger, user_functions6)
+{
+    parser.Parse(LogicalId{0, 0, 8}, U"p(a)=a+15;");
+    Integer res = parser.Parse(LogicalId{0, 0, 9}, U"p(5);");
+    ASSERT_TRUE(res.ToStdString() == "20") << res.ToStdString();
+    parser.Parse(LogicalId{0, 0, 5}, U"p(a)=a+1;");
+    parser.Parse(LogicalId{0, 0, 1}, U"p(a)=a+5;");
+    res = parser.Parse(LogicalId{0, 0, 2}, U"p(5);");
+    ASSERT_TRUE(res.ToStdString() == "10") << res.ToStdString();
+    res = parser.Parse(LogicalId{0, 0, 6}, U"p(5);");
+    ASSERT_TRUE(res.ToStdString() == "6") << res.ToStdString();
+    res = parser.Parse(LogicalId{0, 0, 2}, U"p(5);");
+    ASSERT_TRUE(res.ToStdString() == "10") << res.ToStdString();
+    res = parser.Parse(LogicalId{0, 0, 9}, U"p(5);");
+    ASSERT_TRUE(res.ToStdString() == "20") << res.ToStdString();
+    parser.Parse(LogicalId{0, 0, 12}, U"p(a)=a+25;");
+    res = parser.Parse(LogicalId{0, 0, 9}, U"p(5);");
+    ASSERT_TRUE(res.ToStdString() == "20") << res.ToStdString();
+}
+
+TEST_F(CalcTestInteger, user_functions7)
+{
+    parser.Parse(LogicalId{0, 0, 1}, U"f(x,y)=pow(x,y);");
+    Integer res = parser.Parse(LogicalId{0, 0, 2}, U"f(5,2);");
+    ASSERT_TRUE(res.ToStdString() == "25") << res.ToStdString();
+}
+
+TEST_F(CalcTestInteger, user_functions8)
+{
+    parser.Parse(LogicalId{0, 0, 1}, U"f(x,y)=(x)/(y);");
+    Integer res = parser.Parse(LogicalId{0, 0, 2}, U"f(8,2);");
+    ASSERT_TRUE(res.ToStdString() == "4") << res.ToStdString();
 }
 
 }

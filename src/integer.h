@@ -122,6 +122,11 @@ public:
     std::u32string ToString(int exp, int accuracy) const;
     std::string ToStdString(const int base = 10) const;
 
+    bool IsZero() const
+    {
+        return mpz_sgn(number) == 0;
+    }
+
 private:
 #ifdef TRACE_OUTPUT
     void UpdateNumberStr();

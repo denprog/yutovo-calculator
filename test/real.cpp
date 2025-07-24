@@ -250,6 +250,40 @@ TEST_F(CalcTestReal, functions15)
     ASSERT_TRUE(r.ToStdString(3, 3) == "2.E+0") << r.ToStdString(3, 3);
 }
 
+TEST_F(CalcTestReal, functions16)
+{
+    try
+    {
+        parser.Parse(LogicalId{0, 0, 1}, U"pow(0,0);");
+    }
+    catch (yutovo_calculator::MathException& ex)
+    {
+        ASSERT_TRUE((ex.id == LogicalId{0, 0, 1}) && ex.ex_id == ParserExceptionCode::Overflow && ex.pos == 0) << ex.ex_id;
+        return;
+    }
+    ASSERT_FALSE(true);
+}
+
+TEST_F(CalcTestReal, functions17)
+{
+    Real res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"pow(0, 2);");
+    ASSERT_TRUE(res.ToStdString(3, 3) == "0.E+0") << res.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestReal, functions18)
+{
+    try
+    {
+        parser.Parse(LogicalId{0, 0, 1}, U"pow(0,-2);");
+    }
+    catch (yutovo_calculator::MathException& ex)
+    {
+        ASSERT_TRUE((ex.id == LogicalId{0, 0, 1}) && ex.ex_id == ParserExceptionCode::Overflow && ex.pos == 0) << ex.ex_id;
+        return;
+    }
+    ASSERT_FALSE(true);
+}
+
 TEST_F(CalcTestReal, user_functions1)
 {
     parser.Parse(LogicalId{0, 0, 1}, U"f(x)=5;");
@@ -319,6 +353,20 @@ TEST_F(CalcTestReal, user_functions6)
     parser.Parse(LogicalId{0, 0, 12}, U"p(a)=a+25;");
     res = parser.Parse(LogicalId{0, 0, 9}, U"p(5);");
     ASSERT_TRUE(res.ToStdString(3, 3) == "20.E+0") << res.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestReal, user_functions7)
+{
+    parser.Parse(LogicalId{0, 0, 1}, U"f(x,y)=pow(x,y);");
+    Real res = parser.Parse(LogicalId{0, 0, 2}, U"f(5,2);");
+    ASSERT_TRUE(res.ToStdString(3, 3) == "25.E+0") << res.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestReal, user_functions8)
+{
+    parser.Parse(LogicalId{0, 0, 1}, U"f(x,y)=(x)/(y);");
+    Real res = parser.Parse(LogicalId{0, 0, 2}, U"f(8,2);");
+    ASSERT_TRUE(res.ToStdString(3, 3) == "4.E+0") << res.ToStdString(3, 3);
 }
 
 TEST_F(CalcTestReal, str1)

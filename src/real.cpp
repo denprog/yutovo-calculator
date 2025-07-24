@@ -1495,6 +1495,9 @@ Real arcsch(const Real& num)
 
 Real pow(const Real& num1, const Real& num2)
 {
+    if (num1.IsZero() && num2 <= 0)
+        throw MathException(Overflow);
+
     Real res(std::max(num1.GetBitPrecision() + 2, num2.GetBitPrecision() + 2));
 
     while (mpfr_pow(res.number, num1.number, num2.number, DEFAULT_RND) < 0)
@@ -1520,6 +1523,9 @@ Real pow(const Real& num1, const Real& num2)
 
 Real pow(const Real& num1, const int num2)
 {
+    if (num1.IsZero() && num2 <= 0)
+        throw MathException(Overflow);
+    
     Real res(num1.GetBitPrecision());
 
     while (mpfr_pow_si(res.number, num1.number, num2, DEFAULT_RND) < 0)

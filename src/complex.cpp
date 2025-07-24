@@ -524,6 +524,9 @@ Complex log(const Complex& num1, const Complex& num2, int& res_pos)
 
 Complex pow(const Complex& num1, const int num2, int& res_pos)
 {
+    if (num1.IsZero() && num2 <= 0)
+        throw MathException(Overflow);
+
     Complex _num1;
     int _num2 = num2;
 
@@ -552,6 +555,9 @@ Complex pow(const Complex& num1, const int num2, int& res_pos)
 
 Complex pow(const Complex& num1, const Complex& num2, int& res_pos)
 {
+    if (num1.IsZero() && num2 <= 0)
+        throw MathException(Overflow);
+
     if (num1.IsReal() && num2.IsReal())
     {
         Real re = pow(num1.GetRe(), num2.GetRe());
