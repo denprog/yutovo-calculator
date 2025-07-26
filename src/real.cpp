@@ -2157,11 +2157,6 @@ void Real::CheckUnit(Real& num)
     {
         if (num.unit.unit.size() != 1 || num.unit.GetPower() != 1)
             throw MathException(UnitsAreIncompatible);
-        if (num.unit.unit[0].first == "rad")
-        {
-            num.angle_measure = AngleMeasure::Radian;
-            num.unit.unit.clear();
-        }
     }
 }
 
