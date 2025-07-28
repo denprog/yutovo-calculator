@@ -818,6 +818,45 @@ TEST_F(CalcTestReal, trigonometric4)
         res.ToStdString(3, 3);
 }
 
+TEST_F(CalcTestReal, trigonometric5)
+{
+    Real res = parser.Parse(LogicalId{0, 0, 1}, U"90°;", AngleMeasure::Radian, AngleMeasure::Degree);
+    ASSERT_TRUE(res.angle_measure == AngleMeasure::Degree && res.ToStdString(3, 3) == "90.E+0") << res.ToStdString(3, 3);
+
+    res = parser.Parse(LogicalId{0, 0, 1}, U"90deg;", AngleMeasure::Radian, AngleMeasure::Degree);
+    ASSERT_TRUE(res.angle_measure == AngleMeasure::Degree && res.ToStdString(3, 3) == "90.E+0") << res.ToStdString(3, 3);
+
+    res = parser.Parse(LogicalId{0, 0, 1}, U"1rad;", AngleMeasure::Radian, AngleMeasure::Radian);
+    ASSERT_TRUE(res.angle_measure == AngleMeasure::Radian && res.ToStdString(3, 3) == "1.E+0") << res.ToStdString(3, 3);
+
+    res = parser.Parse(LogicalId{0, 0, 1}, U"1grad;", AngleMeasure::Radian, AngleMeasure::Grad);
+    ASSERT_TRUE(res.angle_measure == AngleMeasure::Grad && res.ToStdString(3, 3) == "1.E+0") << res.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestReal, trigonometric6)
+{
+    Real res = parser.Parse(LogicalId{0, 0, 1}, U"90°;", AngleMeasure::Radian, AngleMeasure::Radian);
+    ASSERT_TRUE(res.angle_measure == AngleMeasure::Radian && res.ToStdString(3, 3) == "1.571E+0") << res.ToStdString(3, 3);
+
+    res = parser.Parse(LogicalId{0, 0, 1}, U"2rad;", AngleMeasure::Radian, AngleMeasure::Degree);
+    ASSERT_TRUE(res.angle_measure == AngleMeasure::Degree && res.ToStdString(3, 3) == "114.592E+0") << res.ToStdString(3, 3);
+
+    res = parser.Parse(LogicalId{0, 0, 1}, U"2grad;", AngleMeasure::Radian, AngleMeasure::Grad);
+    ASSERT_TRUE(res.angle_measure == AngleMeasure::Grad && res.ToStdString(3, 3) == "2.E+0") << res.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestReal, trigonometric7)
+{
+    Real res = parser.Parse(LogicalId{0, 0, 1}, U"90°;", AngleMeasure::Radian, AngleMeasure::Radian, 10);
+    ASSERT_TRUE(res.angle_measure == AngleMeasure::Radian && res.ToStdString(3, 10) == "1.5707963268E+0") << res.ToStdString(3, 10);
+
+    res = parser.Parse(LogicalId{0, 0, 1}, U"2rad;", AngleMeasure::Radian, AngleMeasure::Degree, 10);
+    ASSERT_TRUE(res.angle_measure == AngleMeasure::Degree && res.ToStdString(3, 10) == "114.5915590262E+0") << res.ToStdString(3, 10);
+
+    res = parser.Parse(LogicalId{0, 0, 1}, U"2grad;", AngleMeasure::Radian, AngleMeasure::Radian, 10);
+    ASSERT_TRUE(res.angle_measure == AngleMeasure::Radian && res.ToStdString(3, 10) == "0.0314159257E+0") << res.ToStdString(3, 10);
+}
+
 TEST_F(CalcTestReal, units1)
 {
     std::string s = parser.GetSuitableUnit(LogicalId{0, 0, 0, 0, 1}, parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"1m;")).ToStdString(3, 3);
@@ -1090,19 +1129,19 @@ TEST_F(CalcTestReal, units34)
 {
     auto r = parser.Parse(LogicalId{0, 0, 0, 0, 0, 0, 0, 2, 0}, U"1rad;");
     std::string s = parser.GetSuitableUnit(LogicalId{0, 0, 0, 0, 0, 0, 0, 2, 0}, r).ToStdString(3, 3);
-    ASSERT_TRUE(s == "1.E+0(rad)") << s;
+    ASSERT_TRUE(s == "1.E+0") << s;
 
     r = parser.Parse(LogicalId{0, 0, 0, 0, 0, 0, 0, 2, 0}, U"1°;");
     s = parser.GetSuitableUnit(LogicalId{0, 0, 0, 0, 0, 0, 0, 2, 0}, r).ToStdString(3, 3);
-    ASSERT_TRUE(s == u8"1.E+0(°)") << s;
+    ASSERT_TRUE(s == u8"1.E+0") << s;
 
     r = parser.Parse(LogicalId{0, 0, 0, 0, 0, 0, 0, 2, 0}, U"1';");
     s = parser.GetSuitableUnit(LogicalId{0, 0, 0, 0, 0, 0, 0, 2, 0}, r).ToStdString(3, 3);
-    ASSERT_TRUE(s == "1.E+0(')") << s;
+    ASSERT_TRUE(s == "1.E+0") << s;
 
     r = parser.Parse(LogicalId{0, 0, 0, 0, 0, 0, 0, 2, 0}, U"1'';");
     s = parser.GetSuitableUnit(LogicalId{0, 0, 0, 0, 0, 0, 0, 2, 0}, r).ToStdString(3, 3);
-    ASSERT_TRUE(s == "1.E+0('')") << s;
+    ASSERT_TRUE(s == "1.E+0") << s;
 }
 
 TEST_F(CalcTestReal, units35)

@@ -605,4 +605,89 @@ TEST_F(CalcTestComplex, errors2)
     ASSERT_FALSE(true);
 }
 
+TEST_F(CalcTestComplex, user_functions1)
+{
+    parser.Parse(LogicalId{0, 0, 1}, U"f(x)=5;");
+    parser.Parse(LogicalId{0, 0, 2}, U"f(x)=x+5;");
+    ASSERT_TRUE(parser.Parse(LogicalId{0, 0, 3}, U"f(2);") == parser.Parse(LogicalId{0, 0, 3}, U"7;")) << 
+        parser.Parse(LogicalId{0, 0, 3}, U"f(2);").ToStdString(3, 3);
+}
+
+TEST_F(CalcTestComplex, user_functions2)
+{
+    parser.Parse(LogicalId{0, 0, 1}, U"f(x)=x;");
+    ASSERT_TRUE(parser.Parse(LogicalId{0, 0, 2}, U"f(2);") == parser.Parse(LogicalId{0, 0, 2}, U"2;")) << 
+        parser.Parse(LogicalId{0, 0, 2}, U"f(2);").ToStdString(3, 3);
+    parser.Parse(LogicalId{0, 0, 3}, U"f(x)=x+7;");
+    ASSERT_TRUE(parser.Parse(LogicalId{0, 0, 4}, U"f(2);") == parser.Parse(LogicalId{0, 0, 4}, U"9;")) << 
+        parser.Parse(LogicalId{0, 0, 4}, U"f(2);").ToStdString(3, 3);
+    ASSERT_TRUE(parser.Parse(LogicalId{0, 0, 2}, U"f(3);") == parser.Parse(LogicalId{0, 0, 2}, U"3;")) << 
+        parser.Parse(LogicalId{0, 0, 2}, U"f(3);").ToStdString(3, 3);
+    ASSERT_TRUE(parser.Parse(LogicalId{0, 0, 4}, U"f(3);") == parser.Parse(LogicalId{0, 0, 4}, U"10;")) << 
+        parser.Parse(LogicalId{0, 0, 4}, U"f(10);").ToStdString(3, 3);
+}
+
+TEST_F(CalcTestComplex, user_functions3)
+{
+    std::vector<std::u32string> dependencies;
+    parser.Parse(LogicalId{0, 0, 1}, U"f(x)=x*2;");
+    parser.Parse(LogicalId{0, 0, 2}, U"f(5);", &dependencies);
+    ASSERT_TRUE(std::find(dependencies.begin(), dependencies.end(), U"f") != dependencies.end());
+}
+
+TEST_F(CalcTestComplex, user_functions4)
+{
+    parser.Parse(LogicalId{0, 0, 1}, U"f(x)=x;");
+    Complex res = parser.Parse(LogicalId{0, 0, 2}, U"f(5);");
+    ASSERT_TRUE(res.ToStdString(3, 3) == "5.E+0") << res.ToStdString(3, 3);
+
+    parser.Parse(LogicalId{0, 0, 3}, U"f(x,y)=x+y;");
+    res = parser.Parse(LogicalId{0, 0, 4}, U"f(5,4);");
+    ASSERT_TRUE(res.ToStdString(3, 3) == "9.E+0") << res.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestComplex, user_functions5)
+{
+    parser.Parse(LogicalId{0, 0, 5}, U"p(a)=a+1;");
+    parser.Parse(LogicalId{0, 0, 1}, U"p(a)=a+5;");
+    Complex res = parser.Parse(LogicalId{0, 0, 6}, U"p(5);");
+    ASSERT_TRUE(res.ToStdString(3, 3) == "6.E+0") << res.ToStdString(3, 3);
+    res = parser.Parse(LogicalId{0, 0, 2}, U"p(5);");
+    ASSERT_TRUE(res.ToStdString(3, 3) == "10.E+0") << res.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestComplex, user_functions6)
+{
+    parser.Parse(LogicalId{0, 0, 8}, U"p(a)=a+15;");
+    Complex res = parser.Parse(LogicalId{0, 0, 9}, U"p(5);");
+    ASSERT_TRUE(res.ToStdString(3, 3) == "20.E+0") << res.ToStdString(3, 3);
+    parser.Parse(LogicalId{0, 0, 5}, U"p(a)=a+1;");
+    parser.Parse(LogicalId{0, 0, 1}, U"p(a)=a+5;");
+    res = parser.Parse(LogicalId{0, 0, 2}, U"p(5);");
+    ASSERT_TRUE(res.ToStdString(3, 3) == "10.E+0") << res.ToStdString(3, 3);
+    res = parser.Parse(LogicalId{0, 0, 6}, U"p(5);");
+    ASSERT_TRUE(res.ToStdString(3, 3) == "6.E+0") << res.ToStdString(3, 3);
+    res = parser.Parse(LogicalId{0, 0, 2}, U"p(5);");
+    ASSERT_TRUE(res.ToStdString(3, 3) == "10.E+0") << res.ToStdString(3, 3);
+    res = parser.Parse(LogicalId{0, 0, 9}, U"p(5);");
+    ASSERT_TRUE(res.ToStdString(3, 3) == "20.E+0") << res.ToStdString(3, 3);
+    parser.Parse(LogicalId{0, 0, 12}, U"p(a)=a+25;");
+    res = parser.Parse(LogicalId{0, 0, 9}, U"p(5);");
+    ASSERT_TRUE(res.ToStdString(3, 3) == "20.E+0") << res.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestComplex, user_functions7)
+{
+    parser.Parse(LogicalId{0, 0, 1}, U"f(x,y)=pow(x,y);");
+    Complex res = parser.Parse(LogicalId{0, 0, 2}, U"f(5,2);");
+    ASSERT_TRUE(res.ToStdString(3, 3) == "25.E+0") << res.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestComplex, user_functions8)
+{
+    parser.Parse(LogicalId{0, 0, 1}, U"f(x,y)=(x)/(y);");
+    Complex res = parser.Parse(LogicalId{0, 0, 2}, U"f(8,2);");
+    ASSERT_TRUE(res.ToStdString(3, 3) == "4.E+0") << res.ToStdString(3, 3);
+}
+
 }

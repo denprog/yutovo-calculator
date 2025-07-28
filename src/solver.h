@@ -66,6 +66,7 @@ struct SolverSymbols
     std::map<std::u32string, BuiltinVariable> buildin_variables;
     std::vector<Unit> buildin_units;
     std::vector<CustomUnit<Number>> units;
+    std::map<std::u32string, Number> builtin_identifiers;
 
     std::u32string last_unit_system;
     bool buildin_elements = false;
@@ -640,6 +641,25 @@ struct Solver : public boost::static_visitor<Number>
         symbols->buildin_units.clear();
     }
 
+    void AddBuiltinIdentifier(const std::u32string& name, const Number& value)
+    {
+        symbols->builtin_identifiers[name] = value;
+    }
+
+    void ResetBuiltinIdentifiers()
+    {
+        symbols->builtin_identifiers.clear();
+    }
+
+    bool FindBuiltinIdentifier(const std::u32string& name, Number& value) const
+    {
+        auto iter = symbols->builtin_identifiers.find(name);
+        if (iter == symbols->builtin_identifiers.end())
+            return false;
+        value = iter->second;
+        return true;
+    }
+
     void RemoveUserIdentifiers()
     {
         //user identifiers have ids' positions >= 0
@@ -1026,6 +1046,8 @@ private:
 
             if (c.unit.unit.size() <= s) //a unit should have minimal size
             {
+                if (c.GetExp() > m + 2)
+                    continue;
                 size_t m2 = c.ToString(::abs(c.GetExp()) + 1, ::abs(c.GetExp()) + 1, false).length();
                 if (c.unit.unit.size() == 1 && c.unit.unit[0].second == 1) //choose the simplest one
                 {
@@ -1178,6 +1200,11 @@ private:
             if (std::find(dependencies->begin(), dependencies->end(), name) == dependencies->end())
                 dependencies->push_back(name);
         }
+    }
+
+    bool FindAngleMeasure(const std::u32string& name, Number& res) const
+    {
+        return false;
     }
 
     Number FunctionCall(FunctionCallNode<Number> const& op) const

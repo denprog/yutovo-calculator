@@ -441,28 +441,42 @@ void Parser<yutovo_calculator::Complex>::SetLocale(Language _language)
 }
 
 template<>
-void Parser<yutovo_calculator::Real>::InitAngleUnits()
+void Parser<yutovo_calculator::Real>::InitBuiltinIdentifiers()
 {
-    for (int i = 1; i <= 5; ++i)
-        solver.RemoveIdentifier(LogicalId{0, -1, 3, i});
+    solver.ResetBuiltinIdentifiers();
     switch (language)
     {
     case Language::English:
-        Parse(LogicalId{0, -1, 3, 1}, U"°~(pi)/(180)rad;");
-        Parse(LogicalId{0, -1, 3, 2}, U"deg~°;");
-        Parse(LogicalId{0, -1, 3, 3}, U"'~°/60;");
-        Parse(LogicalId{0, -1, 3, 4}, U"''~(')/(60);");
-        Parse(LogicalId{0, -1, 3, 5}, U"grad~(9)/(10)°;");
+        {
+            Real v;
+            v = 1;
+            v.angle_measure = AngleMeasure::Radian;
+            solver.AddBuiltinIdentifier(U"rad", v); //radian (angle)
+            v.angle_measure = AngleMeasure::Degree;
+            solver.AddBuiltinIdentifier(U"°", v); //degree (angle)
+            solver.AddBuiltinIdentifier(U"deg", v); //degree (angle)
+            solver.AddBuiltinIdentifier(U"'", v);
+            solver.AddBuiltinIdentifier(U"''", v);
+            v.angle_measure = AngleMeasure::Grad;
+            solver.AddBuiltinIdentifier(U"grad", v); //grad (angle)
+        }
         break;
     case Language::Russian:
-        Parse(LogicalId{0, -1, 3, 1}, U"°~(pi)/(180)рад;");
-        Parse(LogicalId{0, -1, 3, 2}, U"deg~°;");
-        Parse(LogicalId{0, -1, 3, 3}, U"'~°/60;");
-        Parse(LogicalId{0, -1, 3, 4}, U"''~(')/(60);");
-        Parse(LogicalId{0, -1, 3, 5}, U"град~(9)/(10)°;");
+        {
+            Real v;
+            v = 1;
+            v.angle_measure = AngleMeasure::Radian;
+            solver.AddBuiltinIdentifier(U"рад", v); //radian (angle)
+            v.angle_measure = AngleMeasure::Degree;
+            solver.AddBuiltinIdentifier(U"°", v); //degree (angle)
+            solver.AddBuiltinIdentifier(U"'", v);
+            solver.AddBuiltinIdentifier(U"''", v);
+            v.angle_measure = AngleMeasure::Grad;
+            solver.AddBuiltinIdentifier(U"град", v); //grad (angle)
+        }
         break;
     default:
-        break;
+        throw ParserException({}, ParserExceptionCode::UnknownLanguage);
     }
 }
 

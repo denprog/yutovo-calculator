@@ -832,6 +832,10 @@ Real Solver<Real>::operator()(ImplicitStringMulNode<Real> const& op) const
         return (*this)(op.left) * custom_unit->value;
     }
 
+    Real val;
+    if (FindBuiltinIdentifier(op.identifier.name, val))
+        return (*this)(op.left) * val;
+
     //there is no such an identifier
     throw SyntaxException(op.id, UnknownIdentifier, U"Identifier '" + op.identifier.name + U"' not found", op.pos, op.identifier.name.length(), op.line);
     
@@ -1007,6 +1011,14 @@ Real Solver<Real>::operator()(ImplicitDivMulNode<Real> const& op) const
             Real arg2 = (*this)(op.lower);
             return (arg1 / arg2) * Real(precision, *unit);
         }
+    }
+
+    Real val;
+    if (FindBuiltinIdentifier(op.identifier.name, val))
+    {
+        Real arg1 = (*this)(op.upper);
+        Real arg2 = (*this)(op.lower);
+        return (arg1 / arg2) * val;
     }
 
     //there is no such an identifier

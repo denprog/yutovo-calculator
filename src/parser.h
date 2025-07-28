@@ -233,7 +233,6 @@ private:
             solver.AddBuiltinUnit(Unit(U"A", U"ampere", 1)); //ampere (electric current)
             solver.AddBuiltinUnit(Unit(U"cd", U"candella", 1)); //candella (luminosity)
             solver.AddBuiltinUnit(Unit(U"K", U"kelvin", 1)); //kelvin (temperature)
-            solver.AddBuiltinUnit(Unit(U"rad", U"radian", 1)); //radian (angle)
             solver.AddBuiltinUnit(Unit(U"sr", U"steradian", 1)); //steradian (solid angle)
             solver.AddBuiltinUnit(Unit(U"bit")); //bit (data)
             break;
@@ -245,7 +244,6 @@ private:
             solver.AddBuiltinUnit(Unit(U"А", U"ампер", 1)); //ampere (electric current)
             solver.AddBuiltinUnit(Unit(U"Кд", U"кандела", 1)); //candella (luminosity)
             solver.AddBuiltinUnit(Unit(U"К", U"кельвин", 1)); //kelvin (temperature)
-            solver.AddBuiltinUnit(Unit(U"рад", U"радиан", 1)); //radian (angle)
             solver.AddBuiltinUnit(Unit(U"ср", U"стерадиан", 1)); //steradian (solid angle)
             solver.AddBuiltinUnit(Unit(U"бит")); //bit (data)
             break;
@@ -258,7 +256,8 @@ private:
         InitSIUnits();
         InitOtherUnits();
         InitRussianUnits();
-        InitAngleUnits();
+
+        InitBuiltinIdentifiers();
 
         solver.symbols->buildin_elements = false;
     }
@@ -317,7 +316,7 @@ private:
             Parse(LogicalId{0, -2, 2, 0, p++}, expr);
     }
 
-    void InitAngleUnits()
+    void InitBuiltinIdentifiers()
     {
     }
 
