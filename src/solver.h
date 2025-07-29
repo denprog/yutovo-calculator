@@ -32,6 +32,11 @@ typedef Rational (*RationalUnaryFunc)(const Rational &num);
 typedef Rational (*RationalBinaryFunc)(const Rational& num1, const Rational& num2);
 typedef Rational (*RationalVariable)();
 
+typedef Array<Real> (*ArrayRealUnaryFunc)(const Array<Real>& num);
+typedef Array<Real> (*ArrayRealBinaryFunc)(const Array<Real>& num1, const Array<Real>& num2);
+typedef Array<Real> (*ArrayRealTrigonometricFunc)(const Array<Real>& num);
+typedef Array<Real> (*ArrayRealPrecisionVariable)(const int precision);
+
 typedef std::vector<std::u32string> Dependencies;
 
 template<typename Number>
@@ -166,7 +171,11 @@ struct Solver : public boost::static_visitor<Number>
         return Number();
     }
 
-    Number operator()(UnitNode<Number> const& op) const;
+    Number operator()(UnitNode<Number> const& op) const
+    {
+        CheckBreak(parser_context);
+        throw MathException(op.id, IncorrectOperation, op.pos, 1, op.line);
+    }
 
     Number operator()(FunctionNode<Number> const& op) const
     {
@@ -175,33 +184,69 @@ struct Solver : public boost::static_visitor<Number>
         return Number();
     }
 
-    Number operator()(UnaryOperationNode<Number> const& op) const;
+    Number operator()(UnaryOperationNode<Number> const& op) const
+    {
+        CheckBreak(parser_context);
+        throw MathException(op.id, IncorrectOperation, op.pos, 1, op.line);
+    }
 
-    Number operator()(OperationNode<Number> const& op) const;
+    Number operator()(OperationNode<Number> const& op) const
+    {
+        CheckBreak(parser_context);
+        throw MathException(op.id, IncorrectOperation, op.pos, 1, op.line);
+    }
 
-    Number operator()(PostfixOperationNode<Number> const& op) const;
+    Number operator()(PostfixOperationNode<Number> const& op) const
+    {
+        CheckBreak(parser_context);
+        throw MathException(op.id, IncorrectOperation, op.pos, 1, op.line);
+    }
 
     Number operator()(MixedDivivsionNode<Number> const& op) const
     {
         return (*this)(op.left) + (*this)(op.numerator) / (*this)(op.denominator);
     }
 
-    Number operator()(FunctionCallNode<Number> const& op) const;
+    Number operator()(FunctionCallNode<Number> const& op) const
+    {
+        CheckBreak(parser_context);
+        throw MathException(op.id, IncorrectOperation, op.pos, 1, op.line);
+    }
 
-    Number operator()(FunctionCallStringNode<Number> const& op) const;
+    Number operator()(FunctionCallStringNode<Number> const& op) const
+    {
+        CheckBreak(parser_context);
+        throw MathException(op.id, IncorrectOperation, op.pos, 1, op.line);
+    }
 
     Number operator()(FunctionParamNode<Number> const& expr) const
     {
         return boost::apply_visitor(*this, expr.op);
     }
 
-    Number operator()(NoFencesFunctionCallNode<Number> const& op) const;
+    Number operator()(NoFencesFunctionCallNode<Number> const& op) const
+    {
+        CheckBreak(parser_context);
+        throw MathException(op.id, IncorrectOperation, op.pos, 1, op.line);
+    }
 
-    Number operator()(IdentifierNode<Number> const& op) const;
+    Number operator()(IdentifierNode<Number> const& op) const
+    {
+        CheckBreak(parser_context);
+        throw MathException(op.id, IncorrectOperation, op.pos, 1, op.line);
+    }
 
-    Number operator()(ImplicitStringMulNode<Number> const& op) const;
+    Number operator()(ImplicitStringMulNode<Number> const& op) const
+    {
+        CheckBreak(parser_context);
+        throw MathException(op.id, IncorrectOperation, op.pos, 1, op.line);
+    }
 
-    Number operator()(ImplicitDivMulNode<Number> const& op) const;
+    Number operator()(ImplicitDivMulNode<Number> const& op) const
+    {
+        CheckBreak(parser_context);
+        throw MathException(op.id, IncorrectOperation, op.pos, 1, op.line);
+    }
 
     Number operator()(ImplicitMulNode<Number> const& op) const
     {
@@ -287,8 +332,7 @@ struct Solver : public boost::static_visitor<Number>
 
     Number operator()(ArrayNode<Number> const& op) const
     {
-        Number res;
-        return res;
+        throw MathException(op.id, IncorrectOperation, op.pos, 1, op.line);
     }
 
     //The beginning of the solving.

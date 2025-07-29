@@ -9,10 +9,179 @@ namespace yutovo_calc_test
 using namespace yutovo_calculator;
 using namespace std::chrono_literals;
 
-TEST_F(CalcTestArray<Real>, arrays1)
+TEST_F(CalcTestArrayReal, arrays1)
 {
     auto res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"[1,2,3];");
     ASSERT_TRUE(res.ToStdString(3, 3) == "[1.E+0,2.E+0,3.E+0]") << res.ToStdString(3, 3);
+
+    res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"[];");
+    ASSERT_TRUE(res.ToStdString(3, 3) == "[]") << res.ToStdString(3, 3);
+
+    res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"[123];");
+    ASSERT_TRUE(res.ToStdString(3, 3) == "[123.E+0]") << res.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestArrayReal, arrays2)
+{
+    auto res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"[1+2,2.3,345E+1];");
+    ASSERT_TRUE(res.ToStdString(3, 3) == "[3.E+0,2.3E+0,3.45E+3]") << res.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestArrayReal, arrays3)
+{
+    parser.Parse(LogicalId{0, 0, 1}, U"f(x,y)=x+y;");
+    auto res = parser.Parse(LogicalId{0, 0, 2}, U"[1,f(2,3),2.3,6/2];");
+    ASSERT_TRUE(res.ToStdString(3, 3) == "[1.E+0,5.E+0,2.3E+0,3.E+0]") << res.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestArrayReal, functions1)
+{
+    auto r = parser.Parse(LogicalId{0, 0, 1}, U"[exp(1)];", 5);
+    ASSERT_TRUE(r.ToStdString(3, 5) == "[2.71828E+0]") << r.ToStdString(3, 5);
+}
+
+TEST_F(CalcTestArrayReal, functions2)
+{
+    auto r = parser.Parse(LogicalId{0, 0, 1}, U"3pow(2,3);", 3);
+    ASSERT_TRUE(r.ToStdString(3, 3) == "[24.E+0]") << r.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestArrayReal, functions3)
+{
+    auto r = parser.Parse(LogicalId{0, 0, 1}, U"pow([2,3,4],[3,2,1]);", 3);
+    ASSERT_TRUE(r.ToStdString(3, 3) == "[8.E+0,9.E+0,4.E+0]") << r.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestArrayReal, functions4)
+{
+    auto r = parser.Parse(LogicalId{0, 0, 1}, U"[abs(-2.3),abs(2.3)];", 3);
+    ASSERT_TRUE(r.ToStdString(3, 3) == "[2.3E+0,2.3E+0]") << r.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestArrayReal, functions5)
+{
+    auto r = parser.Parse(LogicalId{0, 0, 1}, U"[integer(-2.3),integer(-2.7),integer(2.3),integer(2.6)];", 3);
+    ASSERT_TRUE(r.ToStdString(3, 3) == "[-2.E+0,-2.E+0,2.E+0,2.E+0]") << r.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestArrayReal, functions6)
+{
+    auto r = parser.Parse(LogicalId{0, 0, 1}, U"fract(-2.3);", 3);
+    ASSERT_TRUE(r.ToStdString(3, 3) == "[-0.3E+0]") << r.ToStdString(3, 3);
+    r = parser.Parse(LogicalId{0, 0, 1}, U"fract(2.3);", 3);
+    ASSERT_TRUE(r.ToStdString(3, 3) == "[0.3E+0]") << r.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestArrayReal, functions7)
+{
+    auto r = parser.Parse(LogicalId{0, 0, 1}, U"[ceil(-2.6),ceil(-2.3),ceil(2.3),ceil(2.5)];", 3);
+    ASSERT_TRUE(r.ToStdString(3, 3) == "[-2.E+0,-2.E+0,3.E+0,3.E+0]") << r.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestArrayReal, functions8)
+{
+    auto r = parser.Parse(LogicalId{0, 0, 1}, U"[floor(-2.6),floor(2.5),floor(-2.3),floor(2.3)];", 3);
+    ASSERT_TRUE(r.ToStdString(3, 3) == "[-3.E+0,2.E+0,-3.E+0,2.E+0]") << r.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestArrayReal, functions9)
+{
+    auto r = parser.Parse(LogicalId{0, 0, 1}, U"round(-2.3);", 3);
+    ASSERT_TRUE(r.ToStdString(3, 3) == "[-2.E+0]") << r.ToStdString(3, 3);
+    r = parser.Parse(LogicalId{0, 0, 1}, U"round(-2.5);", 3);
+    ASSERT_TRUE(r.ToStdString(3, 3) == "[-3.E+0]") << r.ToStdString(3, 3);
+    r = parser.Parse(LogicalId{0, 0, 1}, U"[round(2.3),round(2.5)];", 3);
+    ASSERT_TRUE(r.ToStdString(3, 3) == "[2.E+0,3.E+0]") << r.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestArrayReal, functions10)
+{
+    auto r = parser.Parse(LogicalId{0, 0, 1}, U"trunc(-2.3);", 3);
+    ASSERT_TRUE(r.ToStdString(3, 3) == "[-2.E+0]") << r.ToStdString(3, 3);
+    r = parser.Parse(LogicalId{0, 0, 1}, U"trunc(-2.5);", 3);
+    ASSERT_TRUE(r.ToStdString(3, 3) == "[-2.E+0]") << r.ToStdString(3, 3);
+    r = parser.Parse(LogicalId{0, 0, 1}, U"[trunc(2.5)];", 3);
+    ASSERT_TRUE(r.ToStdString(3, 3) == "[2.E+0]") << r.ToStdString(3, 3);
+    r = parser.Parse(LogicalId{0, 0, 1}, U"[trunc(2.1)];", 3);
+    ASSERT_TRUE(r.ToStdString(3, 3) == "[2.E+0]") << r.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestArrayReal, variables1)
+{
+    auto r = parser.Parse(LogicalId{0, 0, 1}, U"t=[2,3,4];", 3);
+    r = parser.Parse(LogicalId{0, 0, 2}, U"t;", 3);
+    ASSERT_TRUE(r.ToStdString(3, 3) == "[2.E+0,3.E+0,4.E+0]") << r.ToStdString(3, 3);
+
+    r = parser.Parse(LogicalId{0, 0, 2}, U"t{0};", 3);
+    ASSERT_TRUE(r.ToStdString(3, 3) == "[2.E+0]") << r.ToStdString(3, 3);
+
+    r = parser.Parse(LogicalId{0, 0, 2}, U"t{1};", 3);
+    ASSERT_TRUE(r.ToStdString(3, 3) == "[3.E+0]") << r.ToStdString(3, 3);
+
+    r = parser.Parse(LogicalId{0, 0, 2}, U"t{2};", 3);
+    ASSERT_TRUE(r.ToStdString(3, 3) == "[4.E+0]") << r.ToStdString(3, 3);
+
+    try
+    {
+        parser.Parse(LogicalId{0, 0, 2}, U"t{3};", 3);
+        ASSERT_FALSE(true);
+    }
+    catch (yutovo_calculator::SyntaxException& ex)
+    {
+        ASSERT_TRUE((ex.id == LogicalId{0, 0, 2}) && ex.ex_id == ParserExceptionCode::ArgumentIsOver && ex.pos == 0) << LogicalIdToString(ex.id);
+    }
+
+    try
+    {
+        parser.Parse(LogicalId{0, 0, 2}, U"t{-1};", 3);
+        ASSERT_FALSE(true);
+    }
+    catch (yutovo_calculator::SyntaxException& ex)
+    {
+        ASSERT_TRUE((ex.id == LogicalId{0, 0, 2}) && ex.ex_id == ParserExceptionCode::SyntaxError && ex.pos == 2) << LogicalIdToString(ex.id);
+    }
+}
+
+TEST_F(CalcTestArrayReal, trigonometric1)
+{
+    auto res = parser.Parse(LogicalId{0, 0, 1}, U"sin(0);");
+    ASSERT_TRUE(res.GetAngleMeasure() == AngleMeasure::None && res.ToStdString(3, 3) == "[0.E+0]") << res.ToStdString(3, 3);
+    
+    res = parser.Parse(LogicalId{0, 0, 1}, U"arcsin(0);");
+    ASSERT_TRUE(res.GetAngleMeasure() == AngleMeasure::Radian && res.ToStdString(3, 3) == "[0.E+0]") << res.ToStdString(3, 3);
+
+    res = parser.Parse(LogicalId{0, 0, 1}, U"[sin(0),arcsin(0)];");
+    ASSERT_TRUE(res.ToStdString(3, 3) == "[0.E+0,0.E+0]") << res.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestArrayReal, trigonometric2)
+{
+    auto res = parser.Parse(LogicalId{0, 0, 1}, U"sin(90);", AngleMeasure::Degree, AngleMeasure::Degree);
+    ASSERT_TRUE(res.GetAngleMeasure() == AngleMeasure::None && res.ToStdString(3, 3) == "[1.E+0]") << res.ToStdString(3, 3);
+
+    res = parser.Parse(LogicalId{0, 0, 1}, U"arcsin(1);", AngleMeasure::Degree, AngleMeasure::Degree);
+    ASSERT_TRUE(res.GetAngleMeasure() == AngleMeasure::Degree && res.ToStdString(3, 3) == "[90.E+0]") << res.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestArrayReal, trigonometric3)
+{
+    auto res = parser.Parse(LogicalId{0, 0, 1}, U"sin(deg(90));", AngleMeasure::Radian, AngleMeasure::Radian);
+    ASSERT_TRUE(res.GetAngleMeasure() == AngleMeasure::None && res.ToStdString(3, 3) == "[1.E+0]") << res.ToStdString(3, 3);
+
+    res = parser.Parse(LogicalId{0, 0, 1}, U"deg(arcsin(1));", AngleMeasure::Radian, AngleMeasure::Degree);
+    ASSERT_TRUE(res.GetAngleMeasure() == AngleMeasure::Degree && res.ToStdString(3, 3) == "[90.E+0]") << res.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestArrayReal, trigonometric4)
+{
+    auto res = parser.Parse(LogicalId{0, 0, 1}, U"sin(90°);", AngleMeasure::Radian, AngleMeasure::Radian);
+    ASSERT_TRUE(res.GetAngleMeasure() == AngleMeasure::None && res.ToStdString(3, 3) == "[1.E+0]") << res.ToStdString(3, 3);
+
+    res = parser.Parse(LogicalId{0, 0, 1}, U"sin((pi)/(2)rad);", AngleMeasure::Radian, AngleMeasure::Radian);
+    ASSERT_TRUE(res.GetAngleMeasure() == AngleMeasure::None && res.ToStdString(3, 3) == "[1.E+0]") << res.ToStdString(3, 3);
+
+    res = parser.Parse(LogicalId{0, 0, 1}, U"[sin(90°),sin((pi)/(2)rad)];", AngleMeasure::Radian, AngleMeasure::Radian);
+    ASSERT_TRUE(res.GetAngleMeasure() == AngleMeasure::None && res.ToStdString(3, 3) == "[1.E+0,1.E+0]") << res.ToStdString(3, 3);
 }
 
 }

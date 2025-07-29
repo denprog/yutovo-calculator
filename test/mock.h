@@ -77,15 +77,14 @@ struct CalcTestComplex : public testing::Test
     Parser<Complex> parser;
 };
 
-template<class Number>
-struct CalcTestArray : public testing::Test
+struct CalcTestArrayReal : public testing::Test
 {
-    CalcTestArray() :
+    CalcTestArrayReal() :
         parser(0, Language::English)
     {
     }
 
-    Parser<Array<Number>> parser;
+    Parser<Array<Real>> parser;
 };
 
 }
