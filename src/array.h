@@ -120,12 +120,6 @@ public:
         return *this;
     }
 
-    Array<Number>& operator=(const int num)
-    {
-        numbers.emplace_back(num);
-        return *this;
-    }
-
     Array<Number>& operator=(const double num)
     {
         numbers.emplace_back(num);
@@ -245,7 +239,9 @@ public:
 
     friend bool operator!=(const Array<Number>& num1, const int num2)
     {
-        throw MathException(IncorrectComparison);
+        if (num1.numbers.size() != 1)
+            throw MathException(IncorrectComparison);
+        return num1.numbers[0] != num2;
     }
 
     friend bool operator>(const Array<Number>& num1, const Array<Number>& num2)
@@ -265,7 +261,14 @@ public:
 
     friend bool operator<=(const Array<Number>& num1, const Array<Number>& num2)
     {
-        throw MathException(IncorrectComparison);
+        if (num1.numbers.size() != num2.numbers.size())
+            throw MathException(IncorrectComparison);
+        for (size_t i = 0; i <  num1.numbers.size(); ++i)
+        {
+            if (num1.numbers[i] > num2.numbers[i])
+                return false;
+        }
+        return true;
     }
 
 private:
@@ -513,6 +516,13 @@ public:
         return r;
     }
 
+    friend Array<Number> size(const Array<Number>& num)
+    {
+        Array<Number> r;
+        r.numbers.push_back(Number(num.numbers.empty() ? (int)mpfr_get_default_prec() : num.numbers[0].GetPrecision(), (int)num.numbers.size()));
+        return r;
+    }
+
 public:
     void Add(const Number& number)
     {
@@ -524,11 +534,16 @@ public:
         numbers.insert(numbers.end(), number.numbers.begin(), number.numbers.end());
     }
 
-    Array<Number> Get(const int pos)
+    void Clear()
+    {
+        numbers.clear();
+    }
+
+    Number Get(const int pos)
     {
         if (pos >= numbers.size() || pos < 0)
             throw SyntaxException(ArgumentIsOver);
-        return Array<Number>(numbers[pos]);
+        return numbers[pos];
     }
 
     int Size()

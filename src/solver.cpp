@@ -842,17 +842,65 @@ Array<Real> Solver<Array<Real>>::operator()(IdentifierNode<Array<Real>> const& o
         Array<Real> res = (*this)(v->expression);
         if (!op.subscript.empty() && v->name.subscript != op.subscript)
         {
-            try
+            VariableNode<Array<Real>>* s = FindVariable(op.subscript, U"");
+            if (s)
             {
-                int index = boost::lexical_cast<int>(op.subscript);
-                if (res.Size() > index && index >= 0)
-                    res = res.Get(index);
+                Array<Real> s_res = (*this)(s->expression);
+                if (s_res.Size() == 1)
+                {
+                    int index = (int)(s_res.Get(0));
+                    if (res.Size() > index && index >= 0)
+                    {
+                        Real r = res.Get(index);
+                        res.Clear();
+                        res.Add(r);
+                    }
+                    else
+                        throw SyntaxException(op.id, ArgumentIsOver, U"Index of '" + op.name + U"' is over", op.pos, op.name.length(), op.line);
+                }
                 else
-                    throw SyntaxException(op.id, ArgumentIsOver, U"Index of '" + op.name + U"' is over", op.pos, op.name.length(), op.line);
+                    throw SyntaxException(op.id, IncorrectOperation, U"Index of '" + op.name + U"' is over", op.pos, op.name.length(), op.line);
             }
-            catch (const boost::bad_lexical_cast& e)
+            else
             {
-                throw SyntaxException(op.id, ArgumentIsOver, U"Index of '" + op.name + U"' is over", op.pos, op.name.length(), op.line);
+                TempVariable* t = FindTempVariable(op.subscript);
+                if (t)
+                {
+                    Array<Real> s_res = t->second;
+                    if (s_res.Size() == 1)
+                    {
+                        int index = (int)(s_res.Get(0));
+                        if (res.Size() > index && index >= 0)
+                        {
+                            Real r = res.Get(index);
+                            res.Clear();
+                            res.Add(r);
+                        }
+                        else
+                            throw SyntaxException(op.id, ArgumentIsOver, U"Index of '" + op.name + U"' is over", op.pos, op.name.length(), op.line);
+                    }
+                    else
+                        throw SyntaxException(op.id, IncorrectOperation, U"Index of '" + op.name + U"' is over", op.pos, op.name.length(), op.line);
+                }
+                else
+                {
+                    try
+                    {
+                        int index = boost::lexical_cast<int>(op.subscript);
+                        if (res.Size() > index && index >= 0)
+                        {
+                            Real r = res.Get(index);
+                            res.Clear();
+                            res.Add(r);
+                        }
+                        else
+                            throw SyntaxException(op.id, ArgumentIsOver, U"Index of '" + op.name + U"' is over", op.pos, op.name.length(), op.line);
+                    }
+                    catch (const boost::bad_lexical_cast& e)
+                    {
+                        throw SyntaxException(op.id, ArgumentIsOver, U"Index of '" + op.name + U"' is over", op.pos, op.name.length(), op.line);
+                    }
+                }
             }
         }
         id = _id;
@@ -1112,7 +1160,11 @@ Array<Real> Solver<Array<Real>>::operator()(ImplicitStringMulNode<Array<Real>> c
             {
                 int index = boost::lexical_cast<int>(op.identifier.subscript);
                 if (res.Size() > index && index >= 0)
-                    res = res.Get(index);
+                {
+                    Real r = res.Get(index);
+                    res.Clear();
+                    res.Add(r);
+                }
                 else
                     throw SyntaxException(op.id, ArgumentIsOver, U"Index of '" + op.identifier.name + U"' is over", op.pos, op.identifier.name.length(), op.line);
             }
@@ -1391,7 +1443,11 @@ Array<Real> Solver<Array<Real>>::operator()(ImplicitDivMulNode<Array<Real>> cons
             {
                 int index = boost::lexical_cast<int>(op.identifier.subscript);
                 if (res.Size() > index && index >= 0)
-                    res = res.Get(index);
+                {
+                    Real r = res.Get(index);
+                    res.Clear();
+                    res.Add(r);
+                }
                 else
                     throw SyntaxException(op.id, ArgumentIsOver, U"Index of '" + op.identifier.name + U"' is over", op.pos, op.identifier.name.length(), op.line);
             }

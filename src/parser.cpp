@@ -170,6 +170,8 @@ Array<Real> minute(const Array<Real>& num);
 Array<Real> second(const Array<Real>& num);
 Array<Real> grad(const Array<Real>& num);
 
+Array<Real> size(const Array<Real> &num);
+
 template<>
 Parser<yutovo_calculator::Integer>::Parser(const int precision, const Language _language) : 
     solver(precision, AngleMeasure::Radian),
@@ -499,6 +501,9 @@ Parser<yutovo_calculator::Array<yutovo_calculator::Real>>::Parser(const int prec
     solver.AddBuiltinFunction(U"second", unary_func);
     unary_func = &grad;
     solver.AddBuiltinFunction(U"grad", unary_func);
+
+    unary_func = &size;
+    solver.AddBuiltinFunction(U"size", unary_func);
 
     ArrayRealTrigonometricFunc trigonometric_func;
     trigonometric_func = &sin;
