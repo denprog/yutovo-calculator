@@ -113,6 +113,19 @@ TEST_F(CalcTestArrayReal, sum1)
     ASSERT_TRUE(r.ToStdString(3, 3) == "[6.E+0]") << r.ToStdString(3, 3);
 }
 
+TEST_F(CalcTestArrayReal, sum2)
+{
+    auto r = parser.Parse(LogicalId{0, 0, 2}, U"loop(i=1,(i<=3),i=i+1,t=0,t=t+[1,2,3]);");
+    ASSERT_TRUE(r.ToStdString(3, 3) == "[3.E+0,6.E+0,9.E+0]") << r.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestArrayReal, sum3)
+{
+    auto r = parser.Parse(LogicalId{0, 0, 1}, U"d=[1.23,pow(2,3),-55,4];");
+    r = parser.Parse(LogicalId{0, 0, 2}, U"loop(n=0,(n<=size(d)-1),n=n+1,n_=0,n_=n_+d{n});");
+    ASSERT_TRUE(r.ToStdString(3, 3) == "[-41.77E+0]") << r.ToStdString(3, 3);
+}
+
 TEST_F(CalcTestArrayReal, variables1)
 {
     auto r = parser.Parse(LogicalId{0, 0, 1}, U"t=[2,3,4];", 3);

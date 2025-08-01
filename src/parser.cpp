@@ -625,6 +625,15 @@ void Parser<yutovo_calculator::Complex>::SetLocale(Language _language)
 }
 
 template<>
+void Parser<yutovo_calculator::Array<Real>>::SetLocale(Language _language)
+{
+    language = _language;
+    InitUnits();
+    InitPhisicalConstants();
+    last_language = language;
+}
+
+template<>
 void Parser<yutovo_calculator::Real>::InitBuiltinIdentifiers()
 {
     solver.ResetBuiltinIdentifiers();

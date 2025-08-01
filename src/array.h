@@ -156,10 +156,13 @@ public:
 
     friend Array<Number> operator+(const Array<Number>& num1, const Array<Number>& num2)
     {
-        if (num1.numbers.size() != 1 || num2.numbers.size() != 1)
+        if (num1.numbers.size() == 1 && num1 == 0)
+            return num2;
+        if (num1.numbers.size() != num2.numbers.size())
             throw MathException(IncorrectOperation);
         Array<Number> res(num1);
-        res.numbers[0] += num2.numbers[0];
+        for (size_t i = 0; i < num1.numbers.size(); ++i)
+            res.numbers[i] += num2.numbers[i];
         return res;
     }
 
@@ -174,10 +177,13 @@ public:
 
     friend Array<Number> operator-(const Array<Number>& num1, const Array<Number>& num2)
     {
-        if (num1.numbers.size() != 1 || num2.numbers.size() != 1)
+        if (num2.numbers.size() == 1 && num2 == 0)
+            return num1;
+        if (num1.numbers.size() != num2.numbers.size())
             throw MathException(IncorrectOperation);
         Array<Number> res(num1);
-        res.numbers[0] -= num2.numbers[0];
+        for (size_t i = 0; i < num1.numbers.size(); ++i)
+            res.numbers[i] -= num2.numbers[i];
         return res;
     }
 
@@ -192,10 +198,13 @@ public:
 
     friend Array<Number> operator*(const Array<Number>& num1, const Array<Number>& num2)
     {
-        if (num1.numbers.size() != 1 || num2.numbers.size() != 1)
+        if (num1.numbers.size() == 1 && num1 == 1)
+            return num2;
+        if (num1.numbers.size() != num2.numbers.size())
             throw MathException(IncorrectOperation);
         Array<Number> res(num1);
-        res.numbers[0] *= num2.numbers[0];
+        for (size_t i = 0; i < num1.numbers.size(); ++i)
+            res.numbers[i] *= num2.numbers[i];
         return res;
     }
 
@@ -210,10 +219,13 @@ public:
 
     friend Array<Number> operator/(const Array<Number>& num1, const Array<Number>& num2)
     {
-        if (num1.numbers.size() != 1 || num2.numbers.size() != 1)
+        if (num2.numbers.size() == 1 && num2 == 1)
+            return num1;
+        if (num1.numbers.size() != num2.numbers.size())
             throw MathException(IncorrectOperation);
         Array<Number> res(num1);
-        res.numbers[0] /= num2.numbers[0];
+        for (size_t i = 0; i < num1.numbers.size(); ++i)
+            res.numbers[i] /= num2.numbers[i];
         return res;
     }
 
@@ -229,12 +241,19 @@ public:
 public:
     friend bool operator==(const Array<Number>& num1, const Array<Number>& num2)
     {
-        throw MathException(IncorrectComparison);
+        if (num1.numbers.size() != num2.numbers.size())
+            throw MathException(IncorrectOperation);
+        for (size_t i = 0; i < num1.numbers.size(); ++i)
+        {
+            if (num1.numbers[i] != num2.numbers[i])
+                return false;
+        }
+        return true;
     }
 
     friend bool operator!=(const Array<Number>& num1, const Array<Number>& num2)
     {
-        throw MathException(IncorrectComparison);
+        return !(operator==(num1, num2));
     }
 
     friend bool operator!=(const Array<Number>& num1, const int num2)
@@ -263,7 +282,7 @@ public:
     {
         if (num1.numbers.size() != num2.numbers.size())
             throw MathException(IncorrectComparison);
-        for (size_t i = 0; i <  num1.numbers.size(); ++i)
+        for (size_t i = 0; i < num1.numbers.size(); ++i)
         {
             if (num1.numbers[i] > num2.numbers[i])
                 return false;
@@ -285,7 +304,7 @@ private:
         if (num1.numbers.size() != num2.numbers.size())
             throw MathException(IncorrectOperation);
         Array<Number> r;
-        for (size_t i = 0; i <  num1.numbers.size(); ++i)
+        for (size_t i = 0; i < num1.numbers.size(); ++i)
             r.numbers.push_back(func(num1.numbers[i], num2.numbers[i]));
         return r;
     }
@@ -331,7 +350,7 @@ public:
         if (num1.numbers.size() != num2.numbers.size())
             throw MathException(IncorrectOperation);
         Array<Number> r;
-        for (size_t i = 0; i <  num1.numbers.size(); ++i)
+        for (size_t i = 0; i < num1.numbers.size(); ++i)
             r.numbers.push_back(root(num1.numbers[i], num2.numbers[i]));
         return r;
     }
