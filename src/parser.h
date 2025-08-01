@@ -181,6 +181,11 @@ struct Parser
         return solver.CastToUnit(id, val, unit);
     }
 
+    void ClearCastUnits()
+    {
+        solver.ClearCastUnits();
+    }
+
     void SetLocale(Language _language);
 
     void ListBuiltinVariables(std::vector<std::u32string>& variables)

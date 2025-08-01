@@ -204,4 +204,11 @@ TEST_F(CalcTestArrayReal, trigonometric4)
     ASSERT_TRUE(res.GetAngleMeasure() == AngleMeasure::None && res.ToStdString(3, 3) == "[1.E+0,1.E+0]") << res.ToStdString(3, 3);
 }
 
+TEST_F(CalcTestArrayReal, units1)
+{
+    parser.SetLocale(Language::Russian);
+    auto r = parser.Parse(LogicalId{0, 0, 1}, U"[5м,3*(м/с)];");
+    ASSERT_TRUE(r.ToStdString(3, 3) == "[5.E+0(м),3.E+0((м)/(с))]") << r.ToStdString(3, 3);
+}
+
 }

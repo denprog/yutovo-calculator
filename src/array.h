@@ -558,14 +558,14 @@ public:
         numbers.clear();
     }
 
-    Number Get(const int pos)
+    Number Get(const int pos) const
     {
         if (pos >= numbers.size() || pos < 0)
             throw SyntaxException(ArgumentIsOver);
         return numbers[pos];
     }
 
-    int Size()
+    int Size() const
     {
         return numbers.size();
     }
