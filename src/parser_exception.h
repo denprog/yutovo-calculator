@@ -21,6 +21,8 @@ enum ParserExceptionCode
 	Overflow = 101, 
 	ArgumentIsOver = 102, 
 	ConversionDoesNotFit = 103,
+	IncorrectComparison = 104,
+	IncorrectOperation = 105,
 	UnitsAreIncompatible = 201,
 	CannotCastToUnit = 202,
 	UnknownLanguage = 301,
@@ -89,6 +91,10 @@ struct ParserException
 
 struct SyntaxException : public ParserException
 {
+	SyntaxException(ParserExceptionCode _id) : ParserException(LogicalId{}, _id, -1, -1)
+	{
+	}
+
 	SyntaxException(LogicalId _id, ParserExceptionCode _ex_id, int _pos, int _line) : 
 		ParserException(_id, _ex_id, _pos, _line)
 	{
@@ -121,6 +127,10 @@ struct MathException : public ParserException
 	}
 
 	MathException(LogicalId _id, ParserExceptionCode _ex_id, int _pos, int _line) : ParserException(_id, _ex_id, _pos, _line)
+	{
+	}
+
+	MathException(LogicalId _id, ParserExceptionCode _ex_id, int _pos, int _size, int _line) : ParserException(_id, _ex_id, _pos, _size, _line)
 	{
 	}
 };

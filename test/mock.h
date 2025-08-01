@@ -77,6 +77,16 @@ struct CalcTestComplex : public testing::Test
     Parser<Complex> parser;
 };
 
+struct CalcTestArrayReal : public testing::Test
+{
+    CalcTestArrayReal() :
+        parser(0, Language::English)
+    {
+    }
+
+    Parser<Array<Real>> parser;
+};
+
 }
 
 #endif

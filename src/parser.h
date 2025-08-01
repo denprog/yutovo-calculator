@@ -6,6 +6,7 @@
 #include "rational.h"
 #include "real.h"
 #include "complex.h"
+#include "array.h"
 #include "ast.h"
 #include "script.h"
 #include "solver.h"

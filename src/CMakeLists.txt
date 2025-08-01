@@ -77,6 +77,7 @@ add_library(${PROJECT_NAME}
     ast.h
     annotation.h
     export.h
+    array.h
 )
 
 if(EMSCRIPTEN)
@@ -139,6 +140,7 @@ install(
         rational.h
         real.h
         complex.h
+        array.h
         custom_unit.h
         script.h
         solver.h

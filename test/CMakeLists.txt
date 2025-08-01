@@ -14,6 +14,7 @@ add_executable(${PROJECT_NAME}_tests
 	real.cpp
 	rational.cpp
 	complex.cpp
+	array.cpp
 )
 
 if(WIN32)

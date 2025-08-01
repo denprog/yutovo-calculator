@@ -74,6 +74,23 @@ void Export::AddVariable<Complex>(const VariableNode<Complex>& var)
 }
 
 template<>
+void Export::AddVariable<Array<Real>>(const VariableNode<Array<Real>>& var)
+{
+    std::scoped_lock<std::mutex> lock(export_mutex);
+    auto it = std::find_if(variables_array_real.begin(), variables_array_real.end(), 
+        [var](auto& v)
+        {
+            return var.name == v.name;
+        });
+    if (it == variables_array_real.end())
+    {
+        variables_array_real.push_back(var);
+        return;
+    }
+    *it = var;
+}
+
+template<>
 void Export::AddFunction(const FunctionNode<Integer>& func)
 {
     std::scoped_lock<std::mutex> lock(export_mutex);
@@ -142,6 +159,23 @@ void Export::AddFunction(const FunctionNode<Complex>& func)
 }
 
 template<>
+void Export::AddFunction(const FunctionNode<Array<Real>>& func)
+{
+    std::scoped_lock<std::mutex> lock(export_mutex);
+    auto it = std::find_if(functions_array_real.begin(), functions_array_real.end(), 
+        [func](auto& v)
+        {
+            return func.name == v.name;
+        });
+    if (it == functions_array_real.end())
+    {
+        functions_array_real.push_back(func);
+        return;
+    }
+    *it = func;
+}
+
+template<>
 void Export::AddUnit(const CustomUnit<Integer>& unit)
 {
 }
@@ -186,6 +220,23 @@ void Export::AddUnit(const CustomUnit<Complex>& unit)
 }
 
 template<>
+void Export::AddUnit(const CustomUnit<Array<Real>>& unit)
+{
+    std::scoped_lock<std::mutex> lock(export_mutex);
+    auto it = std::find_if(units_array_real.begin(), units_array_real.end(), 
+        [unit](auto& v)
+        {
+            return unit.name == v.name;
+        });
+    if (it == units_array_real.end())
+    {
+        units_array_real.push_back(unit);
+        return;
+    }
+    *it = unit;
+}
+
+template<>
 VariableNode<Integer>* Export::FindVariable<Integer>(const std::u32string& name, const std::u32string& subscript)
 {
     std::scoped_lock<std::mutex> lock(export_mutex);
@@ -226,6 +277,18 @@ VariableNode<Complex>* Export::FindVariable<Complex>(const std::u32string& name,
 {
     std::scoped_lock<std::mutex> lock(export_mutex);
     for (auto& var : variables_complex)
+    {
+        if (var.name.name == name && var.name.subscript == subscript)
+            return &var;
+    }
+    return nullptr;
+}
+
+template<>
+VariableNode<Array<Real>>* Export::FindVariable<Array<Real>>(const std::u32string& name, const std::u32string& subscript)
+{
+    std::scoped_lock<std::mutex> lock(export_mutex);
+    for (auto& var : variables_array_real)
     {
         if (var.name.name == name && var.name.subscript == subscript)
             return &var;
@@ -282,6 +345,18 @@ FunctionNode<Complex>* Export::FindFunction<Complex>(const std::u32string& name)
 }
 
 template<>
+FunctionNode<Array<Real>>* Export::FindFunction<Array<Real>>(const std::u32string& name)
+{
+    std::scoped_lock<std::mutex> lock(export_mutex);
+    for (auto& func : functions_array_real)
+    {
+        if (func.name.name == name)
+            return &func;
+    }
+    return nullptr;
+}
+
+template<>
 CustomUnit<Integer>* Export::FindUnit<Integer>(const std::u32string& name, const std::u32string& system)
 {
     return nullptr;
@@ -318,6 +393,18 @@ CustomUnit<Complex>* Export::FindUnit<Complex>(const std::u32string& name, const
 }
 
 template<>
+CustomUnit<Array<Real>>* Export::FindUnit<Array<Real>>(const std::u32string& name, const std::u32string& system)
+{
+    std::scoped_lock<std::mutex> lock(export_mutex);
+    for (auto& unit : units_array_real)
+    {
+        if (unit.name == name && (unit.system == system || (unit.system == U"SI" && system.empty())))
+            return &unit;
+    }
+    return nullptr;
+}
+
+template<>
 void Export::GetUnits(const std::u32string& system, std::vector<CustomUnit<Real>>& units)
 {
     std::scoped_lock<std::mutex> lock(export_mutex);
@@ -349,6 +436,17 @@ void Export::GetUnits(const std::u32string& system, std::vector<CustomUnit<Compl
 {
 }
 
+template<>
+void Export::GetUnits(const std::u32string& system, std::vector<CustomUnit<Array<Real>>>& units)
+{
+    std::scoped_lock<std::mutex> lock(export_mutex);
+    for (auto& unit : units_array_real)
+    {
+        if (unit.system == system)
+            units.push_back(unit);
+    }
+}
+
 void Export::Clear()
 {
     std::scoped_lock<std::mutex> lock(export_mutex);
@@ -356,14 +454,17 @@ void Export::Clear()
     variables_real.clear();
     variables_rational.clear();
     variables_complex.clear();
+    variables_array_real.clear();
 
     functions_integer.clear();
     functions_real.clear();
     functions_rational.clear();
     functions_complex.clear();
+    functions_array_real.clear();
 
     units_real.clear();
     units_rational.clear();
+    units_array_real.clear();
 }
 
 }
