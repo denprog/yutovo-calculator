@@ -158,11 +158,11 @@ Expression<Real>::Expression(LogicalId id, std::u32string& expr, Solver<Real>* _
 
     expression = addition.alias();
     
-    addition = multiplication >> *((char_('+') > multiplication) | (char_('-') > multiplication));
+    addition = multiplication >> *((char_(U'+') > multiplication) | (char_(U'-') > multiplication));
     
     multiplication = unary >> *(multiply);
 
-    multiply = char_('*') > unary | char_('/') > unary | char_('%') >> unary;
+    multiply = char_(U'*') > unary | char_(U'/') > unary | char_(U'%') >> unary;
     
     unary = loop | compare | implicit_function_mul | implicit_post_function_mul | postfix_operation | implicit_div_mul | implicit_string_mul | 
         implicit_fraction_mul | mixed_division | implicit_mul | number | function_call | no_fences_function_call | identifier | 
@@ -170,9 +170,9 @@ Expression<Real>::Expression(LogicalId id, std::u32string& expr, Solver<Real>* _
     
     number = exp_number | digits_number;
     
-    digits_number = +char_("0-9.");
+    digits_number = +(char_(U'0', U'9') | char_(U'.'));
 
-    integer_number_str = +char_("0-9");
+    integer_number_str = +char_(U'0', U'9');
 
     integer_number = integer_number_str;
 
@@ -186,7 +186,7 @@ Expression<Real>::Expression(LogicalId id, std::u32string& expr, Solver<Real>* _
 
     real_number = digits_number;
 
-    exp_number = +char_("0-9.") >> raw[lexeme[(no_case[char_("E")] > (char_('+') | char_('-')))]] > +(char_("0-9"));
+    exp_number = +(char_(U'0', U'9') | char_(U'.')) >> raw[lexeme[no_case[char_(U'E')] >> (char_(U'+') | char_(U'-'))]] > +(char_(U'0', U'9'));
 
     identifier = name >> -('{' > (integer_number_str | name) > '}');
 
@@ -196,9 +196,10 @@ Expression<Real>::Expression(LogicalId id, std::u32string& expr, Solver<Real>* _
 
     implicit_mul = real_number >> '(' >> expression > ')';
 
-    name = (raw[lexeme[(alpha | char_("°'_")) >> *(alnum | char_("'_"))]]);
+    name = (raw[lexeme[(alpha | char_(U'°') | char_(U'\'') | char_(U'_') | char_(U'₽') | char_(U'$') | char_(U'¢') | char_(U'€')) >> 
+        *(alnum | char_(U'\'') | char_(U'_'))]]);
 
-    unary_operation = (char_('+') > unary) | (char_('-') > unary);
+    unary_operation = (char_(U'+') > unary) | (char_(U'-') > unary);
 
     postfix_operation = (identifier >> char_('!')) | ((number | '(' > expression > ')') >> char_('!'));
     
@@ -266,12 +267,14 @@ Expression<Real>::Expression(LogicalId id, std::u32string& expr, Solver<Real>* _
         boost::phoenix::function<ErrorHandler<SyntaxException>>(ErrorHandler<SyntaxException>(id, expr.begin(), expr.end(), SyntaxError))(_3));
     
     // BOOST_SPIRIT_DEBUG_NODE(expression);
+    // BOOST_SPIRIT_DEBUG_NODE(multiply);
     // BOOST_SPIRIT_DEBUG_NODE(addition);
     // BOOST_SPIRIT_DEBUG_NODE(unary_operation);
     // BOOST_SPIRIT_DEBUG_NODE(postfix_operation);
     // BOOST_SPIRIT_DEBUG_NODE(multiplication);
     // BOOST_SPIRIT_DEBUG_NODE(mixed_division);
     // BOOST_SPIRIT_DEBUG_NODE(number);
+    // BOOST_SPIRIT_DEBUG_NODE(implicit_string_mul);
     // BOOST_SPIRIT_DEBUG_NODE(function_call);
     // BOOST_SPIRIT_DEBUG_NODE(function_param);
     // BOOST_SPIRIT_DEBUG_NODE(identifier);
@@ -281,6 +284,7 @@ Expression<Real>::Expression(LogicalId id, std::u32string& expr, Solver<Real>* _
     // BOOST_SPIRIT_DEBUG_NODE(compare);
     // BOOST_SPIRIT_DEBUG_NODE(loop);
     // BOOST_SPIRIT_DEBUG_NODE(variable);
+    // BOOST_SPIRIT_DEBUG_NODE(name);
 }
 
 template<>
@@ -334,7 +338,8 @@ Expression<yutovo_calculator::Rational>::Expression(LogicalId id, std::u32string
 
     identifier = name >> -('{' > (digits_number | name) > '}');
     
-    name = (raw[lexeme[(alpha | char_("°'_")) >> *(alnum | char_("'_"))]]);
+    name = (raw[lexeme[(alpha | char_(U'°') | char_(U'\'') | char_(U'_') | char_(U'₽') | char_(U'$') | char_(U'¢') | char_(U'€')) >> 
+        *(alnum | char_(U'\'') | char_(U'_'))]]);
 
     unary_operation = (char_('+') > unary) | (char_('-') > unary);
     

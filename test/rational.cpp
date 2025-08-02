@@ -546,6 +546,46 @@ TEST_F(CalcTestRational, prod1)
     ASSERT_TRUE(s == "145152/390625") << s;
 }
 
+TEST_F(CalcTestRational, money1)
+{
+    auto r = parser.Parse(LogicalId{0, 0, 1}, U"1₽;", 3);
+    ASSERT_TRUE(r.ToStdString() == "1(₽)") << r.ToStdString();
+    r = parser.GetSuitableUnit(LogicalId{0, 0, 1}, parser.Parse(LogicalId{0, 0, 1}, U"1kop;", 3));
+    ASSERT_TRUE(r.ToStdString() == "1(kop)") << r.ToStdString();
+
+    r = parser.Parse(LogicalId{0, 0, 1}, U"1$;", 3);
+    ASSERT_TRUE(r.ToStdString() == "1($)") << r.ToStdString();
+    r = parser.GetSuitableUnit(LogicalId{0, 0, 1}, parser.Parse(LogicalId{0, 0, 1}, U"1cent;", 3));
+    ASSERT_TRUE(r.ToStdString() == "1(¢)") << r.ToStdString();
+    r = parser.GetSuitableUnit(LogicalId{0, 0, 1}, parser.Parse(LogicalId{0, 0, 1}, U"33¢;", 3));
+    ASSERT_TRUE(r.ToStdString() == "33(¢)") << r.ToStdString();
+
+    r = parser.Parse(LogicalId{0, 0, 1}, U"1€;", 3);
+    ASSERT_TRUE(r.ToStdString() == "1(€)") << r.ToStdString();
+    r = parser.GetSuitableUnit(LogicalId{0, 0, 1}, parser.Parse(LogicalId{0, 0, 1}, U"1eurocent;", 3));
+    ASSERT_TRUE(r.ToStdString() == "1(ct)") << r.ToStdString();
+}
+
+TEST_F(CalcTestRational, money2)
+{
+    parser.SetLocale(Language::Russian);
+
+    auto r = parser.Parse(LogicalId{0, 0, 1}, U"1₽;", 3);
+    ASSERT_TRUE(r.ToStdString() == "1(₽)") << r.ToStdString();
+    r = parser.GetSuitableUnit(LogicalId{0, 0, 1}, parser.Parse(LogicalId{0, 0, 1}, U"1коп;", 3));
+    ASSERT_TRUE(r.ToStdString() == "1(коп)") << r.ToStdString();
+
+    r = parser.Parse(LogicalId{0, 0, 1}, U"1$;", 3);
+    ASSERT_TRUE(r.ToStdString() == "1($)") << r.ToStdString();
+    r = parser.GetSuitableUnit(LogicalId{0, 0, 1}, parser.Parse(LogicalId{0, 0, 1}, U"1цент;", 3));
+    ASSERT_TRUE(r.ToStdString() == "1(цент)") << r.ToStdString();
+
+    r = parser.Parse(LogicalId{0, 0, 1}, U"1€;", 3);
+    ASSERT_TRUE(r.ToStdString() == "1(€)") << r.ToStdString();
+    r = parser.GetSuitableUnit(LogicalId{0, 0, 1}, parser.Parse(LogicalId{0, 0, 1}, U"1евроцент;", 3));
+    ASSERT_TRUE(r.ToStdString() == "1(евроцент)") << r.ToStdString();
+}
+
 TEST_F(CalcTestRational, user_functions1)
 {
     parser.Parse(LogicalId{0, 0, 1}, U"f(x)=5;");

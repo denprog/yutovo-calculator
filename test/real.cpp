@@ -1468,6 +1468,21 @@ TEST_F(CalcTestReal, units66)
     ASSERT_TRUE(s == u8"4.E+0(cube_m)") << s;
 }
 
+TEST_F(CalcTestReal, units67)
+{
+    parser.SetLocale(Language::Russian);
+    try
+    {
+        parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"pow(1.008,с);");
+    }
+    catch (yutovo_calculator::MathException& ex)
+    {
+        ASSERT_TRUE((ex.id == LogicalId{0, 0, 0, 0, 2}) && ex.ex_id == ParserExceptionCode::UnitsAreIncompatible && ex.pos == 0) << LogicalIdToString(ex.id);
+        return;
+    }
+    ASSERT_FALSE(true);
+}
+
 TEST_F(CalcTestReal, compare1)
 {
     std::string s = parser.Parse(LogicalId{0, 0, 0, 0, 0, 0, 0, 2, 0}, U"(0<10);").ToStdString(3, 3);
@@ -1621,6 +1636,54 @@ TEST_F(CalcTestReal, list_identifiers3)
         {
             return p.first == U"м" && p.second == U"метр";
         }) != units.end());
+}
+
+TEST_F(CalcTestReal, money1)
+{
+    auto r = parser.Parse(LogicalId{0, 0, 1}, U"1₽;", 3);
+    ASSERT_TRUE(r.ToStdString(3, 3) == "1.E+0(₽)") << r.ToStdString(3, 3);
+    r = parser.Parse(LogicalId{0, 0, 1}, U"0.1₽;", 3);
+    ASSERT_TRUE(r.ToStdString(3, 3) == "0.1E+0(₽)") << r.ToStdString(3, 3);
+    r = parser.GetSuitableUnit(LogicalId{0, 0, 0, 2}, parser.Parse(LogicalId{0, 0, 0, 2}, U"1kop;", 3));
+    ASSERT_TRUE(r.ToStdString(3, 3) == "1.E+0(kop)") << r.ToStdString(3, 3);
+
+    r = parser.Parse(LogicalId{0, 0, 1}, U"1$;", 3);
+    ASSERT_TRUE(r.ToStdString(3, 3) == "1.E+0($)") << r.ToStdString(3, 3);
+    r = parser.GetSuitableUnit(LogicalId{0, 0, 1}, parser.Parse(LogicalId{0, 0, 1}, U"1cent;", 3));
+    ASSERT_TRUE(r.ToStdString(3, 3) == "1.E+0(¢)") << r.ToStdString(3, 3);
+    r = parser.GetSuitableUnit(LogicalId{0, 0, 1}, parser.Parse(LogicalId{0, 0, 1}, U"33¢;", 3));
+    ASSERT_TRUE(r.ToStdString(3, 3) == "33.E+0(¢)") << r.ToStdString(3, 3);
+
+    r = parser.Parse(LogicalId{0, 0, 1}, U"1€;", 3);
+    ASSERT_TRUE(r.ToStdString(3, 3) == "1.E+0(€)") << r.ToStdString(3, 3);
+    r = parser.GetSuitableUnit(LogicalId{0, 0, 2}, parser.Parse(LogicalId{0, 0, 2}, U"1euro;", 3));
+    ASSERT_TRUE(r.ToStdString(3, 3) == "1.E+0(€)") << r.ToStdString(3, 3);
+    r = parser.GetSuitableUnit(LogicalId{0, 0, 3}, parser.Parse(LogicalId{0, 0, 3}, U"1eurocent;", 3));
+    ASSERT_TRUE(r.ToStdString(3, 3) == "1.E+0(ct)") << r.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestReal, money2)
+{
+    parser.SetLocale(Language::Russian);
+
+    auto r = parser.Parse(LogicalId{0, 0, 1}, U"1₽;", 3);
+    ASSERT_TRUE(r.ToStdString(3, 3) == "1.E+0(₽)") << r.ToStdString(3, 3);
+    r = parser.Parse(LogicalId{0, 0, 1}, U"0.1₽;", 3);
+    ASSERT_TRUE(r.ToStdString(3, 3) == "0.1E+0(₽)") << r.ToStdString(3, 3);
+    r = parser.GetSuitableUnit(LogicalId{0, 0, 0, 2}, parser.Parse(LogicalId{0, 0, 0, 2}, U"1коп;", 3));
+    ASSERT_TRUE(r.ToStdString(3, 3) == "1.E+0(коп)") << r.ToStdString(3, 3);
+
+    r = parser.Parse(LogicalId{0, 0, 1}, U"1$;", 3);
+    ASSERT_TRUE(r.ToStdString(3, 3) == "1.E+0($)") << r.ToStdString(3, 3);
+    r = parser.GetSuitableUnit(LogicalId{0, 0, 1}, parser.Parse(LogicalId{0, 0, 1}, U"1цент;", 3));
+    ASSERT_TRUE(r.ToStdString(3, 3) == "1.E+0(цент)") << r.ToStdString(3, 3);
+
+    r = parser.Parse(LogicalId{0, 0, 1}, U"1€;", 3);
+    ASSERT_TRUE(r.ToStdString(3, 3) == "1.E+0(€)") << r.ToStdString(3, 3);
+    r = parser.GetSuitableUnit(LogicalId{0, 0, 2}, parser.Parse(LogicalId{0, 0, 2}, U"1евро;", 3));
+    ASSERT_TRUE(r.ToStdString(3, 3) == "1.E+0(€)") << r.ToStdString(3, 3);
+    r = parser.GetSuitableUnit(LogicalId{0, 0, 3}, parser.Parse(LogicalId{0, 0, 3}, U"1евроцент;", 3));
+    ASSERT_TRUE(r.ToStdString(3, 3) == "1.E+0(евроцент)") << r.ToStdString(3, 3);
 }
 
 }
