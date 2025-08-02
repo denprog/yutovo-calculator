@@ -590,7 +590,8 @@ Expression<Array<Real>>::Expression(LogicalId id, std::u32string& expr, Solver<A
 
     implicit_mul = real_number >> '(' >> expression > ')';
 
-    name = (raw[lexeme[(alpha | char_("°'_")) >> *(alnum | char_("'_"))]]);
+    name = (raw[lexeme[(alpha | char_(U'°') | char_(U'\'') | char_(U'_') | char_(U'₽') | char_(U'$') | char_(U'¢') | char_(U'€')) >> 
+        *(alnum | char_(U'\'') | char_(U'_'))]]);
 
     unary_operation = (char_('+') > unary) | (char_('-') > unary);
 
