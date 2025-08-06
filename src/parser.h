@@ -240,9 +240,12 @@ private:
             solver.AddBuiltinUnit(Unit(U"K", U"kelvin", 1)); //kelvin (temperature)
             solver.AddBuiltinUnit(Unit(U"sr", U"steradian", 1)); //steradian (solid angle)
             solver.AddBuiltinUnit(Unit(U"bit")); //bit (data)
-            solver.AddBuiltinUnit(Unit(U"₽", U"ruble", 1));
-            solver.AddBuiltinUnit(Unit(U"$", U"dollar", 1));
-            solver.AddBuiltinUnit(Unit(U"€", U"euro", 1));
+            solver.AddBuiltinUnit(Unit(U"₽", U"ruble", 1)); //russian ruble
+            solver.AddBuiltinUnit(Unit(U"$", U"dollar", 1)); //US dollar
+            solver.AddBuiltinUnit(Unit(U"€", U"euro", 1)); //euro
+            solver.AddBuiltinUnit(Unit(U"¥", U"yuan", 1)); //chinese yuan
+            solver.AddBuiltinUnit(Unit(U"₹", U"rupee", 1)); //indian rupee
+            solver.AddBuiltinUnit(Unit(U"R$", U"real", 1)); //brazilian real
             break;
         case Language::Russian:
             solver.AddBuiltinUnit(Unit(U"м", U"метр", 1)); //meter (length)
@@ -254,9 +257,12 @@ private:
             solver.AddBuiltinUnit(Unit(U"К", U"кельвин", 1)); //kelvin (temperature)
             solver.AddBuiltinUnit(Unit(U"ср", U"стерадиан", 1)); //steradian (solid angle)
             solver.AddBuiltinUnit(Unit(U"бит")); //bit (data)
-            solver.AddBuiltinUnit(Unit(U"₽", U"рубль", 1));
-            solver.AddBuiltinUnit(Unit(U"$", U"доллар", 1));
-            solver.AddBuiltinUnit(Unit(U"€", U"евро", 1));
+            solver.AddBuiltinUnit(Unit(U"₽", U"рубль", 1)); //russian ruble
+            solver.AddBuiltinUnit(Unit(U"$", U"доллар", 1)); //US dollar
+            solver.AddBuiltinUnit(Unit(U"€", U"евро", 1)); //euro
+            solver.AddBuiltinUnit(Unit(U"¥", U"юань", 1)); //chinese yuan
+            solver.AddBuiltinUnit(Unit(U"₹", U"рупия", 1)); //indian rupee
+            solver.AddBuiltinUnit(Unit(U"R$", U"реал", 1)); //brazilian real
             break;
         default:
             throw ParserException({}, ParserExceptionCode::UnknownLanguage);
@@ -702,7 +708,10 @@ private:
                     U"cent~¢;",
                     U"euro~€;",
                     U"ct~0.01€;", //eurocent
-                    U"eurocent~0.01€;"
+                    U"eurocent~0.01€;",
+                    U"yuan~¥;",
+                    U"rupee~₹;",
+                    U"real~R$;"
                 }
             },
             {
@@ -739,7 +748,10 @@ private:
                     U"доллар~$;",
                     U"цент~0.01$;",
                     U"евро~€;",
-                    U"евроцент~0.01€;"
+                    U"евроцент~0.01€;",
+                    U"юань~¥;",
+                    U"рупия~₹;",
+                    U"реал~R$;"
                 }
             }
         };

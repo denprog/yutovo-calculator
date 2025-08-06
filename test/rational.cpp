@@ -586,6 +586,24 @@ TEST_F(CalcTestRational, money2)
     ASSERT_TRUE(r.ToStdString() == "1(евроцент)") << r.ToStdString();
 }
 
+TEST_F(CalcTestRational, money3)
+{
+    auto r = parser.Parse(LogicalId{0, 0, 1}, U"1¥;", 3);
+    ASSERT_TRUE(r.ToStdString() == "1(¥)") << r.ToStdString();
+    r = parser.Parse(LogicalId{0, 0, 1}, U"1yuan;", 3);
+    ASSERT_TRUE(r.ToStdString() == "1(¥)") << r.ToStdString();
+
+    r = parser.Parse(LogicalId{0, 0, 1}, U"1₹;", 3);
+    ASSERT_TRUE(r.ToStdString() == "1(₹)") << r.ToStdString();
+    r = parser.Parse(LogicalId{0, 0, 1}, U"1rupee;", 3);
+    ASSERT_TRUE(r.ToStdString() == "1(₹)") << r.ToStdString();
+
+    r = parser.Parse(LogicalId{0, 0, 1}, U"1R$;", 3);
+    ASSERT_TRUE(r.ToStdString() == "1(R$)") << r.ToStdString();
+    r = parser.Parse(LogicalId{0, 0, 1}, U"1real;", 3);
+    ASSERT_TRUE(r.ToStdString() == "1(R$)") << r.ToStdString();
+}
+
 TEST_F(CalcTestRational, user_functions1)
 {
     parser.Parse(LogicalId{0, 0, 1}, U"f(x)=5;");

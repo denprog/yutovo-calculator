@@ -74,7 +74,7 @@ Expression<Integer>::Expression(LogicalId id, std::u32string& expr, Solver<Integ
 
     function_call_string = identifier >> '[' >> +(alnum | '_') > ']';
 
-    no_fences_function_call = (identifier >> '$' >> *(expression >> omit[',']) >> function_param);
+    no_fences_function_call = (identifier >> ':' >> *(expression >> omit[',']) >> function_param);
     
     function_param = number | identifier | '(' > expression > ')';
 
@@ -196,8 +196,8 @@ Expression<Real>::Expression(LogicalId id, std::u32string& expr, Solver<Real>* _
 
     implicit_mul = real_number >> '(' >> expression > ')';
 
-    name = (raw[lexeme[(alpha | char_(U'°') | char_(U'\'') | char_(U'_') | char_(U'₽') | char_(U'$') | char_(U'¢') | char_(U'€')) >> 
-        *(alnum | char_(U'\'') | char_(U'_'))]]);
+    name = (raw[lexeme[(alpha | char_(U'°') | char_(U'\'') | char_(U'_') | char_(U'₽') | char_(U'$') | char_(U'¢') | char_(U'€') | char_(U'¥') | 
+        char_(U'₹')) >> *(alnum | char_(U'\'') | char_(U'_') | char_(U'$'))]]);
 
     unary_operation = (char_(U'+') > unary) | (char_(U'-') > unary);
 
@@ -205,7 +205,7 @@ Expression<Real>::Expression(LogicalId id, std::u32string& expr, Solver<Real>* _
     
     function_call = identifier >> '(' >> -(expression % ',') > ')';
     
-    no_fences_function_call = (identifier >> '$' >> *(expression >> omit[',']) >> function_param);
+    no_fences_function_call = (identifier >> ':' >> *(expression >> omit[',']) >> function_param);
     
     function_param = number | identifier | '(' > expression > ')';
 
@@ -338,14 +338,14 @@ Expression<yutovo_calculator::Rational>::Expression(LogicalId id, std::u32string
 
     identifier = name >> -('{' > (digits_number | name) > '}');
     
-    name = (raw[lexeme[(alpha | char_(U'°') | char_(U'\'') | char_(U'_') | char_(U'₽') | char_(U'$') | char_(U'¢') | char_(U'€')) >> 
-        *(alnum | char_(U'\'') | char_(U'_'))]]);
+    name = (raw[lexeme[(alpha | char_(U'°') | char_(U'\'') | char_(U'_') | char_(U'₽') | char_(U'$') | char_(U'¢') | char_(U'€') | char_(U'¥') | 
+        char_(U'₹')) >> *(alnum | char_(U'\'') | char_(U'_') | char_(U'$'))]]);
 
     unary_operation = (char_('+') > unary) | (char_('-') > unary);
     
     function_call = (identifier >> '(' >> -(expression % ',') > ')');
 
-    no_fences_function_call = (identifier >> '$' >> *(expression >> omit[',']) >> function_param);
+    no_fences_function_call = (identifier >> ':' >> *(expression >> omit[',']) >> function_param);
     
     function_param = number | identifier | '(' > expression > ')';
 
@@ -463,7 +463,7 @@ Expression<Complex>::Expression(LogicalId id, std::u32string& expr, Solver<Compl
     
     function_call = identifier >> '(' >> -(expression % ',') > ')';
     
-    no_fences_function_call = (identifier >> '$' >> *(expression >> omit[',']) >> function_param);
+    no_fences_function_call = (identifier >> ':' >> *(expression >> omit[',']) >> function_param);
     
     function_param = number | identifier | '(' > expression > ')';
 
@@ -590,8 +590,8 @@ Expression<Array<Real>>::Expression(LogicalId id, std::u32string& expr, Solver<A
 
     implicit_mul = real_number >> '(' >> expression > ')';
 
-    name = (raw[lexeme[(alpha | char_(U'°') | char_(U'\'') | char_(U'_') | char_(U'₽') | char_(U'$') | char_(U'¢') | char_(U'€')) >> 
-        *(alnum | char_(U'\'') | char_(U'_'))]]);
+    name = (raw[lexeme[(alpha | char_(U'°') | char_(U'\'') | char_(U'_') | char_(U'₽') | char_(U'$') | char_(U'¢') | char_(U'€') | char_(U'¥') | 
+        char_(U'₹')) >> *(alnum | char_(U'\'') | char_(U'_') | char_(U'$'))]]);
 
     unary_operation = (char_('+') > unary) | (char_('-') > unary);
 
@@ -599,7 +599,7 @@ Expression<Array<Real>>::Expression(LogicalId id, std::u32string& expr, Solver<A
     
     function_call = identifier >> '(' >> -(expression % ',') > ')';
     
-    no_fences_function_call = (identifier >> '$' >> *(expression >> omit[',']) >> function_param);
+    no_fences_function_call = (identifier >> ':' >> *(expression >> omit[',']) >> function_param);
     
     function_param = number | identifier | '(' > expression > ')';
 

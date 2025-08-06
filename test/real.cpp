@@ -110,11 +110,11 @@ TEST_F(CalcTestReal, functions1)
     ASSERT_TRUE(r.ToStdString(3, 3) == parser.Parse(LogicalId{0, 0, 1}, U"2.0E+0;").ToStdString(3, 3)) << r.ToStdString(3, 3);
     r = parser.Parse(LogicalId{0, 0, 1}, U"log(2, 3);");
     ASSERT_TRUE(r.ToStdString(3, 3) == parser.Parse(LogicalId{0, 0, 1}, U"1.585E+0;").ToStdString(3, 3)) << r.ToStdString(3, 3);
-    r = parser.Parse(LogicalId{0, 0, 1}, U"log$2,3;");
+    r = parser.Parse(LogicalId{0, 0, 1}, U"log:2,3;");
     ASSERT_TRUE(r.ToStdString(3, 3) == parser.Parse(LogicalId{0, 0, 1}, U"1.585E+0;").ToStdString(3, 3)) << r.ToStdString(3, 3);
-    r = parser.Parse(LogicalId{0, 0, 1}, U"log$2,1+3;");
+    r = parser.Parse(LogicalId{0, 0, 1}, U"log:2,1+3;");
     ASSERT_TRUE(r.ToStdString(3, 3) == parser.Parse(LogicalId{0, 0, 1}, U"3.E+0;").ToStdString(3, 3)) << r.ToStdString(3, 3);
-    r = parser.Parse(LogicalId{0, 0, 1}, U"log$2,(1+3);");
+    r = parser.Parse(LogicalId{0, 0, 1}, U"log:2,(1+3);");
     ASSERT_TRUE(r.ToStdString(3, 3) == parser.Parse(LogicalId{0, 0, 1}, U"2.E+0;").ToStdString(3, 3)) << r.ToStdString(3, 3);
 }
 
@@ -1684,6 +1684,26 @@ TEST_F(CalcTestReal, money2)
     ASSERT_TRUE(r.ToStdString(3, 3) == "1.E+0(€)") << r.ToStdString(3, 3);
     r = parser.GetSuitableUnit(LogicalId{0, 0, 3}, parser.Parse(LogicalId{0, 0, 3}, U"1евроцент;", 3));
     ASSERT_TRUE(r.ToStdString(3, 3) == "1.E+0(евроцент)") << r.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestReal, money3)
+{
+    parser.SetLocale(Language::Russian);
+
+    auto r = parser.Parse(LogicalId{0, 0, 1}, U"1¥;", 3);
+    ASSERT_TRUE(r.ToStdString(3, 3) == "1.E+0(¥)") << r.ToStdString(3, 3);
+    r = parser.Parse(LogicalId{0, 0, 1}, U"1юань;", 3);
+    ASSERT_TRUE(r.ToStdString(3, 3) == "1.E+0(¥)") << r.ToStdString(3, 3);
+
+    r = parser.Parse(LogicalId{0, 0, 1}, U"1₹;", 3);
+    ASSERT_TRUE(r.ToStdString(3, 3) == "1.E+0(₹)") << r.ToStdString(3, 3);
+    r = parser.Parse(LogicalId{0, 0, 1}, U"1рупия;", 3);
+    ASSERT_TRUE(r.ToStdString(3, 3) == "1.E+0(₹)") << r.ToStdString(3, 3);
+
+    r = parser.Parse(LogicalId{0, 0, 1}, U"1R$;", 3);
+    ASSERT_TRUE(r.ToStdString(3, 3) == "1.E+0(R$)") << r.ToStdString(3, 3);
+    r = parser.Parse(LogicalId{0, 0, 1}, U"1реал;", 3);
+    ASSERT_TRUE(r.ToStdString(3, 3) == "1.E+0(R$)") << r.ToStdString(3, 3);
 }
 
 }
