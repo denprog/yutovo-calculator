@@ -34,6 +34,12 @@ TEST_F(CalcTestArrayReal, arrays3)
     ASSERT_TRUE(res.ToStdString(3, 3) == "[1.E+0,5.E+0,2.3E+0,3.E+0]") << res.ToStdString(3, 3);
 }
 
+TEST_F(CalcTestArrayReal, arrays4)
+{
+    auto res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"[1234567890];");
+    ASSERT_TRUE(res.ToStdString(3, 3) == "[1.235E+9]") << res.ToStdString(3, 3);
+}
+
 TEST_F(CalcTestArrayReal, functions1)
 {
     auto r = parser.Parse(LogicalId{0, 0, 1}, U"[exp(1)];", 5);
