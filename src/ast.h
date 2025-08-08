@@ -239,6 +239,7 @@ struct VariableNode : ExpressionPosition
 	mutable LogicalId id;
 	IdentifierNode<Number> name;
 	ExpressionNode<Number> expression;
+	bool exported = false;
 };
 
 template<typename Number>
@@ -248,6 +249,7 @@ struct FunctionNode : ExpressionPosition
 	IdentifierNode<Number> name;
 	std::list<IdentifierNode<Number>> arguments;
 	ExpressionNode<Number> return_expression;
+	bool exported = false;
 };
 
 template<typename Number>

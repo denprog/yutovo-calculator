@@ -16,7 +16,9 @@ void Export::AddVariable<Integer>(const VariableNode<Integer>& var)
         });
     if (it == variables_integer.end())
     {
-        variables_integer.push_back(var);
+        VariableNode<Integer> v(var);
+        v.exported = true;
+        variables_integer.push_back(v);
         return;
     }
     *it = var;
@@ -33,7 +35,9 @@ void Export::AddVariable<Real>(const VariableNode<Real>& var)
         });
     if (it == variables_real.end())
     {
-        variables_real.push_back(var);
+        VariableNode<Real> v(var);
+        v.exported = true;
+        variables_real.push_back(v);
         return;
     }
     *it = var;
@@ -50,7 +54,9 @@ void Export::AddVariable<Rational>(const VariableNode<Rational>& var)
         });
     if (it == variables_rational.end())
     {
-        variables_rational.push_back(var);
+        VariableNode<Rational> v(var);
+        v.exported = true;
+        variables_rational.push_back(v);
         return;
     }
     *it = var;
@@ -67,7 +73,9 @@ void Export::AddVariable<Complex>(const VariableNode<Complex>& var)
         });
     if (it == variables_complex.end())
     {
-        variables_complex.push_back(var);
+        VariableNode<Complex> v(var);
+        v.exported = true;
+        variables_complex.push_back(v);
         return;
     }
     *it = var;
@@ -84,7 +92,9 @@ void Export::AddVariable<Array<Real>>(const VariableNode<Array<Real>>& var)
         });
     if (it == variables_array_real.end())
     {
-        variables_array_real.push_back(var);
+        VariableNode<Array<Real>> v(var);
+        v.exported = true;
+        variables_array_real.push_back(v);
         return;
     }
     *it = var;
@@ -101,7 +111,9 @@ void Export::AddFunction(const FunctionNode<Integer>& func)
         });
     if (it == functions_integer.end())
     {
-        functions_integer.push_back(func);
+        FunctionNode<Integer> f(func);
+        f.exported = true;
+        functions_integer.push_back(f);
         return;
     }
     *it = func;
@@ -118,7 +130,9 @@ void Export::AddFunction(const FunctionNode<Real>& func)
         });
     if (it == functions_real.end())
     {
-        functions_real.push_back(func);
+        FunctionNode<Real> f(func);
+        f.exported = true;
+        functions_real.push_back(f);
         return;
     }
     *it = func;
@@ -135,7 +149,9 @@ void Export::AddFunction(const FunctionNode<Rational>& func)
         });
     if (it == functions_rational.end())
     {
-        functions_rational.push_back(func);
+        FunctionNode<Rational> f(func);
+        f.exported = true;
+        functions_rational.push_back(f);
         return;
     }
     *it = func;
@@ -152,7 +168,9 @@ void Export::AddFunction(const FunctionNode<Complex>& func)
         });
     if (it == functions_complex.end())
     {
-        functions_complex.push_back(func);
+        FunctionNode<Complex> f(func);
+        f.exported = true;
+        functions_complex.push_back(f);
         return;
     }
     *it = func;
@@ -169,7 +187,9 @@ void Export::AddFunction(const FunctionNode<Array<Real>>& func)
         });
     if (it == functions_array_real.end())
     {
-        functions_array_real.push_back(func);
+        FunctionNode<Array<Real>> f(func);
+        f.exported = true;
+        functions_array_real.push_back(f);
         return;
     }
     *it = func;

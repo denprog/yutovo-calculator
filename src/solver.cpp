@@ -394,7 +394,10 @@ Integer Solver<Integer>::operator()(FunctionCallNode<Integer> const& op) const
                 PushTempVariable(funcIter->name, arg);
             }
 
+            bool _exported_id = exported_id;
+            exported_id = user_func->exported;
             res = (*this)(user_func->return_expression);
+            exported_id = _exported_id;
             PopTempVariables(op.arguments.size());
             return res;
         }
@@ -472,7 +475,10 @@ Rational Solver<Rational>::operator()(FunctionCallNode<Rational> const& op) cons
                 PushTempVariable(funcIter->name, arg);
             }
 
+            bool _exported_id = exported_id;
+            exported_id = user_func->exported;
             res = (*this)(user_func->return_expression);
+            exported_id = _exported_id;
             PopTempVariables(op.arguments.size());
             return res;
         }
@@ -645,9 +651,12 @@ Integer Solver<Integer>::operator()(IdentifierNode<Integer> const& op) const
     if (v)
     {
         LogicalId _id = id;
+        bool _exported_id = exported_id;
         id = v->id;
+        exported_id = v->exported;
         Integer res = (*this)(v->expression);
         id = _id;
+        exported_id = _exported_id;
         return res;
     }
     
@@ -685,9 +694,12 @@ Real Solver<Real>::operator()(IdentifierNode<Real> const& op) const
     if (v)
     {
         LogicalId _id = id;
+        bool _exported_id = exported_id;
         id = v->id;
+        exported_id = v->exported;
         Real res = (*this)(v->expression);
         id = _id;
+        exported_id = _exported_id;
         return res;
     }
     
@@ -741,9 +753,12 @@ Rational Solver<Rational>::operator()(IdentifierNode<Rational> const& op) const
     if (v)
     {
         LogicalId _id = id;
+        bool _exported_id = exported_id;
         id = v->id;
+        exported_id = v->exported;
         Rational res = (*this)(v->expression);
         id = _id;
+        exported_id = _exported_id;
         return res;
     }
     
@@ -796,9 +811,12 @@ Complex Solver<Complex>::operator()(IdentifierNode<Complex> const& op) const
     if (v)
     {
         LogicalId _id = id;
+        bool _exported_id = exported_id;
         id = v->id;
+        exported_id = v->exported;
         Complex res = (*this)(v->expression);
         id = _id;
+        exported_id = _exported_id;
         return res;
     }
     
@@ -838,7 +856,9 @@ Array<Real> Solver<Array<Real>>::operator()(IdentifierNode<Array<Real>> const& o
     if (v)
     {
         LogicalId _id = id;
+        bool _exported_id = exported_id;
         id = v->id;
+        exported_id = v->exported;
         Array<Real> res = (*this)(v->expression);
         if (!op.subscript.empty() && v->name.subscript != op.subscript)
         {
@@ -904,6 +924,7 @@ Array<Real> Solver<Array<Real>>::operator()(IdentifierNode<Array<Real>> const& o
             }
         }
         id = _id;
+        exported_id = _exported_id;
         return res;
     }
     
@@ -1435,7 +1456,9 @@ Array<Real> Solver<Array<Real>>::operator()(ImplicitDivMulNode<Array<Real>> cons
     if (v)
     {
         LogicalId _id = id;
+        bool _exported_id = exported_id;
         id = v->id;
+        exported_id = v->exported;
         Array<Real> res = (*this)(v->expression);
         if (!op.identifier.subscript.empty() && v->name.subscript != op.identifier.subscript)
         {
@@ -1457,6 +1480,7 @@ Array<Real> Solver<Array<Real>>::operator()(ImplicitDivMulNode<Array<Real>> cons
             }
         }
         id = _id;
+        exported_id = _exported_id;
         Array<Real> arg1 = (*this)(op.upper);
         Array<Real> arg2 = (*this)(op.lower);
         return (arg1 / arg2) * res;

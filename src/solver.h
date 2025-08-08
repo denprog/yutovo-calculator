@@ -145,6 +145,7 @@ struct Solver : public boost::static_visitor<Number>
             Solver<Number> solver(precision, default_angle_measure, result_angle_measure, default_notation, im, res, symbols);
             solver.parser_context = parser_context;
             solver.id = id;
+            solver.exported_id = exported_id;
             solver.cast_units = cast_units;
             solver.max_cast_unit_size = max_cast_unit_size;
             solver.SetDependencies(dependencies);
@@ -451,8 +452,11 @@ struct Solver : public boost::static_visitor<Number>
         for (int i = (int)symbols->variables.size() - 1; i >= 0; --i)
         {
             auto& var = symbols->variables[i];
-            if (IsLess(var.id, id) && var.name.name == name && var.name.subscript == subscript)
-                return &var;
+            if (var.name.name == name && var.name.subscript == subscript)
+            {
+                if (exported_id || IsLess(var.id, id))
+                    return &var;
+            }
         }
 
         return FindExportVariable(name, subscript);
@@ -470,11 +474,14 @@ struct Solver : public boost::static_visitor<Number>
         for (int i = (int)symbols->functions.size() - 1; i >= 0; --i)
         {
             auto& func = symbols->functions[i];
-            if (IsLess(func.id, id) && func.name.name == op.name.name)
+            if (func.name.name == op.name.name)
             {
-                if (func.arguments.size() != op.arguments.size())
-                    throw SyntaxException(op.id, WrongArgumentsCount, U"Wrong arguments count in '" + op.name.name + U"'", op.pos, op.line);
-                return &func;
+                if (exported_id || IsLess(func.id, id))
+                {
+                    if (func.arguments.size() != op.arguments.size())
+                        throw SyntaxException(op.id, WrongArgumentsCount, U"Wrong arguments count in '" + op.name.name + U"'", op.pos, op.line);
+                    return &func;
+                }
             }
         }
         return FindExportFunction(op);
@@ -1272,7 +1279,10 @@ private:
                     PushTempVariable(funcIter->name, arg);
                 }
 
+                bool _exported_id = exported_id;
+                exported_id = user_func->exported;
                 res = (*this)(user_func->return_expression);
+                exported_id = _exported_id;
                 PopTempVariables(op.arguments.size());
                 return res;
             }
@@ -1431,6 +1441,7 @@ private:
     Number left_value; //left solved value
     mutable Dependencies* dependencies = nullptr;
     mutable std::map<std::u32string, std::vector<Number>> cast_units;
+    mutable bool exported_id = false;
 
     int max_cast_unit_size = 2; //max size of each unit in the cast vector
 };
