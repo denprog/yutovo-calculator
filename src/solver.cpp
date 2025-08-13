@@ -1,6 +1,5 @@
 ﻿#include "stdafx.h"
 #include "solver.h"
-#include <boost/lexical_cast.hpp>
 
 namespace yutovo_calculator
 {
@@ -908,7 +907,7 @@ Array<Real> Solver<Array<Real>>::operator()(IdentifierNode<Array<Real>> const& o
                 {
                     try
                     {
-                        int index = boost::lexical_cast<int>(op.subscript);
+                        int index = FromUtfString(op.subscript);
                         if (res.Size() > index && index >= 0)
                         {
                             Real r = res.Get(index);
@@ -918,7 +917,7 @@ Array<Real> Solver<Array<Real>>::operator()(IdentifierNode<Array<Real>> const& o
                         else
                             throw SyntaxException(op.id, ArgumentIsOver, U"Index of '" + op.name + U"' is over", op.pos, op.name.length(), op.line);
                     }
-                    catch (const boost::bad_lexical_cast& e)
+                    catch (const std::exception& e)
                     {
                         throw SyntaxException(op.id, ArgumentIsOver, U"Index of '" + op.name + U"' is over", op.pos, op.name.length(), op.line);
                     }
@@ -1181,7 +1180,7 @@ Array<Real> Solver<Array<Real>>::operator()(ImplicitStringMulNode<Array<Real>> c
         {
             try
             {
-                int index = boost::lexical_cast<int>(op.identifier.subscript);
+                int index = FromUtfString(op.identifier.subscript);
                 if (res.Size() > index && index >= 0)
                 {
                     Real r = res.Get(index);
@@ -1191,7 +1190,7 @@ Array<Real> Solver<Array<Real>>::operator()(ImplicitStringMulNode<Array<Real>> c
                 else
                     throw SyntaxException(op.id, ArgumentIsOver, U"Index of '" + op.identifier.name + U"' is over", op.pos, op.identifier.name.length(), op.line);
             }
-            catch (const boost::bad_lexical_cast& e)
+            catch (const std::exception& e)
             {
                 throw SyntaxException(op.id, ArgumentIsOver, U"Index of '" + op.identifier.name + U"' is over", op.pos, op.identifier.name.length(), op.line);
             }
@@ -1466,7 +1465,7 @@ Array<Real> Solver<Array<Real>>::operator()(ImplicitDivMulNode<Array<Real>> cons
         {
             try
             {
-                int index = boost::lexical_cast<int>(op.identifier.subscript);
+                int index = FromUtfString(op.identifier.subscript);
                 if (res.Size() > index && index >= 0)
                 {
                     Real r = res.Get(index);
@@ -1476,7 +1475,7 @@ Array<Real> Solver<Array<Real>>::operator()(ImplicitDivMulNode<Array<Real>> cons
                 else
                     throw SyntaxException(op.id, ArgumentIsOver, U"Index of '" + op.identifier.name + U"' is over", op.pos, op.identifier.name.length(), op.line);
             }
-            catch (const boost::bad_lexical_cast& e)
+            catch (const std::exception& e)
             {
                 throw SyntaxException(op.id, ArgumentIsOver, U"Index of '" + op.identifier.name + U"' is over", op.pos, op.identifier.name.length(), op.line);
             }

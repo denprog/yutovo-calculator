@@ -1431,6 +1431,37 @@ private:
         return res;
     }
 
+    int FromUtfString(const std::u32string& str) const
+    {
+        if (str.empty())
+            throw std::out_of_range("Empty string");
+
+        int sign = 1;
+        size_t i = 0;
+
+        if (str[0] == U'-')
+        {
+            sign = -1;
+            i = 1;
+        }
+        else if (str[0] == U'+')
+            i = 1;
+
+        int value = 0;
+        for (; i < str.size(); ++i)
+        {
+            char32_t ch = str[i];
+            if (ch < U'0' || ch > U'9')
+                throw std::out_of_range("Invalid digit");
+            int digit = static_cast<int>(ch - U'0');
+            if (value > (std::numeric_limits<int>::max() - digit) / 10)
+                throw std::overflow_error("Integer overflow");
+            value = value * 10 + digit;
+        }
+
+        return value * sign;        
+    }
+
     friend struct Expression<Number>;
 
     mutable LogicalId id;

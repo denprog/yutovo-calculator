@@ -166,6 +166,16 @@ TEST_F(CalcTestArrayReal, variables1)
     {
         ASSERT_TRUE((ex.id == LogicalId{0, 0, 2}) && ex.ex_id == ParserExceptionCode::SyntaxError && ex.pos == 2) << LogicalIdToString(ex.id);
     }
+
+    try
+    {
+        parser.Parse(LogicalId{0, 0, 2}, U"t{n};", 3);
+        ASSERT_FALSE(true);
+    }
+    catch (yutovo_calculator::SyntaxException& ex)
+    {
+        ASSERT_TRUE((ex.id == LogicalId{0, 0, 2}) && ex.ex_id == ParserExceptionCode::ArgumentIsOver && ex.pos == 0) << LogicalIdToString(ex.id);
+    }
 }
 
 TEST_F(CalcTestArrayReal, trigonometric1)
