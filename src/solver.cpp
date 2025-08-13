@@ -603,6 +603,8 @@ VariableNode<Array<Real>>* Solver<Array<Real>>::FindVariable(const std::u32strin
         }
     }
 
+    if (FindTempVariable(subscript))
+        return FindExportVariable(name, U"");
     return FindExportVariable(name, subscript);
 }
 
