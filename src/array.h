@@ -120,6 +120,12 @@ public:
         return *this;
     }
 
+    Array<Number>& operator=(const int num)
+    {
+        numbers.emplace_back(num);
+        return *this;
+    }
+
     Array<Number>& operator=(const double num)
     {
         numbers.emplace_back(num);
@@ -198,7 +204,7 @@ public:
 
     friend Array<Number> operator*(const Array<Number>& num1, const Array<Number>& num2)
     {
-        if (num1.numbers.size() == 1 && num1 == 1)
+        if (num1.numbers.size() == 1 && num1 == 1 && num1.numbers[0].unit.IsEmpty())
             return num2;
         if (num1.numbers.size() != num2.numbers.size())
             throw MathException(IncorrectOperation);
@@ -219,7 +225,7 @@ public:
 
     friend Array<Number> operator/(const Array<Number>& num1, const Array<Number>& num2)
     {
-        if (num2.numbers.size() == 1 && num2 == 1)
+        if (num2.numbers.size() == 1 && num2 == 1 && num2.numbers[0].unit.IsEmpty())
             return num1;
         if (num1.numbers.size() != num2.numbers.size())
             throw MathException(IncorrectOperation);
@@ -251,6 +257,13 @@ public:
         return true;
     }
 
+    friend bool operator==(const Array<Number>& num1, const int num2)
+    {
+        if (num1.numbers.size() != 1)
+            throw MathException(IncorrectOperation);
+        return num1.numbers[0] == num2;
+    }
+
     friend bool operator!=(const Array<Number>& num1, const Array<Number>& num2)
     {
         return !(operator==(num1, num2));
@@ -258,9 +271,7 @@ public:
 
     friend bool operator!=(const Array<Number>& num1, const int num2)
     {
-        if (num1.numbers.size() != 1)
-            throw MathException(IncorrectComparison);
-        return num1.numbers[0] != num2;
+        return !(operator==(num1, num2));
     }
 
     friend bool operator>(const Array<Number>& num1, const Array<Number>& num2)

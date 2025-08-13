@@ -605,6 +605,11 @@ TEST_F(CalcTestComplex, errors2)
     ASSERT_FALSE(true);
 }
 
+TEST_F(CalcTestComplex, errors3)
+{
+    EXPECT_THROW(parser.Parse(LogicalId{0, 0, 1}, U"(1)/(0);"), yutovo_calculator::MathException);
+}
+
 TEST_F(CalcTestComplex, user_functions1)
 {
     parser.Parse(LogicalId{0, 0, 1}, U"f(x)=5;");

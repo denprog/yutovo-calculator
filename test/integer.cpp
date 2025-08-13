@@ -264,6 +264,11 @@ TEST_F(CalcTestInteger, errors4)
     ASSERT_FALSE(true);
 }
 
+TEST_F(CalcTestInteger, errors5)
+{
+    EXPECT_THROW(parser.Parse(LogicalId{0, 0, 1}, U"(1)/(0);"), yutovo_calculator::MathException);
+}
+
 TEST_F(CalcTestInteger, notation1)
 {
     Integer res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"123;");

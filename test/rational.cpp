@@ -199,6 +199,11 @@ TEST_F(CalcTestRational, errors4)
     ASSERT_FALSE(true);
 }
 
+TEST_F(CalcTestRational, errors5)
+{
+    EXPECT_THROW(parser.Parse(LogicalId{0, 0, 1}, U"(1)/(0);"), yutovo_calculator::MathException);
+}
+
 TEST_F(CalcTestRational, rationals1)
 {
     ASSERT_TRUE(parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"2/4;") == parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"1/2;")) << 

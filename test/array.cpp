@@ -227,4 +227,9 @@ TEST_F(CalcTestArrayReal, units1)
     ASSERT_TRUE(r.ToStdString(3, 3) == "[5.E+0(м),3.E+0((м)/(с))]") << r.ToStdString(3, 3);
 }
 
+TEST_F(CalcTestArrayReal, errors1)
+{
+    EXPECT_THROW(parser.Parse(LogicalId{0, 0, 1}, U"(1)/(0);"), yutovo_calculator::MathException);
+}
+
 }
