@@ -1,4 +1,11 @@
-﻿#ifndef __MOCK_H__
+/*
+ * Yutovo Calculator
+ * Copyright (C) 2022-2025 Yutovo developers. All rights reserved.
+ * This file is a part of the Yutovo project
+ * SPDX-License-Identifier: GPL-3.0-only
+ */
+
+#ifndef __MOCK_H__
 #define __MOCK_H__
 
 #include <gmock/gmock.h>

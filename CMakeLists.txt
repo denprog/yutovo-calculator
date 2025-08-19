@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 
-project(yutovo_calculator
+project(yutovo-calculator
     VERSION 0.1.0 
     LANGUAGES CXX
 )

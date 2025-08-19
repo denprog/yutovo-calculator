@@ -1,4 +1,11 @@
-﻿#ifndef INTEGER_H
+/*
+ * Yutovo Calculator
+ * Copyright (C) 2022-2025 Yutovo developers. All rights reserved.
+ * This file is a part of the Yutovo project
+ * SPDX-License-Identifier: GPL-3.0-only
+ */
+
+#ifndef INTEGER_H
 #define INTEGER_H
 
 #include <string>

@@ -1,4 +1,11 @@
-﻿#ifndef AST_H
+/*
+ * Yutovo Calculator
+ * Copyright (C) 2022-2025 Yutovo developers. All rights reserved.
+ * This file is a part of the Yutovo project
+ * SPDX-License-Identifier: GPL-3.0-only
+ */
+
+#ifndef AST_H
 #define AST_H
 
 #include "stdafx.h"

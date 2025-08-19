@@ -1,4 +1,11 @@
-﻿#include "utils.h"
+/*
+ * Yutovo Calculator
+ * Copyright (C) 2022-2025 Yutovo developers. All rights reserved.
+ * This file is a part of the Yutovo project
+ * SPDX-License-Identifier: GPL-3.0-only
+ */
+
+#include "utils.h"
 #include "parser_exception.h"
 #include <chrono>
 #ifdef EMSCRIPTEN

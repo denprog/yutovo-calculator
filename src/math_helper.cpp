@@ -1,4 +1,11 @@
-﻿#include "stdafx.h"
+/*
+ * Yutovo Calculator
+ * Copyright (C) 2022-2025 Yutovo developers. All rights reserved.
+ * This file is a part of the Yutovo project
+ * SPDX-License-Identifier: GPL-3.0-only
+ */
+
+#include "stdafx.h"
 #include "math_helper.h"
 #include <algorithm>
 #include "integer.h"
