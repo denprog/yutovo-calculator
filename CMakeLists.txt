@@ -5,6 +5,10 @@ project(yutovo-calculator
     LANGUAGES CXX
 )
 
+set(PROJECT_LICENSE "GPL-3.0-only")
+
+message(STATUS "Project license: ${PROJECT_LICENSE}")
+
 if(WIN32)
     set(INSTALL_PATH "c:/Lang/vcpkg/installed/x64-windows")
 else()
