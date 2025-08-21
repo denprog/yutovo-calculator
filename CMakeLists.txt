@@ -18,7 +18,9 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     add_compile_definitions(DEBUG)
 endif()
 
+option(BUILD_TESTS "Build unit tests" ON)
+
 add_subdirectory(src)
-if(NOT DEFINED EMSCRIPTEN)
+if((NOT DEFINED EMSCRIPTEN) AND BUILD_TESTS)
     add_subdirectory(test)
 endif()
