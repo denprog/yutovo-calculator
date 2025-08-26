@@ -1495,6 +1495,24 @@ TEST_F(CalcTestReal, units67)
     ASSERT_FALSE(true);
 }
 
+TEST_F(CalcTestReal, units68)
+{
+    parser.SetLocale(Language::Spanish);
+    LogicalId id{0, 0, 0, 1};
+    auto r = parser.Parse(id, U"10m;");
+    auto s = parser.GetSuitableUnit(LogicalId{0, 0, 0, 2}, r).ToStdString(3, 3);
+    ASSERT_TRUE(s == u8"10.E+0(m)") << s;
+}
+
+TEST_F(CalcTestReal, units69)
+{
+    parser.SetLocale(Language::Spanish);
+    LogicalId id{0, 0, 0, 1};
+    auto r = parser.Parse(id, U"2día;");
+    auto s = parser.GetSuitableUnit(LogicalId{0, 0, 0, 2}, r).ToStdString(3, 3);
+    ASSERT_TRUE(s == u8"2.E+0(día)") << s;
+}
+
 TEST_F(CalcTestReal, compare1)
 {
     std::string s = parser.Parse(LogicalId{0, 0, 0, 0, 0, 0, 0, 2, 0}, U"(0<10);").ToStdString(3, 3);

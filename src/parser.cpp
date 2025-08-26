@@ -651,6 +651,7 @@ void Parser<yutovo_calculator::Real>::InitBuiltinIdentifiers()
     switch (language)
     {
     case Language::English:
+    case Language::Spanish:
         {
             Real v;
             v = 1;
@@ -691,6 +692,7 @@ void Parser<yutovo_calculator::Array<Real>>::InitBuiltinIdentifiers()
     switch (language)
     {
     case Language::English:
+    case Language::Spanish:
         {
             Real v;
             v = 1;

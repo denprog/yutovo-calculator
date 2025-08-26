@@ -59,7 +59,8 @@ enum class Language
 {
 	None = 0,
 	English = 1,
-	Russian
+	Russian,
+	Spanish
 };
 
 class Real;

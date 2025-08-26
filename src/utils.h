@@ -14,6 +14,7 @@
 #ifdef _WIN32
 #include <windows.h>
 #endif
+#include "math_helper.h"
 
 namespace yutovo_calculator
 {
@@ -102,6 +103,8 @@ LogicalId LogicalIdFromString(const std::string& id);
 bool IsLess(const LogicalId& id1, const LogicalId& id2);
 
 void CheckBreak(ParserContext* parser_context);
+
+std::string LanguageToString(const Language language);
 
 }
 

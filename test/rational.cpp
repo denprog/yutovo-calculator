@@ -514,6 +514,19 @@ TEST_F(CalcTestRational, units20)
     ASSERT_TRUE(r.ToStdString() == "8(m)") << r.ToStdString();
 }
 
+TEST_F(CalcTestRational, units21)
+{
+    parser.SetLocale(Language::Spanish);
+    LogicalId id{0, 0, 0, 0, 0, 0, 0, 2, 0};
+    auto val = parser.Parse(id, U"5*(km/hora);");
+    std::vector<Unit> cast_units;
+    parser.GetCastUnits(id, val, cast_units);
+    ASSERT_TRUE(FindUnit(cast_units, Unit(U"m", U"s")));
+    ASSERT_TRUE(FindUnit(cast_units, Unit(U"km", U"hora")));
+    std::string t = parser.GetSuitableUnit(id, val).ToStdString();
+    ASSERT_TRUE(t == "5((km)/(hora))") << t;
+}
+
 TEST_F(CalcTestRational, compare1)
 {
     std::string s = parser.Parse(LogicalId{0, 0, 0, 0, 0, 0, 0, 2, 0}, U"(0<(2/3));").ToStdString();

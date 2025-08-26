@@ -129,6 +129,20 @@ void CheckBreak(ParserContext* parser_context)
 		throw TimeExceedException();
 }
 
+std::string LanguageToString(const Language language)
+{
+    switch (language)
+    {
+    case Language::English:
+        return "English";
+    case Language::Russian:
+        return "Russian";
+    case Language::Spanish:
+        return "Spanish";
+    }
+    return "";
+}
+
 void InitThreadTime()
 {
 #ifdef _WIN32
