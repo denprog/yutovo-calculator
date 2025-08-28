@@ -1513,6 +1513,39 @@ TEST_F(CalcTestReal, units69)
     ASSERT_TRUE(s == u8"2.E+0(día)") << s;
 }
 
+TEST_F(CalcTestReal, units70)
+{
+    parser.SetLocale(Language::English);
+    LogicalId id{0, 0, 0, 1};
+    auto r = parser.Parse(id, U"2inch{us};");
+    auto s = parser.GetSuitableUnit(LogicalId{0, 0, 0, 2}, r).ToStdString(3, 3);
+    ASSERT_TRUE(s == "2.E+0(inch){us}") << s;
+    r = parser.Parse(id, U"2in{us};");
+    s = parser.GetSuitableUnit(LogicalId{0, 0, 0, 2}, r).ToStdString(3, 3);
+    ASSERT_TRUE(s == "2.E+0(inch){us}") << s;
+}
+
+TEST_F(CalcTestReal, units71)
+{
+    parser.SetLocale(Language::Russian);
+    LogicalId id{0, 0, 0, 1};
+    auto r = parser.Parse(id, U"2дюйм{us};");
+    auto s = parser.GetSuitableUnit(LogicalId{0, 0, 0, 2}, r).ToStdString(3, 3);
+    ASSERT_TRUE(s == "2.E+0(дюйм){us}") << s;
+}
+
+TEST_F(CalcTestReal, units72)
+{
+    parser.SetLocale(Language::Spanish);
+    LogicalId id{0, 0, 0, 1};
+    auto r = parser.Parse(id, U"2pulgada{us};");
+    auto s = parser.GetSuitableUnit(LogicalId{0, 0, 0, 2}, r).ToStdString(3, 3);
+    ASSERT_TRUE(s == "2.E+0(pulgada){us}") << s;
+    r = parser.Parse(id, U"2in{us};");
+    s = parser.GetSuitableUnit(LogicalId{0, 0, 0, 2}, r).ToStdString(3, 3);
+    ASSERT_TRUE(s == "2.E+0(pulgada){us}") << s;
+}
+
 TEST_F(CalcTestReal, compare1)
 {
     std::string s = parser.Parse(LogicalId{0, 0, 0, 0, 0, 0, 0, 2, 0}, U"(0<10);").ToStdString(3, 3);

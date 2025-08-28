@@ -297,6 +297,7 @@ private:
         InitSIUnits();
         InitOtherUnits();
         InitRussianUnits();
+        InitUsUnits();
 
         InitBuiltinIdentifiers();
 
@@ -355,6 +356,24 @@ private:
         int p = 0;
         for (auto& expr : it->second)
             Parse(LogicalId{0, -2, 2, 0, p++}, expr);
+    }
+
+    void InitUsUnits()
+    {
+        auto it = us_units.find(last_language);
+        if (it != us_units.end())
+        {
+            int p = 0;
+            for (auto& expr : it->second)
+                solver.RemoveIdentifier(LogicalId{0, -2, 3, 0, p++});
+        }
+
+        it = us_units.find(language);
+        if (it == us_units.end())
+            return;
+        int p = 0;
+        for (auto& expr : it->second)
+            Parse(LogicalId{0, -2, 3, 0, p++}, expr);
     }
 
     void InitBuiltinIdentifiers()
@@ -1124,6 +1143,147 @@ private:
                     U"shtof{rus}~10charka{rus};",
                     U"vedro{rus}~4chet{rus};",
                     U"bochka{rus}~40vedro{rus};"
+                }
+            }
+        };
+
+    std::map<Language, std::vector<std::u32string>> us_units = 
+        {
+            {
+                Language::English, 
+                {
+                    //distance
+                    U"inch{us}~25.4mm;",
+                    U"foot{us}~12inch{us};",
+                    U"yard{us}~3foot{us};",
+                    U"mile{us}~1760yard{us};",
+
+                    //mass
+                    U"ounce{us}~28.3495g;",
+                    U"pound{us}~16ounce{us};",
+                    U"stone{us}~14pound{us};",
+                    U"hundredweight{us}~100pound{us};",
+                    U"ton{us}~2000pound{us};",
+
+                    //volume
+                    U"teaspoon{us}~4.92892ml;",
+                    U"tablespoon{us}~14.7868ml;",
+                    U"fluid_ounce{us}~29.5735ml;",
+                    U"cup{us}~236.588ml;",
+                    U"pint{us}~16fluid_ounce{us};",
+                    U"quart{us}~2pint{us};",
+                    U"gallon{us}~4quart{us};",
+                    U"dry_pint{us}~550.6ml;",
+                    U"dry_quart{us}~1.101l;",
+                    U"dry_gallon{us}~4.4048l;",
+                    U"bushel{us}~35.2391l;",
+                    U"peck{us}~8.8098l;",
+
+                    //abbreviations
+                    U"in{us}~inch{us};",
+                    U"ft{us}~foot{us};",
+                    U"yd{us}~yard{us};",
+                    U"mi{us}~mile{us};",
+                    U"oz{us}~ounce{us};",
+                    U"lb{us}~pound{us};",
+                    U"st{us}~stone{us};",
+                    U"cwt{us}~hundredweight{us};",
+                    U"tsp{us}~teaspoon{us};",
+                    U"tbsp{us}~tablespoon{us};",
+                    U"fl_oz{us}~fluid_ounce{us};",
+                    U"pt{us}~pint{us};",
+                    U"qt{us}~quart{us};",
+                    U"gal{us}~gallon{us};",
+                    U"dry_pt{us}~dry_pint{us};",
+                    U"dry_qt{us}~dry_quart{us};",
+                    U"dry_gal{us}~dry_gallon{us};",
+                    U"pk{us}~peck{us};",
+                    U"bu{us}~bushel{us};"
+                }
+            },
+            {
+                Language::Russian, 
+                {
+                    //distance
+                    U"дюйм{us}~25.4мм;",
+                    U"фут{us}~12дюйм{us};",
+                    U"ярд{us}~3фут{us};",
+                    U"миля{us}~1760ярд{us};",
+
+                    //mass
+                    U"унция{us}~28.3495г;",
+                    U"фунт{us}~16унция{us};",
+                    U"стоун{us}~14фунт{us};",
+                    U"центнер{us}~100фунт{us};",
+                    U"тонна{us}~2000фунт{us};",
+
+                    //volume
+                    U"чайная_ложка{us}~4.92892мл;",
+                    U"столовая_ложка{us}~14.7868мл;",
+                    U"жидкая_унция{us}~29.5735мл;",
+                    U"чашка{us}~236.588мл;",
+                    U"пинта{us}~16унция{us};",
+                    U"кварта{us}~2пинта{us};",
+                    U"галлон{us}~4кварта{us};",
+                    U"сухая_пинта{us}~550.6мл;",
+                    U"сухая_кварта{us}~1.101л;",
+                    U"сухой_галлон{us}~4.4048л;",
+                    U"бушель{us}~35.2391л;",
+                    U"пек{us}~8.8098л;"
+                }
+            },
+            {
+                Language::Spanish, 
+                {
+                    //distance
+                    U"pulgada{us}~25.4mm;",
+                    U"pie{us}~12pulgada{us};",
+                    U"yarda{us}~3pie{us};",
+                    U"milla{us}~1760yarda{us};",
+
+                    //mass
+                    U"onza{us}~28.3495g;",
+                    U"libra{us}~16onza{us};",
+                    U"stone{us}~14libra{us};",
+                    U"centena_corta{us}~100libra{us};",
+                    U"tonelada_corta{us}~2000libra{us};",
+
+                    //volume
+                    U"cucharadita{us}~4.92892ml;",
+                    U"cucharada{us}~14.7868ml;",
+                    U"onza_líquida{us}~29.5735ml;",
+                    U"taza{us}~236.588ml;",
+                    U"pinta{us}~16onza_líquida{us};",
+                    U"cuarto_de_galón{us}~2pinta{us};",
+                    U"galón{us}~4cuarto_de_galón{us};",
+                    U"pinta_seca{us}~550.6ml;",
+                    U"cuarto_seco{us}~1.101l;",
+                    U"galón_seco{us}~4.4048l;",
+                    U"bushel{us}~35.2391l;",
+                    U"peck{us}~8.8098l;",
+
+                    //abbreviations
+                    U"in{us}~pulgada{us};",
+                    U"ft{us}~pie{us};",
+                    U"yd{us}~yarda{us};",
+                    U"mi{us}~milla{us};",
+                    U"oz{us}~onza{us};",
+                    U"lb{us}~libra{us};",
+                    U"st{us}~stone{us};",
+                    U"cwt{us}~centena_corta{us};",
+                    U"ton{us}~tonelada_corta{us};",
+                    U"tsp{us}~cucharadita{us};",
+                    U"tbsp{us}~cucharada{us};",
+                    U"fl_oz{us}~onza_líquida{us};",
+                    U"cup{us}~taza{us};",
+                    U"pt{us}~pinta{us};",
+                    U"qt{us}~cuarto_de_galón{us};",
+                    U"gal{us}~galón{us};",
+                    U"dry_pt{us}~pinta_seca{us};",
+                    U"dry_quart{us}~cuarto_seco{us};",
+                    U"dry_gal{us}~galón_seco{us};",
+                    U"pk{us}~peck{us};",
+                    U"bu{us}~bushel{us};"
                 }
             }
         };
