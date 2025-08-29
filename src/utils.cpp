@@ -142,6 +142,7 @@ std::string LanguageToString(const Language language)
     case Language::None:
         return "";
     }
+    return "";
 }
 
 void InitThreadTime()
