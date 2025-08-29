@@ -36,3 +36,84 @@ Run the tests:
 ```
 ./test/yutovo-calculator_tests
 ```
+
+## Building for Emscripten
+
+Install boost:
+```
+wget https://archives.boost.io/release/1.81.0/source/boost_1_81_0.zip
+unzip boost_1_81_0.zip
+
+cd boost_1_81_0
+./bootstrap.sh --prefix=$PWD/../../deploy --libdir=$PWD/../../deploy/lib --includedir=$PWD/../../deploy/include
+./b2 --prefix=$PWD/../../deploy link=static install
+./b2 -q toolset=emscripten link=static variant=release threading=single --with-iostreams
+```
+
+Install gmp:
+```
+git clone https://github.com/sethtroisi/libgmp.git
+cd libgmp
+git checkout prev_prime
+./.bootstrap
+emconfigure ./configure --enable-static --disable-shared --host wasm32 --enable-cxx --libdir=/home/denis/programs/Math/yutovo/deploy/wasm/ --prefix=/home/denis/programs/Math/yutovo/deploy/
+make -sj4 && make install
+```
+
+Install mpfr:
+```
+git clone --branch=4.2.1 https://gitlab.inria.fr/mpfr/mpfr.git
+cd mpfr
+export CPPFLAGS='-pthread -s USE_PTHREADS=1 -s PTHREAD_POOL_SIZE=2'
+emconfigure ./configure --enable-static --host wasm32 --disable-shared --libdir=/home/denis/programs/Math/yutovo/deploy/wasm/ --prefix=/home/denis/programs/Math/yutovo/deploy/ --with-gmp-build=/home/denis/programs/Math/yutovo/third_party/libgmp/
+make -sj4 && make install
+```
+
+Clone the project in the yutovo dir (select another branch if you want):
+```
+cd yutovo
+git clone -b develop https://github.com/denprog/yutovo-calculator.git
+```
+Set these variables:
+
+```
+export YUTOVO_DEPLOY=~/yutovo/deploy
+source ~/emsdk/emsdk_env.sh
+```
+
+Build the project:
+
+```
+emcmake cmake -DCMAKE_BUILD_TYPE=Debug ../..
+make -sj && make install
+```
+
+## Building for Windows
+
+If you haven't yet, build [yutovo-logger](https://github.com/denprog/yutovo-logger).
+Install the requirements:
+
+```
+vcpkg install boost-iostreams gtest gmock mpfr
+```
+Clone the project in the yutovo dir (select another branch if you want):
+
+```
+cd yutovo
+git clone -b develop https://github.com/denprog/yutovo-calculator.git
+```
+
+Create the build directory:
+
+```
+cd yutovo-calculator
+mkdir -p build/debug
+cd build/debug
+```
+
+Build the project:
+
+```
+cmake -DCMAKE_BUILD_TYPE=Debug ../..
+make -sj && make install
+```
