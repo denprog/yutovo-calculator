@@ -824,6 +824,7 @@ struct Solver : public boost::static_visitor<Number>
 
         GetCastUnits(_id, val, U"SI", _cast_units);
         GetCastUnits(_id, val, U"rus", _cast_units);
+        GetCastUnits(_id, val, U"us", _cast_units);
         std::sort(_cast_units.begin(), _cast_units.end());
     }
 
