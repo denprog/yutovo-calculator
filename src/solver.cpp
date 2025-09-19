@@ -56,6 +56,46 @@ Array<Real> Solver<Array<Real>>::operator()(NumberNode<Array<Real>> const& op) c
 }
 
 template<>
+Array<Real> Solver<Array<Real>>::operator()(LineGraphNode<Array<Real>> const& op) const
+{
+    Array<Real> res;
+    Array<Real> x = (*this)(op.x_left);
+    PushTempVariable(op.identifier.name, x);
+    Array<Real> x_right, y_bottom, y_top;
+    Array<Real> inc = ((*this)(op.end_pos) - (*this)(op.start_pos)) / ((*this)(op.points_count));
+    try
+    {
+        x_right = (*this)(op.x_right);
+        y_bottom = (*this)(op.y_bottom);
+        y_top = (*this)(op.y_top);
+    }
+    catch (...)
+    {
+        PopTempVariables(1);
+        throw;
+    }
+
+    while (x < x_right)
+    {
+        try
+        {
+            Array<Real> val = (*this)(op.expression);
+            res.Add(val);
+            x += inc;
+            SetTempVariable(op.identifier.name, x);
+        }
+        catch (...)
+        {
+            Real nan;
+            nan.SetNaN();
+            res.Add(nan);
+        }
+    }
+    PopTempVariables(1);
+    return res;
+}
+
+template<>
 Real Solver<Real>::operator()(UnitNode<Real> const& op) const
 {
     //store the unit

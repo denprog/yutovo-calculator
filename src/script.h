@@ -11,6 +11,7 @@
 #include "ast.h"
 #include "expression.h"
 #include "definition.h"
+#include "graph.h"
 #include "error_handler.h"
 
 namespace yutovo_calculator
@@ -23,6 +24,7 @@ struct Script : qi::grammar<std::u32string::iterator, ScriptNode<Number>(), unic
 	Script(LogicalId id, std::u32string& expr, Solver<Number>* solver) : 
 		Script::base_type(script), 
 		definition(id, expr, solver), 
+		graph(id, expr, solver), 
 		expression(id, expr, solver)
 	{
 		using boost::spirit::qi::on_error;
@@ -31,6 +33,7 @@ struct Script : qi::grammar<std::u32string::iterator, ScriptNode<Number>(), unic
 
 		script = 
 			*(
+				(graph > ";") | 
 				(definition > ";") | 
 				(expression > ";")
 			);
@@ -40,6 +43,7 @@ struct Script : qi::grammar<std::u32string::iterator, ScriptNode<Number>(), unic
 	}
 
 	Definition<Number> definition;
+	Graph<Number> graph;
 	Expression<Number> expression;
 	qi::rule<std::u32string::iterator, ScriptNode<Number>(), unicode::space_type> script;
 };

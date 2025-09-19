@@ -57,6 +57,7 @@ add_library(${PROJECT_NAME}
     utils.cpp
     unit.cpp
     export.cpp
+    graph.cpp
 
     stdafx.h
     utils.h
@@ -78,6 +79,7 @@ add_library(${PROJECT_NAME}
     annotation.h
     export.h
     array.h
+    graph.h
 )
 
 if(EMSCRIPTEN)
@@ -148,6 +150,7 @@ install(
         utils.h
         unit.h
         export.h
+        graph.h
     DESTINATION ${INSTALL_PATH}/include/${PROJECT_NAME}
     COMPONENT ${PROJECT_NAME}
 )

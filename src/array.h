@@ -251,6 +251,26 @@ public:
         return res;
     }
 
+    void operator+=(const Array<Number>& num)
+    {
+        *this = *this + num;
+    }
+
+    void operator-=(const Array<Number>& num)
+    {
+        *this = *this - num;
+    }
+
+    void operator*=(const Array<Number>& num)
+    {
+        *this = *this * num;
+    }
+
+    void operator/=(const Array<Number>& num)
+    {
+        *this = *this / num;
+    }
+
 public:
     friend bool operator==(const Array<Number>& num1, const Array<Number>& num2)
     {
@@ -283,17 +303,38 @@ public:
 
     friend bool operator>(const Array<Number>& num1, const Array<Number>& num2)
     {
-        throw MathException(IncorrectComparison);
+        if (num1.numbers.size() != num2.numbers.size())
+            throw MathException(IncorrectComparison);
+        for (size_t i = 0; i < num1.numbers.size(); ++i)
+        {
+            if (num1.numbers[i] <= num2.numbers[i])
+                return false;
+        }
+        return true;
     }
 
     friend bool operator>=(const Array<Number>& num1, const Array<Number>& num2)
     {
-        throw MathException(IncorrectComparison);
+        if (num1.numbers.size() != num2.numbers.size())
+            throw MathException(IncorrectComparison);
+        for (size_t i = 0; i < num1.numbers.size(); ++i)
+        {
+            if (num1.numbers[i] < num2.numbers[i])
+                return false;
+        }
+        return true;
     }
 
     friend bool operator<(const Array<Number>& num1, const Array<Number>& num2)
     {
-        throw MathException(IncorrectComparison);
+        if (num1.numbers.size() != num2.numbers.size())
+            throw MathException(IncorrectComparison);
+        for (size_t i = 0; i < num1.numbers.size(); ++i)
+        {
+            if (num1.numbers[i] >= num2.numbers[i])
+                return false;
+        }
+        return true;
     }
 
     friend bool operator<=(const Array<Number>& num1, const Array<Number>& num2)

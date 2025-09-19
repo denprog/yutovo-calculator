@@ -191,6 +191,21 @@ struct Annotation
 		UpdatePosition(pos, op);
 	}
 
+	void operator()(BarGraphNode<Number>& op, std::u32string::iterator pos) const
+	{
+		UpdatePosition(pos, op);
+	}
+
+	void operator()(LineGraphNode<Number>& op, std::u32string::iterator pos) const
+	{
+		UpdatePosition(pos, op);
+	}
+
+	void operator()(GraphNode<Number>& op, std::u32string::iterator pos) const
+	{
+		UpdatePosition(pos, op);
+	}
+
 	template<typename Num>
 	struct OperandVisitor
 	{
@@ -299,6 +314,21 @@ struct Annotation
 		}
 
 		void operator()(VariableNode<Num> const& op) const
+		{
+			annotation->UpdatePosition(iter, op);
+		}
+
+		void operator()(LineGraphNode<Num> const& op) const
+		{
+			annotation->UpdatePosition(iter, op);
+		}
+
+		void operator()(BarGraphNode<Num> const& op) const
+		{
+			annotation->UpdatePosition(iter, op);
+		}
+
+		void operator()(GraphNode<Num> const& op) const
 		{
 			annotation->UpdatePosition(iter, op);
 		}
