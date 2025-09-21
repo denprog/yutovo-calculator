@@ -188,6 +188,15 @@ public:
         return res;
     }
 
+    friend Array<Number> operator+(const float num1, const Array<Number>& num2)
+    {
+        if (num2.numbers.size() != 1)
+            throw MathException(IncorrectOperation);
+        Array<Number> res(num2);
+        res.numbers[0] = num1 + num2.numbers[0];
+        return res;
+    }
+
     friend Array<Number> operator-(const Array<Number>& num1, const Array<Number>& num2)
     {
         if (num2.numbers.size() == 1 && num2 == 0)
@@ -206,6 +215,15 @@ public:
             throw MathException(IncorrectOperation);
         Array<Number> res(num1);
         res.numbers[0] -= num2;
+        return res;
+    }
+
+    friend Array<Number> operator-(const float num1, const Array<Number>& num2)
+    {
+        if (num2.numbers.size() != 1)
+            throw MathException(IncorrectOperation);
+        Array<Number> res(num2);
+        res.numbers[0] = num1 - num2.numbers[0];
         return res;
     }
 
@@ -230,6 +248,15 @@ public:
         return res;
     }
 
+    friend Array<Number> operator*(const float num1, const Array<Number>& num2)
+    {
+        if (num2.numbers.size() != 1)
+            throw MathException(IncorrectOperation);
+        Array<Number> res(num2);
+        res.numbers[0] = num1 * num2.numbers[0];
+        return res;
+    }
+
     friend Array<Number> operator/(const Array<Number>& num1, const Array<Number>& num2)
     {
         if (num2.numbers.size() == 1 && num2 == 1 && num2.numbers[0].unit.IsEmpty())
@@ -248,6 +275,15 @@ public:
             throw MathException(IncorrectOperation);
         Array<Number> res(num1);
         res.numbers[0] /= num2;
+        return res;
+    }
+
+    friend Array<Number> operator/(const float num1, const Array<Number>& num2)
+    {
+        if (num2.numbers.size() != 1)
+            throw MathException(IncorrectOperation);
+        Array<Number> res(num2);
+        res.numbers[0] = num1 / num2.numbers[0];
         return res;
     }
 

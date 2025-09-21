@@ -59,15 +59,21 @@ template<>
 Array<Real> Solver<Array<Real>>::operator()(LineGraphNode<Array<Real>> const& op) const
 {
     Array<Real> res;
-    Array<Real> x = (*this)(op.x_left);
+    Array<Real> x;
     PushTempVariable(op.identifier.name, x);
     Array<Real> x_right, y_bottom, y_top;
-    Array<Real> inc = ((*this)(op.end_pos) - (*this)(op.start_pos)) / ((*this)(op.points_count));
+    Array<Real> inc;
+    Array<Real> start_pos, end_pos;
     try
     {
+        x = (*this)(op.x_left);
+        SetTempVariable(op.identifier.name, x);
         x_right = (*this)(op.x_right);
         y_bottom = (*this)(op.y_bottom);
         y_top = (*this)(op.y_top);
+        start_pos = (*this)(op.start_pos);
+        end_pos = (*this)(op.end_pos);
+        inc = (x_right - x) / ((*this)(op.points_count));
     }
     catch (...)
     {
@@ -80,14 +86,24 @@ Array<Real> Solver<Array<Real>>::operator()(LineGraphNode<Array<Real>> const& op
         try
         {
             Array<Real> val = (*this)(op.expression);
+            res.Add(x);
             res.Add(val);
             x += inc;
             SetTempVariable(op.identifier.name, x);
+        }
+        catch (TimeExceedException)
+        {
+            break;
+        }
+        catch (BreakException)
+        {
+            break;
         }
         catch (...)
         {
             Real nan;
             nan.SetNaN();
+            res.Add(nan);
             res.Add(nan);
         }
     }
