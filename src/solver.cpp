@@ -81,30 +81,46 @@ Array<Real> Solver<Array<Real>>::operator()(LineGraphNode<Array<Real>> const& op
         throw;
     }
 
+    //the first items are bounds of the graph
+    res.Add(x);
+    res.Add(x_right);
+    res.Add(y_bottom);
+    res.Add(y_top);
+
+    //next items are points of the graph x, y
     while (x < x_right)
     {
         try
         {
-            Array<Real> val = (*this)(op.expression);
+            Array<Real> y = (*this)(op.expression);
             res.Add(x);
-            res.Add(val);
+            res.Add(y);
             x += inc;
             SetTempVariable(op.identifier.name, x);
         }
         catch (TimeExceedException)
         {
-            break;
+            PopTempVariables(1);
+            throw;
         }
         catch (BreakException)
         {
-            break;
+            PopTempVariables(1);
+            throw;
+        }
+        catch (SyntaxException)
+        {
+            PopTempVariables(1);
+            throw;
         }
         catch (...)
         {
             Real nan;
             nan.SetNaN();
+            res.Add(x);
             res.Add(nan);
-            res.Add(nan);
+            x += inc;
+            SetTempVariable(op.identifier.name, x);
         }
     }
     PopTempVariables(1);
