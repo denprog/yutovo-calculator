@@ -63,6 +63,12 @@ template<typename Number>
 struct ArrayNode;
 template<typename Number>
 struct ExpressionNode;
+template<typename Number>
+struct GraphNode;
+template<typename Number>
+struct LineGraphNode;
+template<typename Number>
+struct BarGraphNode;
 
 //Expression position
 struct ExpressionPosition
@@ -368,6 +374,41 @@ struct ExpressionNode : ExpressionPosition
 	std::list<OperationNode<Number>> rest;
 };
 
+//Line graph node
+template<typename Number>
+struct LineGraphNode : ExpressionPosition
+{
+	ExpressionNode<Number> expression;
+	IdentifierNode<Number> identifier;
+	ExpressionNode<Number> x_left;
+	ExpressionNode<Number> x_right;
+	ExpressionNode<Number> y_bottom;
+	ExpressionNode<Number> y_top;
+	NumberNode<Number> points_count;
+	NumberNode<Number> start_pos;
+	NumberNode<Number> end_pos;
+};
+
+//Bar graph node
+template<typename Number>
+struct BarGraphNode : ExpressionPosition
+{
+	ExpressionNode<Number> expression;
+	NumberNode<Number> points_count;
+};
+
+//Graph node
+template<typename Number>
+struct GraphNode : ExpressionPosition
+{
+	typedef boost::variant<
+		boost::recursive_wrapper<LineGraphNode<Number>>, 
+		boost::recursive_wrapper<BarGraphNode<Number>>> 
+		Graph;
+	
+	Graph graph;
+};
+
 //Script node.
 template<typename Number>
 struct ScriptNode
@@ -375,6 +416,7 @@ struct ScriptNode
 	typedef Number value_type;
 	typedef boost::variant<
 		boost::recursive_wrapper<DefinitionNode<Number>>, 
+		boost::recursive_wrapper<GraphNode<Number>>, 
 		boost::recursive_wrapper<ExpressionNode<Number>>> 
 		Operand;
 	
@@ -487,6 +529,24 @@ BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::LoopNode<yutovo_calculator::Integer
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::ArrayNode<yutovo_calculator::Integer>, 
 	(std::list<yutovo_calculator::ExpressionNode<yutovo_calculator::Integer>>, array))
 
+BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::LineGraphNode<yutovo_calculator::Integer>, 
+	(yutovo_calculator::ExpressionNode<yutovo_calculator::Integer>, expression)
+	(yutovo_calculator::IdentifierNode<yutovo_calculator::Integer>, identifier)
+	(yutovo_calculator::ExpressionNode<yutovo_calculator::Integer>, x_left)
+	(yutovo_calculator::ExpressionNode<yutovo_calculator::Integer>, x_right)
+	(yutovo_calculator::ExpressionNode<yutovo_calculator::Integer>, y_bottom)
+	(yutovo_calculator::ExpressionNode<yutovo_calculator::Integer>, y_top)
+	(yutovo_calculator::NumberNode<yutovo_calculator::Integer>, points_count)
+	(yutovo_calculator::NumberNode<yutovo_calculator::Integer>, start_pos)
+	(yutovo_calculator::NumberNode<yutovo_calculator::Integer>, end_pos))
+
+BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::BarGraphNode<yutovo_calculator::Integer>, 
+	(yutovo_calculator::ExpressionNode<yutovo_calculator::Integer>, expression)
+	(yutovo_calculator::NumberNode<yutovo_calculator::Integer>, points_count))
+
+BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::GraphNode<yutovo_calculator::Integer>, 
+	(yutovo_calculator::GraphNode<yutovo_calculator::Integer>::Graph, graph))
+
 //Real adaptors
 
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::UnaryOperationNode<yutovo_calculator::Real>, 
@@ -590,6 +650,24 @@ BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::LoopNode<yutovo_calculator::Real>,
 
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::ArrayNode<yutovo_calculator::Real>, 
 	(std::list<yutovo_calculator::ExpressionNode<yutovo_calculator::Real>>, array))
+
+BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::LineGraphNode<yutovo_calculator::Real>, 
+	(yutovo_calculator::ExpressionNode<yutovo_calculator::Real>, expression)
+	(yutovo_calculator::IdentifierNode<yutovo_calculator::Real>, identifier)
+	(yutovo_calculator::ExpressionNode<yutovo_calculator::Real>, x_left)
+	(yutovo_calculator::ExpressionNode<yutovo_calculator::Real>, x_right)
+	(yutovo_calculator::ExpressionNode<yutovo_calculator::Real>, y_bottom)
+	(yutovo_calculator::ExpressionNode<yutovo_calculator::Real>, y_top)
+	(yutovo_calculator::NumberNode<yutovo_calculator::Real>, points_count)
+	(yutovo_calculator::NumberNode<yutovo_calculator::Real>, start_pos)
+	(yutovo_calculator::NumberNode<yutovo_calculator::Real>, end_pos))
+
+BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::BarGraphNode<yutovo_calculator::Real>, 
+	(yutovo_calculator::ExpressionNode<yutovo_calculator::Real>, expression)
+	(yutovo_calculator::NumberNode<yutovo_calculator::Real>, points_count))
+
+BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::GraphNode<yutovo_calculator::Real>, 
+	(yutovo_calculator::GraphNode<yutovo_calculator::Real>::Graph, graph))
 
 //Rational adaptors
 
@@ -695,6 +773,24 @@ BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::LoopNode<yutovo_calculator::Rationa
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::ArrayNode<yutovo_calculator::Rational>, 
 	(std::list<yutovo_calculator::ExpressionNode<yutovo_calculator::Rational>>, array))
 
+BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::LineGraphNode<yutovo_calculator::Rational>, 
+	(yutovo_calculator::ExpressionNode<yutovo_calculator::Rational>, expression)
+	(yutovo_calculator::IdentifierNode<yutovo_calculator::Rational>, identifier)
+	(yutovo_calculator::ExpressionNode<yutovo_calculator::Rational>, x_left)
+	(yutovo_calculator::ExpressionNode<yutovo_calculator::Rational>, x_right)
+	(yutovo_calculator::ExpressionNode<yutovo_calculator::Rational>, y_bottom)
+	(yutovo_calculator::ExpressionNode<yutovo_calculator::Rational>, y_top)
+	(yutovo_calculator::NumberNode<yutovo_calculator::Rational>, points_count)
+	(yutovo_calculator::NumberNode<yutovo_calculator::Rational>, start_pos)
+	(yutovo_calculator::NumberNode<yutovo_calculator::Rational>, end_pos))
+
+BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::BarGraphNode<yutovo_calculator::Rational>, 
+	(yutovo_calculator::ExpressionNode<yutovo_calculator::Rational>, expression)
+	(yutovo_calculator::NumberNode<yutovo_calculator::Rational>, points_count))
+
+BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::GraphNode<yutovo_calculator::Rational>, 
+	(yutovo_calculator::GraphNode<yutovo_calculator::Rational>::Graph, graph))
+
 //Complex adaptors
 
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::UnaryOperationNode<yutovo_calculator::Complex>, 
@@ -799,6 +895,24 @@ BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::LoopNode<yutovo_calculator::Complex
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::ArrayNode<yutovo_calculator::Complex>, 
 	(std::list<yutovo_calculator::ExpressionNode<yutovo_calculator::Complex>>, array))
 
+BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::LineGraphNode<yutovo_calculator::Complex>, 
+	(yutovo_calculator::ExpressionNode<yutovo_calculator::Complex>, expression)
+	(yutovo_calculator::IdentifierNode<yutovo_calculator::Complex>, identifier)
+	(yutovo_calculator::ExpressionNode<yutovo_calculator::Complex>, x_left)
+	(yutovo_calculator::ExpressionNode<yutovo_calculator::Complex>, x_right)
+	(yutovo_calculator::ExpressionNode<yutovo_calculator::Complex>, y_bottom)
+	(yutovo_calculator::ExpressionNode<yutovo_calculator::Complex>, y_top)
+	(yutovo_calculator::NumberNode<yutovo_calculator::Complex>, points_count)
+	(yutovo_calculator::NumberNode<yutovo_calculator::Complex>, start_pos)
+	(yutovo_calculator::NumberNode<yutovo_calculator::Complex>, end_pos))
+
+BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::BarGraphNode<yutovo_calculator::Complex>, 
+	(yutovo_calculator::ExpressionNode<yutovo_calculator::Complex>, expression)
+	(yutovo_calculator::NumberNode<yutovo_calculator::Complex>, points_count))
+
+BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::GraphNode<yutovo_calculator::Complex>, 
+	(yutovo_calculator::GraphNode<yutovo_calculator::Complex>::Graph, graph))
+
 //Array<Real> adaptors
 
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::UnaryOperationNode<yutovo_calculator::Array<yutovo_calculator::Real>>, 
@@ -902,5 +1016,23 @@ BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::LoopNode<yutovo_calculator::Array<y
 
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::ArrayNode<yutovo_calculator::Array<yutovo_calculator::Real>>, 
 	(std::list<yutovo_calculator::ExpressionNode<yutovo_calculator::Array<yutovo_calculator::Real>>>, array))
+
+BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::LineGraphNode<yutovo_calculator::Array<yutovo_calculator::Real>>, 
+	(yutovo_calculator::ExpressionNode<yutovo_calculator::Array<yutovo_calculator::Real>>, expression)
+	(yutovo_calculator::IdentifierNode<yutovo_calculator::Array<yutovo_calculator::Real>>, identifier)
+	(yutovo_calculator::ExpressionNode<yutovo_calculator::Array<yutovo_calculator::Real>>, x_left)
+	(yutovo_calculator::ExpressionNode<yutovo_calculator::Array<yutovo_calculator::Real>>, x_right)
+	(yutovo_calculator::ExpressionNode<yutovo_calculator::Array<yutovo_calculator::Real>>, y_bottom)
+	(yutovo_calculator::ExpressionNode<yutovo_calculator::Array<yutovo_calculator::Real>>, y_top)
+	(yutovo_calculator::NumberNode<yutovo_calculator::Array<yutovo_calculator::Real>>, points_count)
+	(yutovo_calculator::NumberNode<yutovo_calculator::Array<yutovo_calculator::Real>>, start_pos)
+	(yutovo_calculator::NumberNode<yutovo_calculator::Array<yutovo_calculator::Real>>, end_pos))
+
+BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::BarGraphNode<yutovo_calculator::Array<yutovo_calculator::Real>>, 
+	(yutovo_calculator::ExpressionNode<yutovo_calculator::Array<yutovo_calculator::Real>>, expression)
+	(yutovo_calculator::NumberNode<yutovo_calculator::Array<yutovo_calculator::Real>>, points_count))
+
+BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::GraphNode<yutovo_calculator::Array<yutovo_calculator::Real>>, 
+	(yutovo_calculator::GraphNode<yutovo_calculator::Array<yutovo_calculator::Real>>::Graph, graph))
 
 #endif

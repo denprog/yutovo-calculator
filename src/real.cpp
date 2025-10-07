@@ -2117,6 +2117,8 @@ void Real::ToString(int exp, int accuracy, bool& mantissa_sign, std::string& man
 
 std::u32string Real::ToString(int exp, int accuracy, bool with_unit) const
 {
+    if (IsNaN())
+        return U"NAN";
     bool mantissa_sign;
     std::u32string mantissa;
     bool exponent_sign;

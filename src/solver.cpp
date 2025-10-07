@@ -56,6 +56,78 @@ Array<Real> Solver<Array<Real>>::operator()(NumberNode<Array<Real>> const& op) c
 }
 
 template<>
+Array<Real> Solver<Array<Real>>::operator()(LineGraphNode<Array<Real>> const& op) const
+{
+    Array<Real> res;
+    Array<Real> x;
+    PushTempVariable(op.identifier.name, x);
+    Array<Real> x_right, y_bottom, y_top;
+    Array<Real> inc;
+    Array<Real> start_pos, end_pos;
+    try
+    {
+        x = (*this)(op.x_left);
+        SetTempVariable(op.identifier.name, x);
+        x_right = (*this)(op.x_right);
+        y_bottom = (*this)(op.y_bottom);
+        y_top = (*this)(op.y_top);
+        start_pos = (*this)(op.start_pos);
+        end_pos = (*this)(op.end_pos);
+        inc = (x_right - x) / ((*this)(op.points_count));
+    }
+    catch (...)
+    {
+        PopTempVariables(1);
+        throw;
+    }
+
+    //the first items are bounds of the graph
+    res.Add(x);
+    res.Add(x_right);
+    res.Add(y_bottom);
+    res.Add(y_top);
+
+    //next items are points of the graph x, y
+    while (x < x_right)
+    {
+        try
+        {
+            Array<Real> y = (*this)(op.expression);
+            res.Add(x);
+            res.Add(y);
+            x += inc;
+            SetTempVariable(op.identifier.name, x);
+        }
+        catch (TimeExceedException)
+        {
+            PopTempVariables(1);
+            throw;
+        }
+        catch (BreakException)
+        {
+            PopTempVariables(1);
+            throw;
+        }
+        catch (SyntaxException)
+        {
+            PopTempVariables(1);
+            throw;
+        }
+        catch (...)
+        {
+            Real nan;
+            nan.SetNaN();
+            res.Add(x);
+            res.Add(nan);
+            x += inc;
+            SetTempVariable(op.identifier.name, x);
+        }
+    }
+    PopTempVariables(1);
+    return res;
+}
+
+template<>
 Real Solver<Real>::operator()(UnitNode<Real> const& op) const
 {
     //store the unit

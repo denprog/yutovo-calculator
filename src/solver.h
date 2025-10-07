@@ -172,6 +172,21 @@ struct Solver : public boost::static_visitor<Number>
         return Number();
     }
 
+    Number operator()(GraphNode<Number> const& op) const
+    {
+        return boost::apply_visitor(*this, op.graph);
+    }
+
+    Number operator()(LineGraphNode<Number> const& op) const
+    {
+        throw MathException(op.id, IncorrectOperation, op.pos, 1, op.line);
+    }
+
+    Number operator()(BarGraphNode<Number> const& op) const
+    {
+        return Number();
+    }
+
     Number operator()(VariableNode<Number> const& op) const
     {
         //store the variable
@@ -1403,8 +1418,6 @@ private:
 
         //there is no such a function		
         throw SyntaxException(op.id, UnknownIdentifier, op.pos, op.line);
-        
-        return res;
     }
 
     Number NoFencesFunctionCall(NoFencesFunctionCallNode<Number> const& op) const
@@ -1435,8 +1448,6 @@ private:
 
         //there is no such a function
         throw SyntaxException(op.id, UnknownIdentifier, U"Identifier '" + op.name.name + U"' not found", op.pos, op.line);
-        
-        return res;
     }
 
     int FromUtfString(const std::u32string& str) const
