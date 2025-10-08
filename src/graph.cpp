@@ -22,7 +22,7 @@ Graph<Array<Real>>::Graph(LogicalId id, std::u32string& expr, Solver<Array<Real>
     graph = line_graph | bar_graph;
 
     line_graph = "graph_line(" >> expression >> ',' >> identifier >> ',' >> expression >> ',' >> expression >> ',' >> 
-        expression >> ',' >> expression >> ',' >> number >> ',' >> number >> ',' >> number >> ')';
+        expression >> ',' >> expression >> ',' >> number >> ')';
 
     bar_graph = "graph_bar(" > expression > ',' > number > ')';
     

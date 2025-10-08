@@ -71,8 +71,6 @@ Array<Real> Solver<Array<Real>>::operator()(LineGraphNode<Array<Real>> const& op
         x_right = (*this)(op.x_right);
         y_bottom = (*this)(op.y_bottom);
         y_top = (*this)(op.y_top);
-        start_pos = (*this)(op.start_pos);
-        end_pos = (*this)(op.end_pos);
         inc = (x_right - x) / ((*this)(op.points_count));
     }
     catch (...)
@@ -90,6 +88,8 @@ Array<Real> Solver<Array<Real>>::operator()(LineGraphNode<Array<Real>> const& op
     //next items are points of the graph x, y
     while (x < x_right)
     {
+        if (parser_context)
+            parser_context->ReInit();
         try
         {
             Array<Real> y = (*this)(op.expression);

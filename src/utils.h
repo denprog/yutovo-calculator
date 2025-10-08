@@ -66,9 +66,10 @@ struct ParserContext
 {
     ParserContext();
 
-    void Init(uint64_t max_time)
+    void Init(uint64_t _max_time)
     {
         break_solving = false;
+        max_time = _max_time;
 
         if (max_time == 0)
         {
@@ -81,8 +82,16 @@ struct ParserContext
         end_time = now + max_time;
     }
 
+    void ReInit()
+    {
+        uint64_t now;
+        GetThreadTime(now);
+        end_time = now + max_time;
+    }
+
     std::atomic<bool> break_solving{false};
     uint64_t end_time = 0; //solve before this time or rise TimeExceedException
+    uint64_t max_time = 0;
     bool no_result = false;
     bool include_document = false;
     std::shared_ptr<Export> exports;

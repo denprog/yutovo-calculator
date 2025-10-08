@@ -116,12 +116,10 @@ bool IsLess(const LogicalId& id1, const LogicalId& id2)
 
 void CheckBreak(ParserContext* parser_context)
 {
-	if (!parser_context)
+	if (!parser_context || parser_context->end_time == 0)
 		return;
     if (parser_context->break_solving)
         throw BreakException();
-    if (parser_context->end_time == 0)
-        return;
     
     uint64_t now;
     GetThreadTime(now);
