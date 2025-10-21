@@ -64,6 +64,9 @@ Array<Real> Solver<Array<Real>>::operator()(LineGraphNode<Array<Real>> const& op
     Array<Real> x_right, y_bottom, y_top;
     Array<Real> inc;
     Array<Real> start_pos, end_pos;
+    Real nan;
+    nan.SetNaN();
+
     try
     {
         x = (*this)(op.x_left);
@@ -84,45 +87,133 @@ Array<Real> Solver<Array<Real>>::operator()(LineGraphNode<Array<Real>> const& op
     res.Add(x_right);
     res.Add(y_bottom);
     res.Add(y_top);
+    Array<Real> y;
+
+    auto add_points = 
+        [&](int pos = -1)
+        {
+            try
+            {
+                y = (*this)(op.expression);
+                if (pos == -1)
+                {
+                    res.Add(x);
+                    res.Add(y);
+                }
+                else
+                {
+                    res.Insert(pos, x);
+                    res.Insert(pos + 1, y);
+                }
+            }
+            catch (TimeExceedException)
+            {
+                PopTempVariables(1);
+                throw;
+            }
+            catch (BreakException)
+            {
+                PopTempVariables(1);
+                throw;
+            }
+            catch (SyntaxException)
+            {
+                PopTempVariables(1);
+                throw;
+            }
+            catch (...)
+            {
+                res.Add(x);
+                res.Add(nan);
+            }
+        };
 
     //next items are points of the graph x, y
     while (x < x_right)
     {
         if (parser_context)
             parser_context->ReInit();
-        try
+        
+        SetTempVariable(op.identifier.name, x);
+        add_points();
+
+        if (res.Size() > 6)
         {
-            Array<Real> y = (*this)(op.expression);
-            res.Add(x);
-            res.Add(y);
-            x += inc;
-            SetTempVariable(op.identifier.name, x);
+            bool gap = false;
+            try
+            {
+                auto r = abs(res.Get(res.Size() - 1) - res.Get(res.Size() - 3));
+                if (r > (y_top - y_bottom) / 10)
+                    gap = true;
+            }
+            catch (MathException)
+            {
+            }
+
+            if (gap)
+            {
+                //fix the wrong vertical lines - insert intermediate points
+                const int p = 20;
+                int i = 0;
+                auto _x = x;
+                auto y1 = res.Get(res.Size() - 3);
+                auto y2 = res.Get(res.Size() - 1);
+                if (y1 > y2)
+                {
+                    auto x1 = _x - inc;
+                    x -= inc - inc / p;
+                    while (y1 < y_top && i++ <= p / 2)
+                    {
+                        x = x1 + (inc / p) * i;
+                        SetTempVariable(op.identifier.name, x);
+                        add_points(res.Size() - 2);
+                        y1 = res.Get(res.Size() - 3);
+                    }
+
+                    res.Insert(res.Size() - 2, x);
+                    res.Insert(res.Size() - 2, nan);
+
+                    i = 0;
+                    x = _x - inc / p;
+                    while (y2 > y_bottom && i++ < p / 2)
+                    {
+                        SetTempVariable(op.identifier.name, x);
+                        add_points(res.Size() - i * 2);
+                        x -= inc / p;
+                        y2 = res.Get(res.Size() - (i + 1) * 2 + 1);
+                    }
+                }
+                else
+                {
+                    auto x1 = _x - inc;
+                    x -= inc - inc / p;
+                    while (y1 > y_bottom && i++ <= p / 2)
+                    {
+                        x = x1 + (inc / p) * i;
+                        SetTempVariable(op.identifier.name, x);
+                        add_points(res.Size() - 2);
+                        y1 = res.Get(res.Size() - 3);
+                    }
+
+                    res.Insert(res.Size() - 2, x);
+                    res.Insert(res.Size() - 2, nan);
+
+                    i = 0;
+                    x = _x - inc / p;
+                    while (y2 < y_top && i++ < p / 2)
+                    {
+                        SetTempVariable(op.identifier.name, x);
+                        add_points(res.Size() - i * 2);
+                        x -= inc / p;
+                        y2 = res.Get(res.Size() - (i + 1) * 2 + 1);
+                    }
+                }
+            }
         }
-        catch (TimeExceedException)
-        {
-            PopTempVariables(1);
-            throw;
-        }
-        catch (BreakException)
-        {
-            PopTempVariables(1);
-            throw;
-        }
-        catch (SyntaxException)
-        {
-            PopTempVariables(1);
-            throw;
-        }
-        catch (...)
-        {
-            Real nan;
-            nan.SetNaN();
-            res.Add(x);
-            res.Add(nan);
-            x += inc;
-            SetTempVariable(op.identifier.name, x);
-        }
+
+        x += inc;
     }
+
     PopTempVariables(1);
     return res;
 }

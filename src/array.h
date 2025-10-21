@@ -648,6 +648,11 @@ public:
         numbers.insert(numbers.end(), number.numbers.begin(), number.numbers.end());
     }
 
+    void Insert(const int pos, const Array<Number>& number)
+    {
+        numbers.insert(numbers.begin() + pos, number.numbers.begin(), number.numbers.end());
+    }
+    
     void Clear()
     {
         numbers.clear();
