@@ -246,6 +246,14 @@ TEST_F(CalcTestArrayReal, graph2)
         res.ToStdString(3, 3).substr(0, 100);
 }
 
+TEST_F(CalcTestArrayReal, graph3)
+{
+    yutovo_calculator::ParserContext parser_context;
+    parser_context.Init(100);
+    EXPECT_THROW(parser.Parse(LogicalId{0, 0, 1}, U"graph_line(sin(x),x,1,1,0,100,100);", &parser_context), yutovo_calculator::MathException);
+    EXPECT_THROW(parser.Parse(LogicalId{0, 0, 1}, U"graph_line(sin(x),x,-1,1,10,10,10);", &parser_context), yutovo_calculator::MathException);
+}
+
 TEST_F(CalcTestArrayReal, units1)
 {
     parser.SetLocale(Language::Russian);

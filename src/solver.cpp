@@ -82,6 +82,9 @@ Array<Real> Solver<Array<Real>>::operator()(LineGraphNode<Array<Real>> const& op
         throw;
     }
 
+    if (x == x_right || y_bottom == y_top)
+        throw MathException(IncorrectOperation);
+    
     //the first items are bounds of the graph
     res.Add(x);
     res.Add(x_right);
