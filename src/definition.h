@@ -50,11 +50,12 @@ struct Definition : qi::grammar<std::u32string::iterator, DefinitionNode<Number>
 
         description = raw[lexeme[+(alnum | '_' | ' ')]];
 
-        //identifier is a name with an optional subscript and optional description
-        identifier = name >> -('{' > (+char_("0-9") | name) > '}') >> -('`' > description > '`');
-        
-        //name is a letter-numeric std::u32string with an letter in the beginning
-        name = (raw[lexeme[(alpha | char_(U'°') | char_(U'\'') | char_(U'_') | char_(U'¢')) >> *(alnum | char_(U'\'') | char_(U'_'))]]);
+		//identifier is a name with an optional subscript and optional description
+		identifier = name >> -('{' > (+char_("0-9") | name) > '}') >> -('`' > description > '`');
+		
+		//name is a letter-numeric std::u32string with an letter in the beginning
+		//0x00B0 = U'°', 39 = U'\'', 0x00A2 = U'¢'
+		name = (raw[lexeme[(alpha | char_(0x00B0) | char_(39) | char_(U'_') | char_(0x00A2)) >> *(alnum | char_(39) | char_(U'_'))]]);
 
         // BOOST_SPIRIT_DEBUG_NODE(definition);
         // BOOST_SPIRIT_DEBUG_NODE(function);
