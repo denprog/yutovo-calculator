@@ -1113,6 +1113,8 @@ private:
             _cast_units = it->second;
         else
             GetCastUnits(_id, val, system, _cast_units);
+        Number eps;
+        eps = 0.999;
 
         for (Number& c : _cast_units)
         {
@@ -1127,7 +1129,7 @@ private:
                 {
                     if (!(res.unit.unit.size() == 1 && res.unit.unit[0].first.size() < c.unit.unit[0].first.size()))
                     {
-                        if (s > 1 || m2 < m || res.unit.unit[0].second < 1 || (m2 == m && (c < res || res < 1) && c >= 1))
+                        if (s > 1 || m2 < m || res.unit.unit[0].second < 1 || (m2 == m && (c < res || res < 1) && c >= eps))
                         {
                             res = c;
                             m = m2;

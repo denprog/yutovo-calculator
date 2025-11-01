@@ -43,6 +43,7 @@ public:
 public:
     Complex& operator=(const Complex& source);
     Complex& operator=(const int num);
+    Complex& operator=(const double num);
     Complex& operator=(const std::u32string& source);
 
     Complex operator+();

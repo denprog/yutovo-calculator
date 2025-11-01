@@ -392,6 +392,17 @@ void Rational::operator/=(const Rational& num)
 void Rational::operator=(const int num)
 {
     mpq_set_si(number, num, 1);
+#ifdef TRACE_OUTPUT
+    UpdateNumberStr();
+#endif
+}
+
+void Rational::operator=(const double num)
+{
+    mpq_set_d(number, num);
+#ifdef TRACE_OUTPUT
+    UpdateNumberStr();
+#endif
 }
 
 Rational::operator int() const

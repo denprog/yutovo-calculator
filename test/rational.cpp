@@ -527,6 +527,15 @@ TEST_F(CalcTestRational, units21)
     ASSERT_TRUE(t == "5((km)/(hora))") << t;
 }
 
+TEST_F(CalcTestRational, units22)
+{
+    parser.SetLocale(Language::Russian);
+    std::string s = parser.GetSuitableUnit(LogicalId{0, 0, 0, 0, 1}, parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"(1)/(1*Гц*1*мкФ);")).ToStdString();
+    ASSERT_TRUE(s == "1(МОм)") << s;
+    s = parser.GetSuitableUnit(LogicalId{0, 0, 0, 0, 1}, parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"(1)/(Гц*мкФ);")).ToStdString();
+    ASSERT_TRUE(s == "1(МОм)") << s;
+}
+
 TEST_F(CalcTestRational, compare1)
 {
     std::string s = parser.Parse(LogicalId{0, 0, 0, 0, 0, 0, 0, 2, 0}, U"(0<(2/3));").ToStdString();

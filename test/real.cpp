@@ -1546,6 +1546,15 @@ TEST_F(CalcTestReal, units72)
     ASSERT_TRUE(s == "2.E+0(pulgada){us}") << s;
 }
 
+TEST_F(CalcTestReal, units73)
+{
+    parser.SetLocale(Language::Russian);
+    std::string s = parser.GetSuitableUnit(LogicalId{0, 0, 0, 0, 1}, parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"(1)/(1*Гц*1*мкФ);")).ToStdString(3, 3);
+    ASSERT_TRUE(s == "1.E+0(МОм)") << s;
+    s = parser.GetSuitableUnit(LogicalId{0, 0, 0, 0, 1}, parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"(1)/(Гц*мкФ);")).ToStdString(3, 3);
+    ASSERT_TRUE(s == "1.E+0(МОм)") << s;
+}
+
 TEST_F(CalcTestReal, compare1)
 {
     std::string s = parser.Parse(LogicalId{0, 0, 0, 0, 0, 0, 0, 2, 0}, U"(0<10);").ToStdString(3, 3);

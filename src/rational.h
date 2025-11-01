@@ -65,6 +65,7 @@ public:
 
 public:
     void operator=(const int num);
+    void operator=(const double num);
     
     operator int() const;
 

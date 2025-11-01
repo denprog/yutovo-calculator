@@ -124,6 +124,18 @@ Complex& Complex::operator=(const int num)
     return *this;
 }
 
+Complex& Complex::operator=(const double num)
+{
+    re = num;
+    im = 0;
+
+#ifdef TRACE_OUTPUT
+    UpdateNumberStr();
+#endif
+
+    return *this;
+}
+
 Complex& Complex::operator=(const std::u32string& source)
 {
     re = source;
