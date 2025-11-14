@@ -439,10 +439,13 @@ struct Solver : public boost::static_visitor<Number>
             }
         }
         var.id = id;
-        if (j == -1)
-            symbols->variables.push_back(var);
-        else
-            symbols->variables.insert(symbols->variables.begin() + j, var);
+        if (!parser_context || (parser_context && parser_context->exports && !parser_context->include_document))
+        {
+            if (j == -1)
+                symbols->variables.push_back(var);
+            else
+                symbols->variables.insert(symbols->variables.begin() + j, var);
+        }
 
         (*this)(var.expression); //for adding dependencies and throwing exceptions
         if (parser_context && parser_context->exports && parser_context->include_document)
@@ -463,10 +466,11 @@ struct Solver : public boost::static_visitor<Number>
         Number res = (*this)(unit.expression);
         auto c = CustomUnit<Number>(id, unit.name.name, unit.name.subscript, res, symbols->buildin_elements);
         c.description = unit.name.description;
-        symbols->units.emplace_back(c);
 
         if (parser_context && parser_context->exports && parser_context->include_document)
             parser_context->exports->AddUnit<Number>(c);
+        else
+            symbols->units.emplace_back(c);
     }
 
     VariableNode<Number>* FindVariable(const std::u32string& name, const std::u32string& subscript) const
@@ -551,14 +555,18 @@ struct Solver : public boost::static_visitor<Number>
                 }
             }
         }
+
         func.id = id;
-        if (j == -1)
-            symbols->functions.push_back((FunctionNode<Number>&)func);
-        else
-            symbols->functions.insert(symbols->functions.begin() + j, (FunctionNode<Number>&)func);
 
         if (parser_context && parser_context->exports && parser_context->include_document)
             parser_context->exports->AddFunction<Number>(func);
+        else
+        {
+            if (j == -1)
+                symbols->functions.push_back((FunctionNode<Number>&)func);
+            else
+                symbols->functions.insert(symbols->functions.begin() + j, (FunctionNode<Number>&)func);
+        }
 
         //parse for adding dependencies
         Number arg;
