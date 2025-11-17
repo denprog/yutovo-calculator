@@ -1370,7 +1370,7 @@ private:
                     Number arg = (*this)(*iter);
                     return (*u)(arg);
                 }
-                catch (boost::bad_get)
+                catch (const boost::bad_get&)
                 {
                 }
 
@@ -1386,7 +1386,7 @@ private:
                         arg.SetAngleMeasure(default_angle_measure);
                     return (*u)(arg, res_pos);
                 }
-                catch (boost::bad_get)
+                catch (const boost::bad_get&)
                 {
                 }
 
@@ -1401,7 +1401,7 @@ private:
                     Number arg2 = (*this)(*iter);
                     return (*b)(arg1, arg2);
                 }
-                catch (boost::bad_get)
+                catch (const boost::bad_get&)
                 {
                 }
 
@@ -1416,7 +1416,7 @@ private:
                     Number arg2 = (*this)(*iter);
                     return (*b)(arg1, arg2, res_pos);
                 }
-                catch (boost::bad_get)
+                catch (const boost::bad_get&)
                 {
                 }
             }
