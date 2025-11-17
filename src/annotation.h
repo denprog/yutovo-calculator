@@ -67,8 +67,6 @@ struct Annotation
 			if (ch == U'\r')
 			{
 				++k;
-				if (ch == U'\n')
-					++k;
 				++j;
 			}
 		
