@@ -75,13 +75,11 @@ struct ExpressionPosition
 {
 	ExpressionPosition()
 	{
-		pos = -1;
-		line = -1;
 	}
 	
-	LogicalId id;
-	int pos; //position in a line
-	int line; //line number
+	mutable LogicalId id;
+	int pos = -1; //position in a line
+	int line = -1; //line number
 };
 
 //Identifier node
@@ -249,7 +247,6 @@ struct ImplicitMulNode : ExpressionPosition
 template<typename Number>
 struct VariableNode : ExpressionPosition
 {
-	mutable LogicalId id;
 	IdentifierNode<Number> name;
 	ExpressionNode<Number> expression;
 	bool exported = false;
@@ -258,7 +255,6 @@ struct VariableNode : ExpressionPosition
 template<typename Number>
 struct FunctionNode : ExpressionPosition
 {
-	mutable LogicalId id;
 	IdentifierNode<Number> name;
 	std::list<IdentifierNode<Number>> arguments;
 	ExpressionNode<Number> return_expression;
@@ -268,7 +264,6 @@ struct FunctionNode : ExpressionPosition
 template<typename Number>
 struct UnitNode : ExpressionPosition
 {
-	mutable LogicalId id;
 	IdentifierNode<Number> name;
 	ExpressionNode<Number> expression;
 };

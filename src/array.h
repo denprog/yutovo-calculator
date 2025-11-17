@@ -113,9 +113,9 @@ public:
         numbers.emplace_back(num);
     }
 
-    Array(const Array& source)
+    Array(const Array& source) :
+        numbers(source.numbers)
     {
-        numbers = source.numbers;
     }
 
 public:

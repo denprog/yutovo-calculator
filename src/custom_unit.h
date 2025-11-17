@@ -14,7 +14,7 @@ namespace yutovo_calculator
 template<typename Number>
 struct CustomUnit
 {
-    CustomUnit(const LogicalId _id, const std::u32string _name, const std::u32string _system, Number _value, bool _buildin) :
+    CustomUnit(const LogicalId _id, const std::u32string& _name, const std::u32string& _system, Number _value, bool _buildin) :
         id(_id),
         name(_name),
         system(_system),

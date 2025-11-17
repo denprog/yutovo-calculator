@@ -25,28 +25,28 @@ public:
     {
     }
 
-    Unit(const std::u32string& name)
+    Unit(const std::u32string& name) : 
+        system(U"SI")
     {
-        system = U"SI";
         unit.push_back(std::make_pair(name, 1));
     }
 
-    Unit(const std::u32string& name, const int power)
+    Unit(const std::u32string& name, const int power) :
+        system(U"SI")
     {
-        system = U"SI";
         unit.push_back(std::make_pair(name, power));
     }
 
     Unit(const std::u32string& name, const std::u32string& _description, const int power) :
-        description(_description)
+        description(_description), 
+        system(U"SI")
     {
-        system = U"SI";
         unit.push_back(std::make_pair(name, power));
     }
 
-    Unit(const std::u32string& numerator, const std::u32string& denomerator)
+    Unit(const std::u32string& numerator, const std::u32string& denomerator) :
+        system(U"SI")
     {
-        system = U"SI";
         unit.push_back(std::make_pair(numerator, 1));
         unit.push_back(std::make_pair(denomerator, -1));
     }

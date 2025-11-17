@@ -112,12 +112,12 @@ struct SyntaxException : public ParserException
 	{
 	}
 
-	SyntaxException(LogicalId _id, ParserExceptionCode _ex_id, std::u32string _description, int _pos, int _line) : 
+	SyntaxException(LogicalId _id, ParserExceptionCode _ex_id, const std::u32string& _description, int _pos, int _line) : 
 		ParserException(_id, _ex_id, _description, _pos, _line)
 	{
 	}
 
-	SyntaxException(LogicalId _id, ParserExceptionCode _ex_id, std::u32string _description, int _pos, int _size, int _line) : 
+	SyntaxException(LogicalId _id, ParserExceptionCode _ex_id, const std::u32string& _description, int _pos, int _size, int _line) : 
 		ParserException(_id, _ex_id, _description, _pos, _size, _line)
 	{
 	}

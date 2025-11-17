@@ -83,11 +83,10 @@ Complex::Complex(const Real& _re, const Real& _im) : re(_re), im(_im)
 #endif
 }
 
-Complex::Complex(const Complex& source)
+Complex::Complex(const Complex& source) : 
+    re(source.re),
+    im(source.im)
 {
-    re = source.re;
-    im = source.im;
-
 #ifdef TRACE_OUTPUT
     UpdateNumberStr();
 #endif

@@ -119,7 +119,7 @@ struct Solver : public boost::static_visitor<Number>
             symbols.reset(new SolverSymbols<Number>());
     }
 
-    Solver(int _precision, AngleMeasure _default_angle_measure, AngleMeasure _result_angle_measure, int _default_notation, std::u32string _im, 
+    Solver(int _precision, AngleMeasure _default_angle_measure, AngleMeasure _result_angle_measure, int _default_notation, const std::u32string& _im, 
         Number _left_value = Number(), std::shared_ptr<SolverSymbols<Number>> _symbols = nullptr) :
         precision(_precision),
         default_angle_measure(_default_angle_measure),
