@@ -909,7 +909,7 @@ struct Solver : public boost::static_visitor<Number>
         for (size_t i = 0; i < symbols->units.size(); ++i)
         {
             CustomUnit<Number>& custom_unit = symbols->units[i];
-            if (!custom_unit.buildin && !IsLess(custom_unit.id, _id))
+            if ((!custom_unit.buildin && !IsLess(custom_unit.id, _id)) || custom_unit.value.unit.IsEmpty())
                 continue;
             Number t = val;
             if (custom_unit.system == system)
@@ -962,7 +962,7 @@ struct Solver : public boost::static_visitor<Number>
         for (size_t i = 0; i < symbols->units.size(); ++i)
         {
             CustomUnit<Number>& custom_unit = symbols->units[i];
-            if (!custom_unit.buildin && !IsLess(custom_unit.id, _id))
+            if ((!custom_unit.buildin && !IsLess(custom_unit.id, _id)) || custom_unit.value.unit.IsEmpty())
                 continue;
             if (custom_unit.system == system)
             {

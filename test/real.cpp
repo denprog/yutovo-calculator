@@ -1555,6 +1555,37 @@ TEST_F(CalcTestReal, units73)
     ASSERT_TRUE(s == "1.E+0(МОм)") << s;
 }
 
+TEST_F(CalcTestReal, units74)
+{
+    parser.SetLocale(Language::English);
+    std::string s = parser.GetSuitableUnit(LogicalId{0, 0, 0, 0, 1}, parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"0.789*m;")).ToStdString(3, 3);
+    ASSERT_TRUE(s == "7.89E+0(dm)") << s;
+    s = parser.GetSuitableUnit(LogicalId{0, 0, 0, 0, 1}, parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"0.871*m;")).ToStdString(3, 3);
+    ASSERT_TRUE(s == "8.71E+0(dm)") << s;
+}
+
+TEST_F(CalcTestReal, units75)
+{
+    parser.SetLocale(Language::Spanish);
+    parser.Parse({0, 0, 0, 0, 1}, U"L~pow(m,3);");
+    parser.Parse({0, 0, 0, 0, 2}, U"r~2*s;");
+    parser.Parse({0, 0, 0, 0, 3}, U"rp~((r)/(s));");
+    parser.Parse({0, 0, 0, 0, 5, 0, 0}, U"Dt=root(L,3);");
+    Real r = parser.Parse({0, 0, 0, 5, 0, 1}, U"Dt;");
+    std::string s = parser.GetSuitableUnit(LogicalId{0, 0, 0, 5, 0, 1}, r).ToStdString(3, 3);
+    ASSERT_TRUE(s == "1.E+0(m)") << s;
+
+    std::vector<Unit> cast_units;
+    parser.ClearCastUnits();
+    parser.GetCastUnits({0, 0, 0, 5, 0, 1}, r, cast_units);
+    ASSERT_TRUE(FindUnit(cast_units, Unit(U"m")));
+
+    Unit u;
+    ASSERT_TRUE(u.FromString(U"arshin{rus}"));
+    s = parser.CastToUnit(LogicalId{0, 0, 0, 5, 0, 1}, r, u).ToStdString(3, 3);
+    ASSERT_TRUE(s == "1.406E+0(arshin){rus}") << s;
+}
+
 TEST_F(CalcTestReal, compare1)
 {
     std::string s = parser.Parse(LogicalId{0, 0, 0, 0, 0, 0, 0, 2, 0}, U"(0<10);").ToStdString(3, 3);
