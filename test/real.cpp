@@ -291,6 +291,14 @@ TEST_F(CalcTestReal, functions18)
     ASSERT_FALSE(true);
 }
 
+TEST_F(CalcTestReal, functions19)
+{
+    Real res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"ln(5.2940000000000005e-23);");
+    ASSERT_TRUE(res.ToStdString(3, 3) == "-51.293E+0") << res.ToStdString(3, 3);
+    res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"ln(0.00069399999999999996);");
+    ASSERT_TRUE(res.ToStdString(3, 3) == "-7.273E+0") << res.ToStdString(3, 3);
+}
+
 TEST_F(CalcTestReal, user_functions1)
 {
     parser.Parse(LogicalId{0, 0, 1}, U"f(x)=5;");
