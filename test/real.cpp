@@ -794,6 +794,20 @@ TEST_F(CalcTestReal, errors8)
     EXPECT_THROW(parser.Parse(LogicalId{0, 0, 1}, U"(1)/(0);"), yutovo_calculator::MathException);
 }
 
+TEST_F(CalcTestReal, errors9)
+{
+    try
+    {
+        parser.Parse(LogicalId{0, 0, 1}, U"2**5;");
+    }
+    catch (yutovo_calculator::SyntaxException& ex)
+    {
+        ASSERT_TRUE((ex.id == LogicalId{0, 0, 1}) && ex.ex_id == ParserExceptionCode::SyntaxError && ex.pos == 2 && ex.size == 0) << ex.ex_id;
+        return;
+    }
+    ASSERT_FALSE(true);
+}
+
 TEST_F(CalcTestReal, trigonometric1)
 {
     Real res = parser.Parse(LogicalId{0, 0, 1}, U"sin(0);");
