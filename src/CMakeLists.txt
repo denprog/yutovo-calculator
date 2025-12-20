@@ -95,8 +95,8 @@ else()
     else()
         target_link_libraries(${PROJECT_NAME} PRIVATE 
             stdc++
-            libmpfr.a
-            libgmp.a
+            ${INSTALL_PATH}/lib/libmpfr.a
+            ${INSTALL_PATH}/lib/libgmp.a
     )
     endif()
 endif()
