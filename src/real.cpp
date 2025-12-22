@@ -65,7 +65,6 @@ Real::Real(int precision, AngleMeasure _angle_measure) :
 Real::Real(int precision, const char* num)
 {
     mpfr_init2(number, std::max((int)mpfr_get_default_prec(), precision));
-    //mpfr_init2(number, strlen(num) + 1);
     mpfr_set_str(number, num, DEFAULT_BASE, MPFR_RNDZ);
     string_number = ToUtfString(num);
     //mpfr_prec_round(number, precision / 2, GMP_RNDN);
@@ -83,7 +82,6 @@ Real::Real(int precision, const char* num)
 Real::Real(int precision, int num)
 {
     mpfr_init2(number, std::max((int)mpfr_get_default_prec(), precision));
-    //mpfr_init2(number, precision);
     mpfr_set_si(number, num, GMP_RNDN);
 
 #ifdef TRACE_OUTPUT
@@ -94,7 +92,6 @@ Real::Real(int precision, int num)
 Real::Real(int precision, float num)
 {
     mpfr_init2(number, std::max((int)mpfr_get_default_prec(), precision));
-    //mpfr_init2(number, precision);
     mpfr_set_d(number, num, GMP_RNDN);
 
 #ifdef TRACE_OUTPUT
@@ -264,85 +261,40 @@ Real operator+(const Real& num1, const Real& num2)
     Real _num2 = num2;
     ToCommonAngleMeasure(_num1, _num2);
     Real res(std::max(_num1.GetBitPrecision() + 2, _num2.GetBitPrecision()) + 2, _num1.angle_measure);
-
-    while (mpfr_add(res.number, _num1.number, _num2.number, DEFAULT_RND) != 0)
-    {
-        if (res.GetBitPrecision() + DEFAULT_INCREASE_PRECISION >= MPFR_PREC_MAX)
-            throw MathException(Overflow);
-
-        res.SetBitPrecision(res.GetBitPrecision() + DEFAULT_INCREASE_PRECISION);
-    }
-
+    res.CalcFunc(mpfr_add, _num1, _num2);
     res.unit = num1.unit + num2.unit;
-
     return res;
 }
 
 Real operator+(const Real& num1, const int num2)
 {
-    Real res(num1.GetBitPrecision(), num1.angle_measure);
-
-    while (mpfr_add_si(res.number, num1.number, num2, DEFAULT_RND) != 0)
-    {
-        if (res.GetBitPrecision() + DEFAULT_INCREASE_PRECISION >= MPFR_PREC_MAX)
-            throw MathException(Overflow);
-
-        res.SetBitPrecision(res.GetBitPrecision() + DEFAULT_INCREASE_PRECISION);
-    }
-
+    Real res(num1.GetBitPrecision() + 10, num1.angle_measure);
+    res.CalcFunc(mpfr_add_si, num1, num2);
     res.unit = num1.unit + num2;
-
     return res;
 }
 
 Real operator+(const int num1, const Real& num2)
 {
-    Real res(num2.GetBitPrecision(), num2.angle_measure);
-
-    while (mpfr_add_si(res.number, num2.number, num1, DEFAULT_RND) != 0)
-    {
-        if (res.GetBitPrecision() + DEFAULT_INCREASE_PRECISION >= MPFR_PREC_MAX)
-            throw MathException(Overflow);
-
-        res.SetBitPrecision(res.GetBitPrecision() + DEFAULT_INCREASE_PRECISION);
-    }
-
+    Real res(num2.GetBitPrecision() + 10, num2.angle_measure);
+    res.CalcFunc(mpfr_add_si, num2, num1);
     res.unit = num1 + num2.unit;
-
     return res;
 }
 
 Real operator+(const Real& num1, const float num2)
 {
-    Real res(num1.GetBitPrecision(), num1.angle_measure);
-
-    while (mpfr_add_d(res.number, num1.number, num2, DEFAULT_RND) != 0)
-    {
-        if (res.GetBitPrecision() + DEFAULT_INCREASE_PRECISION >= MPFR_PREC_MAX)
-            throw MathException(Overflow);
-
-        res.SetBitPrecision(res.GetBitPrecision() + DEFAULT_INCREASE_PRECISION);
-    }
-
+    Real res(num1.GetBitPrecision() + 10, num1.angle_measure);
+    res.CalcFunc(mpfr_add_d, num1, num2);
     res.unit = num1.unit + num2;
-
     return res;
 }
 
 Real operator+(const float num1, const Real& num2)
 {
-    Real res(num2.GetBitPrecision(), num2.angle_measure);
-
-    while (mpfr_add_d(res.number, num2.number, num1, DEFAULT_RND) != 0)
-    {
-        if (res.GetBitPrecision() + DEFAULT_INCREASE_PRECISION >= MPFR_PREC_MAX)
-            throw MathException(Overflow);
-
-        res.SetBitPrecision(res.GetBitPrecision() + DEFAULT_INCREASE_PRECISION);
-    }
-
+    Real res(num2.GetBitPrecision() + 10, num2.angle_measure);
+    res.CalcFunc(mpfr_add_d, num2, num1);
     res.unit = num1 + num2.unit;
-
     return res;
 }
 
@@ -351,60 +303,44 @@ Real operator-(const Real& num1, const Real& num2)
     Real _num1 = num1;
     Real _num2 = num2;
     ToCommonAngleMeasure(_num1, _num2);
-    Real res(std::max(_num1.GetBitPrecision(), _num2.GetBitPrecision()) + 1, _num1.angle_measure);
-
-    mpfr_sub(res.number, _num1.number, _num2.number, GMP_RNDN);
-
+    Real res(std::max(_num1.GetBitPrecision(), _num2.GetBitPrecision()), _num1.angle_measure);
+    res.CalcFunc(mpfr_sub, num1, num2);
     res.unit = num1.unit - num2.unit;
-
 #ifdef TRACE_OUTPUT
     res.UpdateNumberStr();
 #endif
-
     return res;
 }
 
 Real operator-(const Real& num1, const int num2)
 {
     Real res(num1.GetBitPrecision(), num1.angle_measure);
-
-    mpfr_sub_si(res.number, num1.number, num2, DEFAULT_RND);
-
+    res.CalcFunc(mpfr_sub_si, num1, num2);
     res.unit = num1.unit - num2;
-
     return res;
 }
 
 Real operator-(const int num1, const Real& num2)
 {
     Real res(num2.GetBitPrecision(), num2.angle_measure);
-
-    mpfr_si_sub(res.number, num1, num2.number, DEFAULT_RND);
-
+    res.CalcFunc(mpfr_si_sub, num1, num2);
     res.unit = num1 - num2.unit;
-
     return res;
 }
 
 Real operator-(const Real& num1, const float num2)
 {
     Real res(num1.GetBitPrecision(), num1.angle_measure);
-
-    mpfr_sub_d(res.number, num1.number, num2, DEFAULT_RND);
-
+    res.CalcFunc(mpfr_sub_d, num1, num2);
     res.unit = num1.unit - num2;
-
     return res;
 }
 
 Real operator-(const float num1, const Real& num2)
 {
     Real res(num2.GetBitPrecision(), num2.angle_measure);
-
-    mpfr_d_sub(res.number, num1, num2.number, DEFAULT_RND);
-
+    res.CalcFunc(mpfr_d_sub, num1, num2);
     res.unit = num1 - num2.unit;
-
     return res;
 }
 
@@ -413,18 +349,9 @@ Real operator*(const Real& num1, const Real& num2)
     Real _num1 = num1;
     Real _num2 = num2;
     ToCommonAngleMeasure(_num1, _num2);
-    Real res(std::max(_num1.GetBitPrecision() * 2, _num2.GetBitPrecision()) * 2, _num1.angle_measure);
-
-    while (mpfr_mul(res.number, num1.number, num2.number, DEFAULT_RND) != 0)
-    {
-        if (res.GetBitPrecision() + DEFAULT_INCREASE_PRECISION >= MPFR_PREC_MAX)
-            throw MathException(Overflow);
-
-        res.SetBitPrecision(res.GetBitPrecision() + DEFAULT_INCREASE_PRECISION);
-    }
-
+    Real res(std::max(_num1.GetBitPrecision(), _num2.GetBitPrecision()) + 2, _num1.angle_measure);
+    res.CalcFunc(mpfr_mul, _num1, _num2);
     res.unit = num1.unit * num2.unit;
-
 #ifdef TRACE_OUTPUT
     res.UpdateNumberStr();
 #endif
@@ -433,18 +360,9 @@ Real operator*(const Real& num1, const Real& num2)
 
 Real operator*(const Real& num1, const int num2)
 {
-    Real res(num1.GetBitPrecision(), num1.angle_measure);
-
-    while (mpfr_mul_si(res.number, num1.number, num2, DEFAULT_RND) != 0)
-    {
-        if (res.GetBitPrecision() + DEFAULT_INCREASE_PRECISION >= MPFR_PREC_MAX)
-            throw MathException(Overflow);
-
-        res.SetBitPrecision(res.GetBitPrecision() + DEFAULT_INCREASE_PRECISION);
-    }
-
+    Real res(num1.GetBitPrecision() + 10, num1.angle_measure);
+    res.CalcFunc(mpfr_mul_si, num1, num2);
     res.unit = num1.unit * num2;
-
 #ifdef TRACE_OUTPUT
     res.UpdateNumberStr();
 #endif
@@ -453,18 +371,9 @@ Real operator*(const Real& num1, const int num2)
 
 Real operator*(const int num1, const Real& num2)
 {
-    Real res(num2.GetBitPrecision(), num2.angle_measure);
-
-    while (mpfr_mul_si(res.number, num2.number, num1, DEFAULT_RND) != 0)
-    {
-        if (res.GetBitPrecision() + DEFAULT_INCREASE_PRECISION >= MPFR_PREC_MAX)
-            throw MathException(Overflow);
-
-        res.SetBitPrecision(res.GetBitPrecision() + DEFAULT_INCREASE_PRECISION);
-    }
-
+    Real res(num2.GetBitPrecision() + 10, num2.angle_measure);
+    res.CalcFunc(mpfr_mul_si, num2, num1);
     res.unit = num1 * num2.unit;
-
 #ifdef TRACE_OUTPUT
     res.UpdateNumberStr();
 #endif
@@ -473,18 +382,9 @@ Real operator*(const int num1, const Real& num2)
 
 Real operator*(const Real& num1, const float num2)
 {
-    Real res(num1.GetBitPrecision(), num1.angle_measure);
-
-    while (mpfr_mul_d(res.number, num1.number, num2, DEFAULT_RND) != 0)
-    {
-        if (res.GetBitPrecision() + DEFAULT_INCREASE_PRECISION >= MPFR_PREC_MAX)
-            throw MathException(Overflow);
-
-        res.SetBitPrecision(res.GetBitPrecision() + DEFAULT_INCREASE_PRECISION);
-    }
-
+    Real res(num1.GetBitPrecision() + 10, num1.angle_measure);
+    res.CalcFunc(mpfr_mul_d, num1, num2);
     res.unit = num1.unit * num2;
-
 #ifdef TRACE_OUTPUT
     res.UpdateNumberStr();
 #endif
@@ -493,18 +393,9 @@ Real operator*(const Real& num1, const float num2)
 
 Real operator*(const float num1, const Real& num2)
 {
-    Real res(num2.GetBitPrecision(), num2.angle_measure);
-
-    while (mpfr_mul_d(res.number, num2.number, num1, DEFAULT_RND) != 0)
-    {
-        if (res.GetBitPrecision() + DEFAULT_INCREASE_PRECISION >= MPFR_PREC_MAX)
-            throw MathException(Overflow);
-
-        res.SetBitPrecision(res.GetBitPrecision() + DEFAULT_INCREASE_PRECISION);
-    }
-
+    Real res(num2.GetBitPrecision() + 10, num2.angle_measure);
+    res.CalcFunc(mpfr_mul_d, num2, num1);
     res.unit = num1 * num2.unit;
-
 #ifdef TRACE_OUTPUT
     res.UpdateNumberStr();
 #endif
@@ -517,74 +408,53 @@ Real operator/(const Real& num1, const Real& num2)
     Real _num2 = num2;
     ToCommonAngleMeasure(_num1, _num2);
     Real res(std::max(_num1.GetBitPrecision() + 2, _num2.GetBitPrecision() + 2), _num1.angle_measure);
-
-    mpfr_div(res.number, _num1.number, _num2.number, GMP_RNDN);
-
+    res.CalcFunc(mpfr_div, num1, num2);
     if (res.IsInfinity() || res.IsNaN())
         throw MathException(DivisionByZero);
-
     res.unit = num1.unit / num2.unit;
-
 #ifdef TRACE_OUTPUT
     res.UpdateNumberStr();
 #endif
-
     return res;
 }
 
 Real operator/(const Real& num1, const int num2)
 {
     Real res(num1.GetBitPrecision(), num1.angle_measure);
-
-    mpfr_div_si(res.number, num1.number, num2, DEFAULT_RND);
-
+    res.CalcFunc(mpfr_div_si, num1, num2);
     if (res.IsInfinity() || res.IsNaN())
         throw MathException(Overflow);
-
     res.unit = num1.unit / num2;
-
     return res;
 }
 
 Real operator/(const int num1, const Real& num2)
 {
     Real res(num2.GetBitPrecision(), num2.angle_measure);
-
-    mpfr_si_div(res.number, num1, num2.number, DEFAULT_RND);
-
+    res.CalcFunc(mpfr_si_div, num1, num2);
     if (res.IsInfinity() || res.IsNaN())
         throw MathException(Overflow);
-    
     res.unit = num1 / num2.unit;
-
     return res;
 }
 
 Real operator/(const Real& num1, const float num2)
 {
     Real res(num1.GetBitPrecision(), num1.angle_measure);
-
-    mpfr_div_d(res.number, num1.number, num2, DEFAULT_RND);
-
+    res.CalcFunc(mpfr_div_d, num1, num2);
     if (res.IsInfinity() || res.IsNaN())
         throw MathException(Overflow);
-    
     res.unit = num1.unit / num2;
-
     return res;
 }
 
 Real operator/(const float num1, const Real& num2)
 {
     Real res(num2.GetBitPrecision(), num2.angle_measure);
-
-    mpfr_d_div(res.number, num1, num2.number, DEFAULT_RND);
-
+    res.CalcFunc(mpfr_d_div, num1, num2);
     if (res.IsInfinity() || res.IsNaN())
         throw MathException(Overflow);
-    
     res.unit = num1 / num2.unit;
-
     return res;
 }
 
@@ -896,31 +766,15 @@ bool operator<=(const float num1, const Real& num2)
 
 Real exp(const Real& num)
 {
-    Real res(num.GetBitPrecision());
-
-    while (mpfr_exp(res.number, num.number, DEFAULT_RND) < 0)
-    {
-        if (res.GetBitPrecision() + DEFAULT_INCREASE_PRECISION >= MPFR_PREC_MAX)
-            throw MathException(Overflow);
-
-        res.SetBitPrecision(res.GetBitPrecision() + DEFAULT_INCREASE_PRECISION);
-    }
-
+    Real res(num.GetBitPrecision() * 2);
+    res.CalcFunc(mpfr_exp, num);
     return res;
 }
 
 Real ln(const Real& num)
 {
-    Real res(num.GetBitPrecision());
-
-    while (mpfr_log(res.number, num.number, DEFAULT_RND) < 0)
-    {
-        if (res.GetBitPrecision() + DEFAULT_INCREASE_PRECISION >= MPFR_PREC_MAX)
-            throw MathException(Overflow);
-
-        res.SetBitPrecision(res.GetBitPrecision() + DEFAULT_INCREASE_PRECISION);
-    }
-
+    Real res(num.GetBitPrecision() * 2);
+    res.CalcFunc(mpfr_log, num);
     return res;
 }
 
@@ -946,15 +800,7 @@ Real sin(const Real& num)
     if (_num.angle_measure != AngleMeasure::Radian)
     {
         _num = _num.ToRadian();
-
-        while (mpfr_sin(res.number, _num.number, DEFAULT_RND) < 0)
-        {
-            if (res.GetBitPrecision() + DEFAULT_INCREASE_PRECISION >= MPFR_PREC_MAX)
-                throw MathException(Overflow);
-
-            res.SetBitPrecision(res.GetBitPrecision() + DEFAULT_INCREASE_PRECISION);
-        }
-
+        res.CalcFunc(mpfr_sin, _num);
         return res;
     }
 
@@ -977,13 +823,7 @@ Real sin(const Real& num)
     }
     else
     {
-        while (mpfr_sin(res.number, num.number, DEFAULT_RND) < 0)
-        {
-            if (res.GetBitPrecision() + DEFAULT_INCREASE_PRECISION >= MPFR_PREC_MAX)
-                throw MathException(Overflow);
-
-            res.SetBitPrecision(res.GetBitPrecision() + DEFAULT_INCREASE_PRECISION);
-        }
+        res.CalcFunc(mpfr_sin, num);
     }
 
     return res;
@@ -1001,15 +841,7 @@ Real cos(const Real& num)
     if (_num.angle_measure != AngleMeasure::Radian)
     {
         _num = _num.ToRadian();
-
-        while (mpfr_cos(res.number, _num.number, DEFAULT_RND) < 0)
-        {
-            if (res.GetBitPrecision() + DEFAULT_INCREASE_PRECISION >= MPFR_PREC_MAX)
-                throw MathException(Overflow);
-
-            res.SetBitPrecision(res.GetBitPrecision() + DEFAULT_INCREASE_PRECISION);
-        }
-
+        res.CalcFunc(mpfr_cos, _num);
         return res;
     }
 
@@ -1039,13 +871,7 @@ Real cos(const Real& num)
     }
     else
     {
-        while (mpfr_cos(res.number, _num.number, DEFAULT_RND) < 0)
-        {
-            if (res.GetBitPrecision() + DEFAULT_INCREASE_PRECISION >= MPFR_PREC_MAX)
-                throw MathException(Overflow);
-
-            res.SetBitPrecision(res.GetBitPrecision() + DEFAULT_INCREASE_PRECISION);
-        }
+        res.CalcFunc(mpfr_cos, _num);
     }
 
     return res;
@@ -1063,25 +889,11 @@ Real tg(const Real& num)
     if (_num.angle_measure != AngleMeasure::Radian)
     {
         _num = _num.ToRadian();
-
-        while (mpfr_tan(res.number, _num.number, DEFAULT_RND) < 0)
-        {
-            if (res.GetBitPrecision() + DEFAULT_INCREASE_PRECISION >= MPFR_PREC_MAX)
-                throw MathException(Overflow);
-
-            res.SetBitPrecision(res.GetBitPrecision() + DEFAULT_INCREASE_PRECISION);
-        }
-
+        res.CalcFunc(mpfr_tan, num);
         return res;
     }
 
-    while (mpfr_tan(res.number, _num.number, DEFAULT_RND) < 0)
-    {
-        if (res.GetBitPrecision() + DEFAULT_INCREASE_PRECISION >= MPFR_PREC_MAX)
-            throw MathException(Overflow);
-
-        res.SetBitPrecision(res.GetBitPrecision() + DEFAULT_INCREASE_PRECISION);
-    }
+    res.CalcFunc(mpfr_tan, num);
 
     if (res.IsInfinity() || res.IsNaN())
         throw MathException(Overflow);
@@ -1101,25 +913,11 @@ Real ctg(const Real& num)
     if (_num.angle_measure != AngleMeasure::Radian)
     {
         _num = _num.ToRadian();
-
-        while (mpfr_cot(res.number, _num.number, DEFAULT_RND) < 0)
-        {
-            if (res.GetBitPrecision() + DEFAULT_INCREASE_PRECISION >= MPFR_PREC_MAX)
-                throw MathException(Overflow);
-
-            res.SetBitPrecision(res.GetBitPrecision() + DEFAULT_INCREASE_PRECISION);
-        }
-
+        res.CalcFunc(mpfr_cot, _num);
         return res;
     }
 
-    while (mpfr_cot(res.number, _num.number, DEFAULT_RND) < 0)
-    {
-        if (res.GetBitPrecision() + DEFAULT_INCREASE_PRECISION >= MPFR_PREC_MAX)
-            throw MathException(Overflow);
-
-        res.SetBitPrecision(res.GetBitPrecision() + DEFAULT_INCREASE_PRECISION);
-    }
+    res.CalcFunc(mpfr_cot, _num);
 
     if (res.IsInfinity() || res.IsNaN())
         throw MathException(Overflow);
@@ -1137,26 +935,11 @@ Real sec(const Real& num)
     if (_num.angle_measure != AngleMeasure::Radian)
     {
         _num = _num.ToRadian();
-
-        while (mpfr_sec(res.number, _num.number, DEFAULT_RND) < 0)
-        {
-            if (res.GetBitPrecision() + DEFAULT_INCREASE_PRECISION >= MPFR_PREC_MAX)
-                throw MathException(Overflow);
-
-            res.SetBitPrecision(res.GetBitPrecision() + DEFAULT_INCREASE_PRECISION);
-        }
-
+        res.CalcFunc(mpfr_sec, _num);
         return res;
     }
 
-    while (mpfr_sec(res.number, _num.number, DEFAULT_RND) < 0)
-    {
-        if (res.GetBitPrecision() + DEFAULT_INCREASE_PRECISION >= MPFR_PREC_MAX)
-            throw MathException(Overflow);
-
-        res.SetBitPrecision(res.GetBitPrecision() + DEFAULT_INCREASE_PRECISION);
-    }
-
+    res.CalcFunc(mpfr_sec, _num);
     return res;
 }
 
@@ -1170,26 +953,11 @@ Real cosec(const Real& num)
     if (_num.angle_measure != AngleMeasure::Radian)
     {
         _num = _num.ToRadian();
-
-        while (mpfr_csc(res.number, _num.number, DEFAULT_RND) < 0)
-        {
-            if (res.GetBitPrecision() + DEFAULT_INCREASE_PRECISION >= MPFR_PREC_MAX)
-                throw MathException(Overflow);
-
-            res.SetBitPrecision(res.GetBitPrecision() + DEFAULT_INCREASE_PRECISION);
-        }
-
+        res.CalcFunc(mpfr_csc, _num);
         return res;
     }
 
-    while (mpfr_csc(res.number, _num.number, DEFAULT_RND) < 0)
-    {
-        if (res.GetBitPrecision() + DEFAULT_INCREASE_PRECISION >= MPFR_PREC_MAX)
-            throw MathException(Overflow);
-
-        res.SetBitPrecision(res.GetBitPrecision() + DEFAULT_INCREASE_PRECISION);
-    }
-
+    res.CalcFunc(mpfr_csc, _num);
     return res;
 }
 
@@ -1200,14 +968,7 @@ Real arcsin(const Real& num)
     if (abs(num) > 1)
         throw MathException(Overflow);
 
-    while (mpfr_asin(res.number, num.number, DEFAULT_RND) < 0)
-    {
-        if (res.GetBitPrecision() + DEFAULT_INCREASE_PRECISION >= MPFR_PREC_MAX)
-            throw MathException(Overflow);
-
-        res.SetBitPrecision(res.GetBitPrecision() + DEFAULT_INCREASE_PRECISION);
-    }
-
+    res.CalcFunc(mpfr_asin, num);
     res.angle_measure = AngleMeasure::Radian;
     return res;
 }
@@ -1219,14 +980,7 @@ Real arccos(const Real& num)
     if (abs(num) > 1)
         throw MathException(Overflow);
 
-    while (mpfr_acos(res.number, num.number, DEFAULT_RND) < 0)
-    {
-        if (res.GetBitPrecision() + DEFAULT_INCREASE_PRECISION >= MPFR_PREC_MAX)
-            throw MathException(Overflow);
-
-        res.SetBitPrecision(res.GetBitPrecision() + DEFAULT_INCREASE_PRECISION);
-    }
-
+    res.CalcFunc(mpfr_acos, num);
     res.angle_measure = AngleMeasure::Radian;
     return res;
 }
@@ -1235,14 +989,7 @@ Real arctg(const Real& num)
 {
     Real res(num.GetBitPrecision());
 
-    while (mpfr_atan(res.number, num.number, DEFAULT_RND) < 0)
-    {
-        if (res.GetBitPrecision() + DEFAULT_INCREASE_PRECISION >= MPFR_PREC_MAX)
-            throw MathException(Overflow);
-
-        res.SetBitPrecision(res.GetBitPrecision() + DEFAULT_INCREASE_PRECISION);
-    }
-
+    res.CalcFunc(mpfr_atan, num);
     res.angle_measure = AngleMeasure::Radian;
     return res;
 }
@@ -1270,25 +1017,11 @@ Real sh(const Real& num)
     if (num.angle_measure != AngleMeasure::Radian)
     {
         Real _num = num.ToRadian();
-
-        while (mpfr_sinh(res.number, _num.number, DEFAULT_RND) < 0)
-        {
-            if (res.GetBitPrecision() + DEFAULT_INCREASE_PRECISION >= MPFR_PREC_MAX)
-                throw MathException(Overflow);
-
-            res.SetBitPrecision(res.GetBitPrecision() + DEFAULT_INCREASE_PRECISION);
-        }
-
+        res.CalcFunc(mpfr_sinh, _num);
         return res;
     }
 
-    while (mpfr_sinh(res.number, num.number, DEFAULT_RND) < 0)
-    {
-        if (res.GetBitPrecision() + DEFAULT_INCREASE_PRECISION >= MPFR_PREC_MAX)
-            throw MathException(Overflow);
-
-        res.SetBitPrecision(res.GetBitPrecision() + DEFAULT_INCREASE_PRECISION);
-    }
+    res.CalcFunc(mpfr_sinh, num);
 
     if (res.IsInfinity() || res.IsNaN())
         throw MathException(Overflow);
@@ -1303,25 +1036,11 @@ Real ch(const Real& num)
     if (num.angle_measure != AngleMeasure::Radian)
     {
         Real _num = num.ToRadian();
-
-        while (mpfr_cosh(res.number, _num.number, DEFAULT_RND) < 0)
-        {
-            if (res.GetBitPrecision() + DEFAULT_INCREASE_PRECISION >= MPFR_PREC_MAX)
-                throw MathException(Overflow);
-
-            res.SetBitPrecision(res.GetBitPrecision() + DEFAULT_INCREASE_PRECISION);
-        }
-
+        res.CalcFunc(mpfr_cosh, _num);
         return res;
     }
 
-    while (mpfr_cosh(res.number, num.number, DEFAULT_RND) < 0)
-    {
-        if (res.GetBitPrecision() + DEFAULT_INCREASE_PRECISION >= MPFR_PREC_MAX)
-            throw MathException(Overflow);
-
-        res.SetBitPrecision(res.GetBitPrecision() + DEFAULT_INCREASE_PRECISION);
-    }
+    res.CalcFunc(mpfr_cosh, num);
 
     if (res.IsInfinity() || res.IsNaN())
         throw MathException(Overflow);
@@ -1336,25 +1055,11 @@ Real th(const Real& num)
     if (num.angle_measure != AngleMeasure::Radian)
     {
         Real _num = num.ToRadian();
-
-        while (mpfr_tanh(res.number, _num.number, DEFAULT_RND) < 0)
-        {
-            if (res.GetBitPrecision() + DEFAULT_INCREASE_PRECISION >= MPFR_PREC_MAX)
-                throw MathException(Overflow);
-
-            res.SetBitPrecision(res.GetBitPrecision() + DEFAULT_INCREASE_PRECISION);
-        }
-
+        res.CalcFunc(mpfr_tanh, _num);
         return res;
     }
 
-    while (mpfr_tanh(res.number, num.number, DEFAULT_RND) < 0)
-    {
-        if (res.GetBitPrecision() + DEFAULT_INCREASE_PRECISION >= MPFR_PREC_MAX)
-            throw MathException(Overflow);
-
-        res.SetBitPrecision(res.GetBitPrecision() + DEFAULT_INCREASE_PRECISION);
-    }
+    res.CalcFunc(mpfr_tanh, num);
 
     if (res.IsInfinity() || res.IsNaN())
         throw MathException(Overflow);
@@ -1369,25 +1074,11 @@ Real cth(const Real& num)
     if (num.angle_measure != AngleMeasure::Radian)
     {
         Real _num = num.ToRadian();
-
-        while (mpfr_coth(res.number, _num.number, DEFAULT_RND) < 0)
-        {
-            if (res.GetBitPrecision() + DEFAULT_INCREASE_PRECISION >= MPFR_PREC_MAX)
-                throw MathException(Overflow);
-
-            res.SetBitPrecision(res.GetBitPrecision() + DEFAULT_INCREASE_PRECISION);
-        }
-
+        res.CalcFunc(mpfr_coth, _num);
         return res;
     }
 
-    while (mpfr_coth(res.number, num.number, DEFAULT_RND) < 0)
-    {
-        if (res.GetBitPrecision() + DEFAULT_INCREASE_PRECISION >= MPFR_PREC_MAX)
-            throw MathException(Overflow);
-
-        res.SetBitPrecision(res.GetBitPrecision() + DEFAULT_INCREASE_PRECISION);
-    }
+    res.CalcFunc(mpfr_coth, num);
 
     if (res.IsInfinity() || res.IsNaN())
         throw MathException(Overflow);
@@ -1505,15 +1196,9 @@ Real pow(const Real& num1, const Real& num2)
     if (num1.IsZero() && num2 <= 0)
         throw MathException(Overflow);
 
-    Real res(std::max(num1.GetBitPrecision() + 2, num2.GetBitPrecision() + 2));
+    Real res(num1.GetBitPrecision() + num2.GetBitPrecision() + 64);
 
-    while (mpfr_pow(res.number, num1.number, num2.number, DEFAULT_RND) < 0)
-    {
-        if (res.GetBitPrecision() + DEFAULT_INCREASE_PRECISION >= MPFR_PREC_MAX)
-            throw MathException(Overflow);
-
-        res.SetBitPrecision(res.GetBitPrecision() + DEFAULT_INCREASE_PRECISION);
-    }
+    res.CalcFunc(mpfr_pow, num1, num2);
 
     if (res.IsInfinity() || res.IsNaN())
         throw MathException(Overflow);
@@ -1533,15 +1218,9 @@ Real pow(const Real& num1, const int num2)
     if (num1.IsZero() && num2 <= 0)
         throw MathException(Overflow);
     
-    Real res(num1.GetBitPrecision());
+    Real res(num1.GetBitPrecision() + sizeof(int) * 8);
 
-    while (mpfr_pow_si(res.number, num1.number, num2, DEFAULT_RND) < 0)
-    {
-        if (res.GetBitPrecision() + DEFAULT_INCREASE_PRECISION >= MPFR_PREC_MAX)
-            throw MathException(Overflow);
-
-        res.SetBitPrecision(res.GetBitPrecision() + DEFAULT_INCREASE_PRECISION);
-    }
+    res.CalcFunc(mpfr_pow_si, num1, num2);
 
     res.unit = pow(num1.unit, num2);
 
@@ -1553,15 +1232,9 @@ Real pow(const Real& num1, const int num2)
 
 Real sqr(const Real& num)
 {
-    Real res(num.GetBitPrecision());
+    Real res(num.GetBitPrecision() * 2);
 
-    while (mpfr_sqr(res.number, num.number, DEFAULT_RND) < 0)
-    {
-        if (res.GetBitPrecision() + DEFAULT_INCREASE_PRECISION >= MPFR_PREC_MAX)
-            throw MathException(Overflow);
-
-        res.SetBitPrecision(res.GetBitPrecision() + DEFAULT_INCREASE_PRECISION);
-    }
+    res.CalcFunc(mpfr_sqr, num);
 
 #ifdef TRACE_OUTPUT
     res.UpdateNumberStr();
@@ -1571,16 +1244,9 @@ Real sqr(const Real& num)
 
 Real sqrt(const Real& num)
 {
-    Real res(num.GetBitPrecision());
+    Real res(num.GetBitPrecision() + 64);
 
-    while (mpfr_sqrt(res.number, num.number, DEFAULT_RND) < 0)
-    {
-        if (res.GetBitPrecision() + DEFAULT_INCREASE_PRECISION >= MPFR_PREC_MAX)
-            throw MathException(Overflow);
-
-        res.SetBitPrecision(res.GetBitPrecision() + DEFAULT_INCREASE_PRECISION);
-    }
-
+    res.CalcFunc(mpfr_sqrt, num);
     res.unit = sqrt(num.unit);
 
 #ifdef TRACE_OUTPUT
@@ -2166,6 +1832,72 @@ void Real::CheckUnit(Real& num)
     {
         if (num.unit.unit.size() != 1 || num.unit.GetPower() != 1)
             throw MathException(UnitsAreIncompatible);
+    }
+}
+
+void Real::CalcFunc(int (*func)(mpfr_ptr, mpfr_srcptr, mpfr_rnd_t), const Real& num)
+{
+    int i = 0;
+    while (func(number, num.number, DEFAULT_RND) != 0 && i++ < 10)
+    {
+        if (GetBitPrecision() + DEFAULT_INCREASE_PRECISION >= MPFR_PREC_MAX)
+            throw MathException(Overflow);
+        SetBitPrecision(GetBitPrecision() + DEFAULT_INCREASE_PRECISION);
+    }
+}
+
+void Real::CalcFunc(int (*func)(mpfr_ptr, mpfr_srcptr, mpfr_srcptr, mpfr_rnd_t), const Real& num1, const Real& num2)
+{
+    int i = 0;
+    while (func(number, num1.number, num2.number, DEFAULT_RND) != 0 && i++ < 10)
+    {
+        if (GetBitPrecision() + DEFAULT_INCREASE_PRECISION >= MPFR_PREC_MAX)
+            throw MathException(Overflow);
+        SetBitPrecision(GetBitPrecision() + DEFAULT_INCREASE_PRECISION);
+    }
+}
+
+void Real::CalcFunc(int (*func)(mpfr_ptr, mpfr_srcptr, long, mpfr_rnd_t), const Real& num1, int num2)
+{
+    int i = 0;
+    while (func(number, num1.number, num2, DEFAULT_RND) != 0 && i++ < 10)
+    {
+        if (GetBitPrecision() + DEFAULT_INCREASE_PRECISION >= MPFR_PREC_MAX)
+            throw MathException(Overflow);
+        SetBitPrecision(GetBitPrecision() + DEFAULT_INCREASE_PRECISION);
+    }
+}
+
+void Real::CalcFunc(int (*func)(mpfr_ptr, long, mpfr_srcptr, mpfr_rnd_t), int num1, const Real& num2)
+{
+    int i = 0;
+    while (func(number, num1, num2.number, DEFAULT_RND) != 0 && i++ < 10)
+    {
+        if (GetBitPrecision() + DEFAULT_INCREASE_PRECISION >= MPFR_PREC_MAX)
+            throw MathException(Overflow);
+        SetBitPrecision(GetBitPrecision() + DEFAULT_INCREASE_PRECISION);
+    }
+}
+
+void Real::CalcFunc(int (*func)(mpfr_ptr, mpfr_srcptr, double, mpfr_rnd_t), const Real& num1, float num2)
+{
+    int i = 0;
+    while (func(number, num1.number, num2, DEFAULT_RND) != 0 && i++ < 10)
+    {
+        if (GetBitPrecision() + DEFAULT_INCREASE_PRECISION >= MPFR_PREC_MAX)
+            throw MathException(Overflow);
+        SetBitPrecision(GetBitPrecision() + DEFAULT_INCREASE_PRECISION);
+    }
+}
+
+void Real::CalcFunc(int (*func)(mpfr_ptr, double, mpfr_srcptr, mpfr_rnd_t), float num1, const Real& num2)
+{
+    int i = 0;
+    while (func(number, num1, num2.number, DEFAULT_RND) != 0 && i++ < 10)
+    {
+        if (GetBitPrecision() + DEFAULT_INCREASE_PRECISION >= MPFR_PREC_MAX)
+            throw MathException(Overflow);
+        SetBitPrecision(GetBitPrecision() + DEFAULT_INCREASE_PRECISION);
     }
 }
 

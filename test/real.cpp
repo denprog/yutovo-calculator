@@ -384,6 +384,19 @@ TEST_F(CalcTestReal, user_functions8)
     ASSERT_TRUE(res.ToStdString(3, 3) == "4.E+0") << res.ToStdString(3, 3);
 }
 
+TEST_F(CalcTestReal, user_functions9)
+{
+    parser.Parse(LogicalId{0, 0, 1}, U"y=(sin((pi)/(2)))/(3.4);");
+    parser.Parse(LogicalId{0, 0, 2}, U"r=sqrt(y);");
+    Real res = parser.Parse(LogicalId{0, 0, 3}, U"r;");
+    ASSERT_TRUE(res.ToStdString(3, 3) == "0.542E+0") << res.ToStdString(3, 3);
+    ASSERT_TRUE(res.GetBitPrecision() < 1000);
+    parser.Parse(LogicalId{0, 0, 4}, U"f(t)=t*cos(r*2);");
+    res = parser.Parse(LogicalId{0, 0, 5}, U"f(3.4);");
+    ASSERT_TRUE(res.ToStdString(3, 3) == "1.589E+0") << res.ToStdString(3, 3);
+    ASSERT_TRUE(res.GetBitPrecision() < 2000) << res.GetBitPrecision();
+}
+
 TEST_F(CalcTestReal, str1)
 {
     EXPECT_THROW(parser.Parse(LogicalId{0, 0, 1}, U"в;"), yutovo_calculator::SyntaxException);

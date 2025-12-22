@@ -339,6 +339,13 @@ public:
 private:
     static void CheckUnit(Real& num);
 
+    void CalcFunc(int (*func)(mpfr_ptr, mpfr_srcptr, mpfr_rnd_t), const Real& num);
+    void CalcFunc(int (*func)(mpfr_ptr, mpfr_srcptr, mpfr_srcptr, mpfr_rnd_t), const Real& num1, const Real& num2);
+    void CalcFunc(int (*func)(mpfr_ptr, mpfr_srcptr, long, mpfr_rnd_t), const Real& num1, int num2);
+    void CalcFunc(int (*func)(mpfr_ptr, long, mpfr_srcptr, mpfr_rnd_t), int num1, const Real& num2);
+    void CalcFunc(int (*func)(mpfr_ptr, mpfr_srcptr, double, mpfr_rnd_t), const Real& num1, float num2);
+    void CalcFunc(int (*func)(mpfr_ptr, double, mpfr_srcptr, mpfr_rnd_t), float num1, const Real& num2);
+
 public:
     AngleMeasure angle_measure = AngleMeasure::None;
     Unit unit;

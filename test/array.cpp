@@ -232,7 +232,7 @@ TEST_F(CalcTestArrayReal, graph1)
     auto res = parser.Parse(LogicalId{0, 0, 1}, U"graph_line(sin(x),x,0,1,0,1,10);", AngleMeasure::Radian, AngleMeasure::Radian);
     ASSERT_TRUE(res.ToStdString(3, 3) == 
         "[0.E+0,1.E+0,0.E+0,1.E+0,0.E+0,0.E+0,0.1E+0,0.0998E+0,0.2E+0,0.199E+0,0.3E+0,0.296E+0,0.4E+0,0.389E+0,0.5E+0,0.479E+0,0.6E+0,"\
-        "0.565E+0,0.7E+0,0.644E+0,0.8E+0,0.717E+0,0.9E+0,0.783E+0]") << 
+        "0.565E+0,0.7E+0,0.644E+0,0.8E+0,0.717E+0,0.9E+0,0.783E+0,1.E+0,0.841E+0]") <<
         res.ToStdString(3, 3);
 }
 
