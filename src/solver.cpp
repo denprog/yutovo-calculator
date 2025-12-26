@@ -82,6 +82,10 @@ Array<Real> Solver<Array<Real>>::operator()(LineGraphNode<Array<Real>> const& op
         throw;
     }
 
+    Array<Real> max_float(64, std::numeric_limits<float>::max());
+    if (abs(x) > max_float || abs(x_right) > max_float)
+        throw MathException(Overflow);
+
     if (x == x_right || y_bottom == y_top)
         throw MathException(IncorrectOperation);
     
@@ -90,24 +94,13 @@ Array<Real> Solver<Array<Real>>::operator()(LineGraphNode<Array<Real>> const& op
     res.Add(x_right);
     res.Add(y_bottom);
     res.Add(y_top);
-    Array<Real> y;
 
-    auto add_points = 
-        [&](int pos = -1)
+    auto get_next_point = 
+        [&](Array<Real>& y)
         {
             try
             {
                 y = (*this)(op.expression);
-                if (pos == -1)
-                {
-                    res.Add(x);
-                    res.Add(y);
-                }
-                else
-                {
-                    res.Insert(pos, x);
-                    res.Insert(pos + 1, y);
-                }
             }
             catch (TimeExceedException)
             {
@@ -126,9 +119,59 @@ Array<Real> Solver<Array<Real>>::operator()(LineGraphNode<Array<Real>> const& op
             }
             catch (...)
             {
-                res.Add(x);
+                y.Add(nan);
+            }
+        };
+
+    Array<Real> y_div = abs(y_bottom - y_top) / 20;
+    Array<Real> y_eighth = abs(y_bottom - y_top) / 8;
+    Array<Real> y_gap = abs(y_bottom - y_top) / 100;
+    Array<Real> y, _y;
+    Array<Real> y_prev = 0;
+
+    auto is_increasing = 
+        [&]()
+        {
+            int p = res.Size() - 1;
+            while (p > 10)
+            {
+                const Array<Real>& r1 = res.Get(p);
+                p -= 2;
+                const Array<Real>& r2 = res.Get(p);
+                if (r1.IsNaN() || r2.IsNaN() || r1 == r2)
+                    continue;
+                if (r1 > r2)
+                    return true;
+                return false;
+            }
+            return false;
+        };
+
+    std::function<void (const Array<Real>&, const Array<Real>&, const Array<Real>&, const Array<Real>&, int)> div_segment = 
+        [&](const Array<Real>& x1, const Array<Real>& x2, const Array<Real>& y1, const Array<Real>& y2, int div_depth)
+        {
+            Array<Real> x_div = x1 + (x2 - x1) / 2;
+            SetTempVariable(op.identifier.name, x_div);
+            get_next_point(_y);
+
+            if (div_depth > 0 && x_div != x1)
+            {
+                if (_y > y_bottom && abs(_y - y1) > y_div)
+                    div_segment(x1, x_div, y1, _y, div_depth - 1);
+                if (_y < y_top && abs(_y - y2) > y_div)
+                    div_segment(x_div, x2, _y, y2, div_depth - 1);
+            }
+            
+            bool incr = is_increasing();
+            if (abs(_y - y_prev) > y_div && ((incr && _y < y_prev) || (!incr && _y > y_prev)))
+            {
+                res.Add(x_div);
                 res.Add(nan);
             }
+
+            res.Add(x_div);
+            res.Add(_y);
+            y_prev = _y;
         };
 
     //next items are points of the graph x, y
@@ -138,82 +181,72 @@ Array<Real> Solver<Array<Real>>::operator()(LineGraphNode<Array<Real>> const& op
             parser_context->ReInit();
         
         SetTempVariable(op.identifier.name, x);
-        add_points();
+        get_next_point(y);
 
-        if (res.Size() > 6)
+        if (res.Size() < 8)
         {
-            bool gap = false;
-            try
-            {
-                auto r = abs(res.Get(res.Size() - 1) - res.Get(res.Size() - 3));
-                if (r > (y_top - y_bottom) / 10)
-                    gap = true;
-            }
-            catch (MathException)
-            {
-            }
+            res.Add(x);
+            res.Add(y);
+            y_prev = y;
+            x += inc;
+            continue;
+        }
 
-            if (gap)
+        if (!y.IsNaN() && !y_prev.IsNaN())
+        {
+            if (abs(y - y_prev) > y_eighth)
             {
-                //fix the wrong vertical lines - insert intermediate points
-                const int p = 20;
-                int i = 0;
-                auto _x = x;
-                auto y1 = res.Get(res.Size() - 3);
-                auto y2 = res.Get(res.Size() - 1);
-                if (y1 > y2)
+                bool incr = is_increasing();
+                if (incr && y < y_prev)
                 {
-                    auto x1 = _x - inc;
-                    x -= inc - inc / p;
-                    while (y1 < y_top && i++ <= p / 2)
-                    {
-                        x = x1 + (inc / p) * i;
-                        SetTempVariable(op.identifier.name, x);
-                        add_points(res.Size() - 2);
-                        y1 = res.Get(res.Size() - 3);
-                    }
-
-                    res.Insert(res.Size() - 2, x);
-                    res.Insert(res.Size() - 2, nan);
-
-                    i = 0;
-                    x = _x - inc / p;
-                    while (y2 > y_bottom && i++ < p / 2)
-                    {
-                        SetTempVariable(op.identifier.name, x);
-                        add_points(res.Size() - i * 2);
-                        x -= inc / p;
-                        y2 = res.Get(res.Size() - (i + 1) * 2 + 1);
-                    }
+                    res.Add(x);
+                    res.Add(y_top * 10);
+                    res.Add(x);
+                    res.Add(nan);
+                    x += inc;
+                    res.Add(x);
+                    res.Add(y_bottom * 10);
+                    y_prev = y_bottom * 10;
+                    x += inc;
+                    continue;
                 }
-                else
+                if (!incr && y > y_prev)
                 {
-                    auto x1 = _x - inc;
-                    x -= inc - inc / p;
-                    while (y1 > y_bottom && i++ <= p / 2)
-                    {
-                        x = x1 + (inc / p) * i;
-                        SetTempVariable(op.identifier.name, x);
-                        add_points(res.Size() - 2);
-                        y1 = res.Get(res.Size() - 3);
-                    }
+                    res.Add(x);
+                    res.Add(y_bottom * 10);
+                    res.Add(x);
+                    res.Add(nan);
+                    x += inc;
+                    res.Add(x);
+                    res.Add(y_top * 10);
+                    y_prev = y_top * 10;
+                    x += inc;
+                    continue;
+                }
+            }
+            if (abs(y - y_prev) > y_div)
+            {
+                div_segment(x - inc, x, y_prev, y, 20);
 
-                    res.Insert(res.Size() - 2, x);
-                    res.Insert(res.Size() - 2, nan);
-
-                    i = 0;
-                    x = _x - inc / p;
-                    while (y2 < y_top && i++ < p / 2)
-                    {
-                        SetTempVariable(op.identifier.name, x);
-                        add_points(res.Size() - i * 2);
-                        x -= inc / p;
-                        y2 = res.Get(res.Size() - (i + 1) * 2 + 1);
-                    }
+                bool incr = is_increasing();
+                if ((incr && y < y_prev) || (!incr && y > y_prev))
+                {
+                    res.Add(x);
+                    res.Add(nan);
                 }
             }
         }
 
+        res.Add(x);
+        res.Add(y);
+
+        if (!y.IsNaN() && (y < y_bottom || y > y_top))
+        {
+            res.Add(x);
+            res.Add(nan);
+        }
+
+        y_prev = y;
         x += inc;
     }
 

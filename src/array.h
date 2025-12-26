@@ -127,6 +127,13 @@ public:
         return *this;
     }
 
+    Array<Number>& operator=(const Number& num)
+    {
+        numbers.clear();
+        numbers.push_back(num);
+        return *this;
+    }
+
     Array<Number>& operator=(const int num)
     {
         numbers.emplace_back(num);
@@ -730,6 +737,16 @@ public:
     {
         for (auto& n : numbers)
             n.angle_measure = angle_measure;
+    }
+
+    bool IsNaN() const
+    {
+        for (auto& n : numbers)
+        {
+            if (n.IsNaN())
+                return true;
+        }
+        return false;
     }
 
 public:
