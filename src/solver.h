@@ -1130,9 +1130,10 @@ private:
 
             if (c.unit.unit.size() <= s) //a unit should have minimal size
             {
-                if (c.GetExp() > m + 2)
+                int exp = c.GetExp();
+                if (exp > m + 2)
                     continue;
-                size_t m2 = c.ToString(::abs(c.GetExp()) + 1, ::abs(c.GetExp()) + 1, false).length();
+                size_t m2 = c.ToString(::abs(exp) + 1, ::abs(exp) + 1, false).length();
                 if (c.unit.unit.size() == 1 && c.unit.unit[0].second == 1) //choose the simplest one
                 {
                     if (!(res.unit.unit.size() == 1 && res.unit.unit[0].first.size() < c.unit.unit[0].first.size()))

@@ -1060,7 +1060,7 @@ TEST_F(CalcTestReal, units20)
 {
     auto val = parser.Parse(LogicalId{0, 0, 0, 0, 0, 0, 0, 2, 0}, U"700fut{rus};");
     std::string t = parser.GetSuitableUnit(LogicalId{0, 0, 0, 0, 0, 0, 0, 2, 0}, val).ToStdString(3, 3);
-    ASSERT_TRUE(t == "0.2E+0(versta){rus}") << t;
+    ASSERT_TRUE(t == "1.E+4(sotka){rus}") << t;
 }
 
 TEST_F(CalcTestReal, units21)

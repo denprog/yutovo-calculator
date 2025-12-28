@@ -260,7 +260,7 @@ Real operator+(const Real& num1, const Real& num2)
     Real _num1 = num1;
     Real _num2 = num2;
     ToCommonAngleMeasure(_num1, _num2);
-    Real res(std::max(_num1.GetBitPrecision() + 2, _num2.GetBitPrecision()) + 2, _num1.angle_measure);
+    Real res(std::max(_num1.GetBitPrecision(), _num2.GetBitPrecision()), _num1.angle_measure);
     res.CalcFunc(mpfr_add, _num1, _num2);
     res.unit = num1.unit + num2.unit;
     return res;
@@ -268,7 +268,7 @@ Real operator+(const Real& num1, const Real& num2)
 
 Real operator+(const Real& num1, const int num2)
 {
-    Real res(num1.GetBitPrecision() + 10, num1.angle_measure);
+    Real res(num1.GetBitPrecision(), num1.angle_measure);
     res.CalcFunc(mpfr_add_si, num1, num2);
     res.unit = num1.unit + num2;
     return res;
@@ -276,7 +276,7 @@ Real operator+(const Real& num1, const int num2)
 
 Real operator+(const int num1, const Real& num2)
 {
-    Real res(num2.GetBitPrecision() + 10, num2.angle_measure);
+    Real res(num2.GetBitPrecision(), num2.angle_measure);
     res.CalcFunc(mpfr_add_si, num2, num1);
     res.unit = num1 + num2.unit;
     return res;
@@ -284,7 +284,7 @@ Real operator+(const int num1, const Real& num2)
 
 Real operator+(const Real& num1, const float num2)
 {
-    Real res(num1.GetBitPrecision() + 10, num1.angle_measure);
+    Real res(num1.GetBitPrecision(), num1.angle_measure);
     res.CalcFunc(mpfr_add_d, num1, num2);
     res.unit = num1.unit + num2;
     return res;
@@ -292,7 +292,7 @@ Real operator+(const Real& num1, const float num2)
 
 Real operator+(const float num1, const Real& num2)
 {
-    Real res(num2.GetBitPrecision() + 10, num2.angle_measure);
+    Real res(num2.GetBitPrecision(), num2.angle_measure);
     res.CalcFunc(mpfr_add_d, num2, num1);
     res.unit = num1 + num2.unit;
     return res;
@@ -349,8 +349,10 @@ Real operator*(const Real& num1, const Real& num2)
     Real _num1 = num1;
     Real _num2 = num2;
     ToCommonAngleMeasure(_num1, _num2);
-    Real res(std::max(_num1.GetBitPrecision(), _num2.GetBitPrecision()) + 2, _num1.angle_measure);
+    mpfr_prec_t cur_precision = std::max(_num1.GetBitPrecision(), _num2.GetBitPrecision());
+    Real res(std::max(_num1.GetBitPrecision() + 2, _num2.GetBitPrecision() + 2), _num1.angle_measure);
     res.CalcFunc(mpfr_mul, _num1, _num2);
+    mpfr_prec_round(res.number, cur_precision, DEFAULT_RND);
     res.unit = num1.unit * num2.unit;
 #ifdef TRACE_OUTPUT
     res.UpdateNumberStr();
@@ -360,7 +362,7 @@ Real operator*(const Real& num1, const Real& num2)
 
 Real operator*(const Real& num1, const int num2)
 {
-    Real res(num1.GetBitPrecision() + 10, num1.angle_measure);
+    Real res(num1.GetBitPrecision(), num1.angle_measure);
     res.CalcFunc(mpfr_mul_si, num1, num2);
     res.unit = num1.unit * num2;
 #ifdef TRACE_OUTPUT
@@ -371,7 +373,7 @@ Real operator*(const Real& num1, const int num2)
 
 Real operator*(const int num1, const Real& num2)
 {
-    Real res(num2.GetBitPrecision() + 10, num2.angle_measure);
+    Real res(num2.GetBitPrecision(), num2.angle_measure);
     res.CalcFunc(mpfr_mul_si, num2, num1);
     res.unit = num1 * num2.unit;
 #ifdef TRACE_OUTPUT
@@ -382,7 +384,7 @@ Real operator*(const int num1, const Real& num2)
 
 Real operator*(const Real& num1, const float num2)
 {
-    Real res(num1.GetBitPrecision() + 10, num1.angle_measure);
+    Real res(num1.GetBitPrecision(), num1.angle_measure);
     res.CalcFunc(mpfr_mul_d, num1, num2);
     res.unit = num1.unit * num2;
 #ifdef TRACE_OUTPUT
@@ -393,7 +395,7 @@ Real operator*(const Real& num1, const float num2)
 
 Real operator*(const float num1, const Real& num2)
 {
-    Real res(num2.GetBitPrecision() + 10, num2.angle_measure);
+    Real res(num2.GetBitPrecision(), num2.angle_measure);
     res.CalcFunc(mpfr_mul_d, num2, num1);
     res.unit = num1 * num2.unit;
 #ifdef TRACE_OUTPUT
@@ -407,7 +409,7 @@ Real operator/(const Real& num1, const Real& num2)
     Real _num1 = num1;
     Real _num2 = num2;
     ToCommonAngleMeasure(_num1, _num2);
-    Real res(std::max(_num1.GetBitPrecision() + 2, _num2.GetBitPrecision() + 2), _num1.angle_measure);
+    Real res(std::max(_num1.GetBitPrecision(), _num2.GetBitPrecision()), _num1.angle_measure);
     res.CalcFunc(mpfr_div, num1, num2);
     if (res.IsInfinity() || res.IsNaN())
         throw MathException(DivisionByZero);
@@ -1837,68 +1839,50 @@ void Real::CheckUnit(Real& num)
 
 void Real::CalcFunc(int (*func)(mpfr_ptr, mpfr_srcptr, mpfr_rnd_t), const Real& num)
 {
-    int i = 0;
-    while (func(number, num.number, DEFAULT_RND) != 0 && i++ < 10)
-    {
-        if (GetBitPrecision() + DEFAULT_INCREASE_PRECISION >= MPFR_PREC_MAX)
-            throw MathException(Overflow);
-        SetBitPrecision(GetBitPrecision() + DEFAULT_INCREASE_PRECISION);
-    }
+    mpfr_prec_t cur_precision = GetBitPrecision();
+    SetBitPrecision(GetBitPrecision() + 64);
+    func(number, num.number, DEFAULT_RND);
+    mpfr_prec_round(number, cur_precision, DEFAULT_RND);
 }
 
 void Real::CalcFunc(int (*func)(mpfr_ptr, mpfr_srcptr, mpfr_srcptr, mpfr_rnd_t), const Real& num1, const Real& num2)
 {
-    int i = 0;
-    while (func(number, num1.number, num2.number, DEFAULT_RND) != 0 && i++ < 10)
-    {
-        if (GetBitPrecision() + DEFAULT_INCREASE_PRECISION >= MPFR_PREC_MAX)
-            throw MathException(Overflow);
-        SetBitPrecision(GetBitPrecision() + DEFAULT_INCREASE_PRECISION);
-    }
+    mpfr_prec_t cur_precision = GetBitPrecision();
+    SetBitPrecision(GetBitPrecision() + 64);
+    func(number, num1.number, num2.number, DEFAULT_RND);
+    mpfr_prec_round(number, cur_precision, DEFAULT_RND);
 }
 
 void Real::CalcFunc(int (*func)(mpfr_ptr, mpfr_srcptr, long, mpfr_rnd_t), const Real& num1, int num2)
 {
-    int i = 0;
-    while (func(number, num1.number, num2, DEFAULT_RND) != 0 && i++ < 10)
-    {
-        if (GetBitPrecision() + DEFAULT_INCREASE_PRECISION >= MPFR_PREC_MAX)
-            throw MathException(Overflow);
-        SetBitPrecision(GetBitPrecision() + DEFAULT_INCREASE_PRECISION);
-    }
+    mpfr_prec_t cur_precision = GetBitPrecision();
+    SetBitPrecision(GetBitPrecision() + 64);
+    func(number, num1.number, num2, DEFAULT_RND);
+    mpfr_prec_round(number, cur_precision, DEFAULT_RND);
 }
 
 void Real::CalcFunc(int (*func)(mpfr_ptr, long, mpfr_srcptr, mpfr_rnd_t), int num1, const Real& num2)
 {
-    int i = 0;
-    while (func(number, num1, num2.number, DEFAULT_RND) != 0 && i++ < 10)
-    {
-        if (GetBitPrecision() + DEFAULT_INCREASE_PRECISION >= MPFR_PREC_MAX)
-            throw MathException(Overflow);
-        SetBitPrecision(GetBitPrecision() + DEFAULT_INCREASE_PRECISION);
-    }
+    mpfr_prec_t cur_precision = GetBitPrecision();
+    SetBitPrecision(GetBitPrecision() + 64);
+    func(number, num1, num2.number, DEFAULT_RND);
+    mpfr_prec_round(number, cur_precision, DEFAULT_RND);
 }
 
 void Real::CalcFunc(int (*func)(mpfr_ptr, mpfr_srcptr, double, mpfr_rnd_t), const Real& num1, float num2)
 {
-    int i = 0;
-    while (func(number, num1.number, num2, DEFAULT_RND) != 0 && i++ < 10)
-    {
-        if (GetBitPrecision() + DEFAULT_INCREASE_PRECISION >= MPFR_PREC_MAX)
-            throw MathException(Overflow);
-        SetBitPrecision(GetBitPrecision() + DEFAULT_INCREASE_PRECISION);
-    }
+    mpfr_prec_t cur_precision = GetBitPrecision();
+    SetBitPrecision(GetBitPrecision() + 64);
+    func(number, num1.number, num2, DEFAULT_RND);
+    mpfr_prec_round(number, cur_precision, DEFAULT_RND);
 }
 
 void Real::CalcFunc(int (*func)(mpfr_ptr, double, mpfr_srcptr, mpfr_rnd_t), float num1, const Real& num2)
 {
-    int i = 0;
-    while (func(number, num1, num2.number, DEFAULT_RND) != 0 && i++ < 10)
-    {
-        if (GetBitPrecision() + DEFAULT_INCREASE_PRECISION >= MPFR_PREC_MAX)
-            throw MathException(Overflow);
-        SetBitPrecision(GetBitPrecision() + DEFAULT_INCREASE_PRECISION);
-    }
+    mpfr_prec_t cur_precision = GetBitPrecision();
+    SetBitPrecision(GetBitPrecision() + 64);
+    func(number, num1, num2.number, DEFAULT_RND);
+    mpfr_prec_round(number, cur_precision, DEFAULT_RND);
 }
 
 //int Real::GetPrecision() const
