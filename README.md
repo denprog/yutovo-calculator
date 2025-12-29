@@ -91,7 +91,7 @@ make -sj && make install
 ## Building for Windows
 
 If you haven't yet, build [yutovo-logger](https://github.com/denprog/yutovo-logger).
-Install the requirements:
+Set the VCPKG_ROOT variable to your vcpkg path. Install the requirements:
 
 ```
 vcpkg install boost-iostreams gtest gmock mpfr
@@ -107,13 +107,12 @@ Create the build directory:
 
 ```
 cd yutovo-calculator
-mkdir -p build/debug
+mkdir "build/debug"
 cd build/debug
 ```
 
 Build the project:
 
 ```
-cmake -DCMAKE_BUILD_TYPE=Debug ../..
-make -sj && make install
+cmake --build . --config Debug ../..
 ```
