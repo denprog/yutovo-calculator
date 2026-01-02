@@ -613,7 +613,7 @@ Integer Solver<Integer>::operator()(FunctionCallNode<Integer> const& op) const
         {
             try
             {
-                UnaryFunction u = boost::get<UnaryFunction>(*func);
+                UnaryFunction u = std::get<UnaryFunction>(*func);
                 if (op.arguments.size() != 1)
                     throw SyntaxException(op.id, WrongArgumentsCount, U"Wrong arguments count in '" + op.name.name + U"'", op.pos, op.name.name.length(), op.line);
                 
@@ -621,13 +621,13 @@ Integer Solver<Integer>::operator()(FunctionCallNode<Integer> const& op) const
                 Integer arg = (*this)(*iter);
                 return (*u)(arg);
             }
-            catch (boost::bad_get)
+            catch (const std::bad_variant_access&)
             {
             }
             
             try
             {
-                BinaryFunction b = boost::get<BinaryFunction>(*func);
+                BinaryFunction b = std::get<BinaryFunction>(*func);
                 if (op.arguments.size() != 2)
                     throw SyntaxException(op.id, WrongArgumentsCount, U"Wrong arguments count in '" + op.name.name + U"'", op.pos, op.name.name.length(), op.line);
                 
@@ -636,7 +636,7 @@ Integer Solver<Integer>::operator()(FunctionCallNode<Integer> const& op) const
                 Integer arg2 = (*this)(*iter);
                 return (*b)(arg1, arg2);
             }
-            catch (boost::bad_get)
+            catch (const std::bad_variant_access&)
             {
             }
         }
@@ -694,7 +694,7 @@ Rational Solver<Rational>::operator()(FunctionCallNode<Rational> const& op) cons
         {
             try
             {
-                UnaryFunction u = boost::get<UnaryFunction>(*func);
+                UnaryFunction u = std::get<UnaryFunction>(*func);
                 if (op.arguments.size() != 1)
                     throw SyntaxException(op.id, WrongArgumentsCount, U"Wrong arguments count in '" + op.name.name + U"'", op.pos, op.name.name.length(), op.line);
                 
@@ -702,13 +702,13 @@ Rational Solver<Rational>::operator()(FunctionCallNode<Rational> const& op) cons
                 Rational arg = (*this)(*iter);
                 return (*u)(arg);
             }
-            catch (boost::bad_get)
+            catch (const std::bad_variant_access&)
             {
             }
             
             try
             {
-                BinaryFunction b = boost::get<BinaryFunction>(*func);
+                BinaryFunction b = std::get<BinaryFunction>(*func);
                 if (op.arguments.size() != 2)
                     throw SyntaxException(op.id, WrongArgumentsCount, U"Wrong arguments count in '" + op.name.name + U"'", op.pos, op.name.name.length(), op.line);
                 
@@ -717,7 +717,7 @@ Rational Solver<Rational>::operator()(FunctionCallNode<Rational> const& op) cons
                 Rational arg2 = (*this)(*iter);
                 return (*b)(arg1, arg2);
             }
-            catch (boost::bad_get)
+            catch (const std::bad_variant_access&)
             {
             }
         }
@@ -757,10 +757,10 @@ Integer Solver<Integer>::operator()(FunctionCallStringNode<Integer> const& op) c
     {
         try
         {
-            StringFunction u = boost::get<StringFunction>(*func);
+            StringFunction u = std::get<StringFunction>(*func);
             return (*u)(op.argument);
         }
-        catch (boost::bad_get)
+        catch (const std::bad_variant_access&)
         {
         }
     }
@@ -872,10 +872,10 @@ Integer Solver<Integer>::operator()(IdentifierNode<Integer> const& op) const
     {
         try
         {
-            IntegerVariable v = boost::get<Variable>(*var);
+            IntegerVariable v = std::get<Variable>(*var);
             return (*v)();
         }
-        catch (boost::bad_get)
+        catch (const std::bad_variant_access&)
         {
         }
     }
@@ -916,10 +916,10 @@ Real Solver<Real>::operator()(IdentifierNode<Real> const& op) const
     {
         try
         {
-            RealPrecisionVariable v = boost::get<PrecisionVariable>(*var);
+            RealPrecisionVariable v = std::get<PrecisionVariable>(*var);
             return (*v)(precision);
         }
-        catch (boost::bad_get)
+        catch (const std::bad_variant_access&)
         {
         }
     }
@@ -974,10 +974,10 @@ Rational Solver<Rational>::operator()(IdentifierNode<Rational> const& op) const
     {
         try
         {
-            RationalVariable v = boost::get<Variable>(*var);
+            RationalVariable v = std::get<Variable>(*var);
             return (*v)();
         }
-        catch (boost::bad_get)
+        catch (const std::bad_variant_access&)
         {
         }
     }
@@ -1033,10 +1033,10 @@ Complex Solver<Complex>::operator()(IdentifierNode<Complex> const& op) const
     {
         try
         {
-            ComplexPrecisionVariable v = boost::get<ComplexPrecisionVariable>(*var);
+            ComplexPrecisionVariable v = std::get<ComplexPrecisionVariable>(*var);
             return (*v)(precision, default_angle_measure);
         }
-        catch (boost::bad_get)
+        catch (const std::bad_variant_access&)
         {
         }
     }
@@ -1141,10 +1141,10 @@ Array<Real> Solver<Array<Real>>::operator()(IdentifierNode<Array<Real>> const& o
     {
         try
         {
-            ArrayRealPrecisionVariable v = boost::get<PrecisionVariable>(*var);
+            ArrayRealPrecisionVariable v = std::get<PrecisionVariable>(*var);
             return (*v)(precision);
         }
-        catch (boost::bad_get)
+        catch (const std::bad_variant_access&)
         {
         }
     }
@@ -1196,10 +1196,10 @@ Integer Solver<Integer>::operator()(ImplicitStringMulNode<Integer> const& op) co
     {
         try
         {
-            IntegerVariable v = boost::get<Variable>(*var);
+            IntegerVariable v = std::get<Variable>(*var);
             return (*this)(op.left) * (*v)();
         }
-        catch (boost::bad_get)
+        catch (const std::bad_variant_access&)
         {
         }
     }
@@ -1235,10 +1235,10 @@ Real Solver<Real>::operator()(ImplicitStringMulNode<Real> const& op) const
     {
         try
         {
-            RealPrecisionVariable v = boost::get<PrecisionVariable>(*var);
+            RealPrecisionVariable v = std::get<PrecisionVariable>(*var);
             return (*this)(op.left) * (*v)(precision);
         }
-        catch (boost::bad_get)
+        catch (const std::bad_variant_access&)
         {
         }
     }
@@ -1294,10 +1294,10 @@ Rational Solver<Rational>::operator()(ImplicitStringMulNode<Rational> const& op)
     {
         try
         {
-            RationalVariable v = boost::get<Variable>(*var);
+            RationalVariable v = std::get<Variable>(*var);
             return (*this)(op.left) * (*v)();
         }
-        catch (boost::bad_get)
+        catch (const std::bad_variant_access&)
         {
         }
     }
@@ -1350,10 +1350,10 @@ Complex Solver<Complex>::operator()(ImplicitStringMulNode<Complex> const& op) co
     {
         try
         {
-            ComplexPrecisionVariable v = boost::get<ComplexPrecisionVariable>(*var);
+            ComplexPrecisionVariable v = std::get<ComplexPrecisionVariable>(*var);
             return (*this)(op.left) * (*v)(precision, default_angle_measure);
         }
-        catch (boost::bad_get)
+        catch (const std::bad_variant_access&)
         {
         }
     }
@@ -1411,10 +1411,10 @@ Array<Real> Solver<Array<Real>>::operator()(ImplicitStringMulNode<Array<Real>> c
     {
         try
         {
-            ArrayRealPrecisionVariable v = boost::get<PrecisionVariable>(*var);
+            ArrayRealPrecisionVariable v = std::get<PrecisionVariable>(*var);
             return (*this)(op.left) * (*v)(precision);
         }
-        catch (boost::bad_get)
+        catch (const std::bad_variant_access&)
         {
         }
     }
@@ -1483,12 +1483,12 @@ Real Solver<Real>::operator()(ImplicitDivMulNode<Real> const& op) const
     {
         try
         {
-            RealPrecisionVariable v = boost::get<PrecisionVariable>(*var);
+            RealPrecisionVariable v = std::get<PrecisionVariable>(*var);
             Real arg1 = (*this)(op.upper);
             Real arg2 = (*this)(op.lower);
             return (arg1 / arg2) * (*v)(precision);
         }
-        catch (boost::bad_get)
+        catch (const std::bad_variant_access&)
         {
         }
     }
@@ -1559,12 +1559,12 @@ Rational Solver<Rational>::operator()(ImplicitDivMulNode<Rational> const& op) co
     {
         try
         {
-            RationalVariable v = boost::get<Variable>(*var);
+            RationalVariable v = std::get<Variable>(*var);
             Rational arg1 = (*this)(op.upper);
             Rational arg2 = (*this)(op.lower);
             return (arg1 / arg2) * (*v)();
         }
-        catch (boost::bad_get)
+        catch (const std::bad_variant_access&)
         {
         }
     }
@@ -1627,12 +1627,12 @@ Complex Solver<Complex>::operator()(ImplicitDivMulNode<Complex> const& op) const
     {
         try
         {
-            ComplexPrecisionVariable v = boost::get<ComplexPrecisionVariable>(*var);
+            ComplexPrecisionVariable v = std::get<ComplexPrecisionVariable>(*var);
             Complex arg1 = (*this)(op.upper);
             Complex arg2 = (*this)(op.lower);
             return (arg1 / arg2) * (*v)(precision, default_angle_measure);
         }
-        catch (boost::bad_get)
+        catch (const std::bad_variant_access&)
         {
         }
     }
@@ -1699,12 +1699,12 @@ Array<Real> Solver<Array<Real>>::operator()(ImplicitDivMulNode<Array<Real>> cons
     {
         try
         {
-            ArrayRealPrecisionVariable v = boost::get<PrecisionVariable>(*var);
+            ArrayRealPrecisionVariable v = std::get<PrecisionVariable>(*var);
             Array<Real> arg1 = (*this)(op.upper);
             Array<Real> arg2 = (*this)(op.lower);
             return (arg1 / arg2) * (*v)(precision);
         }
-        catch (boost::bad_get)
+        catch (const std::bad_variant_access&)
         {
         }
     }

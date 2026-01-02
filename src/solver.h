@@ -13,6 +13,7 @@
 #include "utils.h"
 #include "export.h"
 #include <chrono>
+#include <variant>
 
 namespace yutovo_calculator
 {
@@ -31,7 +32,6 @@ typedef Real (*RealPrecisionVariable)(const int precision);
 
 typedef Complex (*ComplexUnaryFunc)(const Complex& num, int& res_pos);
 typedef Complex (*ComplexBinaryFunc)(const Complex& num1, const Complex& num2, int& res_pos);
-typedef Complex (*ComplexTrigonometricFunc)(const Complex& num, int& res_pos);
 typedef Complex (*ComplexPrecisionVariable)(const int precision, AngleMeasure angle_measure);
 typedef Complex (*ComplexFunc)(const Complex& num);
 
@@ -57,17 +57,15 @@ struct SolverSymbols
     typedef Number (*StringFunction)(const std::u32string& str);
     typedef Number (*TrigonometricFunction)(const Number& num);
     typedef Number (*ComplexUnaryFunction)(const Number& num, int& res_pos);
-    typedef Number (*ComplexTrigonometricFunction)(const Number& num, int& res_pos);
     typedef Number (*ComplexBinaryFunction)(const Number& num1, const Number& num2, int& res_pos);
 
-    typedef boost::variant<UnaryFunction, BinaryFunction, StringFunction, ComplexUnaryFunction, ComplexTrigonometricFunction, 
-        ComplexBinaryFunction> BuiltinFunction;
-    typedef boost::variant<TrigonometricFunction, ComplexTrigonometricFunction> BuiltinTrigonometricFunction;
+    typedef std::variant<UnaryFunction, BinaryFunction, StringFunction, ComplexUnaryFunction, ComplexBinaryFunction> BuiltinFunction;
+    typedef std::variant<TrigonometricFunction, ComplexUnaryFunction> BuiltinTrigonometricFunction;
     
     //build-in variables' typedefs
     typedef Number (*Variable)();
     typedef Number (*PrecisionVariable)(const int precision);
-    typedef boost::variant<Variable, PrecisionVariable, ComplexPrecisionVariable> BuiltinVariable;
+    typedef std::variant<Variable, PrecisionVariable, ComplexPrecisionVariable> BuiltinVariable;
 
     mutable std::deque<TempVariable> temp_variables;
     mutable std::deque<VariableNode<Number>> variables; //user variables
@@ -98,7 +96,6 @@ struct Solver : public boost::static_visitor<Number>
     typedef typename SolverSymbols<Number>::BuiltinFunction BuiltinFunction;
     typedef typename SolverSymbols<Number>::BuiltinTrigonometricFunction BuiltinTrigonometricFunction;
     typedef typename SolverSymbols<Number>::ComplexUnaryFunction ComplexUnaryFunction;
-    typedef typename SolverSymbols<Number>::ComplexTrigonometricFunction ComplexTrigonometricFunction;
     typedef typename SolverSymbols<Number>::ComplexBinaryFunction ComplexBinaryFunction;
     
     typedef typename SolverSymbols<Number>::PrecisionVariable PrecisionVariable;
@@ -600,11 +597,6 @@ struct Solver : public boost::static_visitor<Number>
     void AddBuiltinFunction(const char32_t* name, ComplexUnaryFunction& func)
     {
         symbols->buildin_functions[name] = func;
-    }
-
-    void AddTrigonometricFunction(const char32_t* name, ComplexTrigonometricFunction& func)
-    {
-        symbols->trigonometric_functions[name] = func;
     }
 
     void AddBuiltinFunction(const char32_t* name, ComplexBinaryFunction& func)
@@ -1326,7 +1318,7 @@ private:
             {
                 try
                 {
-                    TrigonometricFunction u = boost::get<TrigonometricFunction>(*t_func);
+                    TrigonometricFunction u = std::get<TrigonometricFunction>(*t_func);
                     if (op.arguments.size() != 1)
                         throw SyntaxException(op.id, WrongArgumentsCount, U"Wrong arguments count in '" + op.name.name + U"'", op.pos, op.line);
                     
@@ -1336,23 +1328,7 @@ private:
                         arg.SetAngleMeasure(default_angle_measure);
                     return (*u)(arg);
                 }
-                catch (boost::bad_get)
-                {
-                }
-
-                try
-                {
-                    ComplexTrigonometricFunction u = boost::get<ComplexTrigonometricFunction>(*t_func);
-                    if (op.arguments.size() != 1)
-                        throw SyntaxException(op.id, WrongArgumentsCount, U"Wrong arguments count in '" + op.name.name + U"'", op.pos, op.line);
-                    
-                    ExpressionNodesIter iter = op.arguments.begin();
-                    Number arg = (*this)(*iter);
-                    if (arg.GetAngleMeasure() == AngleMeasure::None)
-                        arg.SetAngleMeasure(default_angle_measure);
-                    return (*u)(arg, res_pos);
-                }
-                catch (boost::bad_get)
+                catch (const std::bad_variant_access&)
                 {
                 }
             }
@@ -1363,7 +1339,7 @@ private:
             {
                 try
                 {
-                    UnaryFunction u = boost::get<UnaryFunction>(*func);
+                    UnaryFunction u = std::get<UnaryFunction>(*func);
                     if (op.arguments.size() != 1)
                         throw SyntaxException(op.id, WrongArgumentsCount, U"Wrong arguments count in '" + op.name.name + U"'", op.pos, op.line);
                     
@@ -1371,13 +1347,13 @@ private:
                     Number arg = (*this)(*iter);
                     return (*u)(arg);
                 }
-                catch (const boost::bad_get&)
+                catch (const std::bad_variant_access&)
                 {
                 }
 
                 try
                 {
-                    ComplexUnaryFunction u = boost::get<ComplexUnaryFunction>(*func);
+                    ComplexUnaryFunction u = std::get<ComplexUnaryFunction>(*func);
                     if (op.arguments.size() != 1)
                         throw SyntaxException(op.id, WrongArgumentsCount, U"Wrong arguments count in '" + op.name.name + U"'", op.pos, op.line);
                     
@@ -1387,13 +1363,13 @@ private:
                         arg.SetAngleMeasure(default_angle_measure);
                     return (*u)(arg, res_pos);
                 }
-                catch (const boost::bad_get&)
+                catch (const std::bad_variant_access&)
                 {
                 }
 
                 try
                 {
-                    BinaryFunction b = boost::get<BinaryFunction>(*func);
+                    BinaryFunction b = std::get<BinaryFunction>(*func);
                     if (op.arguments.size() != 2)
                         throw SyntaxException(op.id, WrongArgumentsCount, U"Wrong arguments count in '" + op.name.name + U"'", op.pos, op.line);
                     
@@ -1402,13 +1378,13 @@ private:
                     Number arg2 = (*this)(*iter);
                     return (*b)(arg1, arg2);
                 }
-                catch (const boost::bad_get&)
+                catch (const std::bad_variant_access&)
                 {
                 }
 
                 try
                 {
-                    ComplexBinaryFunction b = boost::get<ComplexBinaryFunction>(*func);
+                    ComplexBinaryFunction b = std::get<ComplexBinaryFunction>(*func);
                     if (op.arguments.size() != 2)
                         throw SyntaxException(op.id, WrongArgumentsCount, U"Wrong arguments count in '" + op.name.name + U"'", op.pos, op.line);
                     
@@ -1417,7 +1393,7 @@ private:
                     Number arg2 = (*this)(*iter);
                     return (*b)(arg1, arg2, res_pos);
                 }
-                catch (const boost::bad_get&)
+                catch (const std::bad_variant_access&)
                 {
                 }
             }
@@ -1443,7 +1419,7 @@ private:
         {
             try
             {
-                BinaryFunction b = boost::get<BinaryFunction>(*func);
+                BinaryFunction b = std::get<BinaryFunction>(*func);
                 if (op.arguments.size() != 1)
                     throw SyntaxException(op.id, WrongArgumentsCount, U"Wrong arguments count in '" + op.name.name + U"'", op.pos, op.line);
                 
@@ -1452,7 +1428,7 @@ private:
                 Number arg2 = (*this)(op.last_argument);
                 return (*b)(arg1, arg2);
             }
-            catch (boost::bad_get)
+            catch (std::bad_variant_access)
             {
             }
         }
