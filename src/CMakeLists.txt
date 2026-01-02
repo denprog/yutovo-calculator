@@ -56,8 +56,7 @@ add_library(${PROJECT_NAME}
     utils.cpp
     unit.cpp
     export.cpp
-    graph.cpp
-
+ 
     stdafx.h
     utils.h
     script.h

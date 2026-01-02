@@ -60,6 +60,8 @@ Array<Real> Solver<Array<Real>>::operator()(LineGraphNode<Array<Real>> const& op
 {
     Array<Real> res;
     Array<Real> x;
+    if (!op.identifier.subscript.empty())
+        throw SyntaxException(op.identifier.id, UnknownIdentifier, op.identifier.pos, op.identifier.name.length(), op.line);
     PushTempVariable(op.identifier.name, x);
     Array<Real> x_right, y_bottom, y_top;
     Array<Real> inc;

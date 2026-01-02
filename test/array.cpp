@@ -253,6 +253,21 @@ TEST_F(CalcTestArrayReal, graph3)
     EXPECT_THROW(parser.Parse(LogicalId{0, 0, 1}, U"graph_line(sin(x),x,-1,1,10,10,10);", &parser_context), yutovo_calculator::MathException);
 }
 
+TEST_F(CalcTestArrayReal, graph4)
+{
+    yutovo_calculator::ParserContext parser_context;
+    parser_context.Init(100);
+    try
+    {
+        parser.Parse(LogicalId{0, 0, 1}, U"graph_line(abs(x),x{y},-1,1,0,1,100);", &parser_context);
+        ASSERT_FALSE(true);
+    }
+    catch (yutovo_calculator::SyntaxException& ex)
+    {
+        ASSERT_TRUE(ex.ex_id == ParserExceptionCode::UnknownIdentifier && ex.pos == 18);
+    }
+}
+
 TEST_F(CalcTestArrayReal, units1)
 {
     parser.SetLocale(Language::Russian);

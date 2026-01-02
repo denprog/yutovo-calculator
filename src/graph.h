@@ -30,6 +30,7 @@ struct Graph : qi::grammar<std::u32string::iterator, GraphNode<Number>(), unicod
         using boost::spirit::qi::no_case;
         using boost::spirit::qi::on_error;
         using boost::spirit::qi::fail;
+        qi::_1_type _1;
         qi::_3_type _3;
 
         graph = line_graph | bar_graph;
@@ -50,6 +51,18 @@ struct Graph : qi::grammar<std::u32string::iterator, GraphNode<Number>(), unicod
         digits_number = +char_("0-9.");
 
         exp_number = +char_("0-9.") >> raw[lexeme[(no_case[char_("E")] > (char_('+') | char_('-')))]] > +(char_("0-9"));
+
+        on_success(line_graph, 
+            boost::phoenix::function<Annotation<Number>>(Annotation<Number>(expr.begin(), expr.end(), id, 
+            &solver->parser_context))(qi::_val, _1));
+
+        on_success(identifier, 
+            boost::phoenix::function<Annotation<Number>>(Annotation<Number>(expr.begin(), expr.end(), id, 
+            &solver->parser_context))(qi::_val, _1));
+
+        on_success(number, 
+            boost::phoenix::function<Annotation<Number>>(Annotation<Number>(expr.begin(), expr.end(), id, 
+            &solver->parser_context))(qi::_val, _1));
 
         on_error<fail>(graph, 
             boost::phoenix::function<ErrorHandler<SyntaxException>>(ErrorHandler<SyntaxException>(id, expr.begin(), expr.end(), SyntaxError))(_3));
