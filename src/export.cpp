@@ -29,6 +29,7 @@ void Export::AddVariable<Integer>(const VariableNode<Integer>& var)
         return;
     }
     *it = var;
+    it->exported = true;
 }
 
 template<>
@@ -48,6 +49,7 @@ void Export::AddVariable<Real>(const VariableNode<Real>& var)
         return;
     }
     *it = var;
+    it->exported = true;
 }
 
 template<>
@@ -67,6 +69,7 @@ void Export::AddVariable<Rational>(const VariableNode<Rational>& var)
         return;
     }
     *it = var;
+    it->exported = true;
 }
 
 template<>
@@ -86,6 +89,7 @@ void Export::AddVariable<Complex>(const VariableNode<Complex>& var)
         return;
     }
     *it = var;
+    it->exported = true;
 }
 
 template<>
@@ -105,6 +109,7 @@ void Export::AddVariable<Array<Real>>(const VariableNode<Array<Real>>& var)
         return;
     }
     *it = var;
+    it->exported = true;
 }
 
 template<>
@@ -124,6 +129,7 @@ void Export::AddFunction(const FunctionNode<Integer>& func)
         return;
     }
     *it = func;
+    it->exported = true;
 }
 
 template<>
@@ -143,6 +149,7 @@ void Export::AddFunction(const FunctionNode<Real>& func)
         return;
     }
     *it = func;
+    it->exported = true;
 }
 
 template<>
@@ -162,6 +169,7 @@ void Export::AddFunction(const FunctionNode<Rational>& func)
         return;
     }
     *it = func;
+    it->exported = true;
 }
 
 template<>
@@ -181,6 +189,7 @@ void Export::AddFunction(const FunctionNode<Complex>& func)
         return;
     }
     *it = func;
+    it->exported = true;
 }
 
 template<>
@@ -200,6 +209,7 @@ void Export::AddFunction(const FunctionNode<Array<Real>>& func)
         return;
     }
     *it = func;
+    it->exported = true;
 }
 
 template<>
@@ -322,11 +332,20 @@ VariableNode<Complex>* Export::FindVariable<Complex>(const std::u32string& name,
 template<>
 VariableNode<Array<Real>>* Export::FindVariable<Array<Real>>(const std::u32string& name, const std::u32string& subscript)
 {
+    int index = -1;
+    try
+    {
+        index = StringToInt(subscript);
+    }
+    catch (const std::exception& e)
+    {
+    }
+
     std::scoped_lock<std::mutex> lock(export_mutex);
     auto it = std::find_if(variables_array_real.begin(), variables_array_real.end(), 
-        [name, subscript](auto& var)
+        [name, subscript, index](auto& var)
         {
-            return var.name.name == name && var.name.subscript == subscript;
+            return var.name.name == name && (index != -1 || var.name.subscript == subscript);
         });
     if (it != variables_array_real.end())
         return &(*it);

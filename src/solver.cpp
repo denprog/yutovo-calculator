@@ -800,7 +800,7 @@ VariableNode<Array<Real>>* Solver<Array<Real>>::FindVariable(const std::u32strin
     for (int i = (int)symbols->variables.size() - 1; i >= 0; --i)
     {
         auto& var = symbols->variables[i];
-        if (IsLess(var.id, id) && var.name.name == name)
+        if ((exported_id || IsLess(var.id, id)) && var.name.name == name)
         {
             if (var.name.subscript == subscript)
                 return &var;
@@ -1115,7 +1115,7 @@ Array<Real> Solver<Array<Real>>::operator()(IdentifierNode<Array<Real>> const& o
                 {
                     try
                     {
-                        int index = FromUtfString(op.subscript);
+                        int index = StringToInt(op.subscript);
                         if (res.Size() > index && index >= 0)
                         {
                             Real r = res.Get(index);
@@ -1388,7 +1388,7 @@ Array<Real> Solver<Array<Real>>::operator()(ImplicitStringMulNode<Array<Real>> c
         {
             try
             {
-                int index = FromUtfString(op.identifier.subscript);
+                int index = StringToInt(op.identifier.subscript);
                 if (res.Size() > index && index >= 0)
                 {
                     Real r = res.Get(index);
@@ -1673,7 +1673,7 @@ Array<Real> Solver<Array<Real>>::operator()(ImplicitDivMulNode<Array<Real>> cons
         {
             try
             {
-                int index = FromUtfString(op.identifier.subscript);
+                int index = StringToInt(op.identifier.subscript);
                 if (res.Size() > index && index >= 0)
                 {
                     Real r = res.Get(index);

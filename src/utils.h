@@ -103,6 +103,8 @@ std::string ToBasicString(const std::u32string& str);
 std::wstring ToWString(const std::string& str);
 std::string ToBasicString(const std::wstring& str);
 
+int StringToInt(const std::u32string& str);
+
 std::string ElementIdToString(const ElementId& id);
 std::string LogicalIdToString(const LogicalId& id);
 
