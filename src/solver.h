@@ -70,6 +70,8 @@ struct SolverSymbols
     mutable std::deque<TempVariable> temp_variables;
     mutable std::deque<VariableNode<Number>> variables; //user variables
     mutable std::vector<FunctionNode<Number>> functions; //user functions
+    mutable std::map<std::u32string, std::vector<std::u32string>> lists; //user lists
+    mutable std::map<std::u32string, std::u32string> strings; //user strings
 
     std::map<std::u32string, BuiltinFunction> buildin_functions;
     std::map<std::u32string, BuiltinTrigonometricFunction> trigonometric_functions;
@@ -152,7 +154,8 @@ struct Solver : public boost::static_visitor<Number>
             solver.exported_id = exported_id;
             solver.cast_units = cast_units;
             solver.max_cast_unit_size = max_cast_unit_size;
-            solver.SetDependencies(dependencies);
+            solver.cur_subscript = cur_subscript;
+            solver.dependencies = dependencies;
             res = boost::apply_visitor(solver, op);
         }
         if (parser_context)
@@ -195,6 +198,18 @@ struct Solver : public boost::static_visitor<Number>
     {
         CheckBreak(parser_context);
         throw MathException(op.id, IncorrectOperation, op.pos, 1, op.line);
+    }
+
+    Number operator()(ListNode<Number> const& op) const
+    {
+        AddList(op);
+        return Number();
+    }
+
+    Number operator()(StringNode<Number> const& op) const
+    {
+        AddString(op);
+        return Number();
     }
 
     Number operator()(FunctionNode<Number> const& op) const
@@ -444,6 +459,7 @@ struct Solver : public boost::static_visitor<Number>
                 symbols->variables.insert(symbols->variables.begin() + j, var);
         }
 
+        cur_subscript = var.name.subscript;
         (*this)(var.expression); //for adding dependencies and throwing exceptions
         if (parser_context && parser_context->exports && parser_context->include_document)
             parser_context->exports->AddVariable<Number>(var);
@@ -470,19 +486,45 @@ struct Solver : public boost::static_visitor<Number>
             symbols->units.emplace_back(c);
     }
 
+    void AddList(ListNode<Number> const& list) const
+    {
+        if (list.name.name.empty())
+            return;
+        symbols->lists[list.name.name] = list.list;
+        if (parser_context && parser_context->exports && parser_context->include_document)
+            parser_context->exports->AddList<Number>(list);
+    }
+
+    void AddString(StringNode<Number> const& str) const
+    {
+        if (str.name.name.empty())
+            return;
+        symbols->strings[str.name.name] = str.str;
+        if (parser_context && parser_context->exports && parser_context->include_document)
+            parser_context->exports->AddString<Number>(str);
+    }
+
     VariableNode<Number>* FindVariable(const std::u32string& name, const std::u32string& subscript) const
     {
+        std::u32string s = subscript;
+        if (!subscript.empty())
+        {
+            auto it = symbols->strings.find(subscript);
+            if (it != symbols->strings.end())
+                s = it->second;
+        }
+        
         for (int i = (int)symbols->variables.size() - 1; i >= 0; --i)
         {
             auto& var = symbols->variables[i];
-            if (var.name.name == name && var.name.subscript == subscript)
+            if (var.name.name == name && var.name.subscript == s)
             {
                 if (exported_id || IsLess(var.id, id))
                     return &var;
             }
         }
 
-        return FindExportVariable(name, subscript);
+        return FindExportVariable(name, s);
     }
 
     VariableNode<Number>* FindExportVariable(const std::u32string& name, const std::u32string& subscript) const
@@ -1053,11 +1095,6 @@ struct Solver : public boost::static_visitor<Number>
         units.insert(units.end(), symbols->units.begin(), symbols->units.end());
     }
 
-    void SetDependencies(Dependencies* _dependencies)
-    {
-        dependencies = _dependencies;
-    }
-
     void SetDefaultNotation(Notation notation)
     {
         switch (notation)
@@ -1276,6 +1313,13 @@ private:
             auto name = identifier.name + U"{" + identifier.subscript + U"}";
             if (std::find(dependencies->begin(), dependencies->end(), name) == dependencies->end())
                 dependencies->push_back(name);
+
+            auto it = symbols->strings.find(identifier.subscript);
+            if (it != symbols->strings.end())
+            {
+                if (std::find(dependencies->begin(), dependencies->end(), identifier.subscript) == dependencies->end())
+                    dependencies->push_back(identifier.subscript);
+            }
         }
     }
 
@@ -1448,6 +1492,7 @@ private:
     mutable Dependencies* dependencies = nullptr;
     mutable std::map<std::u32string, std::vector<Number>> cast_units;
     mutable bool exported_id = false;
+    mutable std::u32string cur_subscript;
 
     int max_cast_unit_size = 2; //max size of each unit in the cast vector
 };

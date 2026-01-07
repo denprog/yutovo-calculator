@@ -29,6 +29,18 @@ public:
     void AddUnit(const CustomUnit<Number>& unit);
 
     template<typename Number>
+    void AddList(const ListNode<Number>& list)
+    {
+        lists[list.name.name] = list.list;
+    }
+
+    template<typename Number>
+    void AddString(const StringNode<Number>& str)
+    {
+        strings[str.name.name] = str.str;
+    }
+
+    template<typename Number>
     VariableNode<Number>* FindVariable(const std::u32string& name, const std::u32string& subscript);
 
     template<typename Number>
@@ -60,6 +72,9 @@ private:
     std::vector<CustomUnit<Real>> units_real;
     std::vector<CustomUnit<Rational>> units_rational;
     std::vector<CustomUnit<Array<Real>>> units_array_real;
+
+    std::map<std::u32string, std::vector<std::u32string>> lists;
+    std::map<std::u32string, std::u32string> strings;
 };
 
 }

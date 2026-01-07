@@ -1844,4 +1844,40 @@ TEST_F(CalcTestReal, money3)
     ASSERT_TRUE(r.ToStdString(3, 3) == "1.E+0(R$)") << r.ToStdString(3, 3);
 }
 
+TEST_F(CalcTestReal, list1)
+{
+    parser.Parse(LogicalId{0, 0, 1}, U"materials=\"cuprum\",\"ferrum\";", 3);
+    parser.Parse(LogicalId{0, 0, 2}, U"ro{cuprum}=1.68E-8;", 3);
+    parser.Parse(LogicalId{0, 0, 3}, U"ro{ferrum}=9.71E-8;", 3);
+    parser.Parse(LogicalId{0, 0, 4}, U"material{materials}=\"cuprum\";", 3);
+    auto r = parser.Parse(LogicalId{0, 0, 5}, U"ro{material};", 3);
+    ASSERT_TRUE(r.ToStdString(3, 3) == "1.68E-8") << r.ToStdString(3, 3);
+
+    parser.Parse(LogicalId{0, 0, 4}, U"material{materials}=\"ferrum\";", 3);
+    r = parser.Parse(LogicalId{0, 0, 5}, U"ro{material};", 3);
+    ASSERT_TRUE(r.ToStdString(3, 3) == "9.71E-8") << r.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestReal, list2)
+{
+    yutovo_calculator::ParserContext parser_context;
+    parser_context.include_document = true;
+    parser.Parse(LogicalId{0, 0, 1}, U"materials=\"cuprum\",\"ferrum\";", &parser_context);
+    parser.Parse(LogicalId{0, 0, 2}, U"ro{cuprum}=1.68E-8*(Ohm*m);", &parser_context);
+    parser.Parse(LogicalId{0, 0, 3}, U"ro{ferrum}=9.71E-8*(Ohm*m);", &parser_context);
+    parser.Parse(LogicalId{0, 0, 4}, U"length=1m;", &parser_context);
+    parser.Parse(LogicalId{0, 0, 5}, U"section=1*pow(mm,2);", &parser_context);
+    parser.Parse(LogicalId{0, 0, 6}, U"material{materials}=\"ferrum\";", &parser_context);
+    parser.Parse(LogicalId{0, 0, 7}, U"resistance=ro{material}*(length)/(section);", &parser_context);
+    auto r = parser.GetSuitableUnit(LogicalId{0, 0, 8}, parser.Parse(LogicalId{0, 0, 8}, U"resistance;", &parser_context));
+    ASSERT_TRUE(r.ToStdString(3, 3) == "97.1E+0(mOhm)") << r.ToStdString(3, 3);
+
+    parser_context.include_document = false;
+    parser.Parse(LogicalId{0, 1, 1}, U"length=4m;", &parser_context);
+    parser.Parse(LogicalId{0, 1, 2}, U"section=2*pow(mm,2);", &parser_context);
+    parser.Parse(LogicalId{0, 1, 3}, U"material{materials}=\"cuprum\";", &parser_context);
+    r = parser.GetSuitableUnit(LogicalId{0, 1, 4}, parser.Parse(LogicalId{0, 1, 4}, U"resistance;", &parser_context));
+    ASSERT_TRUE(r.ToStdString(3, 3) == "33.6E+0(mOhm)") << r.ToStdString(3, 3);
+}
+
 }

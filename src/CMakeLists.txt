@@ -44,7 +44,6 @@ set(CMAKE_DEBUG_POSTFIX d)
 
 add_library(${PROJECT_NAME}
     parser.cpp
-    definition.cpp
     expression.cpp
     integer.cpp
     math_helper.cpp

@@ -291,10 +291,18 @@ template<>
 VariableNode<Real>* Export::FindVariable<Real>(const std::u32string& name, const std::u32string& subscript)
 {
     std::scoped_lock<std::mutex> lock(export_mutex);
+    std::u32string s = subscript;
+    if (!subscript.empty())
+    {
+        auto it = strings.find(subscript);
+        if (it != strings.end())
+            s = it->second;
+    }
+
     auto it = std::find_if(variables_real.begin(), variables_real.end(), 
-        [name, subscript](auto& var)
+        [name, s](auto& var)
         {
-            return var.name.name == name && var.name.subscript == subscript;
+            return var.name.name == name && var.name.subscript == s;
         });
     if (it != variables_real.end())
         return &(*it);
@@ -305,10 +313,18 @@ template<>
 VariableNode<Rational>* Export::FindVariable<Rational>(const std::u32string& name, const std::u32string& subscript)
 {
     std::scoped_lock<std::mutex> lock(export_mutex);
+    std::u32string s = subscript;
+    if (!subscript.empty())
+    {
+        auto it = strings.find(subscript);
+        if (it != strings.end())
+            s = it->second;
+    }
+
     auto it = std::find_if(variables_rational.begin(), variables_rational.end(), 
-        [name, subscript](auto& var)
+        [name, s](auto& var)
         {
-            return var.name.name == name && var.name.subscript == subscript;
+            return var.name.name == name && var.name.subscript == s;
         });
     if (it != variables_rational.end())
         return &(*it);

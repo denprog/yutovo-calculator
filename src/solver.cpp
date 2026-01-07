@@ -943,6 +943,16 @@ Real Solver<Real>::operator()(IdentifierNode<Real> const& op) const
         return custom_unit->value;
     }
 
+    if (!cur_subscript.empty())
+    {
+        auto it = symbols->lists.find(cur_subscript);
+        if (it != symbols->lists.end())
+        {
+            if (std::find(it->second.begin(), it->second.end(), op.name) != it->second.end())
+                return Real();
+        }
+    }
+
     //there is no such an identifier
     throw SyntaxException(op.id, UnknownIdentifier, U"Identifier '" + op.name + U"' not found", op.pos, op.name.length(), op.line);
 }
@@ -999,6 +1009,16 @@ Rational Solver<Rational>::operator()(IdentifierNode<Rational> const& op) const
     {
         symbols->last_unit_system = custom_unit->system;
         return custom_unit->value;
+    }
+
+    if (!cur_subscript.empty())
+    {
+        auto it = symbols->lists.find(cur_subscript);
+        if (it != symbols->lists.end())
+        {
+            if (std::find(it->second.begin(), it->second.end(), op.name) != it->second.end())
+                return Rational();
+        }
     }
 
     //there is no such an identifier
