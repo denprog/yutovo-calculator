@@ -1621,6 +1621,14 @@ TEST_F(CalcTestReal, units75)
     ASSERT_TRUE(s == "1.406E+0(arshin){rus}") << s;
 }
 
+TEST_F(CalcTestReal, units76)
+{
+    parser.SetLocale(Language::Russian);
+    Real r = parser.Parse({0, 0, 0, 0, 1}, U"0.*Кл;");
+    std::string s = parser.GetSuitableUnit(LogicalId{0, 0, 0, 0, 1}, r).ToStdString(3, 3);
+    ASSERT_TRUE(s == "0.E+0(Кл)") << s;
+}
+
 TEST_F(CalcTestReal, compare1)
 {
     std::string s = parser.Parse(LogicalId{0, 0, 0, 0, 0, 0, 0, 2, 0}, U"(0<10);").ToStdString(3, 3);

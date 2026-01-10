@@ -1209,7 +1209,7 @@ private:
                             }
                             continue;
                         }
-                        if ((res < 1 || c < 1) && 1 / res < 1 / c)
+                        if ((res == 0 || c == 0) || ((res < 1 || c < 1) && (1 / res < 1 / c)))
                             continue;
                     }
                 }
