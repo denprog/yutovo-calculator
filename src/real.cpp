@@ -104,7 +104,7 @@ Real::Real(const std::u32string& num)
     string_number = num;
     mpfr_init2(number, std::max((int)mpfr_get_default_prec(), MathHelper::ToBitPrecision(num.length() * 2)) + 1);
     mpfr_set_str(number, ToBasicString(num).c_str(), DEFAULT_BASE, MPFR_RNDA);
-    SetPrecision(GetPrecision() + GetExp());
+    SetPrecision(GetPrecision() + GetExp() - 1);
 
 #ifdef TRACE_OUTPUT
     UpdateNumberStr();

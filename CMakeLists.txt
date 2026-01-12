@@ -7,6 +7,7 @@ project(yutovo-calculator
 set(PROJECT_LICENSE "GPL-3.0-only")
 
 message(STATUS "Project license: ${PROJECT_LICENSE}")
+message(STATUS "CXX Compiler ID: ${CMAKE_CXX_COMPILER_ID}")
 
 if(WIN32)
     set(INSTALL_PATH "$ENV{VCPKG_ROOT}/installed/x64-windows")

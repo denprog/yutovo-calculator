@@ -17,6 +17,13 @@ add_executable(${PROJECT_NAME}_tests
 	array.cpp
 )
 
+if (NOT WIN32)
+    if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+		add_compile_options(-O0 -g -fsanitize=undefined -fsanitize=address -fno-omit-frame-pointer)
+		target_link_options(${PROJECT_NAME}_tests PRIVATE -fsanitize=undefined -fsanitize=address)
+    endif()
+endif()
+
 if(WIN32)
 	target_link_libraries(${PROJECT_NAME}_tests PRIVATE
 		${PROJECT_NAME}

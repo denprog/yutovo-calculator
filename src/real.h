@@ -10,6 +10,7 @@
 
 #include <string>
 #include <mpfr.h>
+#include <cmath>
 #include "math_helper.h"
 #include "parser_exception.h"
 #include "unit.h"
@@ -270,24 +271,9 @@ public:
 
     int GetExp() const
     {
-        mp_exp_t exp;
-        mpfr_get_str(NULL, &exp, DEFAULT_BASE, 0, number, DEFAULT_RND);
-
-        return exp - 1;
-    }
-
-    void SetExp(int exp)
-    {
-        //int curExp = GetExp();
-
-        //if (curExp > exp)
-        //	*this /= (float)pow(10., curExp - exp);
-        //else if (curExp < exp)
-        //	*this *= (float)pow(10., exp - curExp);
-
-#ifdef TRACE_OUTPUT
-        UpdateNumberStr();
-#endif
+        if (mpfr_zero_p(number))
+            return 0;
+        return static_cast<int>(std::floor(mpfr_get_exp(number) * 0.3010299956639812));
     }
 
     AngleMeasure GetAngleMeasure();
