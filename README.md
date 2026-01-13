@@ -47,7 +47,7 @@ unzip boost_1_81_0.zip
 cd boost_1_81_0
 ./bootstrap.sh --prefix=$PWD/../../deploy --libdir=$PWD/../../deploy/lib --includedir=$PWD/../../deploy/include
 ./b2 --prefix=$PWD/../../deploy link=static install
-./b2 -q toolset=emscripten link=static variant=release threading=single --with-iostreams
+./b2 -q toolset=emscripten link=static variant=release threading=single
 ```
 
 Install gmp:
@@ -94,7 +94,7 @@ If you haven't yet, build [yutovo-logger](https://github.com/denprog/yutovo-logg
 Set the VCPKG_ROOT variable to your vcpkg path. Install the requirements:
 
 ```
-vcpkg install boost-iostreams gtest gmock mpfr
+vcpkg install boost gtest gmock mpfr
 ```
 Clone the project in the yutovo dir (select another branch if you want):
 
