@@ -12,7 +12,7 @@ if(WIN32)
     find_package(PkgConfig)
 	set(CMAKE_PREFIX_PATH "${INSTALL_PATH}")
     pkg_check_modules(mpfr REQUIRED IMPORTED_TARGET mpfr)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /bigobj")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /bigobj /EHsc")
 endif()
 
 if(EMSCRIPTEN)
@@ -103,7 +103,7 @@ else()
             stdc++
             ${INSTALL_PATH}/lib/libmpfr.a
             ${INSTALL_PATH}/lib/libgmp.a
-    )
+        )
     endif()
 endif()
 
