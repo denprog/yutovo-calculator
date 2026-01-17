@@ -6,7 +6,12 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 enable_testing()
-find_package(GTest REQUIRED PATHS ${INSTALL_PATH}/share/gtest)
+
+if(WIN32)
+	find_package(GTest CONFIG REQUIRED)
+else()
+	find_package(GTest REQUIRED PATHS ${INSTALL_PATH}/share/gtest)
+endif()
 
 add_executable(${PROJECT_NAME}_tests
 	main.cpp
@@ -28,7 +33,7 @@ if(WIN32)
 	target_link_libraries(${PROJECT_NAME}_tests PRIVATE
 		${PROJECT_NAME}
 	)
-	target_link_libraries(${PROJECT_NAME}_tests PRIVATE GTest::gtest GTest::gtest_main GTest::gmock GTest::gmock_main)
+	target_link_libraries(${PROJECT_NAME}_tests PRIVATE GTest::gtest GTest::gmock)
 else()
 	target_link_libraries(${PROJECT_NAME}_tests PRIVATE
 		stdc++
