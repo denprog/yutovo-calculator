@@ -1932,6 +1932,32 @@ Array<Real> Solver<Array<Real>>::operator()(ScriptNode<Array<Real>> const& scrip
 }
 
 template<>
+void Solver<Integer>::FillBuiltinOperations()
+{
+    symbols->builtin_operations.push_back(U"plus");
+    symbols->builtin_operations.push_back(U"minus");
+    symbols->builtin_operations.push_back(U"mul");
+    symbols->builtin_operations.push_back(U"div");
+    symbols->builtin_operations.push_back(U"power");
+    symbols->builtin_operations.push_back(U"sub");
+    symbols->builtin_operations.push_back(U"sum");
+    symbols->builtin_operations.push_back(U"prod");
+}
+
+template<>
+void Solver<Rational>::FillBuiltinOperations()
+{
+    symbols->builtin_operations.push_back(U"plus");
+    symbols->builtin_operations.push_back(U"minus");
+    symbols->builtin_operations.push_back(U"mul");
+    symbols->builtin_operations.push_back(U"div");
+    symbols->builtin_operations.push_back(U"power");
+    symbols->builtin_operations.push_back(U"sub");
+    symbols->builtin_operations.push_back(U"sum");
+    symbols->builtin_operations.push_back(U"prod");
+}
+
+template<>
 Real Solver<Real>::GetSuitableUnit(const LogicalId _id, const Real& val, const std::u32string& system, const bool buildin) const
 {
     return GetSuitableUnitImpl(_id, val, system, buildin);

@@ -225,6 +225,16 @@ struct Parser
         solver.ListUserUnits(units);
     }
 
+    void ListBuiltinOperations(std::vector<std::u32string>& operations)
+    {
+        solver.ListBuiltinOperations(operations);
+    }
+
+    void ListUserStrings(std::vector<std::u32string>& strings)
+    {
+        solver.ListUserStrings(strings);
+    }
+
     void SetMaxCastUnitSize(int max_cast_unit_size)
     {
         solver.SetMaxCastUnitSize(max_cast_unit_size);

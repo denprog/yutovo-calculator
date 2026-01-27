@@ -80,6 +80,8 @@ struct SolverSymbols
     std::vector<CustomUnit<Number>> units;
     std::map<std::u32string, Number> builtin_identifiers;
 
+    std::vector<std::u32string> builtin_operations;
+
     std::u32string last_unit_system;
     bool buildin_elements = false;
 };
@@ -116,6 +118,7 @@ struct Solver : public boost::static_visitor<Number>
     {
         if (!symbols)
             symbols.reset(new SolverSymbols<Number>());
+        FillBuiltinOperations();
     }
 
     Solver(int _precision, AngleMeasure _default_angle_measure, AngleMeasure _result_angle_measure, int _default_notation, const std::u32string& _im, 
@@ -130,6 +133,7 @@ struct Solver : public boost::static_visitor<Number>
     {
         if (!symbols)
             symbols.reset(new SolverSymbols<Number>());
+        FillBuiltinOperations();
     }
     
     Number operator()(Number n) const
@@ -646,6 +650,20 @@ struct Solver : public boost::static_visitor<Number>
         symbols->buildin_functions[name] = func;
     }
 
+    void FillBuiltinOperations()
+    {
+        symbols->builtin_operations.push_back(U"plus");
+        symbols->builtin_operations.push_back(U"minus");
+        symbols->builtin_operations.push_back(U"mul");
+        symbols->builtin_operations.push_back(U"div");
+        symbols->builtin_operations.push_back(U"power");
+        symbols->builtin_operations.push_back(U"sqrt");
+        symbols->builtin_operations.push_back(U"root");
+        symbols->builtin_operations.push_back(U"sub");
+        symbols->builtin_operations.push_back(U"sum");
+        symbols->builtin_operations.push_back(U"prod");
+    }
+
     BuiltinFunction* FindBuiltinFunction(const std::u32string& name) const
     {
         typename std::map<std::u32string, BuiltinFunction>::const_iterator iter = symbols->buildin_functions.find(name);
@@ -1093,6 +1111,20 @@ struct Solver : public boost::static_visitor<Number>
             units.push_back(c);
         }
         units.insert(units.end(), symbols->units.begin(), symbols->units.end());
+    }
+
+    void ListBuiltinOperations(std::vector<std::u32string>& operations)
+    {
+        operations = symbols->builtin_operations;
+    }
+
+    void ListUserStrings(std::vector<std::u32string>& strings)
+    {
+        for (auto& str : symbols->strings)
+        {
+            strings.push_back(str.first);
+            strings.push_back(str.second);
+        }
     }
 
     void SetDefaultNotation(Notation notation)
