@@ -1383,7 +1383,15 @@ private:
 
                 bool _exported_id = exported_id;
                 exported_id = user_func->exported;
-                res = (*this)(user_func->return_expression);
+                try
+                {
+                    res = (*this)(user_func->return_expression);
+                }
+                catch (const MathException& e)
+                {
+                    PopTempVariables(op.arguments.size());
+                    throw;
+                }
                 exported_id = _exported_id;
                 PopTempVariables(op.arguments.size());
                 return res;

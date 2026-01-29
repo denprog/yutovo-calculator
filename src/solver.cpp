@@ -121,6 +121,7 @@ Array<Real> Solver<Array<Real>>::operator()(LineGraphNode<Array<Real>> const& op
             }
             catch (...)
             {
+                y.Clear();
                 y.Add(nan);
             }
         };

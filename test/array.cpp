@@ -268,6 +268,27 @@ TEST_F(CalcTestArrayReal, graph4)
     }
 }
 
+TEST_F(CalcTestArrayReal, graph5)
+{
+    yutovo_calculator::ParserContext parser_context;
+    parser_context.Init(100);
+    auto res = parser.Parse(LogicalId{0, 0, 1}, U"graph_line((pow(x,2))/(sqrt(x)),x,0,10,0,10,100);", &parser_context);
+    ASSERT_TRUE(res.ToStdString(3, 3).substr(0, 100) == 
+        "[0.E+0,10.E+0,0.E+0,10.E+0,0.E+0,NAN,0.1E+0,0.0316E+0,0.2E+0,0.0894E+0,0.3E+0,0.164E+0,0.4E+0,0.253E") << 
+        res.ToStdString(3, 3).substr(0, 100);
+}
+
+TEST_F(CalcTestArrayReal, graph6)
+{
+    yutovo_calculator::ParserContext parser_context;
+    parser_context.Init(100);
+    auto res = parser.Parse(LogicalId{0, 0, 1}, U"graph_line((pow(x,2))/(sqrt(x)),x,-0.5,10,-1,10,100);", &parser_context);
+    ASSERT_TRUE(res.ToStdString(3, 3).substr(0, 200) == 
+        "[-0.5E+0,10.E+0,-1.E+0,10.E+0,-0.5E+0,NAN,-0.395E+0,NAN,-0.29E+0,NAN,-0.185E+0,NAN,-0.08E+0,NAN,0.025E+0,0.00395E+0,"\
+        "0.13E+0,0.0469E+0,0.235E+0,0.114E+0,0.34E+0,0.198E+0,0.445E+0,0.297E+0,0.55E+0,0.408") << 
+        res.ToStdString(3, 3).substr(0, 200);
+}
+
 TEST_F(CalcTestArrayReal, units1)
 {
     parser.SetLocale(Language::Russian);
