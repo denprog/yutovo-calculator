@@ -1374,11 +1374,11 @@ private:
             FunctionNode<Number>* user_func = FindFunction(op);
             if (user_func)
             {
-                IdentifierNodesIter funcIter = user_func->arguments.begin();
-                for (ExpressionNodesIter iter = op.arguments.begin(); iter != op.arguments.end(); ++iter, ++funcIter)
+                IdentifierNodesIter func_iter = user_func->arguments.begin();
+                for (ExpressionNodesIter iter = op.arguments.begin(); iter != op.arguments.end(); ++iter, ++func_iter)
                 {
                     Number arg = (*this)(*iter);
-                    PushTempVariable(funcIter->name, arg);
+                    PushTempVariable(func_iter->name, arg);
                 }
 
                 bool _exported_id = exported_id;
