@@ -3,6 +3,21 @@ Yutovo is a powerful calculator with graphical representation of mathematics ope
 
 Yutovo calculator is a library for calculations using its own simple syntax.
 
+## Features
+   * Expression has a standard mathematical syntax based on nested parentheses.
+   * All arithmetic and logical operations are supported.
+   * Numbers can have (almost) unlimited length.
+   * Numbers can have (almost) unlimited precision.
+   * User-defined variables, functions, and units are supported.
+   * The following number types are supported: real, fractional, integer, complex, and arrays of real numbers.
+   * All the basic arithmetic, trigometric, and hyperbolic functions are built-in.
+   * Basic physical units of the following systems are built-in: SI, Russian, and American.
+   * Conversion between units is supported.
+   * The following angular units are supported: degrees, radians, and grads.
+   * Basic physical constants are built-in.
+   * Automatic unit selection is supported.
+   * Units are presented in the following languages: Russian, English, Spanish.
+
 ## Building for Ubuntu
 
 If you haven't yet, build [yutovo-logger](https://github.com/denprog/yutovo-logger).
