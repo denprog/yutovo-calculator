@@ -1081,7 +1081,7 @@ struct Solver : public boost::static_visitor<Number>
             if (var.name.subscript.empty())
                 variables.push_back(std::make_pair(var.name.name, var.name.description));
             else
-                variables.push_back(std::make_pair(var.name.name + var.name.subscript, var.name.description));
+                variables.push_back(std::make_pair(var.name.name + U"{" + var.name.subscript + U"}", var.name.description));
         }
     }
 
@@ -1092,7 +1092,7 @@ struct Solver : public boost::static_visitor<Number>
             if (func.name.subscript.empty())
                 functions.push_back(func.name.name);
             else
-                functions.push_back(func.name.name + func.name.subscript);
+                functions.push_back(func.name.name + U"{" + func.name.subscript + U"}");
         }
     }
 
