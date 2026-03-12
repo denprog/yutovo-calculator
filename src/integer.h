@@ -113,6 +113,8 @@ public:
 
     friend Integer fact(const Integer& num);
 
+    friend Integer reminder(const Integer& num1, const Integer& num2);
+
     friend Integer bin(const std::u32string& str);
     friend Integer oct(const std::u32string& str);
     friend Integer dec(const std::u32string& str);

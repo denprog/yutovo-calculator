@@ -210,6 +210,14 @@ TEST_F(CalcTestInteger, functions6)
     ASSERT_FALSE(true);
 }
 
+TEST_F(CalcTestInteger, functions7)
+{
+    Integer res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"reminder(3, 2);");
+    ASSERT_TRUE(res.ToStdString() == "1") << res.ToStdString();
+    res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"reminder(35, 3);");
+    ASSERT_TRUE(res.ToStdString() == "2") << res.ToStdString();
+}
+
 TEST_F(CalcTestInteger, symbols1)
 {
     EXPECT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"•"), yutovo_calculator::SyntaxException) << parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"•").ToStdString();

@@ -484,18 +484,21 @@ Integer pow(const Integer& num1, const Integer& num2)
 Integer abs(const Integer& num)
 {
     Integer res;
-
     mpz_abs(res.number, num.number);
-
     return res;
 }
 
 Integer fact(const Integer& num)
 {
     Integer res;
-
     mpz_fac_ui(res.number, (int)num);
+    return res;
+}
 
+Integer reminder(const Integer& num1, const Integer& num2)
+{
+    Integer res;
+    mpz_mod(res.number, num1.number, num2.number);
     return res;
 }
 

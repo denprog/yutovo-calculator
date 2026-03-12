@@ -17,6 +17,7 @@ Integer dec(const std::u32string& str);
 Integer hex(const std::u32string& str);
 
 Integer pow(const Integer& num1, const Integer& num2);
+Integer reminder(const Integer& num1, const Integer& num2);
 
 Integer abs(const Integer &num);
 
@@ -189,6 +190,8 @@ Parser<yutovo_calculator::Integer>::Parser(const int precision, const Language _
     
     IntegerBinaryFunc binary_func = &pow;
     solver.AddBuiltinFunction(U"pow", binary_func);
+    binary_func = &reminder;
+    solver.AddBuiltinFunction(U"reminder", binary_func);
 
     IntegerStringFunc string_func = &bin;
     solver.AddBuiltinFunction(U"bin", string_func);
