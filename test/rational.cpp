@@ -770,7 +770,7 @@ TEST_F(CalcTestRational, list2)
     parser.Parse(LogicalId{0, 1, 2}, U"section=2*pow(mm,2);", &parser_context);
     parser.Parse(LogicalId{0, 1, 3}, U"material{materials}=\"cuprum\";", &parser_context);
     r = parser.GetSuitableUnit(LogicalId{0, 1, 4}, parser.Parse(LogicalId{0, 1, 4}, U"resistance;", &parser_context));
-    ASSERT_TRUE(r.ToStdString() == "33600(1/(MS))") << r.ToStdString();
+    ASSERT_TRUE(r.ToStdString() == "168/5(mOhm)") << r.ToStdString();
 }
 
 }

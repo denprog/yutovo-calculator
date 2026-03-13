@@ -1243,6 +1243,8 @@ private:
                         }
                         if ((res.IsZero() || c.IsZero()) || ((res < 1 || c < 1) && (1 / res < 1 / c)))
                             continue;
+                        if (res.unit.unit.size() == 1 && res.unit.unit[0].second == 1 && c.unit.unit[0].second == -1)
+                            continue;
                     }
                 }
                 else
