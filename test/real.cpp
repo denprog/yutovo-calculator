@@ -1888,4 +1888,215 @@ TEST_F(CalcTestReal, list2)
     ASSERT_TRUE(r.ToStdString(3, 3) == "33.6E+0(mOhm)") << r.ToStdString(3, 3);
 }
 
+TEST_F(CalcTestReal, pt_BR_language_to_string)
+{
+    ASSERT_TRUE(LanguageToString(Language::BrazilianPortuguese) == "Portuguese (Brazil)");
+}
+
+TEST_F(CalcTestReal, pt_BR_si_units_distance)
+{
+    parser.SetLocale(Language::BrazilianPortuguese);
+
+    std::string s = parser.GetSuitableUnit(LogicalId{0, 0, 1}, parser.Parse(LogicalId{0, 0, 1}, U"1m;")).ToStdString(3, 3);
+    ASSERT_TRUE(s == "1.E+0(m)") << s;
+
+    s = parser.GetSuitableUnit(LogicalId{0, 0, 2}, parser.Parse(LogicalId{0, 0, 2}, U"1km;")).ToStdString(3, 3);
+    ASSERT_TRUE(s == "1.E+0(km)") << s;
+
+    s = parser.GetSuitableUnit(LogicalId{0, 0, 3}, parser.Parse(LogicalId{0, 0, 3}, U"1000m;")).ToStdString(3, 3);
+    ASSERT_TRUE(s == "1.E+0(km)") << s;
+
+    s = parser.GetSuitableUnit(LogicalId{0, 0, 4}, parser.Parse(LogicalId{0, 0, 4}, U"1cm;")).ToStdString(3, 3);
+    ASSERT_TRUE(s == "1.E+0(cm)") << s;
+
+    s = parser.GetSuitableUnit(LogicalId{0, 0, 5}, parser.Parse(LogicalId{0, 0, 5}, U"1mm;")).ToStdString(3, 3);
+    ASSERT_TRUE(s == "1.E+0(mm)") << s;
+}
+
+TEST_F(CalcTestReal, pt_BR_si_units_time)
+{
+    parser.SetLocale(Language::BrazilianPortuguese);
+
+    std::string s = parser.GetSuitableUnit(LogicalId{0, 0, 1}, parser.Parse(LogicalId{0, 0, 1}, U"1s;")).ToStdString(3, 3);
+    ASSERT_TRUE(s == "1.E+0(s)") << s;
+
+    s = parser.GetSuitableUnit(LogicalId{0, 0, 2}, parser.Parse(LogicalId{0, 0, 2}, U"1min;")).ToStdString(3, 3);
+    ASSERT_TRUE(s == "1.E+0(min)") << s;
+
+    s = parser.GetSuitableUnit(LogicalId{0, 0, 3}, parser.Parse(LogicalId{0, 0, 3}, U"60s;")).ToStdString(3, 3);
+    ASSERT_TRUE(s == "1.E+0(min)") << s;
+
+    s = parser.GetSuitableUnit(LogicalId{0, 0, 4}, parser.Parse(LogicalId{0, 0, 4}, U"1ms;")).ToStdString(3, 3);
+    ASSERT_TRUE(s == "1.E+0(ms)") << s;
+
+    s = parser.GetSuitableUnit(LogicalId{0, 0, 5}, parser.Parse(LogicalId{0, 0, 5}, U"1000ms;")).ToStdString(3, 3);
+    ASSERT_TRUE(s == "1.E+0(s)") << s;
+}
+
+TEST_F(CalcTestReal, pt_BR_si_units_mass)
+{
+    parser.SetLocale(Language::BrazilianPortuguese);
+
+    std::string s = parser.GetSuitableUnit(LogicalId{0, 0, 1}, parser.Parse(LogicalId{0, 0, 1}, U"1kg;")).ToStdString(3, 3);
+    ASSERT_TRUE(s == "1.E+0(kg)") << s;
+
+    s = parser.GetSuitableUnit(LogicalId{0, 0, 2}, parser.Parse(LogicalId{0, 0, 2}, U"1000g;")).ToStdString(3, 3);
+    ASSERT_TRUE(s == "1.E+0(kg)") << s;
+
+    s = parser.GetSuitableUnit(LogicalId{0, 0, 3}, parser.Parse(LogicalId{0, 0, 3}, U"1ton;")).ToStdString(3, 3);
+    ASSERT_TRUE(s == "1.E+0(ton)") << s;
+
+    s = parser.GetSuitableUnit(LogicalId{0, 0, 4}, parser.Parse(LogicalId{0, 0, 4}, U"1mg;")).ToStdString(3, 3);
+    ASSERT_TRUE(s == "1.E+0(g)") << s;
+}
+
+TEST_F(CalcTestReal, pt_BR_si_units_electric)
+{
+    parser.SetLocale(Language::BrazilianPortuguese);
+
+    std::string s = parser.GetSuitableUnit(LogicalId{0, 0, 1}, parser.Parse(LogicalId{0, 0, 1}, U"1A;")).ToStdString(3, 3);
+    ASSERT_TRUE(s == "1.E+0(A)") << s;
+
+    s = parser.GetSuitableUnit(LogicalId{0, 0, 2}, parser.Parse(LogicalId{0, 0, 2}, U"1V;")).ToStdString(3, 3);
+    ASSERT_TRUE(s == "1.E+0(V)") << s;
+
+    s = parser.GetSuitableUnit(LogicalId{0, 0, 3}, parser.Parse(LogicalId{0, 0, 3}, U"1Ohm;")).ToStdString(3, 3);
+    ASSERT_TRUE(s == "1.E+0(Ohm)") << s;
+
+    s = parser.GetSuitableUnit(LogicalId{0, 0, 4}, parser.Parse(LogicalId{0, 0, 4}, U"1F;")).ToStdString(3, 3);
+    ASSERT_TRUE(s == "1.E+0(F)") << s;
+
+    s = parser.GetSuitableUnit(LogicalId{0, 0, 5}, parser.Parse(LogicalId{0, 0, 5}, U"1W;")).ToStdString(3, 3);
+    ASSERT_TRUE(s == "1.E+0(W)") << s;
+
+    s = parser.GetSuitableUnit(LogicalId{0, 0, 6}, parser.Parse(LogicalId{0, 0, 6}, U"1J;")).ToStdString(3, 3);
+    ASSERT_TRUE(s == "1.E+0(J)") << s;
+
+    s = parser.GetSuitableUnit(LogicalId{0, 0, 7}, parser.Parse(LogicalId{0, 0, 7}, U"1Pa;")).ToStdString(3, 3);
+    ASSERT_TRUE(s == "1.E+0(Pa)") << s;
+
+    s = parser.GetSuitableUnit(LogicalId{0, 0, 8}, parser.Parse(LogicalId{0, 0, 8}, U"1T;")).ToStdString(3, 3);
+    ASSERT_TRUE(s == "1.E+0(T)") << s;
+}
+
+TEST_F(CalcTestReal, pt_BR_other_units)
+{
+    parser.SetLocale(Language::BrazilianPortuguese);
+
+    std::string s = parser.GetSuitableUnit(LogicalId{0, 0, 1}, parser.Parse(LogicalId{0, 0, 1}, U"1l;")).ToStdString(3, 3);
+    ASSERT_TRUE(s == "1.E+0(l)") << s;
+
+    s = parser.GetSuitableUnit(LogicalId{0, 0, 2}, parser.Parse(LogicalId{0, 0, 2}, U"1ml;")).ToStdString(3, 3);
+    ASSERT_TRUE(s == "1.E+0(ml)") << s;
+
+    s = parser.GetSuitableUnit(LogicalId{0, 0, 3}, parser.Parse(LogicalId{0, 0, 3}, U"1byte;")).ToStdString(3, 3);
+    ASSERT_TRUE(s == "8.E+0(bit)") << s;
+
+    s = parser.GetSuitableUnit(LogicalId{0, 0, 4}, parser.Parse(LogicalId{0, 0, 4}, U"1kbyte;")).ToStdString(3, 3);
+    ASSERT_TRUE(s == "1.E+0(kbyte)") << s;
+
+    s = parser.GetSuitableUnit(LogicalId{0, 0, 5}, parser.Parse(LogicalId{0, 0, 5}, U"1ha;")).ToStdString(3, 3);
+    ASSERT_TRUE(s == "1.E+0(ha)") << s;
+}
+
+TEST_F(CalcTestReal, pt_BR_physical_constants)
+{
+    parser.SetLocale(Language::BrazilianPortuguese);
+
+    auto r = parser.Parse(LogicalId{0, 0, 1}, U"v_l;");
+    ASSERT_TRUE(r.ToStdString(3, 3).find("2.998E+8") == 0) << r.ToStdString(3, 3);
+
+    r = parser.Parse(LogicalId{0, 0, 2}, U"G;");
+    ASSERT_TRUE(r.ToStdString(3, 3).find("6.674E-11") == 0) << r.ToStdString(3, 3);
+
+    r = parser.Parse(LogicalId{0, 0, 3}, U"h;");
+    ASSERT_TRUE(r.ToStdString(3, 3).find("6.626E-34") == 0) << r.ToStdString(3, 3);
+
+    r = parser.Parse(LogicalId{0, 0, 4}, U"k;");
+    ASSERT_TRUE(r.ToStdString(3, 3).find("1.381E-23") == 0) << r.ToStdString(3, 3);
+
+    r = parser.Parse(LogicalId{0, 0, 5}, U"e_c;");
+    ASSERT_TRUE(r.ToStdString(3, 3).find("1.602E-19") != std::string::npos) << r.ToStdString(3, 3);
+
+    r = parser.Parse(LogicalId{0, 0, 6}, U"a_g;");
+    ASSERT_TRUE(r.ToStdString(3, 3).find("9.807E+0") == 0) << r.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestReal, pt_BR_us_units)
+{
+    parser.SetLocale(Language::BrazilianPortuguese);
+
+    auto r = parser.Parse(LogicalId{0, 0, 1}, U"1polegada{us};");
+    std::string s = parser.GetSuitableUnit(LogicalId{0, 0, 1}, r).ToStdString(3, 3);
+    ASSERT_TRUE(s.find("polegada") != std::string::npos) << s;
+
+    r = parser.Parse(LogicalId{0, 0, 2}, U"1jarda{us};");
+    s = parser.GetSuitableUnit(LogicalId{0, 0, 2}, r).ToStdString(3, 3);
+    ASSERT_TRUE(s.find("jarda") != std::string::npos) << s;
+
+    r = parser.Parse(LogicalId{0, 0, 3}, U"1milha{us};");
+    s = parser.GetSuitableUnit(LogicalId{0, 0, 3}, r).ToStdString(3, 3);
+    ASSERT_TRUE(s.find("milha") != std::string::npos) << s;
+
+    r = parser.Parse(LogicalId{0, 0, 4}, U"1libra{us};");
+    s = parser.GetSuitableUnit(LogicalId{0, 0, 4}, r).ToStdString(3, 3);
+    ASSERT_TRUE(s.find("libra") != std::string::npos) << s;
+
+    r = parser.Parse(LogicalId{0, 0, 5}, U"1galão{us};");
+    s = parser.GetSuitableUnit(LogicalId{0, 0, 5}, r).ToStdString(3, 3);
+    ASSERT_TRUE(s.find("galão") != std::string::npos) << s;
+}
+
+TEST_F(CalcTestReal, pt_BR_russian_units)
+{
+    parser.SetLocale(Language::BrazilianPortuguese);
+
+    auto r = parser.Parse(LogicalId{0, 0, 1}, U"1ponto{rus};");
+    std::string s = parser.GetSuitableUnit(LogicalId{0, 0, 1}, r).ToStdString(3, 3);
+    ASSERT_TRUE(s.find("ponto") != std::string::npos) << s;
+
+    r = parser.Parse(LogicalId{0, 0, 2}, U"10linha{rus};");
+    s = parser.GetSuitableUnit(LogicalId{0, 0, 2}, r).ToStdString(3, 3);
+    ASSERT_TRUE(s.find("polegada") != std::string::npos) << s;
+
+    r = parser.Parse(LogicalId{0, 0, 3}, U"1copo{rus};");
+    s = parser.GetSuitableUnit(LogicalId{0, 0, 3}, r).ToStdString(3, 3);
+    ASSERT_TRUE(s.find("copo") != std::string::npos) << s;
+
+    r = parser.Parse(LogicalId{0, 0, 4}, U"500sazhen{rus};");
+    s = parser.GetSuitableUnit(LogicalId{0, 0, 4}, r).ToStdString(3, 3);
+    ASSERT_TRUE(s.find("versta") != std::string::npos) << s;
+}
+
+TEST_F(CalcTestReal, pt_BR_currency)
+{
+    parser.SetLocale(Language::BrazilianPortuguese);
+
+    auto r = parser.Parse(LogicalId{0, 0, 1}, U"1R$;");
+    ASSERT_TRUE(r.ToStdString(3, 3) == "1.E+0(R$)") << r.ToStdString(3, 3);
+
+    r = parser.Parse(LogicalId{0, 0, 2}, U"1real;");
+    ASSERT_TRUE(r.ToStdString(3, 3) == "1.E+0(R$)") << r.ToStdString(3, 3);
+
+    r = parser.Parse(LogicalId{0, 0, 3}, U"1dólar;");
+    ASSERT_TRUE(r.ToStdString(3, 3) == "1.E+0($)") << r.ToStdString(3, 3);
+
+    r = parser.Parse(LogicalId{0, 0, 4}, U"1euro;");
+    ASSERT_TRUE(r.ToStdString(3, 3) == "1.E+0(€)") << r.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestReal, pt_locale_switch_back)
+{
+    parser.SetLocale(Language::BrazilianPortuguese);
+    auto r = parser.Parse(LogicalId{0, 0, 1}, U"1hora;");
+    std::string s = parser.GetSuitableUnit(LogicalId{0, 0, 1}, r).ToStdString(3, 3);
+    ASSERT_TRUE(s == "1.E+0(hora)") << s;
+
+    parser.SetLocale(Language::English);
+    EXPECT_THROW(parser.Parse(LogicalId{0, 0, 2}, U"1hora;"), yutovo_calculator::SyntaxException);
+    r = parser.Parse(LogicalId{0, 0, 3}, U"1hour;");
+    s = parser.GetSuitableUnit(LogicalId{0, 0, 3}, r).ToStdString(3, 3);
+    ASSERT_TRUE(s == "1.E+0(hour)") << s;
+}
+
 }

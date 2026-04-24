@@ -168,6 +168,8 @@ std::string LanguageToString(const Language language)
         return "Russian";
     case Language::Spanish:
         return "Spanish";
+    case Language::BrazilianPortuguese:
+        return "Portuguese (Brazil)";
     case Language::None:
         return "";
     }
