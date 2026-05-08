@@ -61,12 +61,14 @@ private:
     std::vector<VariableNode<Real>> variables_real;
     std::vector<VariableNode<Rational>> variables_rational;
     std::vector<VariableNode<Complex>> variables_complex;
+    std::vector<VariableNode<Symbolic>> variables_symbolic;
     std::vector<VariableNode<Array<Real>>> variables_array_real;
 
     std::vector<FunctionNode<Integer>> functions_integer;
     std::vector<FunctionNode<Real>> functions_real;
     std::vector<FunctionNode<Rational>> functions_rational;
     std::vector<FunctionNode<Complex>> functions_complex;
+    std::vector<FunctionNode<Symbolic>> functions_symbolic;
     std::vector<FunctionNode<Array<Real>>> functions_array_real;
 
     std::vector<CustomUnit<Real>> units_real;

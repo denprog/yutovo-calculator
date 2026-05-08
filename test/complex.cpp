@@ -539,6 +539,93 @@ TEST_F(CalcTestComplex, variables3)
     ASSERT_TRUE(s == "7.389E+0") << s;
 }
 
+TEST_F(CalcTestComplex, variables4)
+{
+    parser.Parse(LogicalId{0, 0, 2}, U"a=77;");
+    parser.Parse(LogicalId{0, 0, 1}, U"a=5;");
+    std::string s = parser.Parse(LogicalId{0, 0, 3}, U"a;").ToStdString(3, 3);
+    ASSERT_TRUE(s == "77.E+0") << s;
+}
+
+TEST_F(CalcTestComplex, variables5)
+{
+    parser.Parse(LogicalId{0, 0, 1}, U"d=4;");
+    std::string s = parser.Parse(LogicalId{0, 0, 2}, U"d+5;").ToStdString(3, 3);
+    ASSERT_TRUE(s == "9.E+0") << s;
+    parser.Parse(LogicalId{0, 0, 3}, U"d=45+d;");
+    s = parser.Parse(LogicalId{0, 0, 4}, U"d+5;").ToStdString(3, 3);
+    ASSERT_TRUE(s == "54.E+0") << s;
+}
+
+TEST_F(CalcTestComplex, variables6)
+{
+    parser.Parse(LogicalId{0, 0, 1}, U"a{1}=5;");
+    std::string s = parser.Parse(LogicalId{0, 0, 2}, U"a{1};").ToStdString(3, 3);
+    ASSERT_TRUE(s == "5.E+0") << s;
+    parser.Parse(LogicalId{0, 0, 3}, U"a=7;");
+    s = parser.Parse(LogicalId{0, 0, 4}, U"a{1}+a;").ToStdString(3, 3);
+    ASSERT_TRUE(s == "12.E+0") << s;
+}
+
+TEST_F(CalcTestComplex, variables7)
+{
+    try
+    {
+        parser.Parse(LogicalId{0, 0, 1}, U"sin;");
+        ASSERT_FALSE(true);
+    }
+    catch (yutovo_calculator::SyntaxException& ex)
+    {
+        ASSERT_TRUE((ex.id == LogicalId{0, 0, 1}) && ex.ex_id == ParserExceptionCode::UnknownIdentifier && ex.pos == 0) << LogicalIdToString(ex.id);
+    }
+
+    parser.Parse(LogicalId{0, 0, 1}, U"sin=2;");
+    Complex res = parser.Parse(LogicalId{0, 0, 2}, U"sin;");
+    ASSERT_TRUE(res.ToStdString(3, 3) == "2.E+0") << res.ToStdString(3, 3);
+
+    res = parser.Parse(LogicalId{0, 0, 3}, U"sin(2);");
+    ASSERT_TRUE(res.ToStdString(3, 3) == "0.909E+0") << res.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestComplex, variables8)
+{
+    parser.Parse(LogicalId{0, 0, 5}, U"b=4;");
+    parser.Parse(LogicalId{0, 0, 3}, U"b=3;");
+    parser.Parse(LogicalId{0, 0, 1}, U"b=2;");
+    Complex res = parser.Parse(LogicalId{0, 0, 6}, U"b;");
+    ASSERT_TRUE(res.ToStdString(3, 3) == "4.E+0") << res.ToStdString(3, 3);
+    res = parser.Parse(LogicalId{0, 0, 4}, U"b;");
+    ASSERT_TRUE(res.ToStdString(3, 3) == "3.E+0") << res.ToStdString(3, 3);
+    res = parser.Parse(LogicalId{0, 0, 2}, U"b;");
+    ASSERT_TRUE(res.ToStdString(3, 3) == "2.E+0") << res.ToStdString(3, 3);
+
+    parser.Parse(LogicalId{0, 0, 1}, U"b=5;");
+    res = parser.Parse(LogicalId{0, 0, 2}, U"b;");
+    ASSERT_TRUE(res.ToStdString(3, 3) == "5.E+0") << res.ToStdString(3, 3);
+    res = parser.Parse(LogicalId{0, 0, 4}, U"b;");
+    ASSERT_TRUE(res.ToStdString(3, 3) == "3.E+0") << res.ToStdString(3, 3);
+    res = parser.Parse(LogicalId{0, 0, 6}, U"b;");
+    ASSERT_TRUE(res.ToStdString(3, 3) == "4.E+0") << res.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestComplex, variables9)
+{
+    std::vector<std::u32string> dependencies;
+    parser.Parse(LogicalId{0, 0, 1}, U"v{12}=555;");
+    std::string s = parser.Parse(LogicalId{0, 0, 2}, U"v{12};", &dependencies).ToStdString(3, 3);
+    ASSERT_TRUE(s == "555.E+0") << s;
+    ASSERT_TRUE(std::find(dependencies.begin(), dependencies.end(), U"v{12}") != dependencies.end());
+}
+
+TEST_F(CalcTestComplex, variables10)
+{
+    yutovo_calculator::ParserContext parser_context;
+    parser.Parse(LogicalId{0, 0, 1}, U"v=555;", &parser_context);
+    ASSERT_TRUE(parser_context.no_result == true);
+    parser.Parse(LogicalId{0, 0, 2}, U"v;", &parser_context);
+    ASSERT_TRUE(parser_context.no_result == false);
+}
+
 TEST_F(CalcTestComplex, compare1)
 {
     std::string s = parser.Parse(LogicalId{0, 0, 0, 0, 0, 0, 0, 2, 0}, U"(0<3);").ToStdString(3, 3);

@@ -33,6 +33,7 @@ enum ParserExceptionCode
 	UnitsAreIncompatible = 201,
 	CannotCastToUnit = 202,
 	UnknownLanguage = 301,
+	NotImplemented = 302,
 	TimeExceed = 401,
 	Break = 501
 };

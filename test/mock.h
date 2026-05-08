@@ -94,6 +94,16 @@ struct CalcTestArrayReal : public testing::Test
     Parser<Array<Real>> parser;
 };
 
+struct CalcTestSymbolic : public testing::Test
+{
+    CalcTestSymbolic() :
+        parser(10, Language::English)
+    {
+    }
+
+    Parser<Symbolic> parser;
+};
+
 }
 
 #endif

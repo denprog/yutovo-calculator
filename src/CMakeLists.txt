@@ -19,6 +19,7 @@ if(EMSCRIPTEN)
     set(CMAKE_FIND_ROOT_PATH ${INSTALL_PATH}/wasm/cmake/)
 else()
     find_package(Boost 1.83.0 REQUIRED)
+    find_package(SymEngine 0.14.0 PATHS ${INSTALL_PATH}/lib/cmake/)
     if (CMAKE_BUILD_TYPE STREQUAL "Debug")
         if (NOT WIN32)
             if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
@@ -58,6 +59,7 @@ add_library(${PROJECT_NAME}
     rational.cpp
     real.cpp
     complex.cpp
+    symbolic.cpp
     script.cpp
     solver.cpp
     utils.cpp
@@ -80,6 +82,7 @@ add_library(${PROJECT_NAME}
     error_handler.h
     definition.h
     complex.h
+    symbolic.h
     ast.h
     annotation.h
     export.h
@@ -92,6 +95,7 @@ if(EMSCRIPTEN)
         stdc++
         ${INSTALL_PATH}/wasm/libmpfr.a
         ${INSTALL_PATH}/wasm/libgmp.a
+        ${INSTALL_PATH}/wasm/libsymengine.a
     )
     target_link_options(${PROJECT_NAME} PUBLIC "-fexceptions -s DISABLE_EXCEPTION_THROWING=0")
     target_compile_options(${PROJECT_NAME} PUBLIC -Wno-overloaded-shift-op-parentheses)
@@ -103,6 +107,7 @@ else()
             stdc++
             ${INSTALL_PATH}/lib/libmpfr.a
             ${INSTALL_PATH}/lib/libgmp.a
+            ${SYMENGINE_LIBRARIES}
         )
     endif()
 endif()
@@ -147,6 +152,7 @@ install(
         rational.h
         real.h
         complex.h
+        symbolic.h
         array.h
         custom_unit.h
         script.h

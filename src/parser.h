@@ -13,6 +13,7 @@
 #include "rational.h"
 #include "real.h"
 #include "complex.h"
+#include "symbolic.h"
 #include "array.h"
 #include "ast.h"
 #include "script.h"
@@ -93,6 +94,11 @@ struct Parser
         return Parse(id, expression, dependencies, AngleMeasure::Radian, AngleMeasure::None, Notation::Decimal, -1, _context);
     }
 
+    Number Parse(LogicalId id, std::u32string expression, Dependencies* dependencies, const int precision, ParserContext* _context = nullptr)
+    {
+        return Parse(id, expression, dependencies, AngleMeasure::Radian, AngleMeasure::None, Notation::Decimal, precision, _context);
+    }
+
     Number Parse(LogicalId id, std::u32string expression, Dependencies* dependencies, Notation default_notation, ParserContext* _context = nullptr)
     {
         return Parse(id, expression, dependencies, AngleMeasure::Radian, AngleMeasure::None, default_notation, -1, _context);
@@ -106,6 +112,11 @@ struct Parser
     Number Parse(LogicalId id, std::string expression, Dependencies* dependencies, ParserContext* _context = nullptr)
     {
         return Parse(id, ToUtfString(expression), dependencies, AngleMeasure::Radian, AngleMeasure::None, -1, _context);
+    }
+
+    Number Parse(LogicalId id, std::string expression, Dependencies* dependencies, const int precision, ParserContext* _context = nullptr)
+    {
+        return Parse(id, ToUtfString(expression), dependencies, AngleMeasure::Radian, AngleMeasure::None, Notation::Decimal, precision, _context);
     }
 
     Number Parse(LogicalId id, std::u32string expression, Notation default_notation, ParserContext* _context = nullptr)

@@ -279,6 +279,8 @@ public:
 private:
     Real re, im;
 
+    friend class Symbolic;
+
 #ifdef TRACE_OUTPUT
     void UpdateNumberStr();
 

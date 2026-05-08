@@ -529,6 +529,74 @@ void Export::GetUnits(const std::u32string& system, std::vector<CustomUnit<Array
     }
 }
 
+template<>
+void Export::AddVariable<Symbolic>(const VariableNode<Symbolic>& var)
+{
+    std::scoped_lock<std::mutex> lock(export_mutex);
+    auto it = std::find_if(variables_symbolic.begin(), variables_symbolic.end(),
+        [var](auto& v)
+        {
+            return var.name == v.name;
+        });
+    if (it == variables_symbolic.end())
+    {
+        VariableNode<Symbolic> v(var);
+        v.exported = true;
+        variables_symbolic.push_back(v);
+        return;
+    }
+    *it = var;
+    it->exported = true;
+}
+
+template<>
+void Export::AddFunction<Symbolic>(const FunctionNode<Symbolic>& func)
+{
+    std::scoped_lock<std::mutex> lock(export_mutex);
+    auto it = std::find_if(functions_symbolic.begin(), functions_symbolic.end(),
+        [func](auto& v)
+        {
+            return func.name == v.name;
+        });
+    if (it == functions_symbolic.end())
+    {
+        FunctionNode<Symbolic> f(func);
+        f.exported = true;
+        functions_symbolic.push_back(f);
+        return;
+    }
+    *it = func;
+    it->exported = true;
+}
+
+template<>
+VariableNode<Symbolic>* Export::FindVariable<Symbolic>(const std::u32string& name, const std::u32string& subscript)
+{
+    std::scoped_lock<std::mutex> lock(export_mutex);
+    auto it = std::find_if(variables_symbolic.begin(), variables_symbolic.end(),
+        [name, subscript](auto& var)
+        {
+            return var.name.name == name && var.name.subscript == subscript;
+        });
+    if (it != variables_symbolic.end())
+        return &(*it);
+    return nullptr;
+}
+
+template<>
+FunctionNode<Symbolic>* Export::FindFunction<Symbolic>(const std::u32string& name)
+{
+    std::scoped_lock<std::mutex> lock(export_mutex);
+    auto it = std::find_if(functions_symbolic.begin(), functions_symbolic.end(),
+        [name](auto& func)
+        {
+            return func.name.name == name;
+        });
+    if (it != functions_symbolic.end())
+        return &(*it);
+    return nullptr;
+}
+
 void Export::Clear()
 {
     std::scoped_lock<std::mutex> lock(export_mutex);
@@ -536,12 +604,14 @@ void Export::Clear()
     variables_real.clear();
     variables_rational.clear();
     variables_complex.clear();
+    variables_symbolic.clear();
     variables_array_real.clear();
 
     functions_integer.clear();
     functions_real.clear();
     functions_rational.clear();
     functions_complex.clear();
+    functions_symbolic.clear();
     functions_array_real.clear();
 
     units_real.clear();

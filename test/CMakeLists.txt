@@ -19,6 +19,7 @@ add_executable(${PROJECT_NAME}_tests
 	real.cpp
 	rational.cpp
 	complex.cpp
+	symbolic.cpp
 	array.cpp
 )
 
