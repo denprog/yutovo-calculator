@@ -44,9 +44,9 @@ typedef Array<Real> (*ArrayRealBinaryFunc)(const Array<Real>& num1, const Array<
 typedef Array<Real> (*ArrayRealTrigonometricFunc)(const Array<Real>& num);
 typedef Array<Real> (*ArrayRealPrecisionVariable)(const int precision);
 
-typedef Symbolic (*SymbolicUnaryFunc)(const Symbolic& num);
-typedef Symbolic (*SymbolicBinaryFunc)(const Symbolic& num1, const Symbolic& num2);
-typedef Symbolic (*SymbolicTernaryFunc)(const Symbolic& num1, const Symbolic& num2, const Symbolic& num3);
+typedef Symbolic<Real> (*SymbolicUnaryFunc)(const Symbolic<Real>& num);
+typedef Symbolic<Real> (*SymbolicBinaryFunc)(const Symbolic<Real>& num1, const Symbolic<Real>& num2);
+typedef Symbolic<Real> (*SymbolicTernaryFunc)(const Symbolic<Real>& num1, const Symbolic<Real>& num2, const Symbolic<Real>& num3);
 
 typedef std::vector<std::u32string> Dependencies;
 

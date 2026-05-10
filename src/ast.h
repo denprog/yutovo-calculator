@@ -439,6 +439,8 @@ struct ScriptNode
 
 };
 
+using namespace yutovo_calculator;
+
 //Integer adaptors
 
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::UnaryOperationNode<yutovo_calculator::Integer>, 
@@ -953,131 +955,131 @@ BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::GraphNode<yutovo_calculator::Comple
 
 //Symbolic adaptors
 
-BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::UnaryOperationNode<yutovo_calculator::Symbolic>, 
-	(char, op)(yutovo_calculator::UnaryOperationNode<yutovo_calculator::Symbolic>::Operand, operand))
+BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::UnaryOperationNode<yutovo_calculator::Symbolic<Real>>, 
+	(char, op)(yutovo_calculator::UnaryOperationNode<yutovo_calculator::Symbolic<Real>>::Operand, operand))
 
-BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::NumberNode<yutovo_calculator::Symbolic>, 
+BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::NumberNode<yutovo_calculator::Symbolic<Real>>, 
 	(std::u32string, number))
 
-BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::OperationNode<yutovo_calculator::Symbolic>, 
-	(char, op)(yutovo_calculator::OperationNode<yutovo_calculator::Symbolic>::Operand, operand))
+BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::OperationNode<yutovo_calculator::Symbolic<Real>>, 
+	(char, op)(yutovo_calculator::OperationNode<yutovo_calculator::Symbolic<Real>>::Operand, operand))
 
-BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::PostfixOperationNode<yutovo_calculator::Symbolic>, 
-	(yutovo_calculator::PostfixOperationNode<yutovo_calculator::Symbolic>::Operand, operand)(char, op))
+BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::PostfixOperationNode<yutovo_calculator::Symbolic<Real>>, 
+	(yutovo_calculator::PostfixOperationNode<yutovo_calculator::Symbolic<Real>>::Operand, operand)(char, op))
 
-BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::MixedDivivsionNode<yutovo_calculator::Symbolic>, 
-	(yutovo_calculator::NumberNode<yutovo_calculator::Symbolic>, left)
-	(yutovo_calculator::NumberNode<yutovo_calculator::Symbolic>, numerator)
-	(yutovo_calculator::NumberNode<yutovo_calculator::Symbolic>, denominator))
+BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::MixedDivivsionNode<yutovo_calculator::Symbolic<Real>>, 
+	(yutovo_calculator::NumberNode<yutovo_calculator::Symbolic<Real>>, left)
+	(yutovo_calculator::NumberNode<yutovo_calculator::Symbolic<Real>>, numerator)
+	(yutovo_calculator::NumberNode<yutovo_calculator::Symbolic<Real>>, denominator))
 
-BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::ImplicitStringMulNode<yutovo_calculator::Symbolic>,
-	(yutovo_calculator::NumberNode<yutovo_calculator::Symbolic>, left)
-	(yutovo_calculator::IdentifierNode<yutovo_calculator::Symbolic>, identifier))
+BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::ImplicitStringMulNode<yutovo_calculator::Symbolic<Real>>,
+	(yutovo_calculator::NumberNode<yutovo_calculator::Symbolic<Real>>, left)
+	(yutovo_calculator::IdentifierNode<yutovo_calculator::Symbolic<Real>>, identifier))
 
-BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::ImplicitDivMulNode<yutovo_calculator::Symbolic>,
-	(yutovo_calculator::ExpressionNode<yutovo_calculator::Symbolic>, upper)
-	(yutovo_calculator::ExpressionNode<yutovo_calculator::Symbolic>, lower)
-	(yutovo_calculator::IdentifierNode<yutovo_calculator::Symbolic>, identifier))
+BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::ImplicitDivMulNode<yutovo_calculator::Symbolic<Real>>,
+	(yutovo_calculator::ExpressionNode<yutovo_calculator::Symbolic<Real>>, upper)
+	(yutovo_calculator::ExpressionNode<yutovo_calculator::Symbolic<Real>>, lower)
+	(yutovo_calculator::IdentifierNode<yutovo_calculator::Symbolic<Real>>, identifier))
 
-BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::ImplicitMulNode<yutovo_calculator::Symbolic>,
-	(yutovo_calculator::NumberNode<yutovo_calculator::Symbolic>, before)
-	(yutovo_calculator::ExpressionNode<yutovo_calculator::Symbolic>, inside_braces))
+BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::ImplicitMulNode<yutovo_calculator::Symbolic<Real>>,
+	(yutovo_calculator::NumberNode<yutovo_calculator::Symbolic<Real>>, before)
+	(yutovo_calculator::ExpressionNode<yutovo_calculator::Symbolic<Real>>, inside_braces))
 
-BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::ImplicitFractionMulNode<yutovo_calculator::Symbolic>, 
-	(yutovo_calculator::NumberNode<yutovo_calculator::Symbolic>, numerator)
-	(yutovo_calculator::NumberNode<yutovo_calculator::Symbolic>, denominator)
-	(yutovo_calculator::IdentifierNode<yutovo_calculator::Symbolic>, identifier))
+BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::ImplicitFractionMulNode<yutovo_calculator::Symbolic<Real>>, 
+	(yutovo_calculator::NumberNode<yutovo_calculator::Symbolic<Real>>, numerator)
+	(yutovo_calculator::NumberNode<yutovo_calculator::Symbolic<Real>>, denominator)
+	(yutovo_calculator::IdentifierNode<yutovo_calculator::Symbolic<Real>>, identifier))
 
-BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::ImplicitFunctionMulNode<yutovo_calculator::Symbolic>, 
-	(yutovo_calculator::NumberNode<yutovo_calculator::Symbolic>, left)
-	(yutovo_calculator::FunctionCallNode<yutovo_calculator::Symbolic>, function_call))
+BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::ImplicitFunctionMulNode<yutovo_calculator::Symbolic<Real>>, 
+	(yutovo_calculator::NumberNode<yutovo_calculator::Symbolic<Real>>, left)
+	(yutovo_calculator::FunctionCallNode<yutovo_calculator::Symbolic<Real>>, function_call))
 
-BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::ImplicitPostFunctionMulNode<yutovo_calculator::Symbolic>, 
-	(yutovo_calculator::FunctionCallNode<yutovo_calculator::Symbolic>, function_call)
-	(yutovo_calculator::IdentifierNode<yutovo_calculator::Symbolic>, right))
+BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::ImplicitPostFunctionMulNode<yutovo_calculator::Symbolic<Real>>, 
+	(yutovo_calculator::FunctionCallNode<yutovo_calculator::Symbolic<Real>>, function_call)
+	(yutovo_calculator::IdentifierNode<yutovo_calculator::Symbolic<Real>>, right))
 
-BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::VariableNode<yutovo_calculator::Symbolic>, 
-	(yutovo_calculator::IdentifierNode<yutovo_calculator::Symbolic>, name)
-	(yutovo_calculator::ExpressionNode<yutovo_calculator::Symbolic>, expression))
+BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::VariableNode<yutovo_calculator::Symbolic<Real>>, 
+	(yutovo_calculator::IdentifierNode<yutovo_calculator::Symbolic<Real>>, name)
+	(yutovo_calculator::ExpressionNode<yutovo_calculator::Symbolic<Real>>, expression))
 
-BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::UnitNode<yutovo_calculator::Symbolic>, 
-	(yutovo_calculator::IdentifierNode<yutovo_calculator::Symbolic>, name)
-	(yutovo_calculator::ExpressionNode<yutovo_calculator::Symbolic>, expression))
+BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::UnitNode<yutovo_calculator::Symbolic<Real>>, 
+	(yutovo_calculator::IdentifierNode<yutovo_calculator::Symbolic<Real>>, name)
+	(yutovo_calculator::ExpressionNode<yutovo_calculator::Symbolic<Real>>, expression))
 
-BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::ListNode<yutovo_calculator::Symbolic>, 
-	(yutovo_calculator::IdentifierNode<yutovo_calculator::Symbolic>, name)
+BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::ListNode<yutovo_calculator::Symbolic<Real>>, 
+	(yutovo_calculator::IdentifierNode<yutovo_calculator::Symbolic<Real>>, name)
 	(std::vector<std::u32string>, list))
 
-BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::StringNode<yutovo_calculator::Symbolic>, 
-	(yutovo_calculator::IdentifierNode<yutovo_calculator::Symbolic>, name)
+BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::StringNode<yutovo_calculator::Symbolic<Real>>, 
+	(yutovo_calculator::IdentifierNode<yutovo_calculator::Symbolic<Real>>, name)
 	(std::u32string, str))
 
-BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::FunctionNode<yutovo_calculator::Symbolic>, 
-	(yutovo_calculator::IdentifierNode<yutovo_calculator::Symbolic>, name)
-	(std::list<yutovo_calculator::IdentifierNode<yutovo_calculator::Symbolic>>, arguments)
-	(yutovo_calculator::ExpressionNode<yutovo_calculator::Symbolic>, return_expression))
+BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::FunctionNode<yutovo_calculator::Symbolic<Real>>, 
+	(yutovo_calculator::IdentifierNode<yutovo_calculator::Symbolic<Real>>, name)
+	(std::list<yutovo_calculator::IdentifierNode<yutovo_calculator::Symbolic<Real>>>, arguments)
+	(yutovo_calculator::ExpressionNode<yutovo_calculator::Symbolic<Real>>, return_expression))
 
-BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::DefinitionNode<yutovo_calculator::Symbolic>, 
-	(yutovo_calculator::DefinitionNode<yutovo_calculator::Symbolic>::Definition, definition))
+BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::DefinitionNode<yutovo_calculator::Symbolic<Real>>, 
+	(yutovo_calculator::DefinitionNode<yutovo_calculator::Symbolic<Real>>::Definition, definition))
 
-BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::IdentifierNode<yutovo_calculator::Symbolic>, 
+BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::IdentifierNode<yutovo_calculator::Symbolic<Real>>, 
 	(std::u32string, name)
 	(std::u32string, subscript)
 	(std::u32string, description))
 
-BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::FunctionCallNode<yutovo_calculator::Symbolic>, 
-	(yutovo_calculator::IdentifierNode<yutovo_calculator::Symbolic>, name)
-	(std::list<yutovo_calculator::ExpressionNode<yutovo_calculator::Symbolic>>, arguments))
+BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::FunctionCallNode<yutovo_calculator::Symbolic<Real>>, 
+	(yutovo_calculator::IdentifierNode<yutovo_calculator::Symbolic<Real>>, name)
+	(std::list<yutovo_calculator::ExpressionNode<yutovo_calculator::Symbolic<Real>>>, arguments))
 
-BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::FunctionCallStringNode<yutovo_calculator::Symbolic>, 
-	(yutovo_calculator::IdentifierNode<yutovo_calculator::Symbolic>, name)
+BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::FunctionCallStringNode<yutovo_calculator::Symbolic<Real>>, 
+	(yutovo_calculator::IdentifierNode<yutovo_calculator::Symbolic<Real>>, name)
 	(std::u32string, argument))
 
-BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::NoFencesFunctionCallNode<yutovo_calculator::Symbolic>, 
-	(yutovo_calculator::IdentifierNode<yutovo_calculator::Symbolic>, name)
-	(std::list<yutovo_calculator::ExpressionNode<yutovo_calculator::Symbolic>>, arguments)
-	(yutovo_calculator::FunctionParamNode<yutovo_calculator::Symbolic>, last_argument))
+BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::NoFencesFunctionCallNode<yutovo_calculator::Symbolic<Real>>, 
+	(yutovo_calculator::IdentifierNode<yutovo_calculator::Symbolic<Real>>, name)
+	(std::list<yutovo_calculator::ExpressionNode<yutovo_calculator::Symbolic<Real>>>, arguments)
+	(yutovo_calculator::FunctionParamNode<yutovo_calculator::Symbolic<Real>>, last_argument))
 
-BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::FunctionParamNode<yutovo_calculator::Symbolic>, 
-	(yutovo_calculator::FunctionParamNode<yutovo_calculator::Symbolic>::Operand, op))
+BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::FunctionParamNode<yutovo_calculator::Symbolic<Real>>, 
+	(yutovo_calculator::FunctionParamNode<yutovo_calculator::Symbolic<Real>>::Operand, op))
 
-BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::ExpressionNode<yutovo_calculator::Symbolic>, 
-	(yutovo_calculator::ExpressionNode<yutovo_calculator::Symbolic>::Operand, first)
-	(std::list<yutovo_calculator::OperationNode<yutovo_calculator::Symbolic>>, rest))
+BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::ExpressionNode<yutovo_calculator::Symbolic<Real>>, 
+	(yutovo_calculator::ExpressionNode<yutovo_calculator::Symbolic<Real>>::Operand, first)
+	(std::list<yutovo_calculator::OperationNode<yutovo_calculator::Symbolic<Real>>>, rest))
 
-BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::ScriptNode<yutovo_calculator::Symbolic>, 
-	(std::list<yutovo_calculator::ScriptNode<yutovo_calculator::Symbolic>::Operand>, list))
+BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::ScriptNode<yutovo_calculator::Symbolic<Real>>, 
+	(std::list<yutovo_calculator::ScriptNode<yutovo_calculator::Symbolic<Real>>::Operand>, list))
 
-BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::CompareNode<yutovo_calculator::Symbolic>, 
-	(yutovo_calculator::ExpressionNode<yutovo_calculator::Symbolic>, left)
+BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::CompareNode<yutovo_calculator::Symbolic<Real>>, 
+	(yutovo_calculator::ExpressionNode<yutovo_calculator::Symbolic<Real>>, left)
 	(std::u32string, sign)
-	(yutovo_calculator::ExpressionNode<yutovo_calculator::Symbolic>, right))
+	(yutovo_calculator::ExpressionNode<yutovo_calculator::Symbolic<Real>>, right))
 
-BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::LoopNode<yutovo_calculator::Symbolic>, 
-	(yutovo_calculator::VariableNode<yutovo_calculator::Symbolic>, counter)
-	(yutovo_calculator::CompareNode<yutovo_calculator::Symbolic>, counter_max)
-	(yutovo_calculator::VariableNode<yutovo_calculator::Symbolic>, counter_increment)
-	(yutovo_calculator::VariableNode<yutovo_calculator::Symbolic>, loop_var)
-	(yutovo_calculator::VariableNode<yutovo_calculator::Symbolic>, loop_expression))
+BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::LoopNode<yutovo_calculator::Symbolic<Real>>, 
+	(yutovo_calculator::VariableNode<yutovo_calculator::Symbolic<Real>>, counter)
+	(yutovo_calculator::CompareNode<yutovo_calculator::Symbolic<Real>>, counter_max)
+	(yutovo_calculator::VariableNode<yutovo_calculator::Symbolic<Real>>, counter_increment)
+	(yutovo_calculator::VariableNode<yutovo_calculator::Symbolic<Real>>, loop_var)
+	(yutovo_calculator::VariableNode<yutovo_calculator::Symbolic<Real>>, loop_expression))
 
-BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::ArrayNode<yutovo_calculator::Symbolic>, 
-	(std::list<yutovo_calculator::ExpressionNode<yutovo_calculator::Symbolic>>, array))
+BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::ArrayNode<yutovo_calculator::Symbolic<Real>>, 
+	(std::list<yutovo_calculator::ExpressionNode<yutovo_calculator::Symbolic<Real>>>, array))
 
-BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::LineGraphNode<yutovo_calculator::Symbolic>, 
-	(yutovo_calculator::ExpressionNode<yutovo_calculator::Symbolic>, expression)
-	(yutovo_calculator::IdentifierNode<yutovo_calculator::Symbolic>, identifier)
-	(yutovo_calculator::ExpressionNode<yutovo_calculator::Symbolic>, x_left)
-	(yutovo_calculator::ExpressionNode<yutovo_calculator::Symbolic>, x_right)
-	(yutovo_calculator::ExpressionNode<yutovo_calculator::Symbolic>, y_bottom)
-	(yutovo_calculator::ExpressionNode<yutovo_calculator::Symbolic>, y_top)
-	(yutovo_calculator::NumberNode<yutovo_calculator::Symbolic>, points_count))
+BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::LineGraphNode<yutovo_calculator::Symbolic<Real>>, 
+	(yutovo_calculator::ExpressionNode<yutovo_calculator::Symbolic<Real>>, expression)
+	(yutovo_calculator::IdentifierNode<yutovo_calculator::Symbolic<Real>>, identifier)
+	(yutovo_calculator::ExpressionNode<yutovo_calculator::Symbolic<Real>>, x_left)
+	(yutovo_calculator::ExpressionNode<yutovo_calculator::Symbolic<Real>>, x_right)
+	(yutovo_calculator::ExpressionNode<yutovo_calculator::Symbolic<Real>>, y_bottom)
+	(yutovo_calculator::ExpressionNode<yutovo_calculator::Symbolic<Real>>, y_top)
+	(yutovo_calculator::NumberNode<yutovo_calculator::Symbolic<Real>>, points_count))
 
-BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::BarGraphNode<yutovo_calculator::Symbolic>, 
-	(yutovo_calculator::ExpressionNode<yutovo_calculator::Symbolic>, expression)
-	(yutovo_calculator::NumberNode<yutovo_calculator::Symbolic>, points_count))
+BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::BarGraphNode<yutovo_calculator::Symbolic<Real>>, 
+	(yutovo_calculator::ExpressionNode<yutovo_calculator::Symbolic<Real>>, expression)
+	(yutovo_calculator::NumberNode<yutovo_calculator::Symbolic<Real>>, points_count))
 
-BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::GraphNode<yutovo_calculator::Symbolic>, 
-	(yutovo_calculator::GraphNode<yutovo_calculator::Symbolic>::Graph, graph))
+BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::GraphNode<yutovo_calculator::Symbolic<Real>>, 
+	(yutovo_calculator::GraphNode<yutovo_calculator::Symbolic<Real>>::Graph, graph))
 
 //Array<Real> adaptors
 

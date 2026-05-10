@@ -530,7 +530,7 @@ void Export::GetUnits(const std::u32string& system, std::vector<CustomUnit<Array
 }
 
 template<>
-void Export::AddVariable<Symbolic>(const VariableNode<Symbolic>& var)
+void Export::AddVariable<Symbolic<Real>>(const VariableNode<Symbolic<Real>>& var)
 {
     std::scoped_lock<std::mutex> lock(export_mutex);
     auto it = std::find_if(variables_symbolic.begin(), variables_symbolic.end(),
@@ -540,7 +540,7 @@ void Export::AddVariable<Symbolic>(const VariableNode<Symbolic>& var)
         });
     if (it == variables_symbolic.end())
     {
-        VariableNode<Symbolic> v(var);
+        VariableNode<Symbolic<Real>> v(var);
         v.exported = true;
         variables_symbolic.push_back(v);
         return;
@@ -550,7 +550,7 @@ void Export::AddVariable<Symbolic>(const VariableNode<Symbolic>& var)
 }
 
 template<>
-void Export::AddFunction<Symbolic>(const FunctionNode<Symbolic>& func)
+void Export::AddFunction<Symbolic<Real>>(const FunctionNode<Symbolic<Real>>& func)
 {
     std::scoped_lock<std::mutex> lock(export_mutex);
     auto it = std::find_if(functions_symbolic.begin(), functions_symbolic.end(),
@@ -560,7 +560,7 @@ void Export::AddFunction<Symbolic>(const FunctionNode<Symbolic>& func)
         });
     if (it == functions_symbolic.end())
     {
-        FunctionNode<Symbolic> f(func);
+        FunctionNode<Symbolic<Real>> f(func);
         f.exported = true;
         functions_symbolic.push_back(f);
         return;
@@ -570,7 +570,7 @@ void Export::AddFunction<Symbolic>(const FunctionNode<Symbolic>& func)
 }
 
 template<>
-VariableNode<Symbolic>* Export::FindVariable<Symbolic>(const std::u32string& name, const std::u32string& subscript)
+VariableNode<Symbolic<Real>>* Export::FindVariable<Symbolic<Real>>(const std::u32string& name, const std::u32string& subscript)
 {
     std::scoped_lock<std::mutex> lock(export_mutex);
     auto it = std::find_if(variables_symbolic.begin(), variables_symbolic.end(),
@@ -584,7 +584,7 @@ VariableNode<Symbolic>* Export::FindVariable<Symbolic>(const std::u32string& nam
 }
 
 template<>
-FunctionNode<Symbolic>* Export::FindFunction<Symbolic>(const std::u32string& name)
+FunctionNode<Symbolic<Real>>* Export::FindFunction<Symbolic<Real>>(const std::u32string& name)
 {
     std::scoped_lock<std::mutex> lock(export_mutex);
     auto it = std::find_if(functions_symbolic.begin(), functions_symbolic.end(),

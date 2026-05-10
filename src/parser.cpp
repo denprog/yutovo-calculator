@@ -180,15 +180,17 @@ Array<Real> grad(const Array<Real>& num);
 
 Array<Real> size(const Array<Real> &num);
 
-Symbolic evalf(const Symbolic& num);
-Symbolic evalf(const Symbolic& num, const Symbolic& prec);
-Symbolic expand(const Symbolic& num);
-Symbolic simplify(const Symbolic& num);
-Symbolic diff(const Symbolic& num, const Symbolic& var);
-Symbolic subs(const Symbolic& num, const Symbolic& var, const Symbolic& value);
-Symbolic pow(const Symbolic& num1, const Symbolic& num2);
-Symbolic log(const Symbolic& num1, const Symbolic& num2);
-Symbolic root(const Symbolic& num1, const Symbolic& num2);
+Symbolic<Real> evalf(const Symbolic<Real>& num);
+Symbolic<Real> evalf(const Symbolic<Real>& num, const Symbolic<Real>& prec);
+Symbolic<Real> expand(const Symbolic<Real>& num);
+Symbolic<Real> simplify(const Symbolic<Real>& num);
+Symbolic<Real> diff(const Symbolic<Real>& num, const Symbolic<Real>& var);
+Symbolic<Real> subs(const Symbolic<Real>& num, const Symbolic<Real>& var, const Symbolic<Real>& value);
+Symbolic<Real> pow(const Symbolic<Real>& num1, const Symbolic<Real>& num2);
+Symbolic<Real> log(const Symbolic<Real>& num1, const Symbolic<Real>& num2);
+Symbolic<Real> root(const Symbolic<Real>& num1, const Symbolic<Real>& num2);
+Symbolic<Real> sin(const Symbolic<Real>& num);
+Symbolic<Real> cos(const Symbolic<Real>& num);
 
 template<>
 Parser<yutovo_calculator::Integer>::Parser(const int precision, const Language _language) : 
@@ -608,6 +610,47 @@ Parser<yutovo_calculator::Array<yutovo_calculator::Real>>::Parser(const int prec
 }
 
 template<>
+Parser<yutovo_calculator::Symbolic<yutovo_calculator::Real>>::Parser(const int precision, const Language _language) :
+    solver(precision, AngleMeasure::Radian),
+    language(_language),
+    last_language(_language)
+{
+    InitThreadTime();
+
+    SymbolicUnaryFunc unary_func;
+    unary_func = &evalf;
+    solver.AddBuiltinFunction(U"evalf", unary_func);
+    unary_func = &expand;
+    solver.AddBuiltinFunction(U"expand", unary_func);
+    unary_func = &simplify;
+    solver.AddBuiltinFunction(U"simplify", unary_func);
+    unary_func = &sin;
+    solver.AddBuiltinFunction(U"sin", unary_func);
+    unary_func = &cos;
+    solver.AddBuiltinFunction(U"cos", unary_func);
+
+    SymbolicBinaryFunc binary_func;
+    binary_func = &diff;
+    solver.AddBuiltinFunction(U"diff", binary_func);
+    binary_func = &pow;
+    solver.AddBuiltinFunction(U"pow", binary_func);
+    binary_func = &log;
+    solver.AddBuiltinFunction(U"log", binary_func);
+    binary_func = &root;
+    solver.AddBuiltinFunction(U"root", binary_func);
+
+    switch (language)
+    {
+    case Language::Russian:
+        solver.im = U"j";
+        break;
+    default:
+        solver.im = U"i";
+        break;
+    }
+}
+
+template<>
 void Parser<yutovo_calculator::Integer>::SetLocale(Language _language)
 {
     language = _language;
@@ -653,6 +696,22 @@ void Parser<yutovo_calculator::Array<Real>>::SetLocale(Language _language)
     language = _language;
     InitUnits();
     InitPhisicalConstants();
+    last_language = language;
+}
+
+template<>
+void Parser<yutovo_calculator::Symbolic<yutovo_calculator::Real>>::SetLocale(Language _language)
+{
+    language = _language;
+    switch (language)
+    {
+    case Language::Russian:
+        solver.im = U"j";
+        break;
+    default:
+        solver.im = U"i";
+        break;
+    }
     last_language = language;
 }
 
@@ -738,63 +797,6 @@ void Parser<yutovo_calculator::Array<Real>>::InitBuiltinIdentifiers()
     default:
         throw ParserException({}, ParserExceptionCode::UnknownLanguage);
     }
-}
-
-template<>
-Parser<yutovo_calculator::Symbolic>::Parser(const int precision, const Language _language) :
-    solver(precision, AngleMeasure::Radian),
-    language(_language),
-    last_language(_language)
-{
-    InitThreadTime();
-
-    SymbolicUnaryFunc unary_func;
-    unary_func = &Symbolic::evalf;
-    solver.AddBuiltinFunction(U"evalf", unary_func);
-    unary_func = &Symbolic::expand;
-    solver.AddBuiltinFunction(U"expand", unary_func);
-    unary_func = &Symbolic::simplify;
-    solver.AddBuiltinFunction(U"simplify", unary_func);
-    unary_func = &Symbolic::sin;
-    solver.AddBuiltinFunction(U"sin", unary_func);
-    unary_func = &Symbolic::cos;
-    solver.AddBuiltinFunction(U"cos", unary_func);
-
-    SymbolicBinaryFunc binary_func;
-    binary_func = &Symbolic::diff;
-    solver.AddBuiltinFunction(U"diff", binary_func);
-    binary_func = &Symbolic::pow;
-    solver.AddBuiltinFunction(U"pow", binary_func);
-    binary_func = &Symbolic::log;
-    solver.AddBuiltinFunction(U"log", binary_func);
-    binary_func = &Symbolic::root;
-    solver.AddBuiltinFunction(U"root", binary_func);
-
-    switch (language)
-    {
-    case Language::Russian:
-        solver.im = U"j";
-        break;
-    default:
-        solver.im = U"i";
-        break;
-    }
-}
-
-template<>
-void Parser<yutovo_calculator::Symbolic>::SetLocale(Language _language)
-{
-    language = _language;
-    switch (language)
-    {
-    case Language::Russian:
-        solver.im = U"j";
-        break;
-    default:
-        solver.im = U"i";
-        break;
-    }
-    last_language = language;
 }
 
 };

@@ -56,6 +56,13 @@ Array<Real> Solver<Array<Real>>::operator()(NumberNode<Array<Real>> const& op) c
 }
 
 template<>
+Symbolic<Real> Solver<Symbolic<Real>>::operator()(NumberNode<Symbolic<Real>> const& op) const
+{
+    NumberNode<Symbolic<Real>> _op = op;
+    return Symbolic<Real>(precision, _op.number);
+}
+
+template<>
 Array<Real> Solver<Array<Real>>::operator()(LineGraphNode<Array<Real>> const& op) const
 {
     Array<Real> res;
@@ -377,6 +384,23 @@ Array<Real> Solver<Array<Real>>::operator()(UnaryOperationNode<Array<Real>> cons
 }
 
 template<>
+Symbolic<Real> Solver<Symbolic<Real>>::operator()(UnaryOperationNode<Symbolic<Real>> const& op) const
+{
+    CheckBreak(parser_context);
+    Symbolic arg = boost::apply_visitor(*this, op.operand);
+    switch (op.op)
+    {
+    case '+':
+        return +arg;
+    case '-':
+        return -arg;
+    default:
+        throw SyntaxException(op.id, IncorrectOperation, op.pos, 1, op.line);
+    }
+    throw SyntaxException(op.id, SyntaxError, op.pos, 1, op.line);
+}
+
+template<>
 Integer Solver<Integer>::operator()(OperationNode<Integer> const& op) const
 {
     CheckBreak(parser_context);
@@ -539,6 +563,36 @@ Array<Real> Solver<Array<Real>>::operator()(OperationNode<Array<Real>> const& op
 }
 
 template<>
+Symbolic<Real> Solver<Symbolic<Real>>::operator()(OperationNode<Symbolic<Real>> const& op) const
+{
+    CheckBreak(parser_context);
+    Symbolic arg = boost::apply_visitor(*this, op.operand);
+    switch (op.op)
+    {
+    case '+':
+        return left_value + arg;
+    case '-':
+        return left_value - arg;
+    case '*':
+        return left_value * arg;
+    case '/':
+        return left_value / arg;
+    case '%':
+        throw SyntaxException(op.id, IncorrectOperation, op.pos, 1, op.line);
+    case '&':
+        throw SyntaxException(op.id, IncorrectOperation, op.pos, 1, op.line);
+    case '|':
+        throw SyntaxException(op.id, IncorrectOperation, op.pos, 1, op.line);
+    case '^':
+        throw SyntaxException(op.id, IncorrectOperation, op.pos, 1, op.line);
+    default:
+        throw SyntaxException(op.id, IncorrectOperation, op.pos, 1, op.line);
+    }
+
+    throw SyntaxException(op.id, SyntaxError, op.pos, op.line);
+}
+
+template<>
 Integer Solver<Integer>::operator()(PostfixOperationNode<Integer> const& op) const
 {
     Integer left = boost::apply_visitor(*this, op.operand);
@@ -577,6 +631,31 @@ Complex Solver<Complex>::operator()(PostfixOperationNode<Complex> const& op) con
     case '!':
         return fact(left);
     }
+    throw SyntaxException(op.id, SyntaxError, op.pos, op.line);
+}
+
+template<>
+Symbolic<Real> Solver<Symbolic<Real>>::operator()(PostfixOperationNode<Symbolic<Real>> const& op) const
+{
+    CheckBreak(parser_context);
+    Symbolic<Real> arg = boost::apply_visitor(*this, op.operand);
+    switch (op.op)
+    {
+    case '!':
+    {
+        Symbolic<Real> one(precision, U"1");
+        Symbolic<Real> res = one;
+        while (arg != one)
+        {
+            res *= arg;
+            arg -= one;
+        }
+        return res;
+    }
+    default:
+        throw SyntaxException(op.id, IncorrectOperation, op.pos, 1, op.line);
+    }
+
     throw SyntaxException(op.id, SyntaxError, op.pos, op.line);
 }
 
@@ -749,6 +828,92 @@ Array<Real> Solver<Array<Real>>::operator()(FunctionCallNode<Array<Real>> const&
 }
 
 template<>
+Symbolic<Real> Solver<Symbolic<Real>>::operator()(FunctionCallNode<Symbolic<Real>> const& op) const
+{
+    CheckBreak(parser_context);
+    AddDependency(op.name);
+
+    Symbolic<Real> res;
+
+    try
+    {
+        //find in the user defined functions
+        FunctionNode<Symbolic<Real>>* user_func = FindFunction(op);
+        if (user_func)
+        {
+            IdentifierNodesIter funcIter = user_func->arguments.begin();
+            for (ExpressionNodesIter iter = op.arguments.begin(); iter != op.arguments.end(); ++iter, ++funcIter)
+            {
+                CheckBreak(parser_context);
+
+                Symbolic arg = (*this)(*iter);
+                PushTempVariable(funcIter->name, arg);
+            }
+
+            bool _exported_id = exported_id;
+            exported_id = user_func->exported;
+            res = (*this)(user_func->return_expression);
+            exported_id = _exported_id;
+            PopTempVariables(op.arguments.size());
+            return res;
+        }
+
+        //special handling for subs(expr, var, value) - ternary
+        if (op.name.name == U"subs")
+        {
+            if (op.arguments.size() != 3)
+                throw SyntaxException(op.id, WrongArgumentsCount, U"Wrong arguments count in 'subs'", op.pos, op.name.name.length(), op.line);
+            ExpressionNodesIter iter = op.arguments.begin();
+            Symbolic arg1 = (*this)(*iter++);
+            Symbolic arg2 = (*this)(*iter++);
+            Symbolic arg3 = (*this)(*iter);
+            return subs(arg1, arg2, arg3);
+        }
+
+        //find in the build-in functions
+        BuiltinFunction* func = FindBuiltinFunction(op.name.name);
+        if (func)
+        {
+            try
+            {
+                UnaryFunction u = std::get<UnaryFunction>(*func);
+                if (op.arguments.size() != 1)
+                    throw SyntaxException(op.id, WrongArgumentsCount, U"Wrong arguments count in '" + op.name.name + U"'", op.pos, op.name.name.length(), op.line);
+                
+                ExpressionNodesIter iter = op.arguments.begin();
+                Symbolic<Real> arg = (*this)(*iter);
+                return (*u)(arg);
+            }
+            catch (const std::bad_variant_access&)
+            {
+            }
+
+            try
+            {
+                BinaryFunction b = std::get<BinaryFunction>(*func);
+                if (op.arguments.size() != 2)
+                    throw SyntaxException(op.id, WrongArgumentsCount, U"Wrong arguments count in '" + op.name.name + U"'", op.pos, op.name.name.length(), op.line);
+                
+                ExpressionNodesIter iter = op.arguments.begin();
+                Symbolic<Real> arg1 = (*this)(*iter++);
+                Symbolic<Real> arg2 = (*this)(*iter);
+                return (*b)(arg1, arg2);
+            }
+            catch (const std::bad_variant_access&)
+            {
+            }
+        }
+    }
+    catch (const MathException& e)
+    {
+        throw MathException(op.id, e.ex_id, op.pos, op.line);
+    }
+
+    //there is no such a function
+    throw SyntaxException(op.id, UnknownIdentifier, U"Identifier '" + op.name.name + U"' not found", op.pos, op.name.name.length(), op.line);
+}
+
+template<>
 Integer Solver<Integer>::operator()(FunctionCallStringNode<Integer> const& op) const
 {
     AddDependency(op.name);
@@ -793,6 +958,40 @@ Complex Solver<Complex>::operator()(FunctionCallStringNode<Complex> const& op) c
 {
     //there is no such a function		
     throw SyntaxException(op.id, UnknownIdentifier, op.pos, op.name.name.length(), op.line);
+}
+
+template<>
+Symbolic<Real> Solver<Symbolic<Real>>::operator()(FunctionCallStringNode<Symbolic<Real>> const& op) const
+{
+    CheckBreak(parser_context);
+    AddDependency(op.name);
+
+    //handle subs(expr, "x", value) where second arg is string
+    if (op.name.name == U"subs")
+    {
+        BuiltinFunction* func = FindBuiltinFunction(op.name.name);
+        if (func)
+        {
+            //subs with string var name - parse var as symbol
+            Symbolic<Real> var(precision, op.argument);
+            throw SyntaxException(op.id, WrongArgumentsCount, U"Incorrect subs arguments", op.pos, op.name.name.length(), op.line);
+        }
+    }
+
+    BuiltinFunction* func = FindBuiltinFunction(op.name.name);
+    if (func)
+    {
+        try
+        {
+            StringFunction s = std::get<StringFunction>(*func);
+            return (*s)(op.argument);
+        }
+        catch (const std::bad_variant_access&)
+        {
+        }
+    }
+
+    throw SyntaxException(op.id, UnknownIdentifier, U"Identifier '" + op.name.name + U"' not found", op.pos, op.name.name.length(), op.line);
 }
 
 template<>
@@ -1191,6 +1390,48 @@ Array<Real> Solver<Array<Real>>::operator()(IdentifierNode<Array<Real>> const& o
 
     //there is no such an identifier
     throw SyntaxException(op.id, UnknownIdentifier, U"Identifier '" + op.name + U"' not found", op.pos, op.name.length(), op.line);
+}
+
+template<>
+Symbolic<Real> Solver<Symbolic<Real>>::operator()(IdentifierNode<Symbolic<Real>> const& op) const
+{
+    CheckBreak(parser_context);
+    AddDependency(op);
+
+    TempVariable* t = FindTempVariable(op.name);
+    if (t)
+        return t->second;
+
+    //find in the user defined variables
+    VariableNode<Symbolic<Real>>* v = FindVariable(op.name, op.subscript);
+    if (v)
+    {
+        LogicalId _id = id;
+        bool _exported_id = exported_id;
+        id = v->id;
+        exported_id = v->exported;
+        Symbolic res = (*this)(v->expression);
+        id = _id;
+        exported_id = _exported_id;
+        return res;
+    }
+
+    //find in the build-in variables
+    BuiltinVariable* var = FindBuiltinVariable(op.name);
+    if (var)
+    {
+        try
+        {
+            PrecisionVariable v = std::get<PrecisionVariable>(*var);
+            return (*v)(precision);
+        }
+        catch (const std::bad_variant_access&)
+        {
+        }
+    }
+
+    //create a symbolic variable
+    return Symbolic<Real>(precision, op.name);
 }
 
 template<>
@@ -1766,12 +2007,81 @@ Array<Real> Solver<Array<Real>>::operator()(ImplicitDivMulNode<Array<Real>> cons
 }
 
 template<>
+Symbolic<Real> Solver<Symbolic<Real>>::operator()(ImplicitDivMulNode<Symbolic<Real>> const& op) const
+{
+    CheckBreak(parser_context);
+    AddDependency(op.identifier);
+
+    TempVariable* t = FindTempVariable(op.identifier.name);
+    if (t)
+    {
+        Symbolic<Real> arg1 = (*this)(op.upper);
+        Symbolic<Real> arg2 = (*this)(op.lower);
+        return (arg1 / arg2) * t->second;
+    }
+    
+    //find in the user defined variables
+    VariableNode<Symbolic<Real>>* v = FindVariable(op.identifier.name, op.identifier.subscript);
+    if (v)
+    {
+        LogicalId _id = id;
+        id = v->id;
+        Symbolic<Real> res = (*this)(v->expression);
+        id = _id;
+        Symbolic<Real> arg1 = (*this)(op.upper);
+        Symbolic<Real> arg2 = (*this)(op.lower);
+        return (arg1 / arg2) * res;
+    }
+    
+    //find in the build-in variables
+    BuiltinVariable* var = FindBuiltinVariable(op.identifier.name);
+    if (var)
+    {
+        try
+        {
+            PrecisionVariable v = std::get<PrecisionVariable>(*var);
+            Symbolic<Real> arg1 = (*this)(op.upper);
+            Symbolic<Real> arg2 = (*this)(op.lower);
+            return (arg1 / arg2) * (*v)(precision);
+        }
+        catch (const std::bad_variant_access&)
+        {
+        }
+    }
+
+    Symbolic<Real> val;
+    if (FindBuiltinIdentifier(op.identifier.name, val))
+    {
+        Symbolic<Real> arg1 = (*this)(op.upper);
+        Symbolic<Real> arg2 = (*this)(op.lower);
+        return (arg1 / arg2) * val;
+    }
+
+    //create a symbolic variable
+    Symbolic<Real> arg1 = (*this)(op.upper);
+    Symbolic<Real> arg2 = (*this)(op.lower);
+    return (arg1 / arg2) * Symbolic<Real>(precision, op.identifier.name);
+}
+
+template<>
 Array<Real> Solver<Array<Real>>::operator()(ArrayNode<Array<Real>> const& op) const
 {
     Array<Real> res;
     for (const auto& v : op.array)
         res.Add((*this)(v));
     return res;
+}
+
+template<>
+Symbolic<Real> Solver<Symbolic<Real>>::operator()(ArrayNode<Symbolic<Real>> const& op) const
+{
+    throw MathException(op.id, IncorrectOperation, op.pos, 1, op.line);
+}
+
+template<>
+Symbolic<Real> Solver<Symbolic<Real>>::operator()(LoopNode<Symbolic<Real>> const& op) const
+{
+    throw MathException(op.id, IncorrectOperation, op.pos, 1, op.line);
 }
 
 template<>
@@ -1785,7 +2095,8 @@ Real Solver<Real>::operator()(ScriptNode<Real> const& script, LogicalId _id, Ang
     dependencies = _dependencies;
     default_angle_measure = _default_angle_measure;
     result_angle_measure = _result_angle_measure;
-    precision = _precision;
+    if (_precision != -1)
+        precision = _precision;
 
     Real res;
     //calculate all the script nodes
@@ -1867,7 +2178,8 @@ Complex Solver<Complex>::operator()(ScriptNode<Complex> const& script, LogicalId
     dependencies = _dependencies;
     default_angle_measure = _default_angle_measure;
     result_angle_measure = _result_angle_measure;
-    precision = _precision;
+    if (_precision != -1)
+        precision = _precision;
 
     Complex res;
     //calculate all the script nodes
@@ -1905,7 +2217,8 @@ Array<Real> Solver<Array<Real>>::operator()(ScriptNode<Array<Real>> const& scrip
     dependencies = _dependencies;
     default_angle_measure = _default_angle_measure;
     result_angle_measure = _result_angle_measure;
-    precision = _precision;
+    if (_precision != -1)
+        precision = _precision;
 
     Array<Real> res;
     //calculate all the script nodes
@@ -1929,6 +2242,31 @@ Array<Real> Solver<Array<Real>>::operator()(ScriptNode<Array<Real>> const& scrip
             break;
         }
     }
+    return res;
+}
+
+template<>
+Symbolic<Real> Solver<Symbolic<Real>>::operator()(ScriptNode<Symbolic<Real>> const& script, LogicalId _id, AngleMeasure _default_angle_measure, 
+    AngleMeasure _result_angle_measure, int _precision, Dependencies* _dependencies) const
+{
+    if (script.list.empty())
+        throw SyntaxException(_id, ParserExceptionCode::ExpressionExpected, -1, 0, -1);
+    
+    id = _id;
+    dependencies = _dependencies;
+    default_angle_measure = _default_angle_measure;
+    result_angle_measure = _result_angle_measure;
+    if (_precision != -1)
+        precision = _precision;
+
+    Symbolic<Real> res;
+    //calculate all the script nodes
+    BOOST_FOREACH(typename ScriptNode<Symbolic<Real>>::Operand const& op, script.list)
+    {
+        CheckBreak(parser_context);
+        res = boost::apply_visitor(*this, op);
+    }
+    
     return res;
 }
 
@@ -1959,7 +2297,7 @@ void Solver<Rational>::FillBuiltinOperations()
 }
 
 template<>
-void Solver<Symbolic>::FillBuiltinOperations()
+void Solver<Symbolic<Real>>::FillBuiltinOperations()
 {
     symbols->builtin_operations.push_back(U"plus");
     symbols->builtin_operations.push_back(U"minus");
@@ -1998,6 +2336,12 @@ Complex Solver<Complex>::GetSuitableUnit(const LogicalId _id, const Complex& val
 }
 
 template<>
+Symbolic<Real> Solver<Symbolic<Real>>::GetSuitableUnit(const LogicalId _id, const Symbolic<Real>& val, const std::u32string& system, const bool buildin) const
+{
+    throw MathException(id, ParserExceptionCode::CannotCastToUnit);
+}
+
+template<>
 Real Solver<Real>::CastToUnit(const LogicalId id, const Real& val, const Unit& unit) const
 {
     return CastToUnitImpl(id, val, unit);
@@ -2022,341 +2366,7 @@ Complex Solver<Complex>::CastToUnit(const LogicalId id, const Complex& val, cons
 }
 
 template<>
-Symbolic Solver<Symbolic>::operator()(NumberNode<Symbolic> const& op) const
-{
-    NumberNode<Symbolic> _op = op;
-    return Symbolic(precision, _op.number);
-}
-
-template<>
-Symbolic Solver<Symbolic>::operator()(IdentifierNode<Symbolic> const& op) const
-{
-    CheckBreak(parser_context);
-    AddDependency(op);
-
-    TempVariable* t = FindTempVariable(op.name);
-    if (t)
-        return t->second;
-
-    //find in the user defined variables
-    VariableNode<Symbolic>* v = FindVariable(op.name, op.subscript);
-    if (v)
-    {
-        LogicalId _id = id;
-        bool _exported_id = exported_id;
-        id = v->id;
-        exported_id = v->exported;
-        Symbolic res = (*this)(v->expression);
-        id = _id;
-        exported_id = _exported_id;
-        return res;
-    }
-
-    //find in the build-in variables
-    BuiltinVariable* var = FindBuiltinVariable(op.name);
-    if (var)
-    {
-        try
-        {
-            PrecisionVariable v = std::get<PrecisionVariable>(*var);
-            return (*v)(precision);
-        }
-        catch (const std::bad_variant_access&)
-        {
-        }
-    }
-
-    //create a symbolic variable
-    return Symbolic(precision, op.name);
-}
-
-template<>
-Symbolic Solver<Symbolic>::operator()(UnaryOperationNode<Symbolic> const& op) const
-{
-    CheckBreak(parser_context);
-    Symbolic arg = boost::apply_visitor(*this, op.operand);
-    switch (op.op)
-    {
-    case '+':
-        return +arg;
-    case '-':
-        return -arg;
-    default:
-        throw SyntaxException(op.id, IncorrectOperation, op.pos, 1, op.line);
-    }
-    return Symbolic();
-}
-
-template<>
-Symbolic Solver<Symbolic>::operator()(OperationNode<Symbolic> const& op) const
-{
-    CheckBreak(parser_context);
-    Symbolic arg = boost::apply_visitor(*this, op.operand);
-    switch (op.op)
-    {
-    case '+':
-        return left_value + arg;
-    case '-':
-        return left_value - arg;
-    case '*':
-        return left_value * arg;
-    case '/':
-        return left_value / arg;
-    case '%':
-        throw SyntaxException(op.id, IncorrectOperation, op.pos, 1, op.line);
-    case '&':
-        throw SyntaxException(op.id, IncorrectOperation, op.pos, 1, op.line);
-    case '|':
-        throw SyntaxException(op.id, IncorrectOperation, op.pos, 1, op.line);
-    case '^':
-        throw SyntaxException(op.id, IncorrectOperation, op.pos, 1, op.line);
-    default:
-        throw SyntaxException(op.id, IncorrectOperation, op.pos, 1, op.line);
-    }
-    return Symbolic();
-}
-
-template<>
-Symbolic Solver<Symbolic>::operator()(PostfixOperationNode<Symbolic> const& op) const
-{
-    CheckBreak(parser_context);
-    Symbolic arg = boost::apply_visitor(*this, op.operand);
-    switch (op.op)
-    {
-    case '!':
-    {
-        Symbolic one(precision, U"1");
-        Symbolic res = one;
-        while (arg != one)
-        {
-            res *= arg;
-            arg -= one;
-        }
-        return res;
-    }
-    default:
-        throw SyntaxException(op.id, IncorrectOperation, op.pos, 1, op.line);
-    }
-    return Symbolic();
-}
-
-template<>
-Symbolic Solver<Symbolic>::operator()(FunctionCallNode<Symbolic> const& op) const
-{
-    CheckBreak(parser_context);
-    AddDependency(op.name);
-
-    Symbolic res;
-
-    try
-    {
-        //find in the user defined functions
-        FunctionNode<Symbolic>* user_func = FindFunction(op);
-        if (user_func)
-        {
-            IdentifierNodesIter funcIter = user_func->arguments.begin();
-            for (ExpressionNodesIter iter = op.arguments.begin(); iter != op.arguments.end(); ++iter, ++funcIter)
-            {
-                CheckBreak(parser_context);
-
-                Symbolic arg = (*this)(*iter);
-                PushTempVariable(funcIter->name, arg);
-            }
-
-            bool _exported_id = exported_id;
-            exported_id = user_func->exported;
-            res = (*this)(user_func->return_expression);
-            exported_id = _exported_id;
-            PopTempVariables(op.arguments.size());
-            return res;
-        }
-
-        //special handling for subs(expr, var, value) - ternary
-        if (op.name.name == U"subs")
-        {
-            if (op.arguments.size() != 3)
-                throw SyntaxException(op.id, WrongArgumentsCount, U"Wrong arguments count in 'subs'", op.pos, op.name.name.length(), op.line);
-            ExpressionNodesIter iter = op.arguments.begin();
-            Symbolic arg1 = (*this)(*iter++);
-            Symbolic arg2 = (*this)(*iter++);
-            Symbolic arg3 = (*this)(*iter);
-            return Symbolic::subs(arg1, arg2, arg3);
-        }
-
-        //find in the build-in functions
-        BuiltinFunction* func = FindBuiltinFunction(op.name.name);
-        if (func)
-        {
-            try
-            {
-                UnaryFunction u = std::get<UnaryFunction>(*func);
-                if (op.arguments.size() != 1)
-                    throw SyntaxException(op.id, WrongArgumentsCount, U"Wrong arguments count in '" + op.name.name + U"'", op.pos, op.name.name.length(), op.line);
-                
-                ExpressionNodesIter iter = op.arguments.begin();
-                Symbolic arg = (*this)(*iter);
-                return (*u)(arg);
-            }
-            catch (const std::bad_variant_access&)
-            {
-            }
-
-            try
-            {
-                BinaryFunction b = std::get<BinaryFunction>(*func);
-                if (op.arguments.size() != 2)
-                    throw SyntaxException(op.id, WrongArgumentsCount, U"Wrong arguments count in '" + op.name.name + U"'", op.pos, op.name.name.length(), op.line);
-                
-                ExpressionNodesIter iter = op.arguments.begin();
-                Symbolic arg1 = (*this)(*iter++);
-                Symbolic arg2 = (*this)(*iter);
-                return (*b)(arg1, arg2);
-            }
-            catch (const std::bad_variant_access&)
-            {
-            }
-        }
-    }
-    catch (const MathException& e)
-    {
-        throw MathException(op.id, e.ex_id, op.pos, op.line);
-    }
-
-    //there is no such a function
-    throw SyntaxException(op.id, UnknownIdentifier, U"Identifier '" + op.name.name + U"' not found", op.pos, op.name.name.length(), op.line);
-
-    return res;
-}
-
-template<>
-Symbolic Solver<Symbolic>::operator()(FunctionCallStringNode<Symbolic> const& op) const
-{
-    CheckBreak(parser_context);
-    AddDependency(op.name);
-
-    //handle subs(expr, "x", value) where second arg is string
-    if (op.name.name == U"subs")
-    {
-        BuiltinFunction* func = FindBuiltinFunction(op.name.name);
-        if (func)
-        {
-            //subs with string var name - parse var as symbol
-            Symbolic var(precision, op.argument);
-            throw SyntaxException(op.id, WrongArgumentsCount, U"Incorrect subs arguments", op.pos, op.name.name.length(), op.line);
-        }
-    }
-
-    BuiltinFunction* func = FindBuiltinFunction(op.name.name);
-    if (func)
-    {
-        try
-        {
-            StringFunction s = std::get<StringFunction>(*func);
-            return (*s)(op.argument);
-        }
-        catch (const std::bad_variant_access&)
-        {
-        }
-    }
-
-    throw SyntaxException(op.id, UnknownIdentifier, U"Identifier '" + op.name.name + U"' not found", op.pos, op.name.name.length(), op.line);
-}
-
-template<>
-Symbolic Solver<Symbolic>::operator()(ImplicitDivMulNode<Symbolic> const& op) const
-{
-    CheckBreak(parser_context);
-    AddDependency(op.identifier);
-
-    TempVariable* t = FindTempVariable(op.identifier.name);
-    if (t)
-    {
-        Symbolic arg1 = (*this)(op.upper);
-        Symbolic arg2 = (*this)(op.lower);
-        return (arg1 / arg2) * t->second;
-    }
-    
-    //find in the user defined variables
-    VariableNode<Symbolic>* v = FindVariable(op.identifier.name, op.identifier.subscript);
-    if (v)
-    {
-        LogicalId _id = id;
-        id = v->id;
-        Symbolic res = (*this)(v->expression);
-        id = _id;
-        Symbolic arg1 = (*this)(op.upper);
-        Symbolic arg2 = (*this)(op.lower);
-        return (arg1 / arg2) * res;
-    }
-    
-    //find in the build-in variables
-    BuiltinVariable* var = FindBuiltinVariable(op.identifier.name);
-    if (var)
-    {
-        try
-        {
-            PrecisionVariable v = std::get<PrecisionVariable>(*var);
-            Symbolic arg1 = (*this)(op.upper);
-            Symbolic arg2 = (*this)(op.lower);
-            return (arg1 / arg2) * (*v)(precision);
-        }
-        catch (const std::bad_variant_access&)
-        {
-        }
-    }
-
-    Symbolic val;
-    if (FindBuiltinIdentifier(op.identifier.name, val))
-    {
-        Symbolic arg1 = (*this)(op.upper);
-        Symbolic arg2 = (*this)(op.lower);
-        return (arg1 / arg2) * val;
-    }
-
-    //create a symbolic variable
-    Symbolic arg1 = (*this)(op.upper);
-    Symbolic arg2 = (*this)(op.lower);
-    return (arg1 / arg2) * Symbolic(precision, op.identifier.name);
-}
-
-template<>
-Symbolic Solver<Symbolic>::operator()(ArrayNode<Symbolic> const& op) const
-{
-    throw MathException(op.id, IncorrectOperation, op.pos, 1, op.line);
-}
-
-template<>
-Symbolic Solver<Symbolic>::operator()(ScriptNode<Symbolic> const& script, LogicalId _id, AngleMeasure _default_angle_measure, 
-    AngleMeasure _result_angle_measure, int _precision, Dependencies* _dependencies) const
-{
-    if (script.list.empty())
-        throw SyntaxException(_id, ParserExceptionCode::ExpressionExpected, -1, 0, -1);
-    
-    id = _id;
-    dependencies = _dependencies;
-    default_angle_measure = _default_angle_measure;
-    result_angle_measure = _result_angle_measure;
-    precision = _precision;
-
-    Symbolic res;
-    //calculate all the script nodes
-    BOOST_FOREACH(typename ScriptNode<Symbolic>::Operand const& op, script.list)
-    {
-        CheckBreak(parser_context);
-        res = boost::apply_visitor(*this, op);
-    }
-    
-    return res;
-}
-
-template<>
-Symbolic Solver<Symbolic>::GetSuitableUnit(const LogicalId _id, const Symbolic& val, const std::u32string& system, const bool buildin) const
-{
-    throw MathException(id, ParserExceptionCode::CannotCastToUnit);
-}
-
-template<>
-Symbolic Solver<Symbolic>::CastToUnit(const LogicalId id, const Symbolic& val, const Unit& unit) const
+Symbolic<Real> Solver<Symbolic<Real>>::CastToUnit(const LogicalId id, const Symbolic<Real>& val, const Unit& unit) const
 {
     throw MathException(id, ParserExceptionCode::CannotCastToUnit);
 }

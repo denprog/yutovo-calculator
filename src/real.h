@@ -18,6 +18,8 @@
 namespace yutovo_calculator
 {
 
+template<typename Number> class Symbolic;
+
 class Real
 {
 public:
@@ -28,6 +30,7 @@ public:
     explicit Real(int precision, const char* num);
     explicit Real(int precision, int num);
     explicit Real(int precision, float num);
+    explicit Real(mpfr_srcptr _number);
     Real(const std::u32string& num);
     Real(const Real& source);
     ~Real();
@@ -337,6 +340,8 @@ public:
     Unit unit;
 
 private:
+    friend class Symbolic<Real>;
+
     mpfr_t number;
     std::u32string string_number;
 

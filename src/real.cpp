@@ -99,6 +99,16 @@ Real::Real(int precision, float num)
 #endif
 }
 
+Real::Real(mpfr_srcptr _number)
+{
+    mpfr_init2(number, mpfr_get_prec(_number));
+    mpfr_set(number, _number, MPFR_RNDN);
+
+#ifdef TRACE_OUTPUT
+    UpdateNumberStr();
+#endif
+}
+
 Real::Real(const std::u32string& num)
 {
     string_number = num;
