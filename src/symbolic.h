@@ -32,6 +32,10 @@
 namespace yutovo_calculator
 {
 
+template<typename Number> class Symbolic;
+class Rational;
+class Complex;
+
 template<class Number>
 class Symbolic
 {
@@ -340,6 +344,11 @@ public:
         return res;
     }
     
+    friend Symbolic<Number> sqrt(const Symbolic<Number>& num)
+    {
+        return root(num, Symbolic<Number>(num.precision, 2));
+    }
+    
     friend Symbolic<Number> pow(const Symbolic<Number>& num1, const Symbolic<Number>& num2)
     {
         Symbolic<Number> res(num1.precision);
@@ -364,6 +373,7 @@ public:
 public:
     std::u32string ToString(int exp) const;
     std::string ToStdString(int exp) const;
+    std::string ToJson(int exp = -1) const;
 
     int GetPrecision() const
     {
@@ -484,6 +494,7 @@ private:
         return mantissa + "E" + (neg ? "-" : "+") + exp_str;
     }
 
+public:
     static std::string FormatFixed(std::string s, bool keep_trailing_dot)
     {
         if (s.find('.') != std::string::npos)
@@ -604,9 +615,418 @@ private:
     }
 
 private:
+    enum class JsonNumberFormat
+    {
+        REAL,
+        RATIONAL,
+        COMPLEX
+    };
+
+    static std::string JsonEscape(const std::string& s)
+    {
+        std::string r;
+        for (char c : s)
+        {
+            if (c == '\\' || c == '"')
+                r += '\\';
+            r += c;
+        }
+        return r;
+    }
+
+    static std::string JsonCodeString(const std::string& text)
+    {
+        return std::string(R"({"type":8,"elements":")") + JsonEscape(text) + R"("})";
+    }
+
+    static std::string JsonCodeRow(const std::vector<std::string>& items)
+    {
+        std::string s = R"({"type":7,"elements":[)";
+        for (size_t i = 0; i < items.size(); ++i)
+        {
+            if (i > 0)
+                s += ",";
+            s += items[i];
+        }
+        s += "]}";
+        return s;
+    }
+
+    static std::string JsonPlus()
+    {
+        return R"({"type":11,"symbol":"+"})";
+    }
+
+    static std::string JsonMinus()
+    {
+        return R"({"type":12,"symbol":"-"})";
+    }
+
+    static std::string JsonMultiply()
+    {
+        return R"({"type":13,"symbol":"·"})";
+    }
+
+    static std::string JsonShape()
+    {
+        return R"({"type":10,"elements":[]})";
+    }
+
+    static std::string JsonOpenRoundBracket()
+    {
+        return R"({"type":19,"symbol":"("})";
+    }
+
+    static std::string JsonCloseRoundBracket()
+    {
+        return R"xx({"type":20,"symbol":")"})xx";
+    }
+
+    static std::string JsonPower(const std::string& base, const std::string& exp)
+    {
+        return R"({"type":15,"elements":[)" + base + "," + JsonShape() + "," + exp + "]}";
+    }
+
+    static std::string JsonDivision(const std::string& num, const std::string& den)
+    {
+        return R"({"type":14,"elements":[)" + num + "," + JsonShape() + "," + den + "]}";
+    }
+
+    static std::string JsonResultWrapper(int type, const std::string& content)
+    {
+        return R"({"type":)" + std::to_string(type) + R"(,"elements":[)" + content + "]}";
+    }
+
+    static std::string FormatNumberForJson(const SymEngine::Number& num, int precision, JsonNumberFormat format)
+    {
+        if (SymEngine::is_a<const SymEngine::Integer>(num))
+        {
+            std::string s = static_cast<const SymEngine::Integer&>(num).__str__();
+            if (format == JsonNumberFormat::REAL || format == JsonNumberFormat::COMPLEX)
+                s += ".";
+            return s;
+        }
+        if (SymEngine::is_a<const SymEngine::Rational>(num))
+        {
+            if (format == JsonNumberFormat::REAL || format == JsonNumberFormat::COMPLEX)
+            {
+                auto evaluated = SymEngine::evalf(num, MathHelper::ToBitPrecision(precision));
+                if (SymEngine::is_a<const SymEngine::RealDouble>(*evaluated))
+                    return FormatNumberForJson(static_cast<const SymEngine::RealDouble&>(*evaluated), precision, format);
+                if (SymEngine::is_a<const SymEngine::RealMPFR>(*evaluated))
+                    return FormatNumberForJson(static_cast<const SymEngine::RealMPFR&>(*evaluated), precision, format);
+                return evaluated->__str__();
+            }
+            return static_cast<const SymEngine::Rational&>(num).__str__();
+        }
+        if (SymEngine::is_a<const SymEngine::RealDouble>(num))
+        {
+            double value = static_cast<const SymEngine::RealDouble&>(num).as_double();
+            std::ostringstream oss;
+            oss << std::fixed << std::setprecision(precision) << value;
+            return Symbolic<Real>::FormatFixed(oss.str(), false);
+        }
+        if (SymEngine::is_a<const SymEngine::ComplexDouble>(num))
+            return static_cast<const SymEngine::ComplexDouble&>(num).__str__();
+        if (SymEngine::is_a<const SymEngine::RealMPFR>(num))
+        {
+            mpfr_srcptr value = static_cast<const SymEngine::RealMPFR&>(num).as_mpfr().get_mpfr_t();
+            char buf[512];
+            mpfr_snprintf(buf, 512, "%.*Rf", precision, value);
+            return Symbolic<Real>::FormatFixed(buf, false);
+        }
+        return num.__str__();
+    }
+
+    static std::string BasicToJson(const SymEngine::Basic& expr, int precision, JsonNumberFormat format)
+    {
+        if (SymEngine::is_a<const SymEngine::Pow>(expr))
+        {
+            const SymEngine::Pow& pow = static_cast<const SymEngine::Pow&>(expr);
+            std::string base = BasicToJson(*pow.get_base(), precision, format);
+            std::string exp = BasicToJson(*pow.get_exp(), precision, format);
+            auto exp_basic = pow.get_exp();
+            if (SymEngine::is_a<const SymEngine::Integer>(*exp_basic))
+            {
+                const auto& exp_int = static_cast<const SymEngine::Integer&>(*exp_basic);
+                if (exp_int.is_negative())
+                {
+                    auto neg = exp_int.neg();
+                    std::string abs_json = JsonCodeString(FormatNumberForJson(*neg, precision, format));
+                    exp = JsonCodeRow({JsonMinus(), abs_json});
+                }
+            }
+            else if (SymEngine::is_a<const SymEngine::Rational>(*exp_basic))
+            {
+                const auto& exp_rat = static_cast<const SymEngine::Rational&>(*exp_basic);
+                if (exp_rat.is_negative())
+                {
+                    auto neg_rat = exp_rat.neg();
+                    std::string abs_json = JsonCodeString(FormatNumberForJson(*neg_rat, precision, format));
+                    exp = JsonCodeRow({JsonMinus(), abs_json});
+                }
+            }
+            return JsonPower(base, exp);
+        }
+        auto items = BasicToJsonElements(expr, precision, format);
+        if (items.size() == 1 && items[0].find(R"({"type":14)") == 0)
+            return items[0];
+        return JsonCodeRow(items);
+    }
+
+    static std::vector<std::string> BasicToJsonElements(const SymEngine::Basic& expr, int precision, JsonNumberFormat format)
+    {
+        if (SymEngine::is_a<const SymEngine::Symbol>(expr))
+            return {JsonCodeString(expr.__str__())};
+
+        if (SymEngine::is_a<const SymEngine::Integer>(expr) ||
+            SymEngine::is_a<const SymEngine::RealDouble>(expr) || SymEngine::is_a<const SymEngine::RealMPFR>(expr) ||
+            SymEngine::is_a<const SymEngine::ComplexDouble>(expr))
+        {
+            return {JsonCodeString(FormatNumberForJson(static_cast<const SymEngine::Number&>(expr), precision, format))};
+        }
+
+        if (SymEngine::is_a<const SymEngine::Rational>(expr))
+        {
+            const SymEngine::Rational& rat = static_cast<const SymEngine::Rational&>(expr);
+            if (format == JsonNumberFormat::RATIONAL)
+            {
+                auto num = rat.get_num();
+                auto den = rat.get_den();
+                if (num->is_negative())
+                    num = num->neg();
+                std::string num_json = JsonCodeString(num->__str__());
+                std::string den_json = JsonCodeString(den->__str__());
+                std::string div = JsonDivision(JsonCodeRow({num_json}), JsonCodeRow({den_json}));
+                if (rat.is_negative())
+                    return {JsonMinus(), div};
+                return {div};
+            }
+            return {JsonCodeString(FormatNumberForJson(rat, precision, format))};
+        }
+
+        if (SymEngine::is_a<const SymEngine::Add>(expr))
+        {
+            const SymEngine::Add& add = static_cast<const SymEngine::Add&>(expr);
+            auto coef = add.get_coef();
+            auto dict = add.get_dict();
+
+            std::vector<std::string> items;
+
+            if (!coef->is_zero())
+            {
+                auto coef_elements = BasicToJsonElements(*coef, precision, format);
+                items.insert(items.end(), coef_elements.begin(), coef_elements.end());
+            }
+
+            std::vector<std::pair<std::string, std::pair<SymEngine::RCP<const SymEngine::Basic>, SymEngine::RCP<const SymEngine::Basic>>>> sorted;
+            for (const auto& p : dict)
+                sorted.emplace_back(p.first->__str__(), std::make_pair(p.first, p.second));
+            std::sort(sorted.begin(), sorted.end(), [](const auto& a, const auto& b) { return a.first < b.first; });
+
+            for (const auto& entry : sorted)
+            {
+                const auto& p = entry.second;
+                auto term_elements = BasicToJsonElements(*p.first, precision, format);
+                auto coeff_elements = BasicToJsonElements(*p.second, precision, format);
+                bool pos = true;
+
+                if (SymEngine::is_a<const SymEngine::Integer>(*p.second))
+                {
+                    const SymEngine::Integer& coeff_int = static_cast<const SymEngine::Integer&>(*p.second);
+                    if (coeff_int.is_negative())
+                    {
+                        pos = false;
+                        auto neg = coeff_int.neg();
+                        coeff_elements = BasicToJsonElements(*neg, precision, format);
+                    }
+                }
+                else if (SymEngine::is_a<const SymEngine::Rational>(*p.second))
+                {
+                    const SymEngine::Rational& coeff_rat = static_cast<const SymEngine::Rational&>(*p.second);
+                    if (coeff_rat.is_negative())
+                    {
+                        pos = false;
+                        auto neg_rat = coeff_rat.neg();
+                        coeff_elements = BasicToJsonElements(*neg_rat, precision, format);
+                    }
+                }
+
+                bool coeff_is_one = false;
+                if (coeff_elements.size() == 1)
+                {
+                    if (coeff_elements[0] == JsonCodeString("1.") || coeff_elements[0] == JsonCodeString("1"))
+                        coeff_is_one = true;
+                }
+
+                if (!coeff_is_one)
+                {
+                    term_elements.insert(term_elements.begin(), JsonMultiply());
+                    for (auto it = coeff_elements.rbegin(); it != coeff_elements.rend(); ++it)
+                        term_elements.insert(term_elements.begin(), *it);
+                }
+
+                if (!items.empty())
+                    items.push_back(pos ? JsonPlus() : JsonMinus());
+                else if (!pos)
+                    items.push_back(JsonMinus());
+
+                for (auto& el : term_elements)
+                    items.push_back(el);
+            }
+            return items;
+        }
+
+        if (SymEngine::is_a<const SymEngine::Pow>(expr))
+            return {BasicToJson(expr, precision, format)};
+
+        if (SymEngine::is_a<const SymEngine::Sin>(expr))
+        {
+            const auto& sin = static_cast<const SymEngine::Sin&>(expr);
+            auto arg_elements = BasicToJsonElements(*sin.get_arg(), precision, format);
+            std::vector<std::string> items;
+            items.push_back(JsonCodeString("sin"));
+            items.push_back(JsonOpenRoundBracket());
+            for (auto& el : arg_elements)
+                items.push_back(el);
+            items.push_back(JsonCloseRoundBracket());
+            return items;
+        }
+
+        if (SymEngine::is_a<const SymEngine::Cos>(expr))
+        {
+            const auto& cos = static_cast<const SymEngine::Cos&>(expr);
+            auto arg_elements = BasicToJsonElements(*cos.get_arg(), precision, format);
+            std::vector<std::string> items;
+            items.push_back(JsonCodeString("cos"));
+            items.push_back(JsonOpenRoundBracket());
+            for (auto& el : arg_elements)
+                items.push_back(el);
+            items.push_back(JsonCloseRoundBracket());
+            return items;
+        }
+
+        if (SymEngine::is_a<const SymEngine::Mul>(expr))
+        {
+            const SymEngine::Mul& mul = static_cast<const SymEngine::Mul&>(expr);
+            auto coef = mul.get_coef();
+            auto dict = mul.get_dict();
+
+            std::vector<std::string> positive;
+            std::vector<std::string> negative;
+            bool leading_minus = false;
+
+            if (!coef->is_zero() && !coef->is_one() && !coef->is_minus_one())
+                positive.push_back(JsonCodeString(FormatNumberForJson(*coef, precision, format)));
+            else if (coef->is_minus_one())
+                leading_minus = true;
+
+            for (const auto& p : dict)
+            {
+                std::string base_json;
+                if (SymEngine::is_a<const SymEngine::Symbol>(*p.first))
+                    base_json = JsonCodeString(p.first->__str__());
+                else if (SymEngine::is_a<const SymEngine::Integer>(*p.first) ||
+                    SymEngine::is_a<const SymEngine::Rational>(*p.first) ||
+                    SymEngine::is_a<const SymEngine::RealDouble>(*p.first) ||
+                    SymEngine::is_a<const SymEngine::RealMPFR>(*p.first) ||
+                    SymEngine::is_a<const SymEngine::ComplexDouble>(*p.first))
+                    base_json = JsonCodeString(FormatNumberForJson(static_cast<const SymEngine::Number&>(*p.first), precision, format));
+                else
+                    base_json = BasicToJson(*p.first, precision, format);
+
+                bool is_neg = false;
+                if (SymEngine::is_a<const SymEngine::Integer>(*p.second))
+                {
+                    if (static_cast<const SymEngine::Integer&>(*p.second).is_negative())
+                        is_neg = true;
+                }
+
+                if (is_neg)
+                {
+                    auto neg_exp = static_cast<const SymEngine::Integer&>(*p.second).neg();
+                    std::string exp_json = JsonCodeString(FormatNumberForJson(*neg_exp, precision, format));
+                    if (exp_json == JsonCodeString("1.") || exp_json == JsonCodeString("1"))
+                        negative.push_back(base_json);
+                    else
+                        negative.push_back(JsonPower(JsonCodeRow({base_json}), JsonCodeRow({exp_json})));
+                }
+                else
+                {
+                    std::string exp_json = JsonCodeString(FormatNumberForJson(*static_cast<const SymEngine::Number*>(p.second.get()), precision, format));
+                    if (exp_json == JsonCodeString("1.") || exp_json == JsonCodeString("1"))
+                        positive.push_back(base_json);
+                    else
+                        positive.push_back(JsonPower(JsonCodeRow({base_json}), JsonCodeRow({exp_json})));
+                }
+            }
+
+            std::vector<std::string> items;
+
+            if (!negative.empty())
+            {
+                std::vector<std::string> num_items;
+                bool first = true;
+                for (auto& p : positive)
+                {
+                    if (!first)
+                        num_items.push_back(JsonMultiply());
+                    num_items.push_back(p);
+                    first = false;
+                }
+
+                std::string num = num_items.empty() ? JsonCodeRow({JsonCodeString("1.")}) : JsonCodeRow(num_items);
+                std::vector<std::string> den_items;
+                first = true;
+                for (auto& n : negative)
+                {
+                    if (!first)
+                        den_items.push_back(JsonMultiply());
+                    den_items.push_back(n);
+                    first = false;
+                }
+                std::string den = JsonCodeRow(den_items);
+
+                std::string div = JsonDivision(num, den);
+                if (leading_minus)
+                    items.push_back(JsonMinus());
+                items.push_back(div);
+            }
+            else
+            {
+                bool first = true;
+                for (auto& p : positive)
+                {
+                    if (!first)
+                        items.push_back(JsonMultiply());
+                    items.push_back(p);
+                    first = false;
+                }
+                if (leading_minus)
+                    items.insert(items.begin(), JsonMinus());
+            }
+            return items;
+        }
+
+        return {JsonCodeString(expr.__str__())};
+    }
+
+private:
+    friend class Symbolic<Rational>;
+    friend class Symbolic<Complex>;
+
     int precision = 0;
     std::unique_ptr<SymEngine::Expression> expr;
 };
+
+template<typename T>
+struct is_symbolic : std::false_type {};
+
+template<typename T>
+struct is_symbolic<Symbolic<T>> : std::true_type {};
+
+template<typename T>
+inline constexpr bool is_symbolic_v = is_symbolic<T>::value;
 
 }
 

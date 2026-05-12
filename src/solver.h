@@ -48,6 +48,12 @@ typedef Symbolic<Real> (*SymbolicUnaryFunc)(const Symbolic<Real>& num);
 typedef Symbolic<Real> (*SymbolicBinaryFunc)(const Symbolic<Real>& num1, const Symbolic<Real>& num2);
 typedef Symbolic<Real> (*SymbolicTernaryFunc)(const Symbolic<Real>& num1, const Symbolic<Real>& num2, const Symbolic<Real>& num3);
 
+typedef Symbolic<Rational> (*SymbolicRationalUnaryFunc)(const Symbolic<Rational>& num);
+typedef Symbolic<Rational> (*SymbolicRationalBinaryFunc)(const Symbolic<Rational>& num1, const Symbolic<Rational>& num2);
+
+typedef Symbolic<Complex> (*SymbolicComplexUnaryFunc)(const Symbolic<Complex>& num);
+typedef Symbolic<Complex> (*SymbolicComplexBinaryFunc)(const Symbolic<Complex>& num1, const Symbolic<Complex>& num2);
+
 typedef std::vector<std::u32string> Dependencies;
 
 template<typename Number>
@@ -146,7 +152,36 @@ struct Solver : public boost::static_visitor<Number>
         return n;
     }
 
-    Number operator()(NumberNode<Number> const& op) const;
+    Number operator()(NumberNode<Number> const& op) const
+    {
+        if constexpr (std::is_same_v<Number, Integer>)
+        {
+            return Integer(op.number, default_notation);
+        }
+        else if constexpr (std::is_same_v<Number, Rational>)
+        {
+            NumberNode<Rational> _op = op;
+            auto p = _op.number.find(U'.');
+            if (p != std::string::npos)
+            {
+                std::u32string d = U"1";
+                for (int i = 0; i < _op.number.length() - p - 1; ++i)
+                    d += U"0";
+                return Rational(_op.number.substr(0, p)) + Rational(_op.number.substr(p + 1, _op.number.length() - p - 1)) / Rational(d);
+            }
+            return Rational(_op.number);
+        }
+        else if constexpr (std::is_same_v<Number, Complex> || std::is_same_v<Number, Real> || std::is_same_v<Number, Array<Real>>)
+        {
+            NumberNode<Number> _op = op;
+            return Number(op.number);
+        }
+        else
+        {
+            NumberNode<Number> _op = op;
+            return Number(precision, _op.number);
+        }
+    }
 
     Number operator()(ExpressionNode<Number> const& expr) const
     {
@@ -230,19 +265,68 @@ struct Solver : public boost::static_visitor<Number>
     Number operator()(UnaryOperationNode<Number> const& op) const
     {
         CheckBreak(parser_context);
-        throw MathException(op.id, IncorrectOperation, op.pos, 1, op.line);
+        if constexpr (is_symbolic_v<Number>)
+        {
+            Number arg = boost::apply_visitor(*this, op.operand);
+            switch (op.op)
+            {
+            case '+':
+                return +arg;
+            case '-':
+                return -arg;
+            default:
+                throw SyntaxException(op.id, IncorrectOperation, op.pos, 1, op.line);
+            }
+        }
+        else
+        {
+            throw MathException(op.id, IncorrectOperation, op.pos, 1, op.line);
+        }
     }
 
     Number operator()(OperationNode<Number> const& op) const
     {
         CheckBreak(parser_context);
-        throw MathException(op.id, IncorrectOperation, op.pos, 1, op.line);
+        if constexpr (is_symbolic_v<Number>)
+        {
+            Number right = boost::apply_visitor(*this, op.operand);
+            switch (op.op)
+            {
+            case '+':
+                return left_value + right;
+            case '-':
+                return left_value - right;
+            case '*':
+                return left_value * right;
+            case '/':
+                return left_value / right;
+            case '^':
+                return left_value ^ right;
+            case '%':
+            case '&':
+            case '|':
+                throw SyntaxException(op.id, IncorrectOperation, op.pos, 1, op.line);
+            default:
+                throw SyntaxException(op.id, IncorrectOperation, op.pos, 1, op.line);
+            }
+        }
+        else
+        {
+            throw MathException(op.id, IncorrectOperation, op.pos, 1, op.line);
+        }
     }
 
     Number operator()(PostfixOperationNode<Number> const& op) const
     {
         CheckBreak(parser_context);
-        throw MathException(op.id, IncorrectOperation, op.pos, 1, op.line);
+        if constexpr (is_symbolic_v<Number>)
+        {
+            throw SyntaxException(op.id, IncorrectOperation, op.pos, 1, op.line);
+        }
+        else
+        {
+            throw MathException(op.id, IncorrectOperation, op.pos, 1, op.line);
+        }
     }
 
     Number operator()(MixedDivivsionNode<Number> const& op) const
@@ -253,13 +337,102 @@ struct Solver : public boost::static_visitor<Number>
     Number operator()(FunctionCallNode<Number> const& op) const
     {
         CheckBreak(parser_context);
-        throw MathException(op.id, IncorrectOperation, op.pos, 1, op.line);
+        if constexpr (is_symbolic_v<Number>)
+        {
+            AddDependency(op.name);
+            Number res;
+            try
+            {
+                FunctionNode<Number>* user_func = FindFunction(op);
+                if (user_func)
+                {
+                    IdentifierNodesIter funcIter = user_func->arguments.begin();
+                    for (ExpressionNodesIter iter = op.arguments.begin(); iter != op.arguments.end(); ++iter, ++funcIter)
+                    {
+                        CheckBreak(parser_context);
+                        Number arg = (*this)(*iter);
+                        PushTempVariable(funcIter->name, arg);
+                    }
+                    bool _exported_id = exported_id;
+                    exported_id = user_func->exported;
+                    res = (*this)(user_func->return_expression);
+                    exported_id = _exported_id;
+                    PopTempVariables(op.arguments.size());
+                    return res;
+                }
+                if (op.name.name == U"subs")
+                {
+                    if (op.arguments.size() != 3)
+                        throw SyntaxException(op.id, WrongArgumentsCount, U"Wrong arguments count in 'subs'", op.pos, op.name.name.length(), op.line);
+                    ExpressionNodesIter iter = op.arguments.begin();
+                    Number arg1 = (*this)(*iter++);
+                    Number arg2 = (*this)(*iter++);
+                    Number arg3 = (*this)(*iter);
+                    return subs(arg1, arg2, arg3);
+                }
+                BuiltinFunction* func = FindBuiltinFunction(op.name.name);
+                if (func)
+                {
+                    try
+                    {
+                        auto u = std::get<typename SolverSymbols<Number>::UnaryFunction>(*func);
+                        if (op.arguments.size() != 1)
+                            throw SyntaxException(op.id, WrongArgumentsCount, U"Wrong arguments count in '" + op.name.name + U"'", op.pos, op.name.name.length(), op.line);
+                        ExpressionNodesIter iter = op.arguments.begin();
+                        Number arg = (*this)(*iter);
+                        return (*u)(arg);
+                    }
+                    catch (const std::bad_variant_access&)
+                    {
+                    }
+                    try
+                    {
+                        auto b = std::get<typename SolverSymbols<Number>::BinaryFunction>(*func);
+                        if (op.arguments.size() != 2)
+                            throw SyntaxException(op.id, WrongArgumentsCount, U"Wrong arguments count in '" + op.name.name + U"'", op.pos, op.name.name.length(), op.line);
+                        ExpressionNodesIter iter = op.arguments.begin();
+                        Number arg1 = (*this)(*iter++);
+                        Number arg2 = (*this)(*iter);
+                        return (*b)(arg1, arg2);
+                    }
+                    catch (const std::bad_variant_access&)
+                    {
+                    }
+                }
+            }
+            catch (const MathException& e)
+            {
+                throw MathException(op.id, e.ex_id, op.pos, op.line);
+            }
+            throw SyntaxException(op.id, UnknownIdentifier, U"Identifier '" + op.name.name + U"' not found", op.pos, op.name.name.length(), op.line);
+        }
+        else
+        {
+            throw MathException(op.id, IncorrectOperation, op.pos, 1, op.line);
+        }
     }
 
     Number operator()(FunctionCallStringNode<Number> const& op) const
     {
         CheckBreak(parser_context);
-        throw MathException(op.id, IncorrectOperation, op.pos, 1, op.line);
+        if constexpr (is_symbolic_v<Number>)
+        {
+            AddDependency(op.name);
+            if (op.name.name == U"subs")
+            {
+                BuiltinFunction* func = FindBuiltinFunction(op.name.name);
+                if (func)
+                {
+                    Number var(precision, op.argument);
+                    throw SyntaxException(op.id, WrongArgumentsCount, U"Incorrect subs arguments", op.pos, op.name.name.length(), op.line);
+                }
+            }
+            throw SyntaxException(op.id, UnknownIdentifier, U"Identifier '" + op.name.name + U"' not found", op.pos, op.name.name.length(), op.line);
+        }
+        else
+        {
+            throw MathException(op.id, IncorrectOperation, op.pos, 1, op.line);
+        }
     }
 
     Number operator()(FunctionParamNode<Number> const& expr) const
@@ -276,19 +449,125 @@ struct Solver : public boost::static_visitor<Number>
     Number operator()(IdentifierNode<Number> const& op) const
     {
         CheckBreak(parser_context);
-        throw MathException(op.id, IncorrectOperation, op.pos, 1, op.line);
+        if constexpr (is_symbolic_v<Number>)
+        {
+            AddDependency(op);
+            auto* t = FindTempVariable(op.name);
+            if (t)
+                return t->second;
+            auto* v = FindVariable(op.name, op.subscript);
+            if (v)
+            {
+                LogicalId _id = id;
+                bool _exported_id = exported_id;
+                id = v->id;
+                exported_id = v->exported;
+                Number res = (*this)(v->expression);
+                id = _id;
+                exported_id = _exported_id;
+                return res;
+            }
+            auto* var = FindBuiltinVariable(op.name);
+            if (var)
+            {
+                try
+                {
+                    auto pv = std::get<typename SolverSymbols<Number>::PrecisionVariable>(*var);
+                    return (*pv)(precision);
+                }
+                catch (const std::bad_variant_access&)
+                {
+                }
+            }
+            return Number(precision, op.name);
+        }
+        else
+        {
+            throw MathException(op.id, IncorrectOperation, op.pos, 1, op.line);
+        }
     }
 
     Number operator()(ImplicitStringMulNode<Number> const& op) const
     {
         CheckBreak(parser_context);
-        throw MathException(op.id, IncorrectOperation, op.pos, 1, op.line);
+        if constexpr (is_symbolic_v<Number>)
+        {
+            AddDependency(op.identifier);
+            auto* t = FindTempVariable(op.identifier.name);
+            if (t)
+                return (*this)(op.left) * t->second;
+            auto* v = FindVariable(op.identifier.name, op.identifier.subscript);
+            if (v)
+            {
+                LogicalId _id = id;
+                id = v->id;
+                Number res = (*this)(v->expression);
+                id = _id;
+                return (*this)(op.left) * res;
+            }
+            auto* var = FindBuiltinVariable(op.identifier.name);
+            if (var)
+            {
+                try
+                {
+                    auto pv = std::get<typename SolverSymbols<Number>::PrecisionVariable>(*var);
+                    return (*this)(op.left) * (*pv)(precision);
+                }
+                catch (const std::bad_variant_access&)
+                {
+                }
+            }
+            return (*this)(op.left) * Number(precision, op.identifier.name);
+        }
+        else
+        {
+            throw MathException(op.id, IncorrectOperation, op.pos, 1, op.line);
+        }
     }
 
     Number operator()(ImplicitDivMulNode<Number> const& op) const
     {
         CheckBreak(parser_context);
-        throw MathException(op.id, IncorrectOperation, op.pos, 1, op.line);
+        if constexpr (is_symbolic_v<Number>)
+        {
+            AddDependency(op.identifier);
+            auto* t = FindTempVariable(op.identifier.name);
+            if (t)
+            {
+                return (*this)(op.upper) / (*this)(op.lower) * t->second;
+            }
+            auto* v = FindVariable(op.identifier.name, op.identifier.subscript);
+            if (v)
+            {
+                LogicalId _id = id;
+                id = v->id;
+                Number res = (*this)(v->expression);
+                id = _id;
+                return (*this)(op.upper) / (*this)(op.lower) * res;
+            }
+            auto* var = FindBuiltinVariable(op.identifier.name);
+            if (var)
+            {
+                try
+                {
+                    auto pv = std::get<typename SolverSymbols<Number>::PrecisionVariable>(*var);
+                    return (*this)(op.upper) / (*this)(op.lower) * (*pv)(precision);
+                }
+                catch (const std::bad_variant_access&)
+                {
+                }
+            }
+            Number val;
+            if (FindBuiltinIdentifier(op.identifier.name, val))
+            {
+                return (*this)(op.upper) / (*this)(op.lower) * val;
+            }
+            return (*this)(op.upper) / (*this)(op.lower) * Number(precision, op.identifier.name);
+        }
+        else
+        {
+            throw MathException(op.id, IncorrectOperation, op.pos, 1, op.line);
+        }
     }
 
     Number operator()(ImplicitMulNode<Number> const& op) const
@@ -336,51 +615,108 @@ struct Solver : public boost::static_visitor<Number>
 
     Number operator()(LoopNode<Number> const& op) const
     {
-        Number counter = (*this)(op.counter.expression);
-        PushTempVariable(op.counter.name.name, counter);
-        Number counter_max;
-        Number res;
-        try
+        if constexpr (is_symbolic_v<Number>)
         {
-            counter_max = (*this)(op.counter_max);
-            res = (*this)(op.loop_var.expression);
+            throw MathException(op.id, IncorrectOperation, op.pos, 1, op.line);
         }
-        catch (...)
+        else
         {
-            PopTempVariables(1);
-            throw;
-        }
-        PushTempVariable(op.loop_var.name.name, res);
-        while (counter_max != 0)
-        {
-            CheckBreak(parser_context);
-
+            Number counter = (*this)(op.counter.expression);
+            PushTempVariable(op.counter.name.name, counter);
+            Number counter_max;
+            Number res;
             try
             {
-                res = (*this)(op.loop_expression.expression);
-                SetTempVariable(op.loop_expression.name.name, res);
-                counter = (*this)(op.counter_increment.expression);
-                SetTempVariable(op.counter.name.name, counter);
                 counter_max = (*this)(op.counter_max);
+                res = (*this)(op.loop_var.expression);
             }
             catch (...)
             {
-                PopTempVariables(2);
+                PopTempVariables(1);
                 throw;
             }
+            PushTempVariable(op.loop_var.name.name, res);
+            while (counter_max != 0)
+            {
+                CheckBreak(parser_context);
+
+                try
+                {
+                    res = (*this)(op.loop_expression.expression);
+                    SetTempVariable(op.loop_expression.name.name, res);
+                    counter = (*this)(op.counter_increment.expression);
+                    SetTempVariable(op.counter.name.name, counter);
+                    counter_max = (*this)(op.counter_max);
+                }
+                catch (...)
+                {
+                    PopTempVariables(2);
+                    throw;
+                }
+            }
+            PopTempVariables(2);
+            return res;
         }
-        PopTempVariables(2);
-        return res;
     }
 
     Number operator()(ArrayNode<Number> const& op) const
     {
-        throw MathException(op.id, IncorrectOperation, op.pos, 1, op.line);
+        if constexpr (std::is_same_v<Number, Array<Real>>)
+        {
+            CheckBreak(parser_context);
+            Number res;
+            for (auto& operand : op.array)
+            {
+                CheckBreak(parser_context);
+                res.Add((*this)(operand));
+            }
+            return res;
+        }
+        else
+        {
+            throw MathException(op.id, IncorrectOperation, op.pos, 1, op.line);
+        }
     }
 
-    //The beginning of the solving.
-    Number operator()(ScriptNode<Number> const& script, LogicalId _id, AngleMeasure _default_angle_measure, 
-        AngleMeasure _result_angle_measure, int _precision, Dependencies* _dependencies) const;
+    Number operator()(ScriptNode<Number> const& script, LogicalId _id, AngleMeasure _default_angle_measure,
+        AngleMeasure _result_angle_measure, int _precision, Dependencies* _dependencies) const
+    {
+        if (script.list.empty())
+            throw SyntaxException(_id, ParserExceptionCode::ExpressionExpected, -1, 0, -1);
+
+        id = _id;
+        dependencies = _dependencies;
+        default_angle_measure = _default_angle_measure;
+        result_angle_measure = _result_angle_measure;
+        if (_precision != -1)
+            precision = _precision;
+
+        Number res;
+        BOOST_FOREACH(typename ScriptNode<Number>::Operand const& op, script.list)
+        {
+            CheckBreak(parser_context);
+            res = boost::apply_visitor(*this, op);
+        }
+
+        if constexpr (std::is_same_v<Number, Real>)
+        {
+            if (res.angle_measure != AngleMeasure::None)
+            {
+                switch (result_angle_measure)
+                {
+                case AngleMeasure::Radian:
+                    return res.ToRadian();
+                case AngleMeasure::Degree:
+                    return res.ToDegree();
+                case AngleMeasure::Grad:
+                    return res.ToGrad();
+                case AngleMeasure::None:
+                    break;
+                }
+            }
+        }
+        return res;
+    }
 
     void PushTempVariable(const std::u32string& name, Number& value) const
     {

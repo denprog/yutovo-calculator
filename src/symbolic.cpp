@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <sstream>
 #include <iomanip>
+#include <limits>
 #include <symengine/pow.h>
 #include <symengine/add.h>
 #include <symengine/mul.h>
@@ -19,6 +20,7 @@
 #include <symengine/real_mpfr.h>
 #include <symengine/real_double.h>
 #include <symengine/complex.h>
+#include <symengine/complex_double.h>
 #include <symengine/eval.h>
 #include <symengine/number.h>
 #include <symengine/visitor.h>
@@ -27,6 +29,7 @@
 #include "real.h"
 #include "rational.h"
 #include "complex.h"
+#include "utils.h"
 
 namespace yutovo_calculator
 {
@@ -58,6 +61,35 @@ std::string Symbolic<Real>::ToStdString(int exp) const
         s = ReplaceRationalNumbers(s, exp, precision);
         s = RemoveNumberParentheses(s);
         s = FormatNumberInExpression(s, exp, precision);
+        std::string result;
+        for (size_t i = 0; i < s.size(); )
+        {
+            if (std::isdigit(static_cast<unsigned char>(s[i])))
+            {
+                size_t j = i;
+                while (j < s.size() && std::isdigit(static_cast<unsigned char>(s[j])))
+                    ++j;
+                bool skip = false;
+                if (j < s.size() && (s[j] == '.' || s[j] == 'e' || s[j] == 'E'))
+                    skip = true;
+                if (i > 0 && s[i - 1] == '.')
+                    skip = true;
+                if (i > 0 && (s[i - 1] == 'e' || s[i - 1] == 'E'))
+                    skip = true;
+                if (i > 1 && (s[i - 2] == 'e' || s[i - 2] == 'E') && (s[i - 1] == '+' || s[i - 1] == '-'))
+                    skip = true;
+                result += s.substr(i, j - i);
+                if (!skip)
+                    result += '.';
+                i = j;
+            }
+            else
+            {
+                result += s[i];
+                ++i;
+            }
+        }
+        s = result;
         return ReplacePowerOperator(s);
     }
 
@@ -205,21 +237,34 @@ std::string Symbolic<Real>::ToStdString(int exp) const
         double value = real_double->as_double();
         std::ostringstream oss;
         oss << std::fixed << std::setprecision(precision) << value;
-        std::string s = oss.str();
-        s.erase(std::remove(s.begin(), s.end(), ' '), s.end());
-        s = FormatFixed(s, exp == precision);
-        int order = GetDecimalOrder(s);
-        if (!s.empty() && s[0] == '-')
+        std::string fixed_str = oss.str();
+        fixed_str.erase(std::remove(fixed_str.begin(), fixed_str.end(), ' '), fixed_str.end());
+        int order = GetDecimalOrder(fixed_str);
+        if (!fixed_str.empty() && fixed_str[0] == '-')
             order--;
-        if (exp < 0)
+        std::string s;
+        if (order > exp && exp >= 0)
         {
-            if (s.find('.') == std::string::npos)
-                s += '.';
+            oss.str("");
+            oss.clear();
+            oss << std::scientific << std::setprecision(precision) << value;
+            s = oss.str();
+            s.erase(std::remove(s.begin(), s.end(), ' '), s.end());
+            s = FormatScientific(s);
         }
         else
         {
-            if (order <= precision && s.find('.') == std::string::npos)
-                s += '.';
+            s = FormatFixed(fixed_str, exp == precision);
+            if (exp < 0)
+            {
+                if (s.find('.') == std::string::npos)
+                    s += '.';
+            }
+            else
+            {
+                if (order <= precision && s.find('.') == std::string::npos)
+                    s += '.';
+            }
         }
         return ReplacePowerOperator(s);
     }
@@ -234,5 +279,155 @@ std::u32string Symbolic<Real>::ToString(int exp) const
 {
     return ToUtfString(ToStdString(exp));
 }
+
+template<>
+SymEngine::Expression Symbolic<Rational>::ToExpression(const Rational& num) const
+{
+    if (!num.unit.IsEmpty())
+        throw ParserException({}, ParserExceptionCode::CannotCastToUnit);
+    return SymEngine::Expression(ToBasicString(num.ToString()));
+}
+
+template<>
+std::string Symbolic<Rational>::ToStdString(int exp) const
+{
+    if (!expr)
+        return {};
+    auto basic = expr->get_basic();
+    std::string s = basic->__str__();
+    s.erase(std::remove(s.begin(), s.end(), ' '), s.end());
+    return ReplacePowerOperator(s);
+}
+
+template<>
+std::u32string Symbolic<Rational>::ToString(int exp) const
+{
+    return ToUtfString(ToStdString(exp));
+}
+
+template<>
+SymEngine::Expression Symbolic<Complex>::ToExpression(const Complex& num) const
+{
+    if (!num.GetRe().unit.IsEmpty() || !num.GetIm().unit.IsEmpty())
+        throw ParserException({}, ParserExceptionCode::CannotCastToUnit);
+    return SymEngine::Expression(std::complex<double>(static_cast<double>(num.GetRe()), static_cast<double>(num.GetIm())));
+}
+
+template<>
+std::string Symbolic<Complex>::ToStdString(int exp) const
+{
+    if (!expr)
+        return {};
+    auto basic = expr->get_basic();
+    if (SymEngine::free_symbols(*basic).empty())
+    {
+        auto evaluated = SymEngine::evalf(*basic, MathHelper::ToBitPrecision(precision));
+        if (SymEngine::is_a<SymEngine::ComplexDouble>(*evaluated))
+        {
+            auto cd = SymEngine::rcp_dynamic_cast<const SymEngine::ComplexDouble>(evaluated);
+            auto re = cd->real_part();
+            auto im = cd->imaginary_part();
+            if (im->is_zero())
+            {
+                Symbolic<Real> temp(precision);
+                *temp.expr = SymEngine::Expression(re);
+                return temp.ToStdString(exp);
+            }
+            Symbolic<Real> re_sym(precision);
+            *re_sym.expr = SymEngine::Expression(re);
+            std::string re_str = re_sym.ToStdString(exp);
+            if (re->is_zero())
+            {
+                Symbolic<Real> im_sym(precision);
+                *im_sym.expr = SymEngine::Expression(im);
+                return im_sym.ToStdString(exp) + "*i";
+            }
+            Symbolic<Real> im_sym(precision);
+            *im_sym.expr = SymEngine::Expression(im);
+            std::string im_str = im_sym.ToStdString(exp);
+            if (!im_str.empty() && im_str[0] == '-')
+                return re_str + im_str + "*i";
+            return re_str + "+" + im_str + "*i";
+        }
+        Symbolic<Real> temp(precision);
+        *temp.expr = SymEngine::Expression(evaluated);
+        return temp.ToStdString(exp);
+    }
+    std::string s = basic->__str__();
+    s.erase(std::remove(s.begin(), s.end(), ' '), s.end());
+    std::replace(s.begin(), s.end(), 'I', 'i');
+    s = ReplaceRationalNumbers(s, std::numeric_limits<int>::max(), precision);
+    s = RemoveNumberParentheses(s);
+    s = FormatNumberInExpression(s, exp, precision);
+    std::string result;
+    for (size_t i = 0; i < s.size(); )
+    {
+        if (std::isdigit(static_cast<unsigned char>(s[i])))
+        {
+            size_t j = i;
+            while (j < s.size() && std::isdigit(static_cast<unsigned char>(s[j])))
+                ++j;
+            bool skip = false;
+            if (j < s.size() && (s[j] == '.' || s[j] == 'e' || s[j] == 'E'))
+                skip = true;
+            if (i > 0 && s[i - 1] == '.')
+                skip = true;
+            if (i > 0 && (s[i - 1] == 'e' || s[i - 1] == 'E'))
+                skip = true;
+            if (i > 1 && (s[i - 2] == 'e' || s[i - 2] == 'E') && (s[i - 1] == '+' || s[i - 1] == '-'))
+                skip = true;
+            result += s.substr(i, j - i);
+            if (!skip)
+                result += '.';
+            i = j;
+        }
+        else
+        {
+            result += s[i];
+            ++i;
+        }
+    }
+    s = result;
+    return ReplacePowerOperator(s);
+}
+
+template<>
+std::u32string Symbolic<Complex>::ToString(int exp) const
+{
+    return ToUtfString(ToStdString(exp));
+}
+
+template<>
+std::string Symbolic<Real>::ToJson(int exp) const
+{
+    if (!expr)
+        return {};
+    auto basic = expr->get_basic();
+    std::string content = BasicToJson(*basic, precision, JsonNumberFormat::REAL);
+    return JsonResultWrapper(45, content); // SYMBOLIC_REAL_RESULT
+}
+
+template<>
+std::string Symbolic<Rational>::ToJson(int exp) const
+{
+    if (!expr)
+        return {};
+    auto basic = expr->get_basic();
+    std::string content = BasicToJson(*basic, precision, JsonNumberFormat::RATIONAL);
+    return JsonResultWrapper(46, content); // SYMBOLIC_RATIONAL_RESULT
+}
+
+template<>
+std::string Symbolic<Complex>::ToJson(int exp) const
+{
+    if (!expr)
+        return {};
+    auto basic = expr->get_basic();
+    std::string content = BasicToJson(*basic, precision, JsonNumberFormat::COMPLEX);
+    return JsonResultWrapper(47, content); // SYMBOLIC_COMPLEX_RESULT
+}
+
+template class Symbolic<Rational>;
+template class Symbolic<Complex>;
 
 }

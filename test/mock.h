@@ -104,6 +104,26 @@ struct CalcTestSymbolicReal : public testing::Test
     Parser<Symbolic<Real>> parser;
 };
 
+struct CalcTestSymbolicRational : public testing::Test
+{
+    CalcTestSymbolicRational() :
+        parser(3, Language::English)
+    {
+    }
+
+    Parser<Symbolic<Rational>> parser;
+};
+
+struct CalcTestSymbolicComplex : public testing::Test
+{
+    CalcTestSymbolicComplex() :
+        parser(3, Language::English)
+    {
+    }
+
+    Parser<Symbolic<Complex>> parser;
+};
+
 }
 
 #endif

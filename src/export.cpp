@@ -597,6 +597,164 @@ FunctionNode<Symbolic<Real>>* Export::FindFunction<Symbolic<Real>>(const std::u3
     return nullptr;
 }
 
+template<>
+void Export::AddVariable<Symbolic<Rational>>(const VariableNode<Symbolic<Rational>>& var)
+{
+    std::scoped_lock<std::mutex> lock(export_mutex);
+    auto it = std::find_if(variables_symbolic_rational.begin(), variables_symbolic_rational.end(),
+        [var](auto& v)
+        {
+            return var.name == v.name;
+        });
+    if (it == variables_symbolic_rational.end())
+    {
+        VariableNode<Symbolic<Rational>> v(var);
+        v.exported = true;
+        variables_symbolic_rational.push_back(v);
+        return;
+    }
+    *it = var;
+    it->exported = true;
+}
+
+template<>
+void Export::AddFunction<Symbolic<Rational>>(const FunctionNode<Symbolic<Rational>>& func)
+{
+    std::scoped_lock<std::mutex> lock(export_mutex);
+    auto it = std::find_if(functions_symbolic_rational.begin(), functions_symbolic_rational.end(),
+        [func](auto& v)
+        {
+            return func.name == v.name;
+        });
+    if (it == functions_symbolic_rational.end())
+    {
+        FunctionNode<Symbolic<Rational>> f(func);
+        f.exported = true;
+        functions_symbolic_rational.push_back(f);
+        return;
+    }
+    *it = func;
+    it->exported = true;
+}
+
+template<>
+VariableNode<Symbolic<Rational>>* Export::FindVariable<Symbolic<Rational>>(const std::u32string& name, const std::u32string& subscript)
+{
+    std::scoped_lock<std::mutex> lock(export_mutex);
+    auto it = std::find_if(variables_symbolic_rational.begin(), variables_symbolic_rational.end(),
+        [name, subscript](auto& var)
+        {
+            return var.name.name == name && var.name.subscript == subscript;
+        });
+    if (it != variables_symbolic_rational.end())
+        return &(*it);
+    return nullptr;
+}
+
+template<>
+FunctionNode<Symbolic<Rational>>* Export::FindFunction<Symbolic<Rational>>(const std::u32string& name)
+{
+    std::scoped_lock<std::mutex> lock(export_mutex);
+    auto it = std::find_if(functions_symbolic_rational.begin(), functions_symbolic_rational.end(),
+        [name](auto& func)
+        {
+            return func.name.name == name;
+        });
+    if (it != functions_symbolic_rational.end())
+        return &(*it);
+    return nullptr;
+}
+
+template<>
+void Export::AddVariable<Symbolic<Complex>>(const VariableNode<Symbolic<Complex>>& var)
+{
+    std::scoped_lock<std::mutex> lock(export_mutex);
+    auto it = std::find_if(variables_symbolic_complex.begin(), variables_symbolic_complex.end(),
+        [var](auto& v)
+        {
+            return var.name == v.name;
+        });
+    if (it == variables_symbolic_complex.end())
+    {
+        VariableNode<Symbolic<Complex>> v(var);
+        v.exported = true;
+        variables_symbolic_complex.push_back(v);
+        return;
+    }
+    *it = var;
+    it->exported = true;
+}
+
+template<>
+void Export::AddFunction<Symbolic<Complex>>(const FunctionNode<Symbolic<Complex>>& func)
+{
+    std::scoped_lock<std::mutex> lock(export_mutex);
+    auto it = std::find_if(functions_symbolic_complex.begin(), functions_symbolic_complex.end(),
+        [func](auto& v)
+        {
+            return func.name == v.name;
+        });
+    if (it == functions_symbolic_complex.end())
+    {
+        FunctionNode<Symbolic<Complex>> f(func);
+        f.exported = true;
+        functions_symbolic_complex.push_back(f);
+        return;
+    }
+    *it = func;
+    it->exported = true;
+}
+
+template<>
+VariableNode<Symbolic<Complex>>* Export::FindVariable<Symbolic<Complex>>(const std::u32string& name, const std::u32string& subscript)
+{
+    std::scoped_lock<std::mutex> lock(export_mutex);
+    auto it = std::find_if(variables_symbolic_complex.begin(), variables_symbolic_complex.end(),
+        [name, subscript](auto& var)
+        {
+            return var.name.name == name && var.name.subscript == subscript;
+        });
+    if (it != variables_symbolic_complex.end())
+        return &(*it);
+    return nullptr;
+}
+
+template<>
+FunctionNode<Symbolic<Complex>>* Export::FindFunction<Symbolic<Complex>>(const std::u32string& name)
+{
+    std::scoped_lock<std::mutex> lock(export_mutex);
+    auto it = std::find_if(functions_symbolic_complex.begin(), functions_symbolic_complex.end(),
+        [name](auto& func)
+        {
+            return func.name.name == name;
+        });
+    if (it != functions_symbolic_complex.end())
+        return &(*it);
+    return nullptr;
+}
+
+template<>
+CustomUnit<Symbolic<Rational>>* Export::FindUnit<Symbolic<Rational>>(const std::u32string& name, const std::u32string& system)
+{
+    return nullptr;
+}
+
+template<>
+CustomUnit<Symbolic<Complex>>* Export::FindUnit<Symbolic<Complex>>(const std::u32string& name, const std::u32string& system)
+{
+    return nullptr;
+}
+
+template<>
+void Export::GetUnits(const std::u32string& system, std::vector<CustomUnit<Symbolic<Rational>>>& units)
+{
+}
+
+template<>
+void Export::GetUnits(const std::u32string& system, std::vector<CustomUnit<Symbolic<Complex>>>& units)
+{
+}
+
 void Export::Clear()
 {
     std::scoped_lock<std::mutex> lock(export_mutex);
@@ -605,6 +763,8 @@ void Export::Clear()
     variables_rational.clear();
     variables_complex.clear();
     variables_symbolic.clear();
+    variables_symbolic_rational.clear();
+    variables_symbolic_complex.clear();
     variables_array_real.clear();
 
     functions_integer.clear();
@@ -612,6 +772,8 @@ void Export::Clear()
     functions_rational.clear();
     functions_complex.clear();
     functions_symbolic.clear();
+    functions_symbolic_rational.clear();
+    functions_symbolic_complex.clear();
     functions_array_real.clear();
 
     units_real.clear();

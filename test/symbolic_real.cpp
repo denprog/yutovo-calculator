@@ -66,13 +66,13 @@ TEST_F(CalcTestSymbolicReal, eval1)
 TEST_F(CalcTestSymbolicReal, eval2)
 {
     Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"x+x;");
-    ASSERT_TRUE(res.ToString(10) == U"2*x") << res.ToStdString(10);
+    ASSERT_TRUE(res.ToString(10) == U"2.*x") << res.ToStdString(10);
 }
 
 TEST_F(CalcTestSymbolicReal, eval3)
 {
     Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"y+2*y+2;");
-    ASSERT_TRUE(res.ToString(10) == U"2+3*y") << res.ToStdString(10);
+    ASSERT_TRUE(res.ToString(10) == U"2.+3.*y") << res.ToStdString(10);
 }
 
 TEST_F(CalcTestSymbolicReal, eval4)
@@ -118,19 +118,19 @@ TEST_F(CalcTestSymbolicReal, unary_minus1)
 TEST_F(CalcTestSymbolicReal, addition1)
 {
     Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"x + 1;");
-    ASSERT_TRUE(res.ToString(10) == U"1+x") << res.ToStdString(10);
+    ASSERT_TRUE(res.ToString(10) == U"1.+x") << res.ToStdString(10);
 }
 
 TEST_F(CalcTestSymbolicReal, subtraction1)
 {
     Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"x - 1;");
-    ASSERT_TRUE(res.ToString(10) == U"-1+x") << res.ToStdString(10);
+    ASSERT_TRUE(res.ToString(10) == U"-1.+x") << res.ToStdString(10);
 }
 
 TEST_F(CalcTestSymbolicReal, multiplication1)
 {
     Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"x * 2;");
-    ASSERT_TRUE(res.ToString(10) == U"2*x") << res.ToStdString(10);
+    ASSERT_TRUE(res.ToString(10) == U"2.*x") << res.ToStdString(10);
 }
 
 TEST_F(CalcTestSymbolicReal, division1)
@@ -142,16 +142,16 @@ TEST_F(CalcTestSymbolicReal, division1)
 TEST_F(CalcTestSymbolicReal, mixed_arithmetic1)
 {
     Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"x + 2*x;");
-    ASSERT_TRUE(res.ToString(10) == U"3*x") << res.ToStdString(10);
+    ASSERT_TRUE(res.ToString(10) == U"3.*x") << res.ToStdString(10);
 }
 
 TEST_F(CalcTestSymbolicReal, power1)
 {
     Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"pow(x, 2);");
-    ASSERT_TRUE(res.ToString(10) == U"pow(x,2)") << res.ToStdString(10);
+    ASSERT_TRUE(res.ToString(10) == U"pow(x,2.)") << res.ToStdString(10);
 
     res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"pow(x + 1, 2);");
-    ASSERT_TRUE(res.ToString(10) == U"pow(1+x,2)") << res.ToStdString(10);
+    ASSERT_TRUE(res.ToString(10) == U"pow(1.+x,2.)") << res.ToStdString(10);
 }
 
 TEST_F(CalcTestSymbolicReal, sin1)
@@ -181,26 +181,26 @@ TEST_F(CalcTestSymbolicReal, root1)
 TEST_F(CalcTestSymbolicReal, expand1)
 {
     Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"expand(pow(x + 1, 2));");
-    ASSERT_TRUE(res.ToString(10) == U"1+2*x+pow(x,2)") << res.ToStdString(10);
+    ASSERT_TRUE(res.ToString(10) == U"1.+2.*x+pow(x,2.)") << res.ToStdString(10);
 }
 
 TEST_F(CalcTestSymbolicReal, simplify1)
 {
     Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"simplify(x + x);");
-    ASSERT_TRUE(res.ToString(10) == U"2*x") << res.ToStdString(10);
+    ASSERT_TRUE(res.ToString(10) == U"2.*x") << res.ToStdString(10);
 }
 
 TEST_F(CalcTestSymbolicReal, simplify2)
 {
     parser.Parse(LogicalId{0, 0, 1}, U"f(x)=x+x;");
     Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 2}, U"simplify(f(x));");
-    ASSERT_TRUE(res.ToString(10) == U"2*x") << res.ToStdString(10);
+    ASSERT_TRUE(res.ToString(10) == U"2.*x") << res.ToStdString(10);
 }
 
 TEST_F(CalcTestSymbolicReal, diff1)
 {
     Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"diff(pow(x, 2), x);");
-    ASSERT_TRUE(res.ToString(10) == U"2*x") << res.ToStdString(10);
+    ASSERT_TRUE(res.ToString(10) == U"2.*x") << res.ToStdString(10);
 }
 
 TEST_F(CalcTestSymbolicReal, diff2)
@@ -214,7 +214,7 @@ TEST_F(CalcTestSymbolicReal, diff3)
 {
     parser.Parse(LogicalId{0, 0, 1}, U"f(x)=pow(x,2);");
     Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 2}, U"diff(f(x), x);");
-    ASSERT_TRUE(res.ToString(10) == U"2*x") << res.ToStdString(10);
+    ASSERT_TRUE(res.ToString(10) == U"2.*x") << res.ToStdString(10);
 }
 
 TEST_F(CalcTestSymbolicReal, diff4)
@@ -531,10 +531,10 @@ TEST_F(CalcTestSymbolicReal, user_functions9)
     parser.Parse(LogicalId{0, 0, 1}, U"y=x+1;");
     parser.Parse(LogicalId{0, 0, 2}, U"r=pow(y,2);");
     Symbolic res = parser.Parse(LogicalId{0, 0, 3}, U"r;");
-    ASSERT_TRUE(res.ToStdString(10) == "pow(1+x,2)") << res.ToStdString(10);
+    ASSERT_TRUE(res.ToStdString(10) == "pow(1.+x,2.)") << res.ToStdString(10);
     parser.Parse(LogicalId{0, 0, 4}, U"f(t)=t+r;");
     res = parser.Parse(LogicalId{0, 0, 5}, U"f(3);");
-    ASSERT_TRUE(res.ToStdString(10) == "3+pow(1+x,2)") << res.ToStdString(10);
+    ASSERT_TRUE(res.ToStdString(10) == "3.+pow(1.+x,2.)") << res.ToStdString(10);
 }
 
 TEST_F(CalcTestSymbolicReal, real1)
@@ -560,6 +560,26 @@ TEST_F(CalcTestSymbolicReal, errors1)
 TEST_F(CalcTestSymbolicReal, errors2)
 {
     EXPECT_THROW(parser.Parse(LogicalId{0, 0, 1}, U"sinx);"), yutovo_calculator::SyntaxException);
+}
+
+TEST_F(CalcTestSymbolicReal, tojson1)
+{
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"1/x;");
+    std::string json = res.ToJson(10);
+    std::string expected = 
+        "{\"type\":45,\"elements\":["
+            "{\"type\":15,\"elements\":["
+                "{\"type\":7,\"elements\":["
+                    "{\"type\":8,\"elements\":\"x\"}"
+                "]},"
+                "{\"type\":10,\"elements\":[]},"
+                "{\"type\":7,\"elements\":["
+                    "{\"type\":12,\"symbol\":\"-\"},"
+                    "{\"type\":8,\"elements\":\"1.\"}"
+                "]}"
+            "]}"
+        "]}";
+    ASSERT_TRUE(json == expected) << json;
 }
 
 }

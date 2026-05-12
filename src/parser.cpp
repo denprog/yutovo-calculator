@@ -191,6 +191,36 @@ Symbolic<Real> log(const Symbolic<Real>& num1, const Symbolic<Real>& num2);
 Symbolic<Real> root(const Symbolic<Real>& num1, const Symbolic<Real>& num2);
 Symbolic<Real> sin(const Symbolic<Real>& num);
 Symbolic<Real> cos(const Symbolic<Real>& num);
+Symbolic<Real> sqrt(const Symbolic<Real>& num);
+
+extern template class Symbolic<Rational>;
+extern template class Symbolic<Complex>;
+
+Symbolic<Rational> evalf(const Symbolic<Rational>& num);
+Symbolic<Rational> evalf(const Symbolic<Rational>& num, const Symbolic<Rational>& prec);
+Symbolic<Rational> expand(const Symbolic<Rational>& num);
+Symbolic<Rational> simplify(const Symbolic<Rational>& num);
+Symbolic<Rational> diff(const Symbolic<Rational>& num, const Symbolic<Rational>& var);
+Symbolic<Rational> subs(const Symbolic<Rational>& num, const Symbolic<Rational>& var, const Symbolic<Rational>& value);
+Symbolic<Rational> pow(const Symbolic<Rational>& num1, const Symbolic<Rational>& num2);
+Symbolic<Rational> log(const Symbolic<Rational>& num1, const Symbolic<Rational>& num2);
+Symbolic<Rational> root(const Symbolic<Rational>& num1, const Symbolic<Rational>& num2);
+Symbolic<Rational> sin(const Symbolic<Rational>& num);
+Symbolic<Rational> cos(const Symbolic<Rational>& num);
+Symbolic<Rational> sqrt(const Symbolic<Rational>& num);
+
+Symbolic<Complex> evalf(const Symbolic<Complex>& num);
+Symbolic<Complex> evalf(const Symbolic<Complex>& num, const Symbolic<Complex>& prec);
+Symbolic<Complex> expand(const Symbolic<Complex>& num);
+Symbolic<Complex> simplify(const Symbolic<Complex>& num);
+Symbolic<Complex> diff(const Symbolic<Complex>& num, const Symbolic<Complex>& var);
+Symbolic<Complex> subs(const Symbolic<Complex>& num, const Symbolic<Complex>& var, const Symbolic<Complex>& value);
+Symbolic<Complex> pow(const Symbolic<Complex>& num1, const Symbolic<Complex>& num2);
+Symbolic<Complex> log(const Symbolic<Complex>& num1, const Symbolic<Complex>& num2);
+Symbolic<Complex> root(const Symbolic<Complex>& num1, const Symbolic<Complex>& num2);
+Symbolic<Complex> sin(const Symbolic<Complex>& num);
+Symbolic<Complex> cos(const Symbolic<Complex>& num);
+Symbolic<Complex> sqrt(const Symbolic<Complex>& num);
 
 template<>
 Parser<yutovo_calculator::Integer>::Parser(const int precision, const Language _language) : 
@@ -628,6 +658,8 @@ Parser<yutovo_calculator::Symbolic<yutovo_calculator::Real>>::Parser(const int p
     solver.AddBuiltinFunction(U"sin", unary_func);
     unary_func = &cos;
     solver.AddBuiltinFunction(U"cos", unary_func);
+    unary_func = &sqrt;
+    solver.AddBuiltinFunction(U"sqrt", unary_func);
 
     SymbolicBinaryFunc binary_func;
     binary_func = &diff;
@@ -701,6 +733,124 @@ void Parser<yutovo_calculator::Array<Real>>::SetLocale(Language _language)
 
 template<>
 void Parser<yutovo_calculator::Symbolic<yutovo_calculator::Real>>::SetLocale(Language _language)
+{
+    language = _language;
+    switch (language)
+    {
+    case Language::Russian:
+        solver.im = U"j";
+        break;
+    default:
+        solver.im = U"i";
+        break;
+    }
+    last_language = language;
+}
+
+template<>
+Parser<yutovo_calculator::Symbolic<yutovo_calculator::Rational>>::Parser(const int precision, const Language _language) :
+    solver(precision, AngleMeasure::Radian),
+    language(_language),
+    last_language(_language)
+{
+    InitThreadTime();
+
+    SymbolicRationalUnaryFunc unary_func;
+    unary_func = &evalf;
+    solver.AddBuiltinFunction(U"evalf", unary_func);
+    unary_func = &expand;
+    solver.AddBuiltinFunction(U"expand", unary_func);
+    unary_func = &simplify;
+    solver.AddBuiltinFunction(U"simplify", unary_func);
+    unary_func = &sin;
+    solver.AddBuiltinFunction(U"sin", unary_func);
+    unary_func = &cos;
+    solver.AddBuiltinFunction(U"cos", unary_func);
+    unary_func = &sqrt;
+    solver.AddBuiltinFunction(U"sqrt", unary_func);
+
+    SymbolicRationalBinaryFunc binary_func;
+    binary_func = &diff;
+    solver.AddBuiltinFunction(U"diff", binary_func);
+    binary_func = &pow;
+    solver.AddBuiltinFunction(U"pow", binary_func);
+    binary_func = &log;
+    solver.AddBuiltinFunction(U"log", binary_func);
+    binary_func = &root;
+    solver.AddBuiltinFunction(U"root", binary_func);
+
+    switch (language)
+    {
+    case Language::Russian:
+        solver.im = U"j";
+        break;
+    default:
+        solver.im = U"i";
+        break;
+    }
+}
+
+template<>
+void Parser<yutovo_calculator::Symbolic<yutovo_calculator::Rational>>::SetLocale(Language _language)
+{
+    language = _language;
+    switch (language)
+    {
+    case Language::Russian:
+        solver.im = U"j";
+        break;
+    default:
+        solver.im = U"i";
+        break;
+    }
+    last_language = language;
+}
+
+template<>
+Parser<yutovo_calculator::Symbolic<yutovo_calculator::Complex>>::Parser(const int precision, const Language _language) :
+    solver(precision, AngleMeasure::Radian),
+    language(_language),
+    last_language(_language)
+{
+    InitThreadTime();
+
+    SymbolicComplexUnaryFunc unary_func;
+    unary_func = &evalf;
+    solver.AddBuiltinFunction(U"evalf", unary_func);
+    unary_func = &expand;
+    solver.AddBuiltinFunction(U"expand", unary_func);
+    unary_func = &simplify;
+    solver.AddBuiltinFunction(U"simplify", unary_func);
+    unary_func = &sin;
+    solver.AddBuiltinFunction(U"sin", unary_func);
+    unary_func = &cos;
+    solver.AddBuiltinFunction(U"cos", unary_func);
+    unary_func = &sqrt;
+    solver.AddBuiltinFunction(U"sqrt", unary_func);
+
+    SymbolicComplexBinaryFunc binary_func;
+    binary_func = &diff;
+    solver.AddBuiltinFunction(U"diff", binary_func);
+    binary_func = &pow;
+    solver.AddBuiltinFunction(U"pow", binary_func);
+    binary_func = &log;
+    solver.AddBuiltinFunction(U"log", binary_func);
+    binary_func = &root;
+    solver.AddBuiltinFunction(U"root", binary_func);
+
+    switch (language)
+    {
+    case Language::Russian:
+        solver.im = U"j";
+        break;
+    default:
+        solver.im = U"i";
+        break;
+    }
+}
+
+template<>
+void Parser<yutovo_calculator::Symbolic<yutovo_calculator::Complex>>::SetLocale(Language _language)
 {
     language = _language;
     switch (language)

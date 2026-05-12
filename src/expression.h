@@ -46,7 +46,7 @@ struct Expression : qi::grammar<std::u32string::iterator, ExpressionNode<Number>
 		boost::recursive_wrapper<ExpressionNode<Number>>>
 		Operand;
 	
-	qi::rule<std::u32string::iterator, ExpressionNode<Number>(), unicode::space_type> expression, term, addition, multiplication;
+	qi::rule<std::u32string::iterator, ExpressionNode<Number>(), unicode::space_type> expression, term, addition, multiplication, power;
 	qi::rule<std::u32string::iterator, Operand(), unicode::space_type> unary;
 	qi::rule<std::u32string::iterator, OperationNode<Number>(), unicode::space_type> multiply;
 	qi::rule<std::u32string::iterator, UnaryOperationNode<Number>(), unicode::space_type> unary_operation;

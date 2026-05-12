@@ -62,6 +62,8 @@ private:
     std::vector<VariableNode<Rational>> variables_rational;
     std::vector<VariableNode<Complex>> variables_complex;
     std::vector<VariableNode<Symbolic<Real>>> variables_symbolic;
+    std::vector<VariableNode<Symbolic<Rational>>> variables_symbolic_rational;
+    std::vector<VariableNode<Symbolic<Complex>>> variables_symbolic_complex;
     std::vector<VariableNode<Array<Real>>> variables_array_real;
 
     std::vector<FunctionNode<Integer>> functions_integer;
@@ -69,6 +71,8 @@ private:
     std::vector<FunctionNode<Rational>> functions_rational;
     std::vector<FunctionNode<Complex>> functions_complex;
     std::vector<FunctionNode<Symbolic<Real>>> functions_symbolic;
+    std::vector<FunctionNode<Symbolic<Rational>>> functions_symbolic_rational;
+    std::vector<FunctionNode<Symbolic<Complex>>> functions_symbolic_complex;
     std::vector<FunctionNode<Array<Real>>> functions_array_real;
 
     std::vector<CustomUnit<Real>> units_real;
