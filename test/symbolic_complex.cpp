@@ -262,7 +262,7 @@ TEST_F(CalcTestSymbolicComplex, tojson2)
     ASSERT_TRUE(json ==
         R"({"type":47,"elements":[)"
             R"({"type":7,"elements":[)"
-                R"({"type":8,"elements":"1."},)"
+                R"({"type":8,"elements":"1"},)"
                 R"({"type":11,"symbol":"+"},)"
                 R"({"type":8,"elements":"i"})"
             R"(]})"
@@ -276,9 +276,9 @@ TEST_F(CalcTestSymbolicComplex, tojson3)
     ASSERT_TRUE(json ==
         R"({"type":47,"elements":[)"
             R"({"type":7,"elements":[)"
-                R"({"type":8,"elements":"1."},)"
+                R"({"type":8,"elements":"1"},)"
                 R"({"type":11,"symbol":"+"},)"
-                R"({"type":8,"elements":"2."},)"
+                R"({"type":8,"elements":"2"},)"
                 R"({"type":13,"symbol":"·"},)"
                 R"({"type":8,"elements":"i"})"
             R"(]})"

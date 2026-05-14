@@ -754,7 +754,6 @@ private:
                     mpfr_clear(mpfr_num);
                     return res;
                 }
-                s += ".";
             }
             return s;
         }

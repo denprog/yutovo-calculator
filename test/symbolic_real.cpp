@@ -575,11 +575,11 @@ TEST_F(CalcTestSymbolicReal, tojson1)
                 "{\"type\":10,\"elements\":[]},"
                 "{\"type\":7,\"elements\":["
                     "{\"type\":12,\"symbol\":\"-\"},"
-                    "{\"type\":8,\"elements\":\"1.\"}"
+                    "{\"type\":8,\"elements\":\"1\"}"
                 "]}"
             "]}"
         "]}";
-    ASSERT_TRUE(json == expected) << json;
+    ASSERT_EQ(json, expected) << json;
 }
 
 TEST_F(CalcTestSymbolicReal, tojson_exp1)
@@ -596,7 +596,7 @@ TEST_F(CalcTestSymbolicReal, tojson_exp2)
     Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"12345;");
     std::string json = res.ToJson(10);
     ASSERT_TRUE(json ==
-        "{\"type\":45,\"elements\":[{\"type\":7,\"elements\":[{\"type\":8,\"elements\":\"12345.\"}]}]}"
+        "{\"type\":45,\"elements\":[{\"type\":7,\"elements\":[{\"type\":8,\"elements\":\"12345\"}]}]}"
         ) << json;
 }
 
