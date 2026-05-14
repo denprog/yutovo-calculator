@@ -119,14 +119,19 @@ ASSERT_TRUE(document.ToHtml() == "<body>...</body>") << document.ToHtml();
 ```
 
 ### Build
-Use `-j16` maximum for building to avoid OOM kills. Build from the `build/debug` subdirectory:
+Each component is built and tested from its own `build/debug` subdirectory (in-tree builds are not used):
 ```bash
 cd yutovo-calculator/build/debug && make -j16 yutovo-calculator_tests
+./test/yutovo-calculator_tests
+
 cd yutovo-solver/build/debug && make -j16
 
 cd yutovo-editor/build/debug && make -j16 yutovo-editor_tests
+./test/yutovo-editor_tests
+
 cd yutovo-desktop/build/debug && make -j16 yutovo-desktop
 ```
+Use `-j16` maximum for building to avoid OOM kills.
 
 ### Test runtime
 Running the full `yutovo-editor_tests` suite takes approximately **25 minutes** (symbolic tests are particularly slow due to WebSocket solver round-trips).

@@ -403,7 +403,7 @@ std::string Symbolic<Real>::ToJson(int exp) const
     if (!expr)
         return {};
     auto basic = expr->get_basic();
-    std::string content = BasicToJson(*basic, precision, JsonNumberFormat::REAL);
+    std::string content = BasicToJson(*basic, precision, exp, JsonNumberFormat::REAL);
     return JsonResultWrapper(45, content); // SYMBOLIC_REAL_RESULT
 }
 
@@ -413,7 +413,7 @@ std::string Symbolic<Rational>::ToJson(int exp) const
     if (!expr)
         return {};
     auto basic = expr->get_basic();
-    std::string content = BasicToJson(*basic, precision, JsonNumberFormat::RATIONAL);
+    std::string content = BasicToJson(*basic, precision, exp, JsonNumberFormat::RATIONAL);
     return JsonResultWrapper(46, content); // SYMBOLIC_RATIONAL_RESULT
 }
 
@@ -423,7 +423,7 @@ std::string Symbolic<Complex>::ToJson(int exp) const
     if (!expr)
         return {};
     auto basic = expr->get_basic();
-    std::string content = BasicToJson(*basic, precision, JsonNumberFormat::COMPLEX);
+    std::string content = BasicToJson(*basic, precision, exp, JsonNumberFormat::COMPLEX);
     return JsonResultWrapper(47, content); // SYMBOLIC_COMPLEX_RESULT
 }
 
