@@ -176,6 +176,17 @@ struct Solver : public boost::static_visitor<Number>
             NumberNode<Number> _op = op;
             return Number(op.number);
         }
+        else if constexpr (std::is_same_v<Number, Symbolic<Rational>>)
+        {
+            NumberNode<Number> _op = op;
+            if (_op.number.find(U'.') != std::u32string::npos)
+            {
+                Rational r;
+                r = _op.number;
+                return Number(precision, r.ToString());
+            }
+            return Number(precision, _op.number);
+        }
         else
         {
             NumberNode<Number> _op = op;

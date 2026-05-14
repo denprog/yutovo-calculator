@@ -89,7 +89,7 @@ Rational::Rational(Unit& _unit)
 Rational::Rational(const std::u32string& num)
 {
     mpq_init(number);
-    mpq_set_str(number, (ToBasicString(num)).c_str(), 10);
+    *this = num;
 
 #ifdef TRACE_OUTPUT
     UpdateNumberStr();
@@ -124,12 +124,12 @@ Rational& Rational::operator=(const std::u32string& source)
 {
     if (source.find(L'.') != -1)
     {
-        std::u32string intPart, fractPart;
+        std::u32string int_part, fract_part;
         int i = 0;
 
         while (i < (int)source.length() && source[i] != '.')
         {
-            intPart += source[i];
+            int_part += source[i];
             ++i;
         }
 
@@ -137,19 +137,24 @@ Rational& Rational::operator=(const std::u32string& source)
 
         while (i < (int)source.length())
         {
-            fractPart += source[i];
+            fract_part += source[i];
             ++i;
         }
 
-        if (fractPart != U"")
+        if (fract_part != U"")
         {
-            int n = fractPart.length();
+            int n = fract_part.length();
             std::u32string t(U"1");
 
             for (int j = 0; j < n; ++j)
                 t += '0';
 
-            *this = Rational(fractPart) / Rational(t) + Rational(intPart);
+            std::u32string combined;
+            if (!int_part.empty() && int_part[0] == U'-')
+                combined = U"-" + int_part.substr(1) + fract_part;
+            else
+                combined = int_part + fract_part;
+            *this = Rational(combined) / Rational(t);
 
             return *this;
         }

@@ -34,6 +34,33 @@ TEST_F(CalcTestSymbolicRational, numbers3)
     ASSERT_TRUE(res.ToStdString(0) == "137174210/109739369") << res.ToStdString(0);
 }
 
+TEST_F(CalcTestSymbolicRational, numbers4)
+{
+    Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"2.3;");
+    ASSERT_TRUE(res.ToStdString(0) == "23/10") << res.ToStdString(0);
+
+    res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"-2.3;");
+    ASSERT_TRUE(res.ToStdString(0) == "-23/10") << res.ToStdString(0);
+
+    res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"0.12;");
+    ASSERT_TRUE(res.ToStdString(0) == "3/25") << res.ToStdString(0);
+
+    res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U".12;");
+    ASSERT_TRUE(res.ToStdString(0) == "3/25") << res.ToStdString(0);
+
+    res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"12.0;");
+    ASSERT_TRUE(res.ToStdString(0) == "12") << res.ToStdString(0);
+
+    res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"54.990;");
+    ASSERT_TRUE(res.ToStdString(0) == "5499/100") << res.ToStdString(0);
+}
+
+TEST_F(CalcTestSymbolicRational, numbers5)
+{
+    Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"2.3*x;");
+    ASSERT_TRUE(res.ToStdString(0) == "(23/10)*x") << res.ToStdString(0);
+}
+
 TEST_F(CalcTestSymbolicRational, eval1)
 {
     Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"x;");
@@ -290,6 +317,45 @@ TEST_F(CalcTestSymbolicRational, tojson4)
                     R"({"type":10,"elements":[]},)"
                     R"({"type":7,"elements":[)"
                         R"({"type":8,"elements":"2"})"
+                    R"(]})"
+                R"(]})"
+            R"(]})"
+        R"(]})" ) << json;
+}
+
+TEST_F(CalcTestSymbolicRational, tojson5)
+{
+    Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"2.3;");
+    std::string json = res.ToJson(10);
+    ASSERT_TRUE(json ==
+        R"({"type":46,"elements":[)"
+            R"({"type":14,"elements":[)"
+                R"({"type":7,"elements":[)"
+                    R"({"type":8,"elements":"23"})"
+                R"(]},)"
+                R"({"type":10,"elements":[]},)"
+                R"({"type":7,"elements":[)"
+                    R"({"type":8,"elements":"10"})"
+                R"(]})"
+            R"(]})"
+        R"(]})" ) << json;
+}
+
+TEST_F(CalcTestSymbolicRational, tojson6)
+{
+    Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"-2.3;");
+    std::string json = res.ToJson(10);
+    ASSERT_TRUE(json ==
+        R"({"type":46,"elements":[)"
+            R"({"type":7,"elements":[)"
+                R"({"type":12,"symbol":"-"},)"
+                R"({"type":14,"elements":[)"
+                    R"({"type":7,"elements":[)"
+                        R"({"type":8,"elements":"23"})"
+                    R"(]},)"
+                    R"({"type":10,"elements":[]},)"
+                    R"({"type":7,"elements":[)"
+                        R"({"type":8,"elements":"10"})"
                     R"(]})"
                 R"(]})"
             R"(]})"

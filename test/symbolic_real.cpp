@@ -57,6 +57,27 @@ TEST_F(CalcTestSymbolicReal, numbers6)
     ASSERT_TRUE(s == "-7.89E+3") << s;
 }
 
+TEST_F(CalcTestSymbolicReal, numbers7)
+{
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"2.3;", 3);
+    std::string s = res.ToStdString(10);
+    ASSERT_TRUE(s == "2.3") << s;
+}
+
+TEST_F(CalcTestSymbolicReal, numbers8)
+{
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"-2.3;", 3);
+    std::string s = res.ToStdString(10);
+    ASSERT_TRUE(s == "-2.3") << s;
+}
+
+TEST_F(CalcTestSymbolicReal, numbers9)
+{
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"2.3*x;", 3);
+    std::string s = res.ToStdString(10);
+    ASSERT_TRUE(s.find("2.3") != std::string::npos) << s;
+}
+
 TEST_F(CalcTestSymbolicReal, eval1)
 {
     Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"x;");
@@ -634,6 +655,24 @@ TEST_F(CalcTestSymbolicReal, tojson_exp6)
     std::string json = res.ToJson(2);
     ASSERT_TRUE(json ==
         "{\"type\":45,\"elements\":[{\"type\":7,\"elements\":[{\"type\":7,\"elements\":[{\"type\":8,\"elements\":\"1.235\"},{\"type\":13,\"symbol\":\"·\"},{\"type\":15,\"elements\":[{\"type\":7,\"elements\":[{\"type\":8,\"elements\":\"10\"}]},{\"type\":10,\"elements\":[]},{\"type\":7,\"elements\":[{\"type\":8,\"elements\":\"18\"}]}]}]},{\"type\":13,\"symbol\":\"·\"},{\"type\":8,\"elements\":\"x\"}]}]}"
+        ) << json;
+}
+
+TEST_F(CalcTestSymbolicReal, tojson_decimal1)
+{
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"2.3;");
+    std::string json = res.ToJson(10);
+    ASSERT_TRUE(json ==
+        "{\"type\":45,\"elements\":[{\"type\":7,\"elements\":[{\"type\":8,\"elements\":\"2.3\"}]}]}"
+        ) << json;
+}
+
+TEST_F(CalcTestSymbolicReal, tojson_decimal2)
+{
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"-2.3;");
+    std::string json = res.ToJson(10);
+    ASSERT_TRUE(json ==
+        "{\"type\":45,\"elements\":[{\"type\":7,\"elements\":[{\"type\":8,\"elements\":\"-2.3\"}]}]}"
         ) << json;
 }
 

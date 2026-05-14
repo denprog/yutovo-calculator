@@ -278,6 +278,22 @@ TEST_F(CalcTestRational, rationals6)
     ASSERT_TRUE(res.ToStdString() == "5/2") << res.ToStdString();
 }
 
+TEST_F(CalcTestRational, rationals7)
+{
+    Rational res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"-2.3;");
+    ASSERT_TRUE(res.ToStdString() == "-23/10") << res.ToStdString();
+    res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"-0.12;");
+    ASSERT_TRUE(res.ToStdString() == "-3/25") << res.ToStdString();
+    res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"-.12;");
+    ASSERT_TRUE(res.ToStdString() == "-3/25") << res.ToStdString();
+    res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"-2.5;");
+    ASSERT_TRUE(res.ToStdString() == "-5/2") << res.ToStdString();
+    res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"-12.0;");
+    ASSERT_TRUE(res.ToStdString() == "-12") << res.ToStdString();
+    res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"-54.990;");
+    ASSERT_TRUE(res.ToStdString() == "-5499/100") << res.ToStdString();
+}
+
 TEST_F(CalcTestRational, proper1)
 {
     auto res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"(5/4);");
