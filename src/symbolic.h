@@ -1037,7 +1037,7 @@ private:
 
             if (!coef->is_zero() && !coef->is_one() && !coef->is_minus_one())
             {
-                auto coef_elems = NumberToJsonElements(*coef, precision, exp, format);
+                auto coef_elems = BasicToJsonElements(*coef, precision, exp, format);
                 if (coef_elems.size() == 1)
                     positive.push_back(coef_elems[0]);
                 else

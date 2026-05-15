@@ -676,4 +676,174 @@ TEST_F(CalcTestSymbolicReal, tojson_decimal2)
         ) << json;
 }
 
+TEST_F(CalcTestSymbolicReal, sqrt1)
+{
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"sqrt(4);");
+    ASSERT_TRUE(res.ToStdString(10) == "2.") << res.ToStdString(10);
+    std::string json = res.ToJson(10);
+    ASSERT_TRUE(json ==
+        "{\"type\":45,\"elements\":[{\"type\":7,\"elements\":[{\"type\":8,\"elements\":\"2\"}]}]}"
+        ) << json;
+}
+
+TEST_F(CalcTestSymbolicReal, sqrt2)
+{
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"sqrt(x);");
+    std::string s = res.ToStdString(10);
+    ASSERT_TRUE(s == "sqrt(x)") << s;
+    std::string json = res.ToJson(10);
+    ASSERT_TRUE(json ==
+        "{\"type\":45,\"elements\":[{\"type\":15,\"elements\":[{\"type\":7,\"elements\":[{\"type\":8,\"elements\":\"x\"}]},{\"type\":10,\"elements\":[]},{\"type\":7,\"elements\":[{\"type\":8,\"elements\":\"0.5\"}]}]}]}"
+        ) << json;
+}
+
+TEST_F(CalcTestSymbolicReal, pow_operator1)
+{
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"x^3;");
+    ASSERT_TRUE(res.ToString(10) == U"pow(x,3.)") << res.ToStdString(10);
+    std::string json = res.ToJson(10);
+    ASSERT_TRUE(json ==
+        "{\"type\":45,\"elements\":[{\"type\":15,\"elements\":[{\"type\":7,\"elements\":[{\"type\":8,\"elements\":\"x\"}]},{\"type\":10,\"elements\":[]},{\"type\":7,\"elements\":[{\"type\":8,\"elements\":\"3\"}]}]}]}"
+        ) << json;
+}
+
+TEST_F(CalcTestSymbolicReal, diff_complex1)
+{
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"diff(x^3+2*x^2-5*x+1, x);");
+    ASSERT_TRUE(res.ToString(10) == U"-5.+4.*x+3.*pow(x,2.)") << res.ToStdString(10);
+    std::string json = res.ToJson(10);
+    ASSERT_TRUE(json ==
+        "{\"type\":45,\"elements\":[{\"type\":7,\"elements\":[{\"type\":8,\"elements\":\"-5\"},{\"type\":11,\"symbol\":\"+\"},{\"type\":8,\"elements\":\"4\"},{\"type\":13,\"symbol\":\"·\"},{\"type\":8,\"elements\":\"x\"},{\"type\":11,\"symbol\":\"+\"},{\"type\":8,\"elements\":\"3\"},{\"type\":13,\"symbol\":\"·\"},{\"type\":15,\"elements\":[{\"type\":7,\"elements\":[{\"type\":8,\"elements\":\"x\"}]},{\"type\":10,\"elements\":[]},{\"type\":7,\"elements\":[{\"type\":8,\"elements\":\"2\"}]}]}]}]}"
+        ) << json;
+}
+
+TEST_F(CalcTestSymbolicReal, subs_complex1)
+{
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"subs(x^2+pow(y,2), x, 3);");
+    ASSERT_TRUE(res.ToString(10) == U"9.+pow(y,2.)") << res.ToStdString(10);
+    std::string json = res.ToJson(10);
+    ASSERT_TRUE(json ==
+        "{\"type\":45,\"elements\":[{\"type\":7,\"elements\":[{\"type\":8,\"elements\":\"9\"},{\"type\":11,\"symbol\":\"+\"},{\"type\":15,\"elements\":[{\"type\":7,\"elements\":[{\"type\":8,\"elements\":\"y\"}]},{\"type\":10,\"elements\":[]},{\"type\":7,\"elements\":[{\"type\":8,\"elements\":\"2\"}]}]}]}]}"
+        ) << json;
+}
+
+TEST_F(CalcTestSymbolicReal, evalf3)
+{
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"evalf(pi);", 20);
+    std::string s = res.ToStdString(10);
+    ASSERT_TRUE(s == "3.14159265358979323846") << s;
+    std::string json = res.ToJson(10);
+    ASSERT_TRUE(json ==
+        "{\"type\":45,\"elements\":[{\"type\":7,\"elements\":[{\"type\":8,\"elements\":\"3.14159265358979323846\"}]}]}"
+        ) << json;
+}
+
+TEST_F(CalcTestSymbolicReal, root2)
+{
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"root(x, 3);");
+    std::string s = res.ToStdString(10);
+    ASSERT_TRUE(s == "pow(x,0.333)") << s;
+    std::string json = res.ToJson(10);
+    ASSERT_TRUE(json ==
+        "{\"type\":45,\"elements\":[{\"type\":15,\"elements\":[{\"type\":7,\"elements\":[{\"type\":8,\"elements\":\"x\"}]},{\"type\":10,\"elements\":[]},{\"type\":7,\"elements\":[{\"type\":8,\"elements\":\"0.333\"}]}]}]}"
+        ) << json;
+}
+
+TEST_F(CalcTestSymbolicReal, tojson_sin)
+{
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"sin(x);");
+    std::string json = res.ToJson(10);
+    ASSERT_TRUE(json ==
+        "{\"type\":45,\"elements\":[{\"type\":7,\"elements\":[{\"type\":8,\"elements\":\"sin\"},{\"type\":19,\"symbol\":\"(\"},{\"type\":8,\"elements\":\"x\"},{\"type\":20,\"symbol\":\")\"}]}]}"
+        ) << json;
+}
+
+TEST_F(CalcTestSymbolicReal, tojson_sincos)
+{
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"sin(x)+cos(x);");
+    std::string json = res.ToJson(10);
+    ASSERT_TRUE(json ==
+        "{\"type\":45,\"elements\":[{\"type\":7,\"elements\":[{\"type\":8,\"elements\":\"cos\"},{\"type\":19,\"symbol\":\"(\"},{\"type\":8,\"elements\":\"x\"},{\"type\":20,\"symbol\":\")\"},{\"type\":11,\"symbol\":\"+\"},{\"type\":8,\"elements\":\"sin\"},{\"type\":19,\"symbol\":\"(\"},{\"type\":8,\"elements\":\"x\"},{\"type\":20,\"symbol\":\")\"}]}]}"
+        ) << json;
+}
+
+TEST_F(CalcTestSymbolicReal, expand3)
+{
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"expand((x+1)^3);");
+    ASSERT_TRUE(res.ToStdString(10) == "1.+3.*x+3.*pow(x,2.)+pow(x,3.)") << res.ToStdString(10);
+    ASSERT_TRUE(res.ToJson(10) ==
+        R"r({"type":45,"elements":[{"type":7,"elements":[{"type":8,"elements":"1"},{"type":11,"symbol":"+"},{"type":8,"elements":"3"},{"type":13,"symbol":"·"},{"type":8,"elements":"x"},{"type":11,"symbol":"+"},{"type":8,"elements":"3"},{"type":13,"symbol":"·"},{"type":15,"elements":[{"type":7,"elements":[{"type":8,"elements":"x"}]},{"type":10,"elements":[]},{"type":7,"elements":[{"type":8,"elements":"2"}]}]},{"type":11,"symbol":"+"},{"type":15,"elements":[{"type":7,"elements":[{"type":8,"elements":"x"}]},{"type":10,"elements":[]},{"type":7,"elements":[{"type":8,"elements":"3"}]}]}]}]})r" ) << res.ToJson(10);
+}
+
+TEST_F(CalcTestSymbolicReal, trig_power1)
+{
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"simplify(sin(x)^2+cos(x)^2);");
+    ASSERT_TRUE(res.ToStdString(10) == "sinpow(x,2.)+cospow(x,2.)") << res.ToStdString(10);
+    ASSERT_TRUE(res.ToJson(10) ==
+        R"r({"type":45,"elements":[{"type":7,"elements":[{"type":15,"elements":[{"type":7,"elements":[{"type":8,"elements":"cos"},{"type":19,"symbol":"("},{"type":8,"elements":"x"},{"type":20,"symbol":")"}]},{"type":10,"elements":[]},{"type":7,"elements":[{"type":8,"elements":"2"}]}]},{"type":11,"symbol":"+"},{"type":15,"elements":[{"type":7,"elements":[{"type":8,"elements":"sin"},{"type":19,"symbol":"("},{"type":8,"elements":"x"},{"type":20,"symbol":")"}]},{"type":10,"elements":[]},{"type":7,"elements":[{"type":8,"elements":"2"}]}]}]}]})r" ) << res.ToJson(10);
+}
+
+TEST_F(CalcTestSymbolicReal, division_nested1)
+{
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"(x+1)/(x-1);");
+    ASSERT_TRUE(res.ToStdString(10) == "(1.+x)/(-1.+x)") << res.ToStdString(10);
+    ASSERT_TRUE(res.ToJson(10) ==
+        R"r({"type":45,"elements":[{"type":14,"elements":[{"type":7,"elements":[{"type":7,"elements":[{"type":8,"elements":"1"},{"type":11,"symbol":"+"},{"type":8,"elements":"x"}]}]},{"type":10,"elements":[]},{"type":7,"elements":[{"type":7,"elements":[{"type":8,"elements":"-1"},{"type":11,"symbol":"+"},{"type":8,"elements":"x"}]}]}]}]})r" ) << res.ToJson(10);
+}
+
+TEST_F(CalcTestSymbolicReal, diff_power5)
+{
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"diff(x^5,x);");
+    ASSERT_TRUE(res.ToStdString(10) == "5.*pow(x,4.)") << res.ToStdString(10);
+    ASSERT_TRUE(res.ToJson(10) ==
+        R"r({"type":45,"elements":[{"type":7,"elements":[{"type":8,"elements":"5"},{"type":13,"symbol":"·"},{"type":15,"elements":[{"type":7,"elements":[{"type":8,"elements":"x"}]},{"type":10,"elements":[]},{"type":7,"elements":[{"type":8,"elements":"4"}]}]}]}]})r" ) << res.ToJson(10);
+}
+
+TEST_F(CalcTestSymbolicReal, diff_cos)
+{
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"diff(cos(x),x);");
+    ASSERT_TRUE(res.ToStdString(10) == "-sin(x)") << res.ToStdString(10);
+    ASSERT_TRUE(res.ToJson(10) ==
+        R"r({"type":45,"elements":[{"type":7,"elements":[{"type":12,"symbol":"-"},{"type":7,"elements":[{"type":8,"elements":"sin"},{"type":19,"symbol":"("},{"type":8,"elements":"x"},{"type":20,"symbol":")"}]}]}]})r" ) << res.ToJson(10);
+}
+
+TEST_F(CalcTestSymbolicReal, frac_power_mult)
+{
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"x^(1/2)*x^(1/3);");
+    ASSERT_TRUE(res.ToStdString(10) == "pow(x,0.833)") << res.ToStdString(10);
+    ASSERT_TRUE(res.ToJson(10) ==
+        R"r({"type":45,"elements":[{"type":15,"elements":[{"type":7,"elements":[{"type":8,"elements":"x"}]},{"type":10,"elements":[]},{"type":7,"elements":[{"type":8,"elements":"0.833"}]}]}]})r" ) << res.ToJson(10);
+}
+
+TEST_F(CalcTestSymbolicReal, expand_diff_squares)
+{
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"expand((x+y)*(x-y));");
+    ASSERT_TRUE(res.ToStdString(10) == "pow(x,2.)-pow(y,2.)") << res.ToStdString(10);
+    ASSERT_TRUE(res.ToJson(10) ==
+        R"r({"type":45,"elements":[{"type":7,"elements":[{"type":15,"elements":[{"type":7,"elements":[{"type":8,"elements":"x"}]},{"type":10,"elements":[]},{"type":7,"elements":[{"type":8,"elements":"2"}]}]},{"type":12,"symbol":"-"},{"type":15,"elements":[{"type":7,"elements":[{"type":8,"elements":"y"}]},{"type":10,"elements":[]},{"type":7,"elements":[{"type":8,"elements":"2"}]}]}]}]})r" ) << res.ToJson(10);
+}
+
+TEST_F(CalcTestSymbolicReal, log_ratio)
+{
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"log(2,4);");
+    ASSERT_TRUE(res.ToStdString(10) == "2.") << res.ToStdString(10);
+    ASSERT_TRUE(res.ToJson(10) ==
+        R"r({"type":45,"elements":[{"type":14,"elements":[{"type":7,"elements":[{"type":7,"elements":[{"type":8,"elements":"log(4)"}]}]},{"type":10,"elements":[]},{"type":7,"elements":[{"type":7,"elements":[{"type":8,"elements":"log(2)"}]}]}]}]})r" ) << res.ToJson(10);
+}
+
+TEST_F(CalcTestSymbolicReal, sqrt_half)
+{
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"sqrt(1/2);");
+    ASSERT_TRUE(res.ToStdString(10) == "0.707") << res.ToStdString(10);
+    ASSERT_TRUE(res.ToJson(10) ==
+        R"r({"type":45,"elements":[{"type":7,"elements":[{"type":8,"elements":"0.5"},{"type":13,"symbol":"·"},{"type":15,"elements":[{"type":7,"elements":[{"type":8,"elements":"2"}]},{"type":10,"elements":[]},{"type":7,"elements":[{"type":8,"elements":"0.5"}]}]}]}]})r" ) << res.ToJson(10);
+}
+
+TEST_F(CalcTestSymbolicReal, subs_add)
+{
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"subs(x+y,y,2);");
+    ASSERT_TRUE(res.ToStdString(10) == "2.+x") << res.ToStdString(10);
+    ASSERT_TRUE(res.ToJson(10) ==
+        R"r({"type":45,"elements":[{"type":7,"elements":[{"type":8,"elements":"2"},{"type":11,"symbol":"+"},{"type":8,"elements":"x"}]}]})r" ) << res.ToJson(10);
+}
 }
