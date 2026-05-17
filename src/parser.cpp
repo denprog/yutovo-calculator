@@ -676,6 +676,10 @@ Parser<yutovo_calculator::Symbolic<yutovo_calculator::Real>>::Parser(const int p
     binary_func = &root;
     solver.AddBuiltinFunction(U"root", binary_func);
 
+    SymbolicTernaryFunc ternary_func;
+    ternary_func = &subs;
+    solver.AddBuiltinFunction(U"subs", ternary_func);
+
     switch (language)
     {
     case Language::Russian:
@@ -786,6 +790,10 @@ Parser<yutovo_calculator::Symbolic<yutovo_calculator::Rational>>::Parser(const i
     binary_func = &root;
     solver.AddBuiltinFunction(U"root", binary_func);
 
+    SymbolicRationalTernaryFunc ternary_func;
+    ternary_func = &subs;
+    solver.AddBuiltinFunction(U"subs", ternary_func);
+
     switch (language)
     {
     case Language::Russian:
@@ -846,6 +854,10 @@ Parser<yutovo_calculator::Symbolic<yutovo_calculator::Complex>>::Parser(const in
     solver.AddBuiltinFunction(U"log", binary_func);
     binary_func = &root;
     solver.AddBuiltinFunction(U"root", binary_func);
+
+    SymbolicComplexTernaryFunc ternary_func;
+    ternary_func = &subs;
+    solver.AddBuiltinFunction(U"subs", ternary_func);
 
     switch (language)
     {

@@ -50,9 +50,11 @@ typedef Symbolic<Real> (*SymbolicTernaryFunc)(const Symbolic<Real>& num1, const 
 
 typedef Symbolic<Rational> (*SymbolicRationalUnaryFunc)(const Symbolic<Rational>& num);
 typedef Symbolic<Rational> (*SymbolicRationalBinaryFunc)(const Symbolic<Rational>& num1, const Symbolic<Rational>& num2);
+typedef Symbolic<Rational> (*SymbolicRationalTernaryFunc)(const Symbolic<Rational>& num1, const Symbolic<Rational>& num2, const Symbolic<Rational>& num3);
 
 typedef Symbolic<Complex> (*SymbolicComplexUnaryFunc)(const Symbolic<Complex>& num);
 typedef Symbolic<Complex> (*SymbolicComplexBinaryFunc)(const Symbolic<Complex>& num1, const Symbolic<Complex>& num2);
+typedef Symbolic<Complex> (*SymbolicComplexTernaryFunc)(const Symbolic<Complex>& num1, const Symbolic<Complex>& num2, const Symbolic<Complex>& num3);
 
 typedef std::vector<std::u32string> Dependencies;
 
@@ -64,12 +66,13 @@ struct SolverSymbols
     //build-in functions' typedefs
     typedef Number (*UnaryFunction)(const Number& num);
     typedef Number (*BinaryFunction)(const Number& num1, const Number& num2);
+    typedef Number (*TernaryFunction)(const Number& num1, const Number& num2, const Number& num3);
     typedef Number (*StringFunction)(const std::u32string& str);
     typedef Number (*TrigonometricFunction)(const Number& num);
     typedef Number (*ComplexUnaryFunction)(const Number& num, int& res_pos);
     typedef Number (*ComplexBinaryFunction)(const Number& num1, const Number& num2, int& res_pos);
 
-    typedef std::variant<UnaryFunction, BinaryFunction, StringFunction, ComplexUnaryFunction, ComplexBinaryFunction> BuiltinFunction;
+    typedef std::variant<UnaryFunction, BinaryFunction, TernaryFunction, StringFunction, ComplexUnaryFunction, ComplexBinaryFunction> BuiltinFunction;
     typedef std::variant<TrigonometricFunction, ComplexUnaryFunction> BuiltinTrigonometricFunction;
     
     //build-in variables' typedefs
@@ -105,6 +108,7 @@ struct Solver : public boost::static_visitor<Number>
     typedef typename SolverSymbols<Number>::TempVariable TempVariable;
     typedef typename SolverSymbols<Number>::UnaryFunction UnaryFunction;
     typedef typename SolverSymbols<Number>::BinaryFunction BinaryFunction;
+    typedef typename SolverSymbols<Number>::TernaryFunction TernaryFunction;
     typedef typename SolverSymbols<Number>::StringFunction StringFunction;
     typedef typename SolverSymbols<Number>::TrigonometricFunction TrigonometricFunction;
     typedef typename SolverSymbols<Number>::BuiltinFunction BuiltinFunction;
@@ -371,16 +375,6 @@ struct Solver : public boost::static_visitor<Number>
                     PopTempVariables(op.arguments.size());
                     return res;
                 }
-                if (op.name.name == U"subs")
-                {
-                    if (op.arguments.size() != 3)
-                        throw SyntaxException(op.id, WrongArgumentsCount, U"Wrong arguments count in 'subs'", op.pos, op.name.name.length(), op.line);
-                    ExpressionNodesIter iter = op.arguments.begin();
-                    Number arg1 = (*this)(*iter++);
-                    Number arg2 = (*this)(*iter++);
-                    Number arg3 = (*this)(*iter);
-                    return subs(arg1, arg2, arg3);
-                }
                 BuiltinFunction* func = FindBuiltinFunction(op.name.name);
                 if (func)
                 {
@@ -405,6 +399,20 @@ struct Solver : public boost::static_visitor<Number>
                         Number arg1 = (*this)(*iter++);
                         Number arg2 = (*this)(*iter);
                         return (*b)(arg1, arg2);
+                    }
+                    catch (const std::bad_variant_access&)
+                    {
+                    }
+                    try
+                    {
+                        auto t = std::get<typename SolverSymbols<Number>::TernaryFunction>(*func);
+                        if (op.arguments.size() != 3)
+                            throw SyntaxException(op.id, WrongArgumentsCount, U"Wrong arguments count in '" + op.name.name + U"'", op.pos, op.name.name.length(), op.line);
+                        ExpressionNodesIter iter = op.arguments.begin();
+                        Number arg1 = (*this)(*iter++);
+                        Number arg2 = (*this)(*iter++);
+                        Number arg3 = (*this)(*iter);
+                        return (*t)(arg1, arg2, arg3);
                     }
                     catch (const std::bad_variant_access&)
                     {
@@ -977,6 +985,11 @@ struct Solver : public boost::static_visitor<Number>
     }
 
     void AddBuiltinFunction(const char32_t* name, BinaryFunction& func)
+    {
+        symbols->buildin_functions[name] = func;
+    }
+
+    void AddBuiltinFunction(const char32_t* name, TernaryFunction& func)
     {
         symbols->buildin_functions[name] = func;
     }
