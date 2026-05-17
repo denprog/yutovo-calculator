@@ -344,6 +344,13 @@ public:
         return res;
     }
     
+    friend Symbolic<Number> exp(const Symbolic<Number>& num)
+    {
+        Symbolic<Number> res(num.precision);
+        *res.expr = SymEngine::exp(*num.expr);
+        return res;
+    }
+    
     friend Symbolic<Number> sqrt(const Symbolic<Number>& num)
     {
         return root(num, Symbolic<Number>(num.precision, 2));

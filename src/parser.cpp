@@ -191,6 +191,7 @@ Symbolic<Real> log(const Symbolic<Real>& num1, const Symbolic<Real>& num2);
 Symbolic<Real> root(const Symbolic<Real>& num1, const Symbolic<Real>& num2);
 Symbolic<Real> sin(const Symbolic<Real>& num);
 Symbolic<Real> cos(const Symbolic<Real>& num);
+Symbolic<Real> exp(const Symbolic<Real>& num);
 Symbolic<Real> sqrt(const Symbolic<Real>& num);
 
 extern template class Symbolic<Rational>;
@@ -207,6 +208,7 @@ Symbolic<Rational> log(const Symbolic<Rational>& num1, const Symbolic<Rational>&
 Symbolic<Rational> root(const Symbolic<Rational>& num1, const Symbolic<Rational>& num2);
 Symbolic<Rational> sin(const Symbolic<Rational>& num);
 Symbolic<Rational> cos(const Symbolic<Rational>& num);
+Symbolic<Rational> exp(const Symbolic<Rational>& num);
 Symbolic<Rational> sqrt(const Symbolic<Rational>& num);
 
 Symbolic<Complex> evalf(const Symbolic<Complex>& num);
@@ -220,6 +222,7 @@ Symbolic<Complex> log(const Symbolic<Complex>& num1, const Symbolic<Complex>& nu
 Symbolic<Complex> root(const Symbolic<Complex>& num1, const Symbolic<Complex>& num2);
 Symbolic<Complex> sin(const Symbolic<Complex>& num);
 Symbolic<Complex> cos(const Symbolic<Complex>& num);
+Symbolic<Complex> exp(const Symbolic<Complex>& num);
 Symbolic<Complex> sqrt(const Symbolic<Complex>& num);
 
 template<>
@@ -658,6 +661,8 @@ Parser<yutovo_calculator::Symbolic<yutovo_calculator::Real>>::Parser(const int p
     solver.AddBuiltinFunction(U"sin", unary_func);
     unary_func = &cos;
     solver.AddBuiltinFunction(U"cos", unary_func);
+    unary_func = &exp;
+    solver.AddBuiltinFunction(U"exp", unary_func);
     unary_func = &sqrt;
     solver.AddBuiltinFunction(U"sqrt", unary_func);
 
@@ -766,6 +771,8 @@ Parser<yutovo_calculator::Symbolic<yutovo_calculator::Rational>>::Parser(const i
     solver.AddBuiltinFunction(U"sin", unary_func);
     unary_func = &cos;
     solver.AddBuiltinFunction(U"cos", unary_func);
+    unary_func = &exp;
+    solver.AddBuiltinFunction(U"exp", unary_func);
     unary_func = &sqrt;
     solver.AddBuiltinFunction(U"sqrt", unary_func);
 
@@ -825,6 +832,8 @@ Parser<yutovo_calculator::Symbolic<yutovo_calculator::Complex>>::Parser(const in
     solver.AddBuiltinFunction(U"sin", unary_func);
     unary_func = &cos;
     solver.AddBuiltinFunction(U"cos", unary_func);
+    unary_func = &exp;
+    solver.AddBuiltinFunction(U"exp", unary_func);
     unary_func = &sqrt;
     solver.AddBuiltinFunction(U"sqrt", unary_func);
 

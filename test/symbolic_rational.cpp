@@ -682,4 +682,14 @@ TEST_F(CalcTestSymbolicRational, subs_add)
     ASSERT_TRUE(res.ToJson(10) ==
         R"({"type":46,"elements":[{"type":7,"elements":[{"type":8,"elements":"2"},{"type":11,"symbol":"+"},{"type":8,"elements":"x"}]}]})" ) << res.ToJson(10);
 }
+
+TEST_F(CalcTestSymbolicRational, evalf_exp)
+{
+    Parser<Symbolic<Rational>> parser10(10, Language::English);
+    Symbolic<Rational> res = parser10.Parse(LogicalId{0, 0, 0, 0, 1}, U"evalf(exp(100));");
+    std::string json = res.ToJson(10);
+    ASSERT_TRUE(json ==
+        R"r({"type":46,"elements":[{"type":7,"elements":[{"type":8,"elements":"2.6881171418"},{"type":13,"symbol":"·"},{"type":15,"elements":[{"type":7,"elements":[{"type":8,"elements":"10"}]},{"type":10,"elements":[]},{"type":7,"elements":[{"type":8,"elements":"43"}]}]}]}]})r" ) << json;
+}
+
 }
