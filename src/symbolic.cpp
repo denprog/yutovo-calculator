@@ -12,6 +12,7 @@
 #include <limits>
 #include <symengine/pow.h>
 #include <symengine/add.h>
+#include <symengine/symengine_exception.h>
 #include <symengine/mul.h>
 #include <symengine/printers/strprinter.h>
 #include <symengine/derivative.h>
@@ -177,7 +178,31 @@ std::string Symbolic<Real>::ToStdString(int exp) const
         return ReplacePowerOperator(str);
     }
 
-    auto evaluated = SymEngine::evalf(*basic, MathHelper::ToBitPrecision(precision), SymEngine::EvalfDomain::Real);
+    SymEngine::RCP<const SymEngine::Basic> evaluated;
+    try
+    {
+        evaluated = SymEngine::evalf(*basic, MathHelper::ToBitPrecision(precision), SymEngine::EvalfDomain::Real);
+    }
+    catch (const SymEngine::DivisionByZeroError&)
+    {
+        throw MathException(LogicalId{}, DivisionByZero);
+    }
+    catch (const SymEngine::DomainError&)
+    {
+        throw MathException(LogicalId{}, ArgumentIsOver);
+    }
+    catch (const SymEngine::ParseError&)
+    {
+        throw MathException(LogicalId{}, SyntaxError);
+    }
+    catch (const SymEngine::NotImplementedError&)
+    {
+        throw MathException(LogicalId{}, NotImplemented);
+    }
+    catch (const SymEngine::SerializationError&)
+    {
+        throw MathException(LogicalId{}, NotImplemented);
+    }
 
     if (SymEngine::is_a<SymEngine::Integer>(*evaluated))
     {
@@ -293,6 +318,7 @@ std::string Symbolic<Rational>::ToStdString(int exp) const
 {
     if (!expr)
         return {};
+    ValidateConstant();
     auto basic = expr->get_basic();
     std::string s = basic->__str__();
     s.erase(std::remove(s.begin(), s.end(), ' '), s.end());
@@ -321,7 +347,31 @@ std::string Symbolic<Complex>::ToStdString(int exp) const
     auto basic = expr->get_basic();
     if (SymEngine::free_symbols(*basic).empty())
     {
-        auto evaluated = SymEngine::evalf(*basic, MathHelper::ToBitPrecision(precision));
+        SymEngine::RCP<const SymEngine::Basic> evaluated;
+        try
+        {
+            evaluated = SymEngine::evalf(*basic, MathHelper::ToBitPrecision(precision));
+        }
+        catch (const SymEngine::DivisionByZeroError&)
+        {
+            throw MathException(LogicalId{}, DivisionByZero);
+        }
+        catch (const SymEngine::DomainError&)
+        {
+            throw MathException(LogicalId{}, ArgumentIsOver);
+        }
+        catch (const SymEngine::ParseError&)
+        {
+            throw MathException(LogicalId{}, SyntaxError);
+        }
+        catch (const SymEngine::NotImplementedError&)
+        {
+            throw MathException(LogicalId{}, NotImplemented);
+        }
+        catch (const SymEngine::SerializationError&)
+        {
+            throw MathException(LogicalId{}, NotImplemented);
+        }
         if (SymEngine::is_a<SymEngine::ComplexDouble>(*evaluated))
         {
             auto cd = SymEngine::rcp_dynamic_cast<const SymEngine::ComplexDouble>(evaluated);
@@ -402,6 +452,7 @@ std::string Symbolic<Real>::ToJson(int exp) const
 {
     if (!expr)
         return {};
+    ValidateConstant();
     auto basic = expr->get_basic();
     std::string content = BasicToJson(*basic, precision, exp, JsonNumberFormat::REAL);
     return JsonResultWrapper(45, content); // SYMBOLIC_REAL_RESULT
@@ -412,6 +463,7 @@ std::string Symbolic<Rational>::ToJson(int exp) const
 {
     if (!expr)
         return {};
+    ValidateConstant();
     auto basic = expr->get_basic();
     std::string content = BasicToJson(*basic, precision, exp, JsonNumberFormat::RATIONAL);
     return JsonResultWrapper(46, content); // SYMBOLIC_RATIONAL_RESULT
@@ -422,6 +474,7 @@ std::string Symbolic<Complex>::ToJson(int exp) const
 {
     if (!expr)
         return {};
+    ValidateConstant();
     auto basic = expr->get_basic();
     std::string content = BasicToJson(*basic, precision, exp, JsonNumberFormat::COMPLEX);
     return JsonResultWrapper(47, content); // SYMBOLIC_COMPLEX_RESULT

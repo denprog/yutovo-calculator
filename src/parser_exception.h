@@ -34,6 +34,7 @@ enum ParserExceptionCode
 	CannotCastToUnit = 202,
 	UnknownLanguage = 301,
 	NotImplemented = 302,
+	SerializationError = 303,
 	TimeExceed = 401,
 	Break = 501
 };

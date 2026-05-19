@@ -1155,6 +1155,40 @@ private:
     friend class Symbolic<Rational>;
     friend class Symbolic<Complex>;
 
+    void ValidateConstant() const
+    {
+        if (!expr)
+            return;
+        auto basic = expr->get_basic();
+        if (SymEngine::free_symbols(*basic).empty())
+        {
+            try
+            {
+                SymEngine::evalf(*basic, MathHelper::ToBitPrecision(precision));
+            }
+            catch (const SymEngine::DivisionByZeroError&)
+            {
+                throw MathException(LogicalId{}, DivisionByZero);
+            }
+            catch (const SymEngine::DomainError&)
+            {
+                throw MathException(LogicalId{}, ArgumentIsOver);
+            }
+            catch (const SymEngine::ParseError&)
+            {
+                throw MathException(LogicalId{}, SyntaxError);
+            }
+            catch (const SymEngine::NotImplementedError&)
+            {
+                throw MathException(LogicalId{}, NotImplemented);
+            }
+            catch (const SymEngine::SerializationError&)
+            {
+                throw MathException(LogicalId{}, SerializationError);
+            }
+        }
+    }
+
     int precision = 0;
     std::unique_ptr<SymEngine::Expression> expr;
 };

@@ -14,6 +14,7 @@
 #include "export.h"
 #include <chrono>
 #include <variant>
+#include <symengine/symengine_exception.h>
 
 namespace yutovo_calculator
 {
@@ -423,6 +424,26 @@ struct Solver : public boost::static_visitor<Number>
             {
                 throw MathException(op.id, e.ex_id, op.pos, op.line);
             }
+            catch (const SymEngine::DivisionByZeroError&)
+            {
+                throw MathException(op.id, DivisionByZero, op.pos, op.line);
+            }
+            catch (const SymEngine::DomainError&)
+            {
+                throw MathException(op.id, ArgumentIsOver, op.pos, op.line);
+            }
+            catch (const SymEngine::ParseError&)
+            {
+                throw MathException(op.id, SyntaxError, op.pos, op.line);
+            }
+            catch (const SymEngine::NotImplementedError&)
+            {
+                throw MathException(op.id, NotImplemented, op.pos, op.line);
+            }
+            catch (const SymEngine::SerializationError&)
+            {
+                throw MathException(op.id, NotImplemented, op.pos, op.line);
+            }
             throw SyntaxException(op.id, UnknownIdentifier, U"Identifier '" + op.name.name + U"' not found", op.pos, op.name.name.length(), op.line);
         }
         else
@@ -711,10 +732,44 @@ struct Solver : public boost::static_visitor<Number>
             precision = _precision;
 
         Number res;
-        BOOST_FOREACH(typename ScriptNode<Number>::Operand const& op, script.list)
+        if constexpr (is_symbolic_v<Number>)
         {
-            CheckBreak(parser_context);
-            res = boost::apply_visitor(*this, op);
+            try
+            {
+                BOOST_FOREACH(typename ScriptNode<Number>::Operand const& op, script.list)
+                {
+                    CheckBreak(parser_context);
+                    res = boost::apply_visitor(*this, op);
+                }
+            }
+            catch (const SymEngine::DivisionByZeroError&)
+            {
+                throw MathException(id, DivisionByZero, -1, -1);
+            }
+            catch (const SymEngine::DomainError&)
+            {
+                throw MathException(id, ArgumentIsOver, -1, -1);
+            }
+            catch (const SymEngine::ParseError&)
+            {
+                throw MathException(id, SyntaxError, -1, -1);
+            }
+            catch (const SymEngine::NotImplementedError&)
+            {
+                throw MathException(id, NotImplemented, -1, -1);
+            }
+            catch (const SymEngine::SerializationError&)
+            {
+                throw MathException(id, SerializationError, -1, -1);
+            }
+        }
+        else
+        {
+            BOOST_FOREACH(typename ScriptNode<Number>::Operand const& op, script.list)
+            {
+                CheckBreak(parser_context);
+                res = boost::apply_visitor(*this, op);
+            }
         }
 
         if constexpr (std::is_same_v<Number, Real>)

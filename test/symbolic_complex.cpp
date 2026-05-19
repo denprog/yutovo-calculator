@@ -210,6 +210,13 @@ TEST_F(CalcTestSymbolicComplex, subs2)
     ASSERT_TRUE(res.ToStdString(10) == "125.") << res.ToStdString(10);
 }
 
+TEST_F(CalcTestSymbolicComplex, subs3)
+{
+    Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"subs(log(x,2),x,1);");
+    EXPECT_THROW(res.ToStdString(10), MathException);
+    EXPECT_THROW(res.ToJson(10), MathException);
+}
+
 TEST_F(CalcTestSymbolicComplex, variables2)
 {
     parser.Parse(LogicalId{0, 0, 1}, U"a=5;");
