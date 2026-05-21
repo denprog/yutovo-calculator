@@ -751,7 +751,7 @@ Expression<Symbolic<Real>>::Expression(LogicalId id, std::u32string& expr, Solve
 
     implicit_post_function_mul = function_call >> identifier;
 
-    name = raw[lexeme[(alpha | char_(U'_')) >> *(alnum | char_(U'_'))]];
+    name = raw[lexeme[(alpha | char_(U'_') | char_(U'∞')) >> *(alnum | char_(U'_') | char_(U'∞'))]];
 
     unary_operation = (char_(U'+') > unary) | (char_(U'-') > unary);
 
@@ -946,7 +946,7 @@ Expression<Symbolic<Rational>>::Expression(LogicalId id, std::u32string& expr, S
 
     implicit_post_function_mul = function_call >> identifier;
 
-    name = raw[lexeme[(alpha | char_(U'_')) >> *(alnum | char_(U'_'))]];
+    name = raw[lexeme[(alpha | char_(U'_') | char_(U'∞')) >> *(alnum | char_(U'_') | char_(U'∞'))]];
 
     unary_operation = (char_(U'+') > unary) | (char_(U'-') > unary);
 
@@ -1096,7 +1096,7 @@ Expression<Symbolic<Complex>>::Expression(LogicalId id, std::u32string& expr, So
 
     implicit_post_function_mul = function_call >> identifier;
 
-    name = raw[lexeme[(alpha | char_(U'_')) >> *(alnum | char_(U'_'))]];
+    name = raw[lexeme[(alpha | char_(U'_') | char_(U'∞')) >> *(alnum | char_(U'_') | char_(U'∞'))]];
 
     unary_operation = (char_(U'+') > unary) | (char_(U'-') > unary);
 

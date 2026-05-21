@@ -26,6 +26,8 @@
 #include <symengine/subs.h>
 #include <symengine/simplify.h>
 #include <symengine/derivative.h>
+#include <symengine/infinity.h>
+#include <symengine/nan.h>
 #include "math_helper.h"
 #include "parser_exception.h"
 
@@ -344,10 +346,38 @@ public:
         return res;
     }
     
+    friend Symbolic<Number> cot(const Symbolic<Number>& num)
+    {
+        Symbolic<Number> res(num.precision);
+        *res.expr = SymEngine::cot(*num.expr);
+        return res;
+    }
+    
+    friend Symbolic<Number> sec(const Symbolic<Number>& num)
+    {
+        Symbolic<Number> res(num.precision);
+        *res.expr = SymEngine::sec(*num.expr);
+        return res;
+    }
+    
+    friend Symbolic<Number> csc(const Symbolic<Number>& num)
+    {
+        Symbolic<Number> res(num.precision);
+        *res.expr = SymEngine::csc(*num.expr);
+        return res;
+    }
+    
     friend Symbolic<Number> exp(const Symbolic<Number>& num)
     {
         Symbolic<Number> res(num.precision);
         *res.expr = SymEngine::exp(*num.expr);
+        return res;
+    }
+    
+    friend Symbolic<Number> ln(const Symbolic<Number>& num)
+    {
+        Symbolic<Number> res(num.precision);
+        *res.expr = SymEngine::log(*num.expr);
         return res;
     }
     
@@ -552,6 +582,17 @@ public:
         if (s.find('.') == std::string::npos && s.length() == 1)
             s += '.';
         return s;
+    }
+
+    static std::string ReplaceAll(std::string str, const std::string& from, const std::string& to)
+    {
+        size_t start_pos = 0;
+        while ((start_pos = str.find(from, start_pos)) != std::string::npos)
+        {
+            str.replace(start_pos, from.length(), to);
+            start_pos += to.length();
+        }
+        return str;
     }
 
     static int GetDecimalOrder(const std::string& num_str)
@@ -1148,6 +1189,17 @@ private:
             return items;
         }
 
+        if (SymEngine::is_a<SymEngine::Infty>(expr))
+        {
+            const auto& inf = static_cast<const SymEngine::Infty&>(expr);
+            if (inf.is_negative())
+                return {JsonMinus(), JsonCodeString("∞")};
+            return {JsonCodeString("∞")};
+        }
+
+        if (SymEngine::is_a<SymEngine::NaN>(expr))
+            return {JsonCodeString("nan")};
+
         return {JsonCodeString(expr.__str__())};
     }
 
@@ -1155,38 +1207,42 @@ private:
     friend class Symbolic<Rational>;
     friend class Symbolic<Complex>;
 
-    void ValidateConstant() const
+    static bool HasNan(const SymEngine::Basic& expr)
     {
-        if (!expr)
-            return;
-        auto basic = expr->get_basic();
-        if (SymEngine::free_symbols(*basic).empty())
+        if (SymEngine::is_a<SymEngine::NaN>(expr))
+            return true;
+        for (const auto& arg : expr.get_args())
         {
-            try
-            {
-                SymEngine::evalf(*basic, MathHelper::ToBitPrecision(precision));
-            }
-            catch (const SymEngine::DivisionByZeroError&)
-            {
-                throw MathException(LogicalId{}, DivisionByZero);
-            }
-            catch (const SymEngine::DomainError&)
-            {
-                throw MathException(LogicalId{}, ArgumentIsOver);
-            }
-            catch (const SymEngine::ParseError&)
-            {
-                throw MathException(LogicalId{}, SyntaxError);
-            }
-            catch (const SymEngine::NotImplementedError&)
-            {
-                throw MathException(LogicalId{}, NotImplemented);
-            }
-            catch (const SymEngine::SerializationError&)
-            {
-                throw MathException(LogicalId{}, SerializationError);
-            }
+            if (HasNan(*arg))
+                return true;
         }
+        return false;
+    }
+
+    static bool HasInfinityOrNan(const SymEngine::Basic& expr)
+    {
+        if (SymEngine::is_a<SymEngine::Infty>(expr) || SymEngine::is_a<SymEngine::NaN>(expr))
+            return true;
+        for (const auto& arg : expr.get_args())
+        {
+            if (HasInfinityOrNan(*arg))
+                return true;
+        }
+        return false;
+    }
+
+    static std::string RemoveInsignificantPoint(const std::string& s)
+    {
+        if (s.size() < 2 || s.back() != '.')
+            return s;
+        for (size_t i = 0; i < s.size() - 1; ++i)
+        {
+            if (i == 0 && s[i] == '-')
+                continue;
+            if (!std::isdigit(static_cast<unsigned char>(s[i])))
+                return s;
+        }
+        return s.substr(0, s.size() - 1);
     }
 
     int precision = 0;

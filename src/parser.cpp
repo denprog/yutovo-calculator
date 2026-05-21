@@ -191,8 +191,12 @@ Symbolic<Real> log(const Symbolic<Real>& num1, const Symbolic<Real>& num2);
 Symbolic<Real> root(const Symbolic<Real>& num1, const Symbolic<Real>& num2);
 Symbolic<Real> sin(const Symbolic<Real>& num);
 Symbolic<Real> cos(const Symbolic<Real>& num);
+Symbolic<Real> cot(const Symbolic<Real>& num);
+Symbolic<Real> sec(const Symbolic<Real>& num);
+Symbolic<Real> csc(const Symbolic<Real>& num);
 Symbolic<Real> exp(const Symbolic<Real>& num);
 Symbolic<Real> sqrt(const Symbolic<Real>& num);
+Symbolic<Real> ln(const Symbolic<Real>& num);
 
 extern template class Symbolic<Rational>;
 extern template class Symbolic<Complex>;
@@ -208,8 +212,12 @@ Symbolic<Rational> log(const Symbolic<Rational>& num1, const Symbolic<Rational>&
 Symbolic<Rational> root(const Symbolic<Rational>& num1, const Symbolic<Rational>& num2);
 Symbolic<Rational> sin(const Symbolic<Rational>& num);
 Symbolic<Rational> cos(const Symbolic<Rational>& num);
+Symbolic<Rational> cot(const Symbolic<Rational>& num);
+Symbolic<Rational> sec(const Symbolic<Rational>& num);
+Symbolic<Rational> csc(const Symbolic<Rational>& num);
 Symbolic<Rational> exp(const Symbolic<Rational>& num);
 Symbolic<Rational> sqrt(const Symbolic<Rational>& num);
+Symbolic<Rational> ln(const Symbolic<Rational>& num);
 
 Symbolic<Complex> evalf(const Symbolic<Complex>& num);
 Symbolic<Complex> evalf(const Symbolic<Complex>& num, const Symbolic<Complex>& prec);
@@ -222,8 +230,12 @@ Symbolic<Complex> log(const Symbolic<Complex>& num1, const Symbolic<Complex>& nu
 Symbolic<Complex> root(const Symbolic<Complex>& num1, const Symbolic<Complex>& num2);
 Symbolic<Complex> sin(const Symbolic<Complex>& num);
 Symbolic<Complex> cos(const Symbolic<Complex>& num);
+Symbolic<Complex> cot(const Symbolic<Complex>& num);
+Symbolic<Complex> sec(const Symbolic<Complex>& num);
+Symbolic<Complex> csc(const Symbolic<Complex>& num);
 Symbolic<Complex> exp(const Symbolic<Complex>& num);
 Symbolic<Complex> sqrt(const Symbolic<Complex>& num);
+Symbolic<Complex> ln(const Symbolic<Complex>& num);
 
 template<>
 Parser<yutovo_calculator::Integer>::Parser(const int precision, const Language _language) : 
@@ -661,10 +673,18 @@ Parser<yutovo_calculator::Symbolic<yutovo_calculator::Real>>::Parser(const int p
     solver.AddBuiltinFunction(U"sin", unary_func);
     unary_func = &cos;
     solver.AddBuiltinFunction(U"cos", unary_func);
+    unary_func = &cot;
+    solver.AddBuiltinFunction(U"cot", unary_func);
+    unary_func = &sec;
+    solver.AddBuiltinFunction(U"sec", unary_func);
+    unary_func = &csc;
+    solver.AddBuiltinFunction(U"csc", unary_func);
     unary_func = &exp;
     solver.AddBuiltinFunction(U"exp", unary_func);
     unary_func = &sqrt;
     solver.AddBuiltinFunction(U"sqrt", unary_func);
+    unary_func = &ln;
+    solver.AddBuiltinFunction(U"ln", unary_func);
 
     SymbolicBinaryFunc binary_func;
     binary_func = &diff;
@@ -679,6 +699,11 @@ Parser<yutovo_calculator::Symbolic<yutovo_calculator::Real>>::Parser(const int p
     SymbolicTernaryFunc ternary_func;
     ternary_func = &subs;
     solver.AddBuiltinFunction(U"subs", ternary_func);
+
+    solver.AddBuiltinIdentifier(U"inf", Symbolic<Real>(precision, "oo"));
+    solver.AddBuiltinIdentifier(U"infinity", Symbolic<Real>(precision, "oo"));
+    solver.AddBuiltinIdentifier(std::u32string(1, 0x221E).c_str(), Symbolic<Real>(precision, "oo"));
+    solver.AddBuiltinIdentifier(U"nan", Symbolic<Real>(precision, "nan"));
 
     switch (language)
     {
@@ -775,10 +800,18 @@ Parser<yutovo_calculator::Symbolic<yutovo_calculator::Rational>>::Parser(const i
     solver.AddBuiltinFunction(U"sin", unary_func);
     unary_func = &cos;
     solver.AddBuiltinFunction(U"cos", unary_func);
+    unary_func = &cot;
+    solver.AddBuiltinFunction(U"cot", unary_func);
+    unary_func = &sec;
+    solver.AddBuiltinFunction(U"sec", unary_func);
+    unary_func = &csc;
+    solver.AddBuiltinFunction(U"csc", unary_func);
     unary_func = &exp;
     solver.AddBuiltinFunction(U"exp", unary_func);
     unary_func = &sqrt;
     solver.AddBuiltinFunction(U"sqrt", unary_func);
+    unary_func = &ln;
+    solver.AddBuiltinFunction(U"ln", unary_func);
 
     SymbolicRationalBinaryFunc binary_func;
     binary_func = &diff;
@@ -793,6 +826,11 @@ Parser<yutovo_calculator::Symbolic<yutovo_calculator::Rational>>::Parser(const i
     SymbolicRationalTernaryFunc ternary_func;
     ternary_func = &subs;
     solver.AddBuiltinFunction(U"subs", ternary_func);
+
+    solver.AddBuiltinIdentifier(U"inf", Symbolic<Rational>(precision, "oo"));
+    solver.AddBuiltinIdentifier(U"infinity", Symbolic<Rational>(precision, "oo"));
+    solver.AddBuiltinIdentifier(std::u32string(1, 0x221E).c_str(), Symbolic<Rational>(precision, "oo"));
+    solver.AddBuiltinIdentifier(U"nan", Symbolic<Rational>(precision, "nan"));
 
     switch (language)
     {
@@ -840,10 +878,18 @@ Parser<yutovo_calculator::Symbolic<yutovo_calculator::Complex>>::Parser(const in
     solver.AddBuiltinFunction(U"sin", unary_func);
     unary_func = &cos;
     solver.AddBuiltinFunction(U"cos", unary_func);
+    unary_func = &cot;
+    solver.AddBuiltinFunction(U"cot", unary_func);
+    unary_func = &sec;
+    solver.AddBuiltinFunction(U"sec", unary_func);
+    unary_func = &csc;
+    solver.AddBuiltinFunction(U"csc", unary_func);
     unary_func = &exp;
     solver.AddBuiltinFunction(U"exp", unary_func);
     unary_func = &sqrt;
     solver.AddBuiltinFunction(U"sqrt", unary_func);
+    unary_func = &ln;
+    solver.AddBuiltinFunction(U"ln", unary_func);
 
     SymbolicComplexBinaryFunc binary_func;
     binary_func = &diff;
@@ -858,6 +904,11 @@ Parser<yutovo_calculator::Symbolic<yutovo_calculator::Complex>>::Parser(const in
     SymbolicComplexTernaryFunc ternary_func;
     ternary_func = &subs;
     solver.AddBuiltinFunction(U"subs", ternary_func);
+
+    solver.AddBuiltinIdentifier(U"inf", Symbolic<Complex>(precision, "oo"));
+    solver.AddBuiltinIdentifier(U"infinity", Symbolic<Complex>(precision, "oo"));
+    solver.AddBuiltinIdentifier(std::u32string(1, 0x221E).c_str(), Symbolic<Complex>(precision, "oo"));
+    solver.AddBuiltinIdentifier(U"nan", Symbolic<Complex>(precision, "nan"));
 
     switch (language)
     {

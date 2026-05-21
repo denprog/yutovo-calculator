@@ -160,6 +160,140 @@ TEST_F(CalcTestSymbolicReal, division1)
     ASSERT_TRUE(res.ToString(10) == U"0.333*x") << res.ToStdString(10);
 }
 
+TEST_F(CalcTestSymbolicReal, division2)
+{
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"1 / 0;");
+    ASSERT_TRUE(res.ToStdString(10) == "∞") << res.ToStdString(10);
+    ASSERT_TRUE(res.ToJson(10) == "{\"type\":45,\"elements\":[{\"type\":7,\"elements\":[{\"type\":8,\"elements\":\"∞\"}]}]}") << res.ToJson(10);
+}
+
+TEST_F(CalcTestSymbolicReal, division3)
+{
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"0 / 0;");
+    ASSERT_TRUE(res.ToStdString(10) == "nan") << res.ToStdString(10);
+    ASSERT_TRUE(res.ToJson(10) == "{\"type\":45,\"elements\":[{\"type\":7,\"elements\":[{\"type\":8,\"elements\":\"nan\"}]}]}") << res.ToJson(10);
+}
+
+TEST_F(CalcTestSymbolicReal, inf1)
+{
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"inf;");
+    ASSERT_TRUE(res.ToStdString(10) == "∞") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicReal, inf2)
+{
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"∞;");
+    ASSERT_TRUE(res.ToStdString(10) == "∞") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicReal, inf3)
+{
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"(1)/(∞);");
+    ASSERT_TRUE(res.ToStdString(10) == "0.") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicReal, inf4)
+{
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"subs((1)/(x),x,0);");
+    ASSERT_TRUE(res.ToStdString(10) == "∞") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicReal, inf5)
+{
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"subs(exp(x),x,-∞);");
+    ASSERT_TRUE(res.ToStdString(10) == "0.") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicReal, inf6)
+{
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"subs(ln(x),x,0);");
+    ASSERT_TRUE(res.ToStdString(10) == "∞") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicReal, inf7)
+{
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"subs(exp(x),x,∞);");
+    ASSERT_TRUE(res.ToStdString(10) == "∞") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicReal, inf8)
+{
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"subs((1)/(x),x,∞);");
+    ASSERT_TRUE(res.ToStdString(10) == "0.") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicReal, inf9)
+{
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"subs((1)/(x-1),x,1);");
+    ASSERT_TRUE(res.ToStdString(10) == "∞") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicReal, inf10)
+{
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"subs((x^2-1)/(x-1),x,1);");
+    ASSERT_TRUE(res.ToStdString(10) == "nan") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicReal, inf11)
+{
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"-∞;");
+    ASSERT_TRUE(res.ToStdString(10) == "-∞") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicReal, nan1)
+{
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"nan;");
+    ASSERT_TRUE(res.ToStdString(10) == "nan") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicReal, nan2)
+{
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"nan+1;");
+    ASSERT_TRUE(res.ToStdString(10) == "nan") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicReal, nan3)
+{
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"x*nan/3;");
+    ASSERT_TRUE(res.ToStdString(10) == "nan") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicReal, nan4)
+{
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"(0)/(0);");
+    ASSERT_TRUE(res.ToStdString(10) == "nan") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicReal, nan5)
+{
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"subs(∞-∞,x,1);");
+    ASSERT_TRUE(res.ToStdString(10) == "nan") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicReal, nan6)
+{
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"subs(0*∞,x,1);");
+    ASSERT_TRUE(res.ToStdString(10) == "nan") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicReal, nan7)
+{
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"subs((∞)/(∞),x,1);");
+    ASSERT_TRUE(res.ToStdString(10) == "nan") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicReal, nan8)
+{
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"subs(pow(∞,0),x,1);");
+    ASSERT_TRUE(res.ToStdString(10) == "1.") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicReal, nan9)
+{
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"subs(pow(0,0),x,1);");
+    ASSERT_TRUE(res.ToStdString(10) == "1.") << res.ToStdString(10);
+}
+
 TEST_F(CalcTestSymbolicReal, mixed_arithmetic1)
 {
     Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"x + 2*x;");
@@ -269,8 +403,8 @@ TEST_F(CalcTestSymbolicReal, subs3)
 TEST_F(CalcTestSymbolicReal, subs4)
 {
     Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"subs(log(x,2),x,1);");
-    EXPECT_THROW(res.ToStdString(10), MathException);
-    EXPECT_THROW(res.ToJson(10), MathException);
+    ASSERT_TRUE(res.ToStdString(10) == "∞*log2.") << res.ToStdString(10);
+    ASSERT_TRUE(res.ToJson(10) == "{\"type\":45,\"elements\":[{\"type\":7,\"elements\":[{\"type\":8,\"elements\":\"∞\"},{\"type\":13,\"symbol\":\"·\"},{\"type\":7,\"elements\":[{\"type\":8,\"elements\":\"log(2)\"}]}]}]}") << res.ToJson(10);
 }
 
 TEST_F(CalcTestSymbolicReal, subs5)
@@ -867,4 +1001,97 @@ TEST_F(CalcTestSymbolicReal, evalf_exp)
         R"r({"type":45,"elements":[{"type":7,"elements":[{"type":8,"elements":"2.6881171418"},{"type":13,"symbol":"·"},{"type":15,"elements":[{"type":7,"elements":[{"type":8,"elements":"10"}]},{"type":10,"elements":[]},{"type":7,"elements":[{"type":8,"elements":"43"}]}]}]}]})r" ) << json;
 }
 
+TEST_F(CalcTestSymbolicReal, limit_cot0)
+{
+    auto res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"subs(cot(x),x,0);");
+    ASSERT_TRUE(res.ToStdString(10) == "∞") << res.ToStdString(10);
 }
+
+TEST_F(CalcTestSymbolicReal, limit_sec_pi2)
+{
+    auto res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"subs(sec(x),x,(pi)/(2));");
+    ASSERT_TRUE(res.ToStdString(10) == "∞") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicReal, limit_csc0)
+{
+    auto res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"subs(csc(x),x,0);");
+    ASSERT_TRUE(res.ToStdString(10) == "∞") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicReal, limit_sin_x)
+{
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"subs(sin(x)/x,x,0);");
+    ASSERT_TRUE(res.ToStdString(10) == "nan") << res.ToStdString(10);
+    ASSERT_TRUE(res.ToJson(10) == "{\"type\":45,\"elements\":[{\"type\":7,\"elements\":[{\"type\":8,\"elements\":\"nan\"}]}]}") << res.ToJson(10);
+}
+
+TEST_F(CalcTestSymbolicReal, limit_exp_m1)
+{
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"subs((exp(x)-1)/x,x,0);");
+    ASSERT_TRUE(res.ToStdString(10) == "nan") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicReal, limit_ln_x)
+{
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"subs(ln(x)/x,x,0);");
+    ASSERT_TRUE(res.ToStdString(10) == "∞") << res.ToStdString(10);
+    ASSERT_TRUE(res.ToJson(10) == "{\"type\":45,\"elements\":[{\"type\":7,\"elements\":[{\"type\":8,\"elements\":\"∞\"}]}]}") << res.ToJson(10);
+}
+
+TEST_F(CalcTestSymbolicReal, limit_exp_1x)
+{
+    bool thrown = false;
+    try {
+        parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"subs(exp(1/x),x,0);");
+    } catch (...) {
+        thrown = true;
+    }
+    ASSERT_TRUE(thrown);
+}
+
+TEST_F(CalcTestSymbolicReal, limit_sin_1x)
+{
+    bool thrown = false;
+    try {
+        parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"subs(sin(1/x),x,0);");
+    } catch (...) {
+        thrown = true;
+    }
+    ASSERT_TRUE(thrown);
+}
+
+TEST_F(CalcTestSymbolicReal, limit_cos_1x)
+{
+    bool thrown = false;
+    try {
+        parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"subs(cos(1/x),x,0);");
+    } catch (...) {
+        thrown = true;
+    }
+    ASSERT_TRUE(thrown);
+}
+
+TEST_F(CalcTestSymbolicReal, limit_ln_1x)
+{
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"subs(ln(1/x),x,0);");
+    ASSERT_TRUE(res.ToStdString(10) == "∞") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicReal, limit_sqrt_noo)
+{
+    bool thrown = false;
+    try {
+        parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"sqrt(-∞);");
+    } catch (...) {
+        thrown = true;
+    }
+    ASSERT_TRUE(thrown);
+}
+
+
+}
+
+
+
+

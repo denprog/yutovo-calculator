@@ -15,6 +15,7 @@
 - `evalf` returns `Symbolic`; explicit `to_real()` / `to_complex()` perform casting.
 - `factor()` and `integrate()` throw `NotImplemented = 302` (not available in SymEngine 0.14.0).
 - `sqrt(x)` is implemented for all symbolic types via `root(x, 2)` (i.e. `pow(x, 1/2)`). Friend function added in `symbolic.h`; registered in `Parser<Symbolic<...>>` constructors in `parser.cpp`.
+- `cot(x)`, `sec(x)`, `csc(x)` are implemented for all symbolic types via SymEngine functions. Friend functions added in `symbolic.h`; registered in `Parser<Symbolic<...>>` constructors in `parser.cpp`.
 - `HAVE_SYMENGINE_MPFR` is commented out in `symengine_config.h`; `evalf` falls back to 53-bit double.
 - `Symbolic<Number>::ToJson()` recursively traverses the SymEngine AST and emits JSON using yutovo-editor element type codes (7=CODE_ROW, 8=CODE_STRING, 10=SHAPE, 11=PLUS, 12=MINUS, 13=MULTIPLY, 14=DIVISION, 15=POWER, 45-47=SYMBOLIC_*_RESULT). This replaces the fragile string-parsing approach in `yutovo-editor::AddSymbolicElements`.
 

@@ -16,7 +16,7 @@ using namespace yutovo_calculator;
 TEST_F(CalcTestSymbolicComplex, numbers1)
 {
     Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"1;");
-    ASSERT_TRUE(res.ToStdString(10) == "1.") << res.ToStdString(10);
+    ASSERT_TRUE(res.ToStdString(10) == "1") << res.ToStdString(10);
 
     res = parser.Parse(LogicalId{0, 0, 1}, U"1+2*i;");
     ASSERT_TRUE(res.ToStdString(10) == "1.+2.*i") << res.ToStdString(10);
@@ -109,7 +109,7 @@ TEST_F(CalcTestSymbolicComplex, expand1)
 TEST_F(CalcTestSymbolicComplex, subs1)
 {
     Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"subs(x^2, x, 5);");
-    ASSERT_TRUE(res.ToStdString(10) == "25.") << res.ToStdString(10);
+    ASSERT_TRUE(res.ToStdString(10) == "25") << res.ToStdString(10);
 }
 
 TEST_F(CalcTestSymbolicComplex, imaginary1)
@@ -171,13 +171,13 @@ TEST_F(CalcTestSymbolicComplex, cos1)
 TEST_F(CalcTestSymbolicComplex, log1)
 {
     Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"log(2, 8);");
-    ASSERT_TRUE(res.ToStdString(10) == "3.") << res.ToStdString(10);
+    ASSERT_TRUE(res.ToStdString(10) == "3") << res.ToStdString(10);
 }
 
 TEST_F(CalcTestSymbolicComplex, root1)
 {
     Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"root(8, 3);");
-    ASSERT_TRUE(res.ToStdString(10) == "2.") << res.ToStdString(10);
+    ASSERT_TRUE(res.ToStdString(10) == "2") << res.ToStdString(10);
 }
 
 TEST_F(CalcTestSymbolicComplex, simplify1)
@@ -189,7 +189,7 @@ TEST_F(CalcTestSymbolicComplex, simplify1)
 TEST_F(CalcTestSymbolicComplex, diff2)
 {
     Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"diff(x+x, x);");
-    ASSERT_TRUE(res.ToStdString(10) == "2.") << res.ToStdString(10);
+    ASSERT_TRUE(res.ToStdString(10) == "2") << res.ToStdString(10);
 }
 
 TEST_F(CalcTestSymbolicComplex, diff3)
@@ -207,14 +207,14 @@ TEST_F(CalcTestSymbolicComplex, diff4)
 TEST_F(CalcTestSymbolicComplex, subs2)
 {
     Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"subs(yy^3, yy, 5);");
-    ASSERT_TRUE(res.ToStdString(10) == "125.") << res.ToStdString(10);
+    ASSERT_TRUE(res.ToStdString(10) == "125") << res.ToStdString(10);
 }
 
 TEST_F(CalcTestSymbolicComplex, subs3)
 {
     Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"subs(log(x,2),x,1);");
-    EXPECT_THROW(res.ToStdString(10), MathException);
-    EXPECT_THROW(res.ToJson(10), MathException);
+    ASSERT_TRUE(res.ToStdString(10) == "∞*log2.") << res.ToStdString(10);
+    ASSERT_TRUE(res.ToJson(10) == "{\"type\":47,\"elements\":[{\"type\":7,\"elements\":[{\"type\":8,\"elements\":\"∞\"},{\"type\":13,\"symbol\":\"·\"},{\"type\":7,\"elements\":[{\"type\":8,\"elements\":\"log(2)\"}]}]}]}") << res.ToJson(10);
 }
 
 TEST_F(CalcTestSymbolicComplex, variables2)
@@ -471,7 +471,7 @@ TEST_F(CalcTestSymbolicComplex, tojson_imaginary1)
 TEST_F(CalcTestSymbolicComplex, root2)
 {
     Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"root(8, 3);");
-    ASSERT_TRUE(res.ToStdString(10) == "2.") << res.ToStdString(10);
+    ASSERT_TRUE(res.ToStdString(10) == "2") << res.ToStdString(10);
     std::string json = res.ToJson(10);
     ASSERT_TRUE(json ==
         R"({"type":47,"elements":[)"
@@ -555,7 +555,7 @@ TEST_F(CalcTestSymbolicComplex, expand_diff_squares)
 TEST_F(CalcTestSymbolicComplex, log_ratio)
 {
     Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"log(2,4);");
-    ASSERT_TRUE(res.ToStdString(10) == "2.") << res.ToStdString(10);
+    ASSERT_TRUE(res.ToStdString(10) == "2") << res.ToStdString(10);
     ASSERT_TRUE(res.ToJson(10) ==
         R"r({"type":47,"elements":[{"type":14,"elements":[{"type":7,"elements":[{"type":7,"elements":[{"type":8,"elements":"log(4)"}]}]},{"type":10,"elements":[]},{"type":7,"elements":[{"type":7,"elements":[{"type":8,"elements":"log(2)"}]}]}]}]})r" ) << res.ToJson(10);
 }
@@ -583,6 +583,222 @@ TEST_F(CalcTestSymbolicComplex, evalf_exp)
     std::string json = res.ToJson(10);
     ASSERT_TRUE(json ==
         R"r({"type":47,"elements":[{"type":7,"elements":[{"type":8,"elements":"2.6881171418"},{"type":13,"symbol":"·"},{"type":15,"elements":[{"type":7,"elements":[{"type":8,"elements":"10"}]},{"type":10,"elements":[]},{"type":7,"elements":[{"type":8,"elements":"43"}]}]}]}]})r" ) << json;
+}
+
+TEST_F(CalcTestSymbolicComplex, limit_cot0)
+{
+    auto res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"subs(cot(x),x,0);");
+    ASSERT_TRUE(res.ToStdString(10) == "∞") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicComplex, limit_sec_pi2)
+{
+    auto res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"subs(sec(x),x,(pi)/(2));");
+    ASSERT_TRUE(res.ToStdString(10) == "∞") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicComplex, limit_csc0)
+{
+    auto res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"subs(csc(x),x,0);");
+    ASSERT_TRUE(res.ToStdString(10) == "∞") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicComplex, limit_sin_x)
+{
+    Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"subs(sin(x)/x,x,0);");
+    ASSERT_TRUE(res.ToStdString(10) == "nan") << res.ToStdString(10);
+    ASSERT_TRUE(res.ToJson(10) == "{\"type\":47,\"elements\":[{\"type\":7,\"elements\":[{\"type\":8,\"elements\":\"nan\"}]}]}") << res.ToJson(10);
+}
+
+TEST_F(CalcTestSymbolicComplex, limit_exp_m1)
+{
+    Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"subs((exp(x)-1)/x,x,0);");
+    ASSERT_TRUE(res.ToStdString(10) == "nan") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicComplex, limit_ln_x)
+{
+    Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"subs(ln(x)/x,x,0);");
+    ASSERT_TRUE(res.ToStdString(10) == "∞") << res.ToStdString(10);
+    ASSERT_TRUE(res.ToJson(10) == "{\"type\":47,\"elements\":[{\"type\":7,\"elements\":[{\"type\":8,\"elements\":\"∞\"}]}]}") << res.ToJson(10);
+}
+
+TEST_F(CalcTestSymbolicComplex, limit_exp_1x)
+{
+    Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"subs(exp(1/x),x,0);");
+    ASSERT_TRUE(res.ToStdString(10) == "nan") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicComplex, limit_sin_1x)
+{
+    Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"subs(sin(1/x),x,0);");
+    ASSERT_TRUE(res.ToStdString(10) == "nan") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicComplex, limit_cos_1x)
+{
+    Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"subs(cos(1/x),x,0);");
+    ASSERT_TRUE(res.ToStdString(10) == "nan") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicComplex, limit_ln_1x)
+{
+    Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"subs(ln(1/x),x,0);");
+    ASSERT_TRUE(res.ToStdString(10) == "∞") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicComplex, limit_sqrt_noo)
+{
+    Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"sqrt(-∞);");
+    ASSERT_TRUE(res.ToStdString(10) == "nan") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicComplex, inf1)
+{
+    Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"inf;");
+    ASSERT_TRUE(res.ToStdString(10) == "∞") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicComplex, inf2)
+{
+    Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"∞;");
+    ASSERT_TRUE(res.ToStdString(10) == "∞") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicComplex, inf3)
+{
+    Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"(1)/(∞);");
+    ASSERT_TRUE(res.ToStdString(10) == "0") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicComplex, inf4)
+{
+    Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"subs((1)/(x),x,0);");
+    ASSERT_TRUE(res.ToStdString(10) == "∞") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicComplex, inf5)
+{
+    Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"subs(exp(x),x,-∞);");
+    ASSERT_TRUE(res.ToStdString(10) == "0") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicComplex, inf6)
+{
+    Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"subs(ln(x),x,0);");
+    ASSERT_TRUE(res.ToStdString(10) == "∞") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicComplex, inf7)
+{
+    Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"subs(exp(x),x,∞);");
+    ASSERT_TRUE(res.ToStdString(10) == "∞") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicComplex, inf8)
+{
+    Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"subs((1)/(x),x,∞);");
+    ASSERT_TRUE(res.ToStdString(10) == "0") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicComplex, inf9)
+{
+    Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"subs((1)/(x-1),x,1);");
+    ASSERT_TRUE(res.ToStdString(10) == "∞") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicComplex, inf10)
+{
+    Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"subs((x^2-1)/(x-1),x,1);");
+    ASSERT_TRUE(res.ToStdString(10) == "nan") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicComplex, inf11)
+{
+    Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"-∞;");
+    ASSERT_TRUE(res.ToStdString(10) == "-∞") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicComplex, nan1)
+{
+    Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"nan;");
+    ASSERT_TRUE(res.ToStdString(10) == "nan") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicComplex, nan2)
+{
+    Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"nan+1;");
+    ASSERT_TRUE(res.ToStdString(10) == "nan") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicComplex, nan3)
+{
+    Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"x*nan/3;");
+    ASSERT_TRUE(res.ToStdString(10) == "nan") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicComplex, nan4)
+{
+    Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"(0)/(0);");
+    ASSERT_TRUE(res.ToStdString(10) == "nan") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicComplex, nan5)
+{
+    Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"subs(∞-∞,x,1);");
+    ASSERT_TRUE(res.ToStdString(10) == "nan") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicComplex, nan6)
+{
+    Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"subs(0*∞,x,1);");
+    ASSERT_TRUE(res.ToStdString(10) == "nan") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicComplex, nan7)
+{
+    Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"subs((∞)/(∞),x,1);");
+    ASSERT_TRUE(res.ToStdString(10) == "nan") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicComplex, nan8)
+{
+    Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"subs(pow(∞,0),x,1);");
+    ASSERT_TRUE(res.ToStdString(10) == "1") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicComplex, nan9)
+{
+    Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"subs(pow(0,0),x,1);");
+    ASSERT_TRUE(res.ToStdString(10) == "1") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicComplex, division2)
+{
+    Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"1 / 0;");
+    ASSERT_TRUE(res.ToStdString(10) == "∞") << res.ToStdString(10);
+    ASSERT_TRUE(res.ToJson(10) == "{\"type\":47,\"elements\":[{\"type\":7,\"elements\":[{\"type\":8,\"elements\":\"∞\"}]}]}") << res.ToJson(10);
+}
+
+TEST_F(CalcTestSymbolicComplex, division3)
+{
+    Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"0 / 0;");
+    ASSERT_TRUE(res.ToStdString(10) == "nan") << res.ToStdString(10);
+    ASSERT_TRUE(res.ToJson(10) == "{\"type\":47,\"elements\":[{\"type\":7,\"elements\":[{\"type\":8,\"elements\":\"nan\"}]}]}") << res.ToJson(10);
+}
+
+TEST_F(CalcTestSymbolicComplex, simplify2)
+{
+    parser.Parse(LogicalId{0, 0, 1}, U"f(x)=x+x;");
+    Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 2}, U"simplify(f(x));");
+    ASSERT_TRUE(res.ToString(10) == U"2.*x") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicComplex, sqrt2)
+{
+    Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"sqrt(x);");
+    std::string s = res.ToStdString(10);
+    ASSERT_TRUE(s == "sqrt(x)") << s;
 }
 
 }

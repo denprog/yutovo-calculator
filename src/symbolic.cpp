@@ -55,7 +55,10 @@ std::string Symbolic<Real>::ToStdString(int exp) const
 
     auto basic = expr->get_basic();
 
-    if (!SymEngine::free_symbols(*basic).empty())
+    if (HasNan(*basic))
+        return "nan";
+
+    if (!SymEngine::free_symbols(*basic).empty() || HasInfinityOrNan(*basic))
     {
         std::string s = basic->__str__();
         s.erase(std::remove(s.begin(), s.end(), ' '), s.end());
@@ -91,6 +94,8 @@ std::string Symbolic<Real>::ToStdString(int exp) const
             }
         }
         s = result;
+        s = ReplaceAll(s, "zoo", "∞");
+        s = ReplaceAll(s, "oo", "∞");
         return ReplacePowerOperator(s);
     }
 
@@ -203,6 +208,10 @@ std::string Symbolic<Real>::ToStdString(int exp) const
     {
         throw MathException(LogicalId{}, NotImplemented);
     }
+    catch (const std::exception&)
+    {
+        throw MathException(LogicalId{}, NotImplemented);
+    }
 
     if (SymEngine::is_a<SymEngine::Integer>(*evaluated))
     {
@@ -296,6 +305,8 @@ std::string Symbolic<Real>::ToStdString(int exp) const
 
     std::string s = evaluated->__str__();
     s.erase(std::remove(s.begin(), s.end(), ' '), s.end());
+    s = ReplaceAll(s, "zoo", "∞");
+    s = ReplaceAll(s, "oo", "∞");
     return ReplacePowerOperator(s);
 }
 
@@ -318,11 +329,12 @@ std::string Symbolic<Rational>::ToStdString(int exp) const
 {
     if (!expr)
         return {};
-    ValidateConstant();
     auto basic = expr->get_basic();
+    if (HasNan(*basic))
+        return "nan";
     std::string s = basic->__str__();
     s.erase(std::remove(s.begin(), s.end(), ' '), s.end());
-    return ReplacePowerOperator(s);
+    return ReplacePowerOperator(ReplaceAll(ReplaceAll(s, "zoo", "∞"), "oo", "∞"));
 }
 
 template<>
@@ -345,7 +357,9 @@ std::string Symbolic<Complex>::ToStdString(int exp) const
     if (!expr)
         return {};
     auto basic = expr->get_basic();
-    if (SymEngine::free_symbols(*basic).empty())
+    if (HasNan(*basic))
+        return "nan";
+    if (SymEngine::free_symbols(*basic).empty() && !HasInfinityOrNan(*basic))
     {
         SymEngine::RCP<const SymEngine::Basic> evaluated;
         try
@@ -372,6 +386,11 @@ std::string Symbolic<Complex>::ToStdString(int exp) const
         {
             throw MathException(LogicalId{}, NotImplemented);
         }
+        catch (const std::exception&)
+        {
+            throw MathException(LogicalId{}, NotImplemented);
+        }
+        
         if (SymEngine::is_a<SymEngine::ComplexDouble>(*evaluated))
         {
             auto cd = SymEngine::rcp_dynamic_cast<const SymEngine::ComplexDouble>(evaluated);
@@ -381,7 +400,7 @@ std::string Symbolic<Complex>::ToStdString(int exp) const
             {
                 Symbolic<Real> temp(precision);
                 *temp.expr = SymEngine::Expression(re);
-                return temp.ToStdString(exp);
+                return RemoveInsignificantPoint(temp.ToStdString(exp));
             }
             Symbolic<Real> re_sym(precision);
             *re_sym.expr = SymEngine::Expression(re);
@@ -401,8 +420,9 @@ std::string Symbolic<Complex>::ToStdString(int exp) const
         }
         Symbolic<Real> temp(precision);
         *temp.expr = SymEngine::Expression(evaluated);
-        return temp.ToStdString(exp);
+        return RemoveInsignificantPoint(temp.ToStdString(exp));
     }
+
     std::string s = basic->__str__();
     s.erase(std::remove(s.begin(), s.end(), ' '), s.end());
     std::replace(s.begin(), s.end(), 'I', 'i');
@@ -437,8 +457,7 @@ std::string Symbolic<Complex>::ToStdString(int exp) const
             ++i;
         }
     }
-    s = result;
-    return ReplacePowerOperator(s);
+    return RemoveInsignificantPoint(ReplacePowerOperator(ReplaceAll(ReplaceAll(result, "zoo", "∞"), "oo", "∞")));
 }
 
 template<>
@@ -452,7 +471,6 @@ std::string Symbolic<Real>::ToJson(int exp) const
 {
     if (!expr)
         return {};
-    ValidateConstant();
     auto basic = expr->get_basic();
     std::string content = BasicToJson(*basic, precision, exp, JsonNumberFormat::REAL);
     return JsonResultWrapper(45, content); // SYMBOLIC_REAL_RESULT
@@ -463,7 +481,6 @@ std::string Symbolic<Rational>::ToJson(int exp) const
 {
     if (!expr)
         return {};
-    ValidateConstant();
     auto basic = expr->get_basic();
     std::string content = BasicToJson(*basic, precision, exp, JsonNumberFormat::RATIONAL);
     return JsonResultWrapper(46, content); // SYMBOLIC_RATIONAL_RESULT
@@ -474,7 +491,6 @@ std::string Symbolic<Complex>::ToJson(int exp) const
 {
     if (!expr)
         return {};
-    ValidateConstant();
     auto basic = expr->get_basic();
     std::string content = BasicToJson(*basic, precision, exp, JsonNumberFormat::COMPLEX);
     return JsonResultWrapper(47, content); // SYMBOLIC_COMPLEX_RESULT

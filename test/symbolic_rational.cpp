@@ -173,8 +173,7 @@ TEST_F(CalcTestSymbolicRational, subs4)
 TEST_F(CalcTestSymbolicRational, subs5)
 {
     Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"subs(log(x,2),x,1);");
-    EXPECT_THROW(res.ToStdString(10), MathException);
-    EXPECT_THROW(res.ToJson(10), MathException);
+    ASSERT_TRUE(res.ToStdString(10) == "∞*log(2)") << res.ToStdString(10);
 }
 
 TEST_F(CalcTestSymbolicRational, subs6)
@@ -709,6 +708,242 @@ TEST_F(CalcTestSymbolicRational, evalf_exp)
     std::string json = res.ToJson(10);
     ASSERT_TRUE(json ==
         R"r({"type":46,"elements":[{"type":7,"elements":[{"type":8,"elements":"2.6881171418"},{"type":13,"symbol":"·"},{"type":15,"elements":[{"type":7,"elements":[{"type":8,"elements":"10"}]},{"type":10,"elements":[]},{"type":7,"elements":[{"type":8,"elements":"43"}]}]}]}]})r" ) << json;
+}
+
+TEST_F(CalcTestSymbolicRational, limit_cot0)
+{
+    auto res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"subs(cot(x),x,0);");
+    ASSERT_TRUE(res.ToStdString(10) == "∞") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicRational, limit_sec_pi2)
+{
+    auto res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"subs(sec(x),x,(pi)/(2));");
+    ASSERT_TRUE(res.ToStdString(10) == "∞") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicRational, limit_csc0)
+{
+    auto res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"subs(csc(x),x,0);");
+    ASSERT_TRUE(res.ToStdString(10) == "∞") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicRational, limit_sin_x)
+{
+    Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"subs(sin(x)/x,x,0);");
+    ASSERT_TRUE(res.ToStdString(10) == "nan") << res.ToStdString(10);
+    ASSERT_TRUE(res.ToJson(10) == "{\"type\":46,\"elements\":[{\"type\":7,\"elements\":[{\"type\":8,\"elements\":\"nan\"}]}]}") << res.ToJson(10);
+}
+
+TEST_F(CalcTestSymbolicRational, limit_exp_m1)
+{
+    Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"subs((exp(x)-1)/x,x,0);");
+    ASSERT_TRUE(res.ToStdString(10) == "nan") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicRational, limit_ln_x)
+{
+    Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"subs(ln(x)/x,x,0);");
+    ASSERT_TRUE(res.ToStdString(10) == "∞") << res.ToStdString(10);
+    ASSERT_TRUE(res.ToJson(10) == "{\"type\":46,\"elements\":[{\"type\":7,\"elements\":[{\"type\":8,\"elements\":\"∞\"}]}]}") << res.ToJson(10);
+}
+
+TEST_F(CalcTestSymbolicRational, limit_exp_1x)
+{
+    bool thrown = false;
+    try {
+        parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"subs(exp(1/x),x,0);");
+    } catch (...) {
+        thrown = true;
+    }
+    ASSERT_TRUE(thrown);
+}
+
+TEST_F(CalcTestSymbolicRational, limit_sin_1x)
+{
+    bool thrown = false;
+    try {
+        parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"subs(sin(1/x),x,0);");
+    } catch (...) {
+        thrown = true;
+    }
+    ASSERT_TRUE(thrown);
+}
+
+TEST_F(CalcTestSymbolicRational, limit_cos_1x)
+{
+    bool thrown = false;
+    try {
+        parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"subs(cos(1/x),x,0);");
+    } catch (...) {
+        thrown = true;
+    }
+    ASSERT_TRUE(thrown);
+}
+
+TEST_F(CalcTestSymbolicRational, limit_ln_1x)
+{
+    Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"subs(ln(1/x),x,0);");
+    ASSERT_TRUE(res.ToStdString(10) == "∞") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicRational, limit_sqrt_noo)
+{
+    bool thrown = false;
+    try {
+        parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"sqrt(-∞);");
+    } catch (...) {
+        thrown = true;
+    }
+    ASSERT_TRUE(thrown);
+}
+
+TEST_F(CalcTestSymbolicRational, inf1)
+{
+    Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"inf;");
+    ASSERT_TRUE(res.ToStdString(10) == "∞") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicRational, inf2)
+{
+    Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"∞;");
+    ASSERT_TRUE(res.ToStdString(10) == "∞") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicRational, inf3)
+{
+    Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"(1)/(∞);");
+    ASSERT_TRUE(res.ToStdString(10) == "0") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicRational, inf4)
+{
+    Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"subs((1)/(x),x,0);");
+    ASSERT_TRUE(res.ToStdString(10) == "∞") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicRational, inf5)
+{
+    Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"subs(exp(x),x,-∞);");
+    ASSERT_TRUE(res.ToStdString(10) == "0") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicRational, inf6)
+{
+    Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"subs(ln(x),x,0);");
+    ASSERT_TRUE(res.ToStdString(10) == "∞") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicRational, inf7)
+{
+    Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"subs(exp(x),x,∞);");
+    ASSERT_TRUE(res.ToStdString(10) == "∞") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicRational, inf8)
+{
+    Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"subs((1)/(x),x,∞);");
+    ASSERT_TRUE(res.ToStdString(10) == "0") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicRational, inf9)
+{
+    Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"subs((1)/(x-1),x,1);");
+    ASSERT_TRUE(res.ToStdString(10) == "∞") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicRational, inf10)
+{
+    Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"subs((x^2-1)/(x-1),x,1);");
+    ASSERT_TRUE(res.ToStdString(10) == "nan") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicRational, inf11)
+{
+    Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"-∞;");
+    ASSERT_TRUE(res.ToStdString(10) == "-∞") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicRational, nan1)
+{
+    Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"nan;");
+    ASSERT_TRUE(res.ToStdString(10) == "nan") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicRational, nan2)
+{
+    Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"nan+1;");
+    ASSERT_TRUE(res.ToStdString(10) == "nan") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicRational, nan3)
+{
+    Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"x*nan/3;");
+    ASSERT_TRUE(res.ToStdString(10) == "nan") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicRational, nan4)
+{
+    Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"(0)/(0);");
+    ASSERT_TRUE(res.ToStdString(10) == "nan") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicRational, nan5)
+{
+    Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"subs(∞-∞,x,1);");
+    ASSERT_TRUE(res.ToStdString(10) == "nan") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicRational, nan6)
+{
+    Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"subs(0*∞,x,1);");
+    ASSERT_TRUE(res.ToStdString(10) == "nan") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicRational, nan7)
+{
+    Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"subs((∞)/(∞),x,1);");
+    ASSERT_TRUE(res.ToStdString(10) == "nan") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicRational, nan8)
+{
+    Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"subs(pow(∞,0),x,1);");
+    ASSERT_TRUE(res.ToStdString(10) == "1") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicRational, nan9)
+{
+    Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"subs(pow(0,0),x,1);");
+    ASSERT_TRUE(res.ToStdString(10) == "1") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicRational, division2)
+{
+    Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"1 / 0;");
+    ASSERT_TRUE(res.ToStdString(10) == "∞") << res.ToStdString(10);
+    ASSERT_TRUE(res.ToJson(10) == "{\"type\":46,\"elements\":[{\"type\":7,\"elements\":[{\"type\":8,\"elements\":\"∞\"}]}]}") << res.ToJson(10);
+}
+
+TEST_F(CalcTestSymbolicRational, division3)
+{
+    Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"0 / 0;");
+    ASSERT_TRUE(res.ToStdString(10) == "nan") << res.ToStdString(10);
+    ASSERT_TRUE(res.ToJson(10) == "{\"type\":46,\"elements\":[{\"type\":7,\"elements\":[{\"type\":8,\"elements\":\"nan\"}]}]}") << res.ToJson(10);
+}
+
+TEST_F(CalcTestSymbolicRational, simplify2)
+{
+    parser.Parse(LogicalId{0, 0, 1}, U"f(x)=x+x;");
+    Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 2}, U"simplify(f(x));");
+    ASSERT_TRUE(res.ToString(10) == U"2*x") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicRational, sqrt2)
+{
+    Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"sqrt(x);");
+    std::string s = res.ToStdString(10);
+    ASSERT_TRUE(s == "sqrt(x)") << s;
 }
 
 }

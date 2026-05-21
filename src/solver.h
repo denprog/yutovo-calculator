@@ -426,10 +426,14 @@ struct Solver : public boost::static_visitor<Number>
             }
             catch (const SymEngine::DivisionByZeroError&)
             {
+                if constexpr (is_symbolic_v<Number>)
+                    return Number(precision, std::u32string(U"zoo"));
                 throw MathException(op.id, DivisionByZero, op.pos, op.line);
             }
             catch (const SymEngine::DomainError&)
             {
+                if constexpr (is_symbolic_v<Number> && std::is_same_v<Number, Symbolic<Complex>>)
+                    return Number(precision, std::u32string(U"nan"));
                 throw MathException(op.id, ArgumentIsOver, op.pos, op.line);
             }
             catch (const SymEngine::ParseError&)
@@ -438,11 +442,19 @@ struct Solver : public boost::static_visitor<Number>
             }
             catch (const SymEngine::NotImplementedError&)
             {
+                if constexpr (is_symbolic_v<Number> && std::is_same_v<Number, Symbolic<Complex>>)
+                    return Number(precision, std::u32string(U"nan"));
                 throw MathException(op.id, NotImplemented, op.pos, op.line);
             }
             catch (const SymEngine::SerializationError&)
             {
                 throw MathException(op.id, NotImplemented, op.pos, op.line);
+            }
+            catch (...)
+            {
+                if constexpr (is_symbolic_v<Number> && std::is_same_v<Number, Symbolic<Complex>>)
+                    return Number(precision, std::u32string(U"nan"));
+                throw MathException(op.id, IncorrectOperation, op.pos, op.line);
             }
             throw SyntaxException(op.id, UnknownIdentifier, U"Identifier '" + op.name.name + U"' not found", op.pos, op.name.name.length(), op.line);
         }
@@ -519,6 +531,9 @@ struct Solver : public boost::static_visitor<Number>
                 {
                 }
             }
+            Number builtin_id_val;
+            if (FindBuiltinIdentifier(op.name, builtin_id_val))
+                return builtin_id_val;
             return Number(precision, op.name);
         }
         else
@@ -557,6 +572,9 @@ struct Solver : public boost::static_visitor<Number>
                 {
                 }
             }
+            Number builtin_id_val;
+            if (FindBuiltinIdentifier(op.identifier.name, builtin_id_val))
+                return (*this)(op.left) * builtin_id_val;
             return (*this)(op.left) * Number(precision, op.identifier.name);
         }
         else
