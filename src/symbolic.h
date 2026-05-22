@@ -511,7 +511,7 @@ private:
             while (!mantissa.empty() && mantissa.back() == '0')
                 mantissa.pop_back();
             if (!mantissa.empty() && mantissa.back() == '.')
-                mantissa += '0';
+                mantissa.pop_back();
         }
 
         //process exponent sign and leading zeros
@@ -558,7 +558,19 @@ private:
             power_exp = JsonCodeRow({JsonMinus(), power_exp});
 
         std::string power = JsonPower(JsonCodeRow({JsonCodeString("10")}), JsonCodeRow({power_exp}));
-        return {JsonCodeString(mantissa), JsonMultiply(), power};
+        std::vector<std::string> result;
+        if (!mantissa.empty() && mantissa[0] == '-')
+        {
+            result.push_back(JsonMinus());
+            result.push_back(JsonCodeString(mantissa.substr(1)));
+        }
+        else
+        {
+            result.push_back(JsonCodeString(mantissa));
+        }
+        result.push_back(JsonMultiply());
+        result.push_back(power);
+        return result;
     }
 
 public:
@@ -575,6 +587,16 @@ public:
             }
         }
         return s;
+    }
+
+    static bool IsEffectivelyZeroFixedStr(const std::string& s)
+    {
+        for (char c : s)
+        {
+            if (c != '0' && c != '.' && c != '-')
+                return false;
+        }
+        return true;
     }
 
     static std::string AddTrailingDotIfSingleDigit(std::string s)
@@ -637,6 +659,12 @@ public:
                 mpfr_snprintf(buf, 512, "%.*Rf", precision, q);
                 std::string s = buf;
                 s = FormatFixed(s, false);
+                if (mpfr_zero_p(q) == 0 && IsEffectivelyZeroFixedStr(s))
+                {
+                    mpfr_snprintf(buf, 512, "%.*Re", precision, q);
+                    s = buf;
+                    s = FormatScientific(s);
+                }
                 result += s;
                 mpfr_clear(num);
                 mpfr_clear(den);
@@ -705,6 +733,8 @@ private:
         std::string s = FormatNumberForJson(num, precision, exp, format);
         if (s.find('E') != std::string::npos)
             return JsonScientificElements(s);
+        if (!s.empty() && s[0] == '-')
+            return {JsonMinus(), JsonCodeString(s.substr(1))};
         return {JsonCodeString(s)};
     }
 
@@ -828,8 +858,9 @@ private:
             int order = GetDecimalOrder(fixed_str);
             if (!fixed_str.empty() && fixed_str[0] == '-')
                 order--;
+            bool is_zero_fixed = IsEffectivelyZeroFixedStr(FormatFixed(fixed_str, false));
             std::string s;
-            if (order > exp && exp >= 0)
+            if ((order > exp && exp >= 0) || (value != 0.0 && is_zero_fixed))
             {
                 oss.str("");
                 oss.clear();
@@ -862,14 +893,15 @@ private:
             if (!str.empty() && str[0] == '-')
                 order--;
             char buf[512];
-            if (order > exp && exp >= 0)
+            mpfr_snprintf(buf, 512, "%.*Rf", precision, value);
+            bool is_zero_fixed = IsEffectivelyZeroFixedStr(FormatFixed(std::string(buf), false));
+            if ((order > exp && exp >= 0) || (mpfr_zero_p(value) == 0 && is_zero_fixed))
             {
                 mpfr_snprintf(buf, 512, "%.*Re", precision, value);
                 return FormatScientific(buf);
             }
             else
             {
-                mpfr_snprintf(buf, 512, "%.*Rf", precision, value);
                 return FormatFixed(buf, false);
             }
         }
@@ -937,6 +969,11 @@ private:
                 auto sci = JsonScientificElements(re_str);
                 items.insert(items.end(), sci.begin(), sci.end());
             }
+            else if (!re_str.empty() && re_str[0] == '-')
+            {
+                items.push_back(JsonMinus());
+                items.push_back(JsonCodeString(re_str.substr(1)));
+            }
             else
                 items.push_back(JsonCodeString(re_str));
             items.push_back(JsonPlus());
@@ -945,6 +982,11 @@ private:
             {
                 auto sci = JsonScientificElements(im_str);
                 items.insert(items.end(), sci.begin(), sci.end());
+            }
+            else if (!im_str.empty() && im_str[0] == '-')
+            {
+                items.push_back(JsonMinus());
+                items.push_back(JsonCodeString(im_str.substr(1)));
             }
             else
                 items.push_back(JsonCodeString(im_str));

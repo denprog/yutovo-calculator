@@ -6,6 +6,10 @@
 - `yutovo-editor/` — Document editor with MathML rendering and solver integration
 - `yutovo-desktop/` — Desktop GUI application using `yutovo-editor` and `yutovo-solver`
 
+## Agent Rules
+
+- **Never delete existing tests.** When fixing regressions or refactoring, update test expectations to match the new correct behavior, but do not remove tests. If `git checkout` or similar commands are used to revert a file, verify that no user-added tests were lost.
+
 ## Current Work: Symbolic Integration
 
 ### yutovo-calculator

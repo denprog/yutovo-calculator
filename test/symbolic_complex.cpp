@@ -76,12 +76,6 @@ TEST_F(CalcTestSymbolicComplex, mixed_arithmetic2)
     ASSERT_TRUE(res.ToStdString(10) == "-5.+3.*x+2.*pow(x,2.)") << res.ToStdString(10);
 }
 
-TEST_F(CalcTestSymbolicComplex, power1)
-{
-    Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"x^2;");
-    ASSERT_TRUE(res.ToStdString(10) == "pow(x,2.)") << res.ToStdString(10);
-}
-
 TEST_F(CalcTestSymbolicComplex, precision1)
 {
     Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"1/3;", 10);
@@ -340,6 +334,21 @@ TEST_F(CalcTestSymbolicComplex, pow1)
         R"(]})" ) << json;
 }
 
+TEST_F(CalcTestSymbolicComplex, pow2)
+{
+    Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"1/pow(10,100);");
+    std::string s = res.ToStdString(10);
+    ASSERT_TRUE(s == "1E-100") << s;
+    std::string json = res.ToJson(10);
+    ASSERT_TRUE(json == "{\"type\":47,\"elements\":[{\"type\":7,\"elements\":[{\"type\":8,\"elements\":\"1\"},{\"type\":13,\"symbol\":\"·\"},{\"type\":15,\"elements\":[{\"type\":7,\"elements\":[{\"type\":8,\"elements\":\"10\"}]},{\"type\":10,\"elements\":[]},{\"type\":7,\"elements\":[{\"type\":7,\"elements\":[{\"type\":12,\"symbol\":\"-\"},{\"type\":8,\"elements\":\"100\"}]}]}]}]}]}") << json;
+}
+
+TEST_F(CalcTestSymbolicComplex, pow3)
+{
+    Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"x^2;");
+    ASSERT_TRUE(res.ToStdString(10) == "pow(x,2.)") << res.ToStdString(10);
+}
+
 TEST_F(CalcTestSymbolicComplex, evalf1)
 {
     Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"evalf(pi);", 3);
@@ -362,7 +371,7 @@ TEST_F(CalcTestSymbolicComplex, diff_complex1)
     ASSERT_TRUE(json ==
         R"({"type":47,"elements":[)"
             R"({"type":7,"elements":[)"
-                R"({"type":8,"elements":"-5"},)"
+                R"({"type":12,"symbol":"-"},{"type":8,"elements":"5"},)"
                 R"({"type":11,"symbol":"+"},)"
                 R"({"type":8,"elements":"4"},)"
                 R"({"type":13,"symbol":"·"},)"
@@ -517,7 +526,7 @@ TEST_F(CalcTestSymbolicComplex, division_nested1)
     Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"(x+1)/(x-1);");
     ASSERT_TRUE(res.ToStdString(10) == "(1.+x)/(-1.+x)") << res.ToStdString(10);
     ASSERT_TRUE(res.ToJson(10) ==
-        R"r({"type":47,"elements":[{"type":14,"elements":[{"type":7,"elements":[{"type":7,"elements":[{"type":8,"elements":"1"},{"type":11,"symbol":"+"},{"type":8,"elements":"x"}]}]},{"type":10,"elements":[]},{"type":7,"elements":[{"type":7,"elements":[{"type":8,"elements":"-1"},{"type":11,"symbol":"+"},{"type":8,"elements":"x"}]}]}]}]})r" ) << res.ToJson(10);
+        R"r({"type":47,"elements":[{"type":14,"elements":[{"type":7,"elements":[{"type":7,"elements":[{"type":8,"elements":"1"},{"type":11,"symbol":"+"},{"type":8,"elements":"x"}]}]},{"type":10,"elements":[]},{"type":7,"elements":[{"type":7,"elements":[{"type":12,"symbol":"-"},{"type":8,"elements":"1"},{"type":11,"symbol":"+"},{"type":8,"elements":"x"}]}]}]}]})r" ) << res.ToJson(10);
 }
 
 TEST_F(CalcTestSymbolicComplex, diff_power5)
@@ -799,6 +808,15 @@ TEST_F(CalcTestSymbolicComplex, sqrt2)
     Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"sqrt(x);");
     std::string s = res.ToStdString(10);
     ASSERT_TRUE(s == "sqrt(x)") << s;
+}
+
+TEST_F(CalcTestSymbolicComplex, pow4)
+{
+    Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"-(1)/pow(10,100);");
+    std::string s = res.ToStdString(10);
+    ASSERT_TRUE(s == "-1E-100") << s;
+    std::string json = res.ToJson(10);
+    ASSERT_TRUE(json == "{\"type\":47,\"elements\":[{\"type\":7,\"elements\":[{\"type\":12,\"symbol\":\"-\"},{\"type\":8,\"elements\":\"1\"},{\"type\":13,\"symbol\":\"·\"},{\"type\":15,\"elements\":[{\"type\":7,\"elements\":[{\"type\":8,\"elements\":\"10\"}]},{\"type\":10,\"elements\":[]},{\"type\":7,\"elements\":[{\"type\":7,\"elements\":[{\"type\":12,\"symbol\":\"-\"},{\"type\":8,\"elements\":\"100\"}]}]}]}]}]}") << json;
 }
 
 }
