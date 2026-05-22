@@ -182,7 +182,7 @@ TEST_F(CalcTestSymbolicRational, subs4)
 TEST_F(CalcTestSymbolicRational, subs5)
 {
     Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"subs(log(x,2),x,1);");
-    ASSERT_TRUE(res.ToStdString(10) == "∞*log(2)") << res.ToStdString(10);
+    ASSERT_TRUE(res.ToStdString(10) == "∞") << res.ToStdString(10);
 }
 
 TEST_F(CalcTestSymbolicRational, subs6)
@@ -195,6 +195,12 @@ TEST_F(CalcTestSymbolicRational, subs7)
 {
     Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"subs(log(2,x),x,1);");
     ASSERT_TRUE(res.ToStdString(10) == "0") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicRational, subs8)
+{
+    Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"subs(log(x,2),x,2);");
+    ASSERT_TRUE(res.ToStdString(10) == "1") << res.ToStdString(10);
 }
 
 TEST_F(CalcTestSymbolicRational, variables1)

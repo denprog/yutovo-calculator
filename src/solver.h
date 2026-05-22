@@ -452,7 +452,7 @@ struct Solver : public boost::static_visitor<Number>
             }
             catch (...)
             {
-                if constexpr (is_symbolic_v<Number> && std::is_same_v<Number, Symbolic<Complex>>)
+                if constexpr (is_symbolic_v<Number> && (std::is_same_v<Number, Symbolic<Real>> || std::is_same_v<Number, Symbolic<Complex>>))
                     return Number(precision, std::u32string(U"nan"));
                 throw MathException(op.id, IncorrectOperation, op.pos, op.line);
             }
@@ -779,6 +779,12 @@ struct Solver : public boost::static_visitor<Number>
             catch (const SymEngine::SerializationError&)
             {
                 throw MathException(id, SerializationError, -1, -1);
+            }
+            catch (...)
+            {
+                if constexpr (std::is_same_v<Number, Symbolic<Real>> || std::is_same_v<Number, Symbolic<Complex>>)
+                    return Number(precision, std::u32string(U"nan"));
+                throw;
             }
         }
         else

@@ -62,6 +62,9 @@ std::string Symbolic<Real>::ToStdString(int exp) const
     {
         std::string s = basic->__str__();
         s.erase(std::remove(s.begin(), s.end(), ' '), s.end());
+        if (s.find("zoo") != std::string::npos)
+            s = "zoo";
+        s.erase(std::remove(s.begin(), s.end(), ' '), s.end());
         s = ReplaceRationalNumbers(s, exp, precision);
         s = RemoveNumberParentheses(s);
         s = FormatNumberInExpression(s, exp, precision);
@@ -337,6 +340,8 @@ std::string Symbolic<Rational>::ToStdString(int exp) const
         return "nan";
     std::string s = basic->__str__();
     s.erase(std::remove(s.begin(), s.end(), ' '), s.end());
+    if (s.find("zoo") != std::string::npos)
+        s = "zoo";
     return ReplacePowerOperator(ReplaceAll(ReplaceAll(s, "zoo", "∞"), "oo", "∞"));
 }
 
@@ -428,6 +433,8 @@ std::string Symbolic<Complex>::ToStdString(int exp) const
 
     std::string s = basic->__str__();
     s.erase(std::remove(s.begin(), s.end(), ' '), s.end());
+    if (s.find("zoo") != std::string::npos)
+        s = "zoo";
     std::replace(s.begin(), s.end(), 'I', 'i');
     s = ReplaceRationalNumbers(s, std::numeric_limits<int>::max(), precision);
     s = RemoveNumberParentheses(s);
@@ -475,6 +482,9 @@ std::string Symbolic<Real>::ToJson(int exp) const
     if (!expr)
         return {};
     auto basic = expr->get_basic();
+    std::string str = basic->__str__();
+    if (str.find("zoo") != std::string::npos)
+        return JsonResultWrapper(45, JsonCodeRow({JsonCodeString("∞")}));
     std::string content = BasicToJson(*basic, precision, exp, JsonNumberFormat::REAL);
     return JsonResultWrapper(45, content); // SYMBOLIC_REAL_RESULT
 }
@@ -485,6 +495,9 @@ std::string Symbolic<Rational>::ToJson(int exp) const
     if (!expr)
         return {};
     auto basic = expr->get_basic();
+    std::string str = basic->__str__();
+    if (str.find("zoo") != std::string::npos)
+        return JsonResultWrapper(46, JsonCodeRow({JsonCodeString("∞")}));
     std::string content = BasicToJson(*basic, precision, exp, JsonNumberFormat::RATIONAL);
     return JsonResultWrapper(46, content); // SYMBOLIC_RATIONAL_RESULT
 }
@@ -495,6 +508,9 @@ std::string Symbolic<Complex>::ToJson(int exp) const
     if (!expr)
         return {};
     auto basic = expr->get_basic();
+    std::string str = basic->__str__();
+    if (str.find("zoo") != std::string::npos)
+        return JsonResultWrapper(47, JsonCodeRow({JsonCodeString("∞")}));
     std::string content = BasicToJson(*basic, precision, exp, JsonNumberFormat::COMPLEX);
     return JsonResultWrapper(47, content); // SYMBOLIC_COMPLEX_RESULT
 }

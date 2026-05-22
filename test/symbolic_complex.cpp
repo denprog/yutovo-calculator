@@ -106,6 +106,25 @@ TEST_F(CalcTestSymbolicComplex, subs1)
     ASSERT_TRUE(res.ToStdString(10) == "25") << res.ToStdString(10);
 }
 
+TEST_F(CalcTestSymbolicComplex, subs2)
+{
+    Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"subs(log(x,2),x,1);");
+    ASSERT_TRUE(res.ToStdString(10) == "∞") << res.ToStdString(10);
+    ASSERT_TRUE(res.ToJson(10) == "{\"type\":47,\"elements\":[{\"type\":7,\"elements\":[{\"type\":8,\"elements\":\"∞\"}]}]}") << res.ToJson(10);
+}
+
+TEST_F(CalcTestSymbolicComplex, subs3)
+{
+    Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"subs(log(x,2),x,2);");
+    ASSERT_TRUE(res.ToStdString(10) == "1") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicComplex, subs4)
+{
+    Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"subs(yy^3, yy, 5);");
+    ASSERT_TRUE(res.ToStdString(10) == "125") << res.ToStdString(10);
+}
+
 TEST_F(CalcTestSymbolicComplex, imaginary1)
 {
     Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"3*i;");
@@ -196,19 +215,6 @@ TEST_F(CalcTestSymbolicComplex, diff4)
 {
     Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"diff(sin(x), x);");
     ASSERT_TRUE(res.ToStdString(10) == "cos(x)") << res.ToStdString(10);
-}
-
-TEST_F(CalcTestSymbolicComplex, subs2)
-{
-    Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"subs(yy^3, yy, 5);");
-    ASSERT_TRUE(res.ToStdString(10) == "125") << res.ToStdString(10);
-}
-
-TEST_F(CalcTestSymbolicComplex, subs3)
-{
-    Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"subs(log(x,2),x,1);");
-    ASSERT_TRUE(res.ToStdString(10) == "∞*log2.") << res.ToStdString(10);
-    ASSERT_TRUE(res.ToJson(10) == "{\"type\":47,\"elements\":[{\"type\":7,\"elements\":[{\"type\":8,\"elements\":\"∞\"},{\"type\":13,\"symbol\":\"·\"},{\"type\":7,\"elements\":[{\"type\":8,\"elements\":\"log(2)\"}]}]}]}") << res.ToJson(10);
 }
 
 TEST_F(CalcTestSymbolicComplex, variables2)
