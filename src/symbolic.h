@@ -432,11 +432,11 @@ private:
 
     std::string ReplacePowerOperator(std::string s) const
     {
-        size_t pos = 0;
+        int pos = 0;
         while ((pos = s.find("**", pos)) != std::string::npos)
         {
-            size_t base_end = pos;
-            size_t base_start = base_end;
+            int base_end = pos;
+            int base_start = base_end;
             if (base_start > 0 && s[base_start - 1] == ')')
             {
                 int depth = 1;
@@ -457,8 +457,8 @@ private:
                     --base_start;
             }
 
-            size_t exp_start = pos + 2;
-            size_t exp_end = exp_start;
+            int exp_start = pos + 2;
+            int exp_end = exp_start;
             if (exp_start < s.size() && s[exp_start] == '(')
             {
                 int depth = 1;
