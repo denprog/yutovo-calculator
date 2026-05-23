@@ -941,7 +941,10 @@ private:
             return JsonPower(base, exp_str);
         }
         auto items = BasicToJsonElements(expr, precision, exp, format);
-        if (items.size() == 1 && items[0].find(R"({"type":14)") == 0)
+        bool is_division_like = (items.size() == 1) &&
+            (SymEngine::is_a<const SymEngine::Mul>(expr) ||
+             (SymEngine::is_a<const SymEngine::Rational>(expr) && format == JsonNumberFormat::RATIONAL));
+        if (is_division_like)
             return items[0];
         return JsonCodeRow(items);
     }
@@ -1209,8 +1212,21 @@ private:
                 }
                 else
                 {
-                    auto exp_elems = NumberToJsonElements(*static_cast<const SymEngine::Number*>(p.second.get()), precision, exp, format);
-                    std::string exp_json = exp_elems.size() == 1 ? exp_elems[0] : JsonCodeRow(exp_elems);
+                    std::string exp_json;
+                    if (SymEngine::is_a<const SymEngine::Integer>(*p.second) ||
+                        SymEngine::is_a<const SymEngine::Rational>(*p.second) ||
+                        SymEngine::is_a<const SymEngine::RealDouble>(*p.second) ||
+                        SymEngine::is_a<const SymEngine::RealMPFR>(*p.second) ||
+                        SymEngine::is_a<const SymEngine::ComplexDouble>(*p.second))
+                    {
+                        auto exp_elems = NumberToJsonElements(static_cast<const SymEngine::Number&>(*p.second), precision, exp, format);
+                        exp_json = exp_elems.size() == 1 ? exp_elems[0] : JsonCodeRow(exp_elems);
+                    }
+                    else
+                    {
+                        auto exp_elems = BasicToJsonElements(*p.second, precision, exp, format);
+                        exp_json = exp_elems.size() == 1 ? exp_elems[0] : JsonCodeRow(exp_elems);
+                    }
                     if (exp_json == JsonCodeString("1.") || exp_json == JsonCodeString("1"))
                         positive.push_back(base_json);
                     else
