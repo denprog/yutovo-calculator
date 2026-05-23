@@ -580,6 +580,8 @@ private:
 public:
     static std::string FormatFixed(std::string s, bool keep_trailing_dot)
     {
+        if (s.find_first_of("eE") != std::string::npos)
+            return s;
         if (s.find('.') != std::string::npos)
         {
             while (!s.empty() && s.back() == '0')
