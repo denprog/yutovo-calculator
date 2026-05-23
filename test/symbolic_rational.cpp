@@ -203,6 +203,36 @@ TEST_F(CalcTestSymbolicRational, subs8)
     ASSERT_TRUE(res.ToStdString(10) == "1") << res.ToStdString(10);
 }
 
+TEST_F(CalcTestSymbolicRational, subscript1)
+{
+    ASSERT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"x{2};"), SyntaxException);
+}
+
+TEST_F(CalcTestSymbolicRational, subscript2)
+{
+    ASSERT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"x{us};"), SyntaxException);
+}
+
+TEST_F(CalcTestSymbolicRational, subscript3)
+{
+    ASSERT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"x{ab};"), SyntaxException);
+}
+
+TEST_F(CalcTestSymbolicRational, subscript4)
+{
+    ASSERT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"x{2}+y;"), SyntaxException);
+}
+
+TEST_F(CalcTestSymbolicRational, subscript5)
+{
+    ASSERT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"2x{2};"), SyntaxException);
+}
+
+TEST_F(CalcTestSymbolicRational, subscript6)
+{
+    ASSERT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"sin(x{2});"), SyntaxException);
+}
+
 TEST_F(CalcTestSymbolicRational, variables1)
 {
     parser.Parse(LogicalId{0, 0, 1}, U"a=2;");

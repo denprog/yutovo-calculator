@@ -125,6 +125,36 @@ TEST_F(CalcTestSymbolicComplex, subs4)
     ASSERT_TRUE(res.ToStdString(10) == "125") << res.ToStdString(10);
 }
 
+TEST_F(CalcTestSymbolicComplex, subscript1)
+{
+    ASSERT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"x{2};"), SyntaxException);
+}
+
+TEST_F(CalcTestSymbolicComplex, subscript2)
+{
+    ASSERT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"x{us};"), SyntaxException);
+}
+
+TEST_F(CalcTestSymbolicComplex, subscript3)
+{
+    ASSERT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"x{ab};"), SyntaxException);
+}
+
+TEST_F(CalcTestSymbolicComplex, subscript4)
+{
+    ASSERT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"x{2}+y;"), SyntaxException);
+}
+
+TEST_F(CalcTestSymbolicComplex, subscript5)
+{
+    ASSERT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"2x{2};"), SyntaxException);
+}
+
+TEST_F(CalcTestSymbolicComplex, subscript6)
+{
+    ASSERT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"sin(x{2});"), SyntaxException);
+}
+
 TEST_F(CalcTestSymbolicComplex, imaginary1)
 {
     Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"3*i;");

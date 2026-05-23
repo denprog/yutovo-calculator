@@ -432,7 +432,7 @@ struct Solver : public boost::static_visitor<Number>
             }
             catch (const SymEngine::DomainError&)
             {
-                if constexpr (is_symbolic_v<Number> && std::is_same_v<Number, Symbolic<Complex>>)
+                if constexpr (is_symbolic_v<Number> && (std::is_same_v<Number, Symbolic<Real>> || std::is_same_v<Number, Symbolic<Complex>>))
                     return Number(precision, std::u32string(U"nan"));
                 throw MathException(op.id, ArgumentIsOver, op.pos, op.line);
             }
@@ -442,13 +442,17 @@ struct Solver : public boost::static_visitor<Number>
             }
             catch (const SymEngine::NotImplementedError&)
             {
-                if constexpr (is_symbolic_v<Number> && std::is_same_v<Number, Symbolic<Complex>>)
+                if constexpr (is_symbolic_v<Number> && (std::is_same_v<Number, Symbolic<Real>> || std::is_same_v<Number, Symbolic<Complex>>))
                     return Number(precision, std::u32string(U"nan"));
                 throw MathException(op.id, NotImplemented, op.pos, op.line);
             }
             catch (const SymEngine::SerializationError&)
             {
                 throw MathException(op.id, NotImplemented, op.pos, op.line);
+            }
+            catch (const ParserException&)
+            {
+                throw;
             }
             catch (...)
             {
@@ -503,6 +507,8 @@ struct Solver : public boost::static_visitor<Number>
         CheckBreak(parser_context);
         if constexpr (is_symbolic_v<Number>)
         {
+            if (!op.subscript.empty())
+                throw SyntaxException(op.id, UnknownIdentifier, U"Identifier '" + op.name + U"' not found", op.pos, op.name.length(), op.line);
             AddDependency(op);
             auto* t = FindTempVariable(op.name);
             if (t)
@@ -547,6 +553,8 @@ struct Solver : public boost::static_visitor<Number>
         CheckBreak(parser_context);
         if constexpr (is_symbolic_v<Number>)
         {
+            if (!op.identifier.subscript.empty())
+                throw SyntaxException(op.id, UnknownIdentifier, U"Identifier '" + op.identifier.name + U"' not found", op.pos, op.identifier.name.length(), op.line);
             AddDependency(op.identifier);
             auto* t = FindTempVariable(op.identifier.name);
             if (t)
@@ -766,6 +774,8 @@ struct Solver : public boost::static_visitor<Number>
             }
             catch (const SymEngine::DomainError&)
             {
+                if constexpr (std::is_same_v<Number, Symbolic<Real>> || std::is_same_v<Number, Symbolic<Complex>>)
+                    return Number(precision, std::u32string(U"nan"));
                 throw MathException(id, ArgumentIsOver, -1, -1);
             }
             catch (const SymEngine::ParseError&)
@@ -774,11 +784,17 @@ struct Solver : public boost::static_visitor<Number>
             }
             catch (const SymEngine::NotImplementedError&)
             {
+                if constexpr (std::is_same_v<Number, Symbolic<Real>> || std::is_same_v<Number, Symbolic<Complex>>)
+                    return Number(precision, std::u32string(U"nan"));
                 throw MathException(id, NotImplemented, -1, -1);
             }
             catch (const SymEngine::SerializationError&)
             {
                 throw MathException(id, SerializationError, -1, -1);
+            }
+            catch (const ParserException&)
+            {
+                throw;
             }
             catch (...)
             {

@@ -440,6 +440,41 @@ TEST_F(CalcTestSymbolicReal, subs7)
     ASSERT_TRUE(res.ToStdString(10) == "1.") << res.ToStdString(10);
 }
 
+TEST_F(CalcTestSymbolicReal, subscript1)
+{
+    ASSERT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"x{2};"), SyntaxException);
+}
+
+TEST_F(CalcTestSymbolicReal, subscript2)
+{
+    // Text subscript
+    ASSERT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"x{us};"), SyntaxException);
+}
+
+TEST_F(CalcTestSymbolicReal, subscript3)
+{
+    // Multi-character subscript
+    ASSERT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"x{ab};"), SyntaxException);
+}
+
+TEST_F(CalcTestSymbolicReal, subscript4)
+{
+    // Expression with multiple variables, one subscripted
+    ASSERT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"x{2}+y;"), SyntaxException);
+}
+
+TEST_F(CalcTestSymbolicReal, subscript5)
+{
+    // Subscript in implicit multiplication
+    ASSERT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"2x{2};"), SyntaxException);
+}
+
+TEST_F(CalcTestSymbolicReal, subscript6)
+{
+    // Subscript as function argument
+    ASSERT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"sin(x{2});"), SyntaxException);
+}
+
 TEST_F(CalcTestSymbolicReal, evalf1)
 {
     Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"evalf(pi);", 3);
@@ -578,14 +613,6 @@ TEST_F(CalcTestSymbolicReal, variables5)
     ASSERT_TRUE(parser.Parse(LogicalId{0, 0, 4}, U"a*b;") == parser.Parse(LogicalId{0, 0, 4}, U"5*(1+x);")) << parser.Parse(LogicalId{0, 0, 4}, U"a*b;").ToStdString(10);
 }
 
-TEST_F(CalcTestSymbolicReal, variables6)
-{
-    parser.Parse(LogicalId{0, 0, 1}, U"a{1}=5;");
-    ASSERT_TRUE(parser.Parse(LogicalId{0, 0, 2}, U"a{1};") == parser.Parse(LogicalId{0, 0, 2}, U"5;")) << parser.Parse(LogicalId{0, 0, 2}, U"a{1};").ToStdString(10);
-    parser.Parse(LogicalId{0, 0, 3}, U"a=7;");
-    ASSERT_TRUE(parser.Parse(LogicalId{0, 0, 4}, U"a{1}+a;") == parser.Parse(LogicalId{0, 0, 4}, U"12;")) << parser.Parse(LogicalId{0, 0, 4}, U"a{1}+a;").ToStdString(10);
-}
-
 TEST_F(CalcTestSymbolicReal, variables7)
 {
     //in Symbolic mode, unknown identifiers become symbols
@@ -619,15 +646,6 @@ TEST_F(CalcTestSymbolicReal, variables8)
     ASSERT_TRUE(res.ToStdString(10) == "3.") << res.ToStdString(10);
     res = parser.Parse(LogicalId{0, 0, 6}, U"b;");
     ASSERT_TRUE(res.ToStdString(10) == "4.") << res.ToStdString(10);
-}
-
-TEST_F(CalcTestSymbolicReal, variables9)
-{
-    std::vector<std::u32string> dependencies;
-    parser.Parse(LogicalId{0, 0, 1}, U"v{12}=555;");
-    auto res = parser.Parse(LogicalId{0, 0, 2}, U"v{12};", &dependencies).ToStdString(10);
-    ASSERT_TRUE(res == "555.") << res;
-    ASSERT_TRUE(std::find(dependencies.begin(), dependencies.end(), U"v{12}") != dependencies.end());
 }
 
 TEST_F(CalcTestSymbolicReal, variables10)
