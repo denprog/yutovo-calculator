@@ -976,12 +976,20 @@ private:
             }
             else
                 items.push_back(JsonCodeString(re_str));
-            items.push_back(JsonPlus());
             std::string im_str = FormatNumberForJson(*im, precision, exp, format);
             if (im_str.find('E') != std::string::npos)
             {
                 auto sci = JsonScientificElements(im_str);
-                items.insert(items.end(), sci.begin(), sci.end());
+                if (!sci.empty() && sci[0] == JsonMinus())
+                {
+                    items.push_back(JsonMinus());
+                    items.insert(items.end(), sci.begin() + 1, sci.end());
+                }
+                else
+                {
+                    items.push_back(JsonPlus());
+                    items.insert(items.end(), sci.begin(), sci.end());
+                }
             }
             else if (!im_str.empty() && im_str[0] == '-')
             {
@@ -989,7 +997,10 @@ private:
                 items.push_back(JsonCodeString(im_str.substr(1)));
             }
             else
+            {
+                items.push_back(JsonPlus());
                 items.push_back(JsonCodeString(im_str));
+            }
             items.push_back(JsonMultiply());
             items.push_back(JsonCodeString("i"));
             return items;
@@ -1058,6 +1069,29 @@ private:
                         pos = false;
                         auto neg_rat = coeff_rat.neg();
                         coeff_elements = BasicToJsonElements(*neg_rat, precision, exp, format);
+                    }
+                }
+                else if (SymEngine::is_a<const SymEngine::RealDouble>(*p.second))
+                {
+                    const SymEngine::RealDouble& coeff_rd = static_cast<const SymEngine::RealDouble&>(*p.second);
+                    if (coeff_rd.as_double() < 0)
+                    {
+                        pos = false;
+                        auto neg_rd = SymEngine::real_double(-coeff_rd.as_double());
+                        coeff_elements = NumberToJsonElements(*neg_rd, precision, exp, format);
+                    }
+                }
+                else if (SymEngine::is_a<const SymEngine::RealMPFR>(*p.second))
+                {
+                    const SymEngine::RealMPFR& coeff_mpfr = static_cast<const SymEngine::RealMPFR&>(*p.second);
+                    if (mpfr_sgn(coeff_mpfr.as_mpfr().get_mpfr_t()) < 0)
+                    {
+                        pos = false;
+                        auto mpfr_val = coeff_mpfr.as_mpfr();
+                        SymEngine::mpfr_class neg_mpfr_val(mpfr_val.get_prec());
+                        mpfr_neg(neg_mpfr_val.get_mpfr_t(), mpfr_val.get_mpfr_t(), MPFR_RNDN);
+                        auto neg_mpfr = SymEngine::real_mpfr(neg_mpfr_val);
+                        coeff_elements = NumberToJsonElements(*neg_mpfr, precision, exp, format);
                     }
                 }
 
