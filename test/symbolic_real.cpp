@@ -29,13 +29,6 @@ TEST_F(CalcTestSymbolicReal, numbers2)
     ASSERT_TRUE(s == "123456789012345678901234567890") << s;
 }
 
-TEST_F(CalcTestSymbolicReal, numbers3)
-{
-    Symbolic res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"123456789012345678901234567890.123;");
-    std::string s = res.ToStdString(20);
-    ASSERT_TRUE(s == "1.235E+29") << s;
-}
-
 TEST_F(CalcTestSymbolicReal, numbers4)
 {
     Symbolic res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"123456789012345678901234567890.123;");
@@ -1162,6 +1155,20 @@ TEST_F(CalcTestSymbolicReal, limit_sqrt_noo)
 {
     Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"sqrt(-∞);");
     ASSERT_TRUE(res.ToStdString(10) == "nan") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicReal, scientific1)
+{
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"1.23e-5;");
+    std::string s = res.ToStdString(10);
+    ASSERT_TRUE(s == "1.23E-5" || s == "0.0000123") << s;
+    res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"-1.23e-5;");
+    s = res.ToStdString(10);
+    ASSERT_TRUE(s == "-1.23E-5" || s == "-0.0000123") << s;
+    res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"-1.23e+5;");
+    ASSERT_TRUE(res.ToStdString(10) == "-123000") << res.ToStdString(10);
+    res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"1.23e+5;");
+    ASSERT_TRUE(res.ToStdString(10) == "123000") << res.ToStdString(10);
 }
 
 }

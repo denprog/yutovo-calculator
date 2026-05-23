@@ -1051,4 +1051,18 @@ TEST_F(CalcTestSymbolicComplex, pow4)
     ASSERT_TRUE(json == "{\"type\":47,\"elements\":[{\"type\":7,\"elements\":[{\"type\":12,\"symbol\":\"-\"},{\"type\":8,\"elements\":\"1\"},{\"type\":13,\"symbol\":\"·\"},{\"type\":15,\"elements\":[{\"type\":7,\"elements\":[{\"type\":8,\"elements\":\"10\"}]},{\"type\":10,\"elements\":[]},{\"type\":7,\"elements\":[{\"type\":7,\"elements\":[{\"type\":12,\"symbol\":\"-\"},{\"type\":8,\"elements\":\"100\"}]}]}]}]}]}") << json;
 }
 
+TEST_F(CalcTestSymbolicComplex, scientific1)
+{
+    Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"1.23e-5;");
+    std::string s = res.ToStdString(10);
+    ASSERT_TRUE(s == "1.23E-5" || s == "0.0000123") << s;
+    res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"-1.23e-5;");
+    s = res.ToStdString(10);
+    ASSERT_TRUE(s == "-1.23E-5" || s == "-0.0000123") << s;
+    res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"-1.23e+5;");
+    ASSERT_TRUE(res.ToStdString(10) == "-123000") << res.ToStdString(10);
+    res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"1.23e+5;");
+    ASSERT_TRUE(res.ToStdString(10) == "123000") << res.ToStdString(10);
+}
+
 }

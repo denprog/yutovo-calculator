@@ -599,13 +599,6 @@ public:
         return true;
     }
 
-    static std::string AddTrailingDotIfSingleDigit(std::string s)
-    {
-        if (s.find('.') == std::string::npos && s.length() == 1)
-            s += '.';
-        return s;
-    }
-
     static std::string ReplaceAll(std::string str, const std::string& from, const std::string& to)
     {
         size_t start_pos = 0;
@@ -941,9 +934,8 @@ private:
             return JsonPower(base, exp_str);
         }
         auto items = BasicToJsonElements(expr, precision, exp, format);
-        bool is_division_like = (items.size() == 1) &&
-            (SymEngine::is_a<const SymEngine::Mul>(expr) ||
-             (SymEngine::is_a<const SymEngine::Rational>(expr) && format == JsonNumberFormat::RATIONAL));
+        bool is_division_like = (items.size() == 1) && (SymEngine::is_a<const SymEngine::Mul>(expr) ||
+            (SymEngine::is_a<const SymEngine::Rational>(expr) && format == JsonNumberFormat::RATIONAL));
         if (is_division_like)
             return items[0];
         return JsonCodeRow(items);
