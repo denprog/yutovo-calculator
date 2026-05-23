@@ -204,7 +204,7 @@ Complex operator+(const float num1, const Complex& num2)
 
 Complex operator-(const Complex& num1, const Complex& num2)
 {
-    Complex res(std::max(num1.GetBitPrecision(), num2.GetBitPrecision()));
+    Complex res(std::max(num1.GetBitPrecision() + 2, num2.GetBitPrecision() + 2));
 
     res.re = num1.re - num2.re;
     res.im = num1.im - num2.im;
@@ -214,23 +214,23 @@ Complex operator-(const Complex& num1, const Complex& num2)
 
 Complex operator-(const Complex& num1, const int num2)
 {
-    Complex _num2(num1.GetBitPrecision(), num2);
+    Complex _num2(num1.GetBitPrecision() + 2, num2);
 
     return num1 - _num2;
 }
 
 Complex operator-(const int num1, const Complex& num2)
 {
-    Complex _num1(num2.GetBitPrecision(), num1);
+    Complex _num1(num2.GetBitPrecision() + 2, num1);
 
     return _num1 - num2;
 }
 
 Complex operator-(const Complex& num1, const float num2)
 {
-    Complex _num2(num1.GetBitPrecision(), num2);
+    Complex _num2(num1.GetBitPrecision() + 2, num2);
 
-    return num1 + _num2;
+    return num1 - _num2;
 }
 
 Complex operator-(const float num1, const Complex& num2)
@@ -243,9 +243,6 @@ Complex operator-(const float num1, const Complex& num2)
 Complex operator*(const Complex& num1, const Complex& num2)
 {
     Complex res(std::max(num1.GetBitPrecision(), num2.GetBitPrecision()));
-
-    //res.re = num1.re * num2.re - num1.im * num2.im;
-    //res.im = num1.im * num2.im + num1.im * num2.re;
 
     res.re = num1.re * num2.re - num1.im * num2.im;
     res.im = num1.re * num2.im + num1.im * num2.re;
