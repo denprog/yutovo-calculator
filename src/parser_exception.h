@@ -24,6 +24,7 @@ enum ParserExceptionCode
 	WrongArgumentsCount = 2, 
 	UnknownIdentifier = 3, 
 	ExpressionExpected = 4,
+	IncorrectIdentifier = 5, 
 	DivisionByZero = 100, 
 	Overflow = 101, 
 	ArgumentIsOver = 102, 

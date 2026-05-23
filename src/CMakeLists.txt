@@ -143,7 +143,6 @@ install(
         ast.h
         definition.h
         error_handler.h
-        definition.h
         expression.h
         integer.h
         math_helper.h

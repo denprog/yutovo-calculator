@@ -117,6 +117,8 @@ ElementId ElementIdFromString(const std::string& id)
         if (s.peek() == ',')
             s.ignore();
     }
+    if (!s.eof())
+        throw ParserException(LogicalId{}, IncorrectIdentifier, 0, 0);
     return res;
 }
 
@@ -130,6 +132,8 @@ LogicalId LogicalIdFromString(const std::string& id)
         if (s.peek() == ',')
             s.ignore();
     }
+    if (!s.eof())
+        throw ParserException(LogicalId{}, IncorrectIdentifier, 0, 0);
     return res;
 }
 
