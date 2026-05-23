@@ -777,6 +777,13 @@ TEST_F(CalcTestSymbolicComplex, diff_cos)
         R"r({"type":47,"elements":[{"type":7,"elements":[{"type":12,"symbol":"-"},{"type":7,"elements":[{"type":8,"elements":"sin"},{"type":19,"symbol":"("},{"type":8,"elements":"x"},{"type":20,"symbol":")"}]}]}]})r" ) << res.ToJson(10);
 }
 
+TEST_F(CalcTestSymbolicComplex, diff_nonsymbol)
+{
+    EXPECT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"diff(x, x+1);"), yutovo_calculator::ParserException);
+    EXPECT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"diff(x, 5);"), yutovo_calculator::ParserException);
+    EXPECT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"diff(x, sin(x));"), yutovo_calculator::ParserException);
+}
+
 TEST_F(CalcTestSymbolicComplex, frac_power_mult)
 {
     Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"x^(1/2)*x^(1/3);");

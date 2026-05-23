@@ -318,6 +318,8 @@ public:
     
     friend Symbolic<Number> diff(const Symbolic<Number>& num, const Symbolic<Number>& var)
     {
+        if (!SymEngine::is_a<const SymEngine::Symbol>(*var.expr->get_basic()))
+            throw ParserException(LogicalId{}, ParserExceptionCode::IncorrectOperation, 0, 0);
         Symbolic<Number> res(num.precision);
         *res.expr = SymEngine::diff(num.expr->get_basic(), SymEngine::rcp_static_cast<const SymEngine::Symbol>(var.expr->get_basic()));
         return res;
