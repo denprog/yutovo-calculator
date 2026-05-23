@@ -1217,24 +1217,24 @@ private:
                 else
                     base_json = BasicToJson(*p.first, precision, exp, format);
 
-                bool is_neg = false;
+                bool is_neg_int = false;
                 if (SymEngine::is_a<const SymEngine::Integer>(*p.second))
                 {
-                    if (static_cast<const SymEngine::Integer&>(*p.second).is_negative())
-                        is_neg = true;
+                    const auto& exp_int = static_cast<const SymEngine::Integer&>(*p.second);
+                    if (exp_int.is_negative())
+                    {
+                        is_neg_int = true;
+                        auto neg_exp = exp_int.neg();
+                        auto exp_elems = NumberToJsonElements(*neg_exp, precision, exp, format);
+                        std::string exp_json = exp_elems.size() == 1 ? exp_elems[0] : JsonCodeRow(exp_elems);
+                        if (exp_json == JsonCodeString("1.") || exp_json == JsonCodeString("1"))
+                            negative.push_back(base_json);
+                        else
+                            negative.push_back(JsonPower(JsonCodeRow({base_json}), JsonCodeRow({exp_json})));
+                    }
                 }
 
-                if (is_neg)
-                {
-                    auto neg_exp = static_cast<const SymEngine::Integer&>(*p.second).neg();
-                    auto exp_elems = NumberToJsonElements(*neg_exp, precision, exp, format);
-                    std::string exp_json = exp_elems.size() == 1 ? exp_elems[0] : JsonCodeRow(exp_elems);
-                    if (exp_json == JsonCodeString("1.") || exp_json == JsonCodeString("1"))
-                        negative.push_back(base_json);
-                    else
-                        negative.push_back(JsonPower(JsonCodeRow({base_json}), JsonCodeRow({exp_json})));
-                }
-                else
+                if (!is_neg_int)
                 {
                     std::string exp_json;
                     if (SymEngine::is_a<const SymEngine::Integer>(*p.second) ||
