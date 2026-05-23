@@ -415,7 +415,11 @@ Rational::operator int() const
     mpz_t num;
     mpz_init(num);
     mpq_get_num(num, number);
-    return mpz_get_si(num);
+    if (mpz_fits_slong_p(num) == 0)
+        throw MathException(ConversionDoesNotFit);
+    int res = (int)mpz_get_si(num);
+    mpz_clear(num);
+    return res;
 }
 
 bool operator==(const Rational& num1, const Rational& num2)
