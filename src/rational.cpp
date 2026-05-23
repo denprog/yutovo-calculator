@@ -532,18 +532,21 @@ Rational pow(const Rational& num1, const int num2)
     mpz_t num, den;
     mpz_init(num);
     mpz_init(den);
+    unsigned long int exp;
     if (num2 > 0)
     {
-        mpz_pow_ui(num, mpq_numref(num1.number), num2);
-        mpz_pow_ui(den, mpq_denref(num1.number), num2);
+        exp = static_cast<unsigned long int>(num2);
+        mpz_pow_ui(num, mpq_numref(num1.number), exp);
+        mpz_pow_ui(den, mpq_denref(num1.number), exp);
     }
     else
     {
         mpq_t tmp;
         mpq_init(tmp);
         mpq_inv(tmp, num1.number);
-        mpz_pow_ui(num, mpq_numref(tmp), -num2);
-        mpz_pow_ui(den, mpq_denref(tmp), -num2);
+        exp = static_cast<unsigned long int>(-(static_cast<long long>(num2)));
+        mpz_pow_ui(num, mpq_numref(tmp), exp);
+        mpz_pow_ui(den, mpq_denref(tmp), exp);
         mpq_clear(tmp);
     }
     mpq_set_num(res.number, num);

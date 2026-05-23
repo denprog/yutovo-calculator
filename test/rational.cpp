@@ -789,4 +789,25 @@ TEST_F(CalcTestRational, list2)
     ASSERT_TRUE(r.ToStdString() == "168/5(mOhm)") << r.ToStdString();
 }
 
+TEST_F(CalcTestRational, pow_int)
+{
+    Rational base(2);
+    Rational res = pow(base, 0);
+    ASSERT_TRUE(res.ToStdString() == "1") << res.ToStdString();
+    res = pow(base, 1);
+    ASSERT_TRUE(res.ToStdString() == "2") << res.ToStdString();
+    res = pow(base, 2);
+    ASSERT_TRUE(res.ToStdString() == "4") << res.ToStdString();
+    res = pow(base, 3);
+    ASSERT_TRUE(res.ToStdString() == "8") << res.ToStdString();
+    res = pow(base, 10);
+    ASSERT_TRUE(res.ToStdString() == "1024") << res.ToStdString();
+    res = pow(base, -1);
+    ASSERT_TRUE(res.ToStdString() == "1/2") << res.ToStdString();
+    res = pow(base, -2);
+    ASSERT_TRUE(res.ToStdString() == "1/4") << res.ToStdString();
+    res = pow(base, -3);
+    ASSERT_TRUE(res.ToStdString() == "1/8") << res.ToStdString();
+}
+
 }

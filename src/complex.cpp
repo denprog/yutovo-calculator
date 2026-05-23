@@ -543,19 +543,20 @@ Complex pow(const Complex& num1, const int num2, int& res_pos)
         throw MathException(Overflow);
 
     Complex _num1;
-    int _num2 = num2;
+    unsigned int _num2;
 
     if (num2 < 0)
     {
         _num1 = Complex(num1.GetBitPrecision(), 1) / num1;
-        _num2 = -num2;
+        _num2 = static_cast<unsigned int>(-(static_cast<long long>(num2)));
     }
     else
     {
         _num1 = num1;
+        _num2 = static_cast<unsigned int>(num2);
     }
 
-    Complex res = _num2 % 2 ? _num1 : Complex(num1.GetBitPrecision(), 1);
+    Complex res(num1.GetBitPrecision(), 1);
 
     while (_num2 > 0)
     {

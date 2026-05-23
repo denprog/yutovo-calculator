@@ -828,4 +828,26 @@ TEST_F(CalcTestComplex, user_functions9)
     ASSERT_TRUE(res.GetBitPrecision() < 1000) << res.GetBitPrecision();
 }
 
+TEST_F(CalcTestComplex, pow_int)
+{
+    int res_pos = 0;
+    Complex base(64, 2);
+    Complex res = pow(base, 0, res_pos);
+    ASSERT_TRUE(res.ToStdString(3, 3) == "1.E+0") << res.ToStdString(3, 3);
+    res = pow(base, 1, res_pos);
+    ASSERT_TRUE(res.ToStdString(3, 3) == "2.E+0") << res.ToStdString(3, 3);
+    res = pow(base, 2, res_pos);
+    ASSERT_TRUE(res.ToStdString(3, 3) == "4.E+0") << res.ToStdString(3, 3);
+    res = pow(base, 3, res_pos);
+    ASSERT_TRUE(res.ToStdString(3, 3) == "8.E+0") << res.ToStdString(3, 3);
+    res = pow(base, 10, res_pos);
+    ASSERT_TRUE(res.ToStdString(3, 3) == "1.024E+3") << res.ToStdString(3, 3);
+    res = pow(base, -1, res_pos);
+    ASSERT_TRUE(res.ToStdString(3, 3) == "0.5E+0") << res.ToStdString(3, 3);
+    res = pow(base, -2, res_pos);
+    ASSERT_TRUE(res.ToStdString(3, 3) == "0.25E+0") << res.ToStdString(3, 3);
+    res = pow(base, -3, res_pos);
+    ASSERT_TRUE(res.ToStdString(3, 3) == "0.125E+0") << res.ToStdString(3, 3);
+}
+
 }
