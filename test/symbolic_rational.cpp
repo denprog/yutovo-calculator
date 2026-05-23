@@ -259,6 +259,36 @@ TEST_F(CalcTestSymbolicRational, eval3)
     ASSERT_TRUE(res.ToStdString(0) == "2+3*y") << res.ToStdString(0);
 }
 
+TEST_F(CalcTestSymbolicRational, eval4)
+{
+    Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"+-x;");
+    ASSERT_TRUE(res.ToString(10) == U"-x") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicRational, eval5)
+{
+    Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"+--x;");
+    ASSERT_TRUE(res.ToString(10) == U"x") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicRational, eval6)
+{
+    Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"sin(x)--2356*x;");
+    ASSERT_TRUE(res.ToString(10) == U"2356*x+sin(x)") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicRational, eval7)
+{
+    Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"-sin(x)++2356*x;");
+    ASSERT_TRUE(res.ToString(10) == U"2356*x-sin(x)") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicRational, eval8)
+{
+    Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"---sin(x)++2356*x;");
+    ASSERT_TRUE(res.ToString(10) == U"2356*x-sin(x)") << res.ToStdString(10);
+}
+
 TEST_F(CalcTestSymbolicRational, unary_plus1)
 {
     Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"+x;");

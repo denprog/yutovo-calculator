@@ -124,6 +124,62 @@ TEST_F(CalcTestSymbolicReal, eval7)
     ASSERT_TRUE(s == "1.333*x") << s;
 }
 
+TEST_F(CalcTestSymbolicReal, eval8)
+{
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"+-x;");
+    ASSERT_TRUE(res.ToString(10) == U"-x") << res.ToStdString(10);
+    ASSERT_TRUE(res.ToJson(10) == "{\"type\":45,\"elements\":[{\"type\":7,\"elements\":[{\"type\":12,\"symbol\":\"-\"},{\"type\":8,\"elements\":\"x\"}]}]}") << res.ToJson(10);
+}
+
+TEST_F(CalcTestSymbolicReal, eval9)
+{
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"+x;");
+    ASSERT_TRUE(res.ToString(10) == U"x") << res.ToStdString(10);
+    ASSERT_TRUE(res.ToJson(10) == "{\"type\":45,\"elements\":[{\"type\":7,\"elements\":[{\"type\":8,\"elements\":\"x\"}]}]}") << res.ToJson(10);
+}
+
+TEST_F(CalcTestSymbolicReal, eval10)
+{
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"--x;");
+    ASSERT_TRUE(res.ToString(10) == U"x") << res.ToStdString(10);
+    ASSERT_TRUE(res.ToJson(10) == "{\"type\":45,\"elements\":[{\"type\":7,\"elements\":[{\"type\":8,\"elements\":\"x\"}]}]}") << res.ToJson(10);
+}
+
+TEST_F(CalcTestSymbolicReal, eval11)
+{
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"++x;");
+    ASSERT_TRUE(res.ToString(10) == U"x") << res.ToStdString(10);
+    ASSERT_TRUE(res.ToJson(10) == "{\"type\":45,\"elements\":[{\"type\":7,\"elements\":[{\"type\":8,\"elements\":\"x\"}]}]}") << res.ToJson(10);
+}
+
+TEST_F(CalcTestSymbolicReal, eval12)
+{
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"sin(x)--2356.78*x;");
+    std::string s = res.ToStdString(3);
+    ASSERT_TRUE(s == "2.357E+3*x+sin(x)") << s;
+}
+
+TEST_F(CalcTestSymbolicReal, eval13)
+{
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"sin(x)-+2356.78*x;");
+    std::string s = res.ToStdString(3);
+    ASSERT_TRUE(s == "-2.357E+3*x+sin(x)") << s;
+}
+
+TEST_F(CalcTestSymbolicReal, eval14)
+{
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"-sin(x)-2356.78*x;");
+    std::string s = res.ToStdString(3);
+    ASSERT_TRUE(s == "-2.357E+3*x-sin(x)") << s;
+}
+
+TEST_F(CalcTestSymbolicReal, eval15)
+{
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"--+sin(x)--+2356.78*x;");
+    std::string s = res.ToStdString(3);
+    ASSERT_TRUE(s == "2.357E+3*x+sin(x)") << s;
+}
+
 TEST_F(CalcTestSymbolicReal, unary_plus1)
 {
     Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"+x;", 3);

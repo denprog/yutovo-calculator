@@ -63,6 +63,18 @@ TEST_F(CalcTestComplex, numbers4)
     ASSERT_TRUE(res == "i*3.E+0") << res;
 }
 
+TEST_F(CalcTestComplex, scientific1)
+{
+    std::string res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"1.23e-5;").ToStdString(3, 3);
+    ASSERT_TRUE(res == "1.23E-5") << res;
+    res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"-1.23e-5;").ToStdString(3, 3);
+    ASSERT_TRUE(res == "-1.23E-5") << res;
+    res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"-1.23e+5;").ToStdString(3, 3);
+    ASSERT_TRUE(res == "-1.23E+5") << res;
+    res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"1.23e+5;").ToStdString(3, 3);
+    ASSERT_TRUE(res == "1.23E+5") << res;
+}
+
 TEST_F(CalcTestComplex, trigonometric1)
 {
     Complex res = parser.Parse(LogicalId{0, 0, 1}, U"sin(i);");

@@ -40,6 +40,115 @@ TEST_F(CalcTestSymbolicComplex, eval1)
     ASSERT_TRUE(res.ToStdString(10) == "x") << res.ToStdString(10);
 }
 
+TEST_F(CalcTestSymbolicComplex, eval2)
+{
+    Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"x+x;");
+    ASSERT_TRUE(res.ToString(10) == U"2.*x") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicComplex, eval3)
+{
+    Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"y+2*y+2;");
+    ASSERT_TRUE(res.ToString(10) == U"2.+3.*y") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicComplex, eval4)
+{
+    Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"123456789012345678901234567890.123+x;");
+    std::string s = res.ToStdString(20);
+    ASSERT_TRUE(s == "1.235E+29+x") << s;
+}
+
+TEST_F(CalcTestSymbolicComplex, eval5)
+{
+    Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"sin(x)+2356.78*x;");
+    std::string s = res.ToStdString(3);
+    ASSERT_TRUE(s == "2.357E+3*x+sin(x)") << s;
+}
+
+TEST_F(CalcTestSymbolicComplex, eval6)
+{
+    Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"sin(x)-2356.78*x;");
+    std::string s = res.ToStdString(3);
+    ASSERT_TRUE(s == "-2.357E+3*x+sin(x)") << s;
+}
+
+TEST_F(CalcTestSymbolicComplex, eval7)
+{
+    Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"x+(x)/(3);");
+    std::string s = res.ToStdString(3);
+    ASSERT_TRUE(s == "1.333*x") << s;
+}
+
+TEST_F(CalcTestSymbolicComplex, eval8)
+{
+    Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"+-x;");
+    ASSERT_TRUE(res.ToString(10) == U"-x") << res.ToStdString(10);
+    ASSERT_TRUE(res.ToJson(10) == "{\"type\":47,\"elements\":[{\"type\":7,\"elements\":[{\"type\":12,\"symbol\":\"-\"},{\"type\":8,\"elements\":\"x\"}]}]}") << 
+        res.ToJson(10);
+}
+
+TEST_F(CalcTestSymbolicComplex, eval9)
+{
+    Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"+x;");
+    ASSERT_TRUE(res.ToString(10) == U"x") << res.ToStdString(10);
+    ASSERT_TRUE(res.ToJson(10) == "{\"type\":47,\"elements\":[{\"type\":7,\"elements\":[{\"type\":8,\"elements\":\"x\"}]}]}") << res.ToJson(10);
+}
+
+TEST_F(CalcTestSymbolicComplex, eval10)
+{
+    Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"--x;");
+    ASSERT_TRUE(res.ToString(10) == U"x") << res.ToStdString(10);
+    ASSERT_TRUE(res.ToJson(10) == "{\"type\":47,\"elements\":[{\"type\":7,\"elements\":[{\"type\":8,\"elements\":\"x\"}]}]}") << res.ToJson(10);
+}
+
+TEST_F(CalcTestSymbolicComplex, eval11)
+{
+    Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"++x;");
+    ASSERT_TRUE(res.ToString(10) == U"x") << res.ToStdString(10);
+    ASSERT_TRUE(res.ToJson(10) == "{\"type\":47,\"elements\":[{\"type\":7,\"elements\":[{\"type\":8,\"elements\":\"x\"}]}]}") << res.ToJson(10);
+}
+
+TEST_F(CalcTestSymbolicComplex, eval12)
+{
+    Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"sin(x)--2356.78*x;");
+    std::string s = res.ToStdString(3);
+    ASSERT_TRUE(s == "2.357E+3*x+sin(x)") << s;
+}
+
+TEST_F(CalcTestSymbolicComplex, eval13)
+{
+    Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"sin(x)-+2356.78*x;");
+    std::string s = res.ToStdString(3);
+    ASSERT_TRUE(s == "-2.357E+3*x+sin(x)") << s;
+}
+
+TEST_F(CalcTestSymbolicComplex, eval14)
+{
+    Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"-sin(x)-2356.78*x;");
+    std::string s = res.ToStdString(3);
+    ASSERT_TRUE(s == "-2.357E+3*x-sin(x)") << s;
+}
+
+TEST_F(CalcTestSymbolicComplex, eval15)
+{
+    Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"--+sin(x)--+2356.78*x;");
+    std::string s = res.ToStdString(3);
+    ASSERT_TRUE(s == "2.357E+3*x+sin(x)") << s;
+}
+
+TEST_F(CalcTestSymbolicComplex, eval16)
+{
+    Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"x+x;");
+    ASSERT_TRUE(res.ToStdString(10) == "2.*x") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicComplex, eval17)
+{
+    Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"y+2*y+2;");
+    ASSERT_TRUE(res.ToStdString(10) == "2.+3.*y") << res.ToStdString(10);
+}
+
 TEST_F(CalcTestSymbolicComplex, addition1)
 {
     Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"x + 1;");
@@ -179,18 +288,6 @@ TEST_F(CalcTestSymbolicComplex, user_functions1)
     parser.Parse(LogicalId{0, 0, 1}, U"f(x)=x+1;");
     Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 2}, U"f(x);");
     ASSERT_TRUE(res.ToStdString(10) == "1.+x") << res.ToStdString(10);
-}
-
-TEST_F(CalcTestSymbolicComplex, eval2)
-{
-    Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"x+x;");
-    ASSERT_TRUE(res.ToStdString(10) == "2.*x") << res.ToStdString(10);
-}
-
-TEST_F(CalcTestSymbolicComplex, eval3)
-{
-    Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"y+2*y+2;");
-    ASSERT_TRUE(res.ToStdString(10) == "2.+3.*y") << res.ToStdString(10);
 }
 
 TEST_F(CalcTestSymbolicComplex, unary_plus1)
@@ -391,6 +488,17 @@ TEST_F(CalcTestSymbolicComplex, tojson7)
                 R"({"type":8,"elements":"i"})"
             R"(]})"
         R"(]})" ) << json;
+}
+
+TEST_F(CalcTestSymbolicComplex, mul_rational_exp)
+{
+    //x/sqrt(y) produces Mul with y -> -1/2 (Rational, not Integer).
+    //this exercises the Mul handler's else branch with a non-Integer exponent.
+    Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"x/sqrt(y);");
+    std::string json = res.ToJson(10);
+    ASSERT_TRUE(json.find("\"type\":47") != std::string::npos) << json;
+    ASSERT_TRUE(json.find("x") != std::string::npos) << json;
+    ASSERT_TRUE(json.find("y") != std::string::npos) << json;
 }
 
 TEST_F(CalcTestSymbolicComplex, tojson8)
