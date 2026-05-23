@@ -11,6 +11,8 @@
 #include <string>
 #include <memory>
 #include <regex>
+#include <cerrno>
+#include <climits>
 #include <symengine/expression.h>
 #include <symengine/parser.h>
 #include <symengine/symbol.h>
@@ -612,14 +614,45 @@ public:
         return str;
     }
 
+    struct MpfrGuard
+    {
+        MpfrGuard()
+        {
+            mpfr_init2(num, 512);
+        }
+
+        ~MpfrGuard()
+        {
+            mpfr_clear(num);
+        }
+
+        mpfr_t num;
+    };
+
     static int GetDecimalOrder(const std::string& num_str)
     {
         size_t e_pos = num_str.find_first_of("eE");
         if (e_pos != std::string::npos)
-            return std::stoi(num_str.substr(e_pos + 1)) + 1;
-        size_t dotPos = num_str.find('.');
-        if (dotPos != std::string::npos)
-            return static_cast<int>(dotPos);
+        {
+            const char* start = num_str.c_str() + e_pos + 1;
+            char* end = nullptr;
+            errno = 0;
+            long exp = std::strtol(start, &end, 10);
+            if (errno == ERANGE || end == start || *end != '\0')
+            {
+                if (num_str[e_pos + 1] == '-')
+                    return INT_MIN;
+                return INT_MAX;
+            }
+            if (exp > INT_MAX - 1)
+                return INT_MAX;
+            if (exp < INT_MIN + 1)
+                return INT_MIN;
+            return static_cast<int>(exp) + 1;
+        }
+        size_t dot_pos = num_str.find('.');
+        if (dot_pos != std::string::npos)
+            return static_cast<int>(dot_pos);
         return static_cast<int>(num_str.length());
     }
 
@@ -691,23 +724,20 @@ public:
             result += expr_str.substr(pos, match.position() - pos);
             std::string num_str = match[0];
 
+            MpfrGuard guard;
             int order = GetDecimalOrder(num_str);
-
-            mpfr_t num;
-            mpfr_init2(num, 512);
-            mpfr_set_str(num, num_str.c_str(), 10, MPFR_RNDN);
+            mpfr_set_str(guard.num, num_str.c_str(), 10, MPFR_RNDN);
             char buf[512];
             if (order > exp || num_str.find_first_of("eE") != std::string::npos)
             {
-                mpfr_snprintf(buf, 512, "%.*Re", precision, num);
+                mpfr_snprintf(buf, 512, "%.*Re", precision, guard.num);
                 result += FormatScientific(buf);
             }
             else
             {
-                mpfr_snprintf(buf, 512, "%.*Rf", precision, num);
+                mpfr_snprintf(buf, 512, "%.*Rf", precision, guard.num);
                 result += FormatFixed(buf, false);
             }
-            mpfr_clear(num);
 
             pos = match.position() + match.length();
         }
