@@ -685,15 +685,11 @@ public:
                 mpfr_set_str(num, num_str.c_str(), 10, MPFR_RNDN);
                 mpfr_set_str(den, den_str.c_str(), 10, MPFR_RNDN);
                 mpfr_div(q, num, den, MPFR_RNDN);
-                char buf[512];
-                mpfr_snprintf(buf, 512, "%.*Rf", precision, q);
-                std::string s = buf;
+                std::string s = MpfrFormat("%.*Rf", precision, q);
                 s = FormatFixed(s, false);
                 if (mpfr_zero_p(q) == 0 && IsEffectivelyZeroFixedStr(s))
                 {
-                    mpfr_snprintf(buf, 512, "%.*Re", precision, q);
-                    s = buf;
-                    s = FormatScientific(s);
+                    s = FormatScientific(MpfrFormat("%.*Re", precision, q));
                 }
                 result += s;
                 mpfr_clear(num);
@@ -729,16 +725,13 @@ public:
             MpfrGuard guard;
             int order = GetDecimalOrder(num_str);
             mpfr_set_str(guard.num, num_str.c_str(), 10, MPFR_RNDN);
-            char buf[512];
             if (order > exp || num_str.find_first_of("eE") != std::string::npos)
             {
-                mpfr_snprintf(buf, 512, "%.*Re", precision, guard.num);
-                result += FormatScientific(buf);
+                result += FormatScientific(MpfrFormat("%.*Re", precision, guard.num));
             }
             else
             {
-                mpfr_snprintf(buf, 512, "%.*Rf", precision, guard.num);
-                result += FormatFixed(buf, false);
+                result += FormatFixed(MpfrFormat("%.*Rf", precision, guard.num), false);
             }
 
             pos = match.position() + match.length();
@@ -853,9 +846,7 @@ private:
                     mpfr_t mpfr_num;
                     mpfr_init2(mpfr_num, 512);
                     mpfr_set_str(mpfr_num, s.c_str(), 10, MPFR_RNDN);
-                    char buf[512];
-                    mpfr_snprintf(buf, 512, "%.*Re", precision, mpfr_num);
-                    std::string res = FormatScientific(buf);
+                    std::string res = FormatScientific(MpfrFormat("%.*Re", precision, mpfr_num));
                     mpfr_clear(mpfr_num);
                     return res;
                 }
@@ -919,17 +910,15 @@ private:
             int order = GetDecimalOrder(str);
             if (!str.empty() && str[0] == '-')
                 order--;
-            char buf[512];
-            mpfr_snprintf(buf, 512, "%.*Rf", precision, value);
-            bool is_zero_fixed = IsEffectivelyZeroFixedStr(FormatFixed(std::string(buf), false));
+            std::string fixed_str = MpfrFormat("%.*Rf", precision, value);
+            bool is_zero_fixed = IsEffectivelyZeroFixedStr(FormatFixed(fixed_str, false));
             if ((order > exp && exp >= 0) || (mpfr_zero_p(value) == 0 && is_zero_fixed))
             {
-                mpfr_snprintf(buf, 512, "%.*Re", precision, value);
-                return FormatScientific(buf);
+                return FormatScientific(MpfrFormat("%.*Re", precision, value));
             }
             else
             {
-                return FormatFixed(buf, false);
+                return FormatFixed(fixed_str, false);
             }
         }
         return num.__str__();
@@ -1361,6 +1350,17 @@ private:
                 return s;
         }
         return s.substr(0, s.size() - 1);
+    }
+
+    static std::string MpfrFormat(const char* fmt, int precision, mpfr_srcptr value)
+    {
+        char* buf = nullptr;
+        int n = mpfr_asprintf(&buf, fmt, precision, value);
+        if (n < 0 || !buf)
+            return {};
+        std::string result(buf);
+        mpfr_free_str(buf);
+        return result;
     }
 
     int precision = 0;

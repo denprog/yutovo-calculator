@@ -109,21 +109,10 @@ std::string Symbolic<Real>::ToStdString(int exp) const
 
         if (exp < 0)
         {
-            int order = static_cast<int>(s.length());
             mpfr_t num;
             mpfr_init2(num, 512);
             mpfr_set_str(num, s.c_str(), 10, MPFR_RNDN);
-            char buf[512];
-            if (order > exp)
-            {
-                mpfr_snprintf(buf, 512, "%.*Re", precision, num);
-                s = FormatScientific(buf);
-            }
-            else
-            {
-                mpfr_snprintf(buf, 512, "%.*Rf", precision, num);
-                s = FormatFixed(buf, false);
-            }
+            s = FormatFixed(MpfrFormat("%.*Rf", precision, num), false);
             mpfr_clear(num);
             if (s.find('.') == std::string::npos)
                 s += '.';
@@ -134,16 +123,13 @@ std::string Symbolic<Real>::ToStdString(int exp) const
             mpfr_t num;
             mpfr_init2(num, 512);
             mpfr_set_str(num, s.c_str(), 10, MPFR_RNDN);
-            char buf[512];
-            if (order > exp)
+            if (order > exp && exp >= 0)
             {
-                mpfr_snprintf(buf, 512, "%.*Re", precision, num);
-                s = FormatScientific(buf);
+                s = FormatScientific(MpfrFormat("%.*Re", precision, num));
             }
             else
             {
-                mpfr_snprintf(buf, 512, "%.*Rf", precision, num);
-                s = FormatFixed(buf, false);
+                s = FormatFixed(MpfrFormat("%.*Rf", precision, num), false);
                 if (order <= precision && s.find('.') == std::string::npos)
                     s += '.';
             }
@@ -162,17 +148,15 @@ std::string Symbolic<Real>::ToStdString(int exp) const
         if (!str.empty() && str[0] == '-')
             order--;
 
-        char buf[512];
-        mpfr_snprintf(buf, 512, "%.*Rf", precision, value);
-        bool is_zero_fixed = IsEffectivelyZeroFixedStr(FormatFixed(std::string(buf), false));
-        if (order > exp || (mpfr_zero_p(value) == 0 && is_zero_fixed))
+        std::string fixed_str = MpfrFormat("%.*Rf", precision, value);
+        bool is_zero_fixed = IsEffectivelyZeroFixedStr(FormatFixed(fixed_str, false));
+        if ((order > exp && exp >= 0) || (mpfr_zero_p(value) == 0 && is_zero_fixed))
         {
-            mpfr_snprintf(buf, 512, "%.*Re", precision, value);
-            str = FormatScientific(buf);
+            str = FormatScientific(MpfrFormat("%.*Re", precision, value));
         }
         else
         {
-            str = FormatFixed(buf, false);
+            str = FormatFixed(fixed_str, false);
         }
         if (exp < 0)
         {
@@ -244,18 +228,16 @@ std::string Symbolic<Real>::ToStdString(int exp) const
         int order = GetDecimalOrder(str);
         if (!str.empty() && str[0] == '-')
             order--;
-        char buf[512];
-        mpfr_snprintf(buf, 512, "%.*Rf", precision, value);
-        bool is_zero_fixed = IsEffectivelyZeroFixedStr(FormatFixed(std::string(buf), false));
-        if (order > exp || (mpfr_zero_p(value) == 0 && is_zero_fixed))
+        std::string fixed_str = MpfrFormat("%.*Rf", precision, value);
+        bool is_zero_fixed = IsEffectivelyZeroFixedStr(FormatFixed(fixed_str, false));
+        if ((order > exp && exp >= 0) || (mpfr_zero_p(value) == 0 && is_zero_fixed))
         {
-            mpfr_snprintf(buf, 512, "%.*Re", precision, value);
-            std::string s = FormatScientific(buf);
+            std::string s = FormatScientific(MpfrFormat("%.*Re", precision, value));
             return ReplacePowerOperator(s);
         }
         else
         {
-            std::string s = FormatFixed(buf, false);
+            std::string s = FormatFixed(fixed_str, false);
             if (exp < 0)
             {
                 if (s.find('.') == std::string::npos)
