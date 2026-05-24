@@ -1111,6 +1111,8 @@ struct Solver : public boost::static_visitor<Number>
 
     void FillBuiltinOperations()
     {
+        if (!symbols->builtin_operations.empty())
+            return;
         symbols->builtin_operations.push_back(U"plus");
         symbols->builtin_operations.push_back(U"minus");
         symbols->builtin_operations.push_back(U"mul");

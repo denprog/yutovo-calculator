@@ -1857,6 +1857,8 @@ Array<Real> Solver<Array<Real>>::operator()(ScriptNode<Array<Real>> const& scrip
 template<>
 void Solver<Integer>::FillBuiltinOperations()
 {
+    if (!symbols->builtin_operations.empty())
+        return;
     symbols->builtin_operations.push_back(U"plus");
     symbols->builtin_operations.push_back(U"minus");
     symbols->builtin_operations.push_back(U"mul");
@@ -1870,6 +1872,8 @@ void Solver<Integer>::FillBuiltinOperations()
 template<>
 void Solver<Rational>::FillBuiltinOperations()
 {
+    if (!symbols->builtin_operations.empty())
+        return;
     symbols->builtin_operations.push_back(U"plus");
     symbols->builtin_operations.push_back(U"minus");
     symbols->builtin_operations.push_back(U"mul");
@@ -1883,6 +1887,8 @@ void Solver<Rational>::FillBuiltinOperations()
 template<>
 void Solver<Symbolic<Real>>::FillBuiltinOperations()
 {
+    if (!symbols->builtin_operations.empty())
+        return;
     symbols->builtin_operations.push_back(U"plus");
     symbols->builtin_operations.push_back(U"minus");
     symbols->builtin_operations.push_back(U"mul");
@@ -1958,6 +1964,8 @@ Symbolic<Real> Solver<Symbolic<Real>>::CastToUnit(const LogicalId id, const Symb
 template<>
 void Solver<Symbolic<Rational>>::FillBuiltinOperations()
 {
+    if (!symbols->builtin_operations.empty())
+        return;
     symbols->builtin_operations.push_back(U"plus");
     symbols->builtin_operations.push_back(U"minus");
     symbols->builtin_operations.push_back(U"mul");
@@ -1985,6 +1993,8 @@ Symbolic<Rational> Solver<Symbolic<Rational>>::CastToUnit(const LogicalId id, co
 template<>
 void Solver<Symbolic<Complex>>::FillBuiltinOperations()
 {
+    if (!symbols->builtin_operations.empty())
+        return;
     symbols->builtin_operations.push_back(U"plus");
     symbols->builtin_operations.push_back(U"minus");
     symbols->builtin_operations.push_back(U"mul");
