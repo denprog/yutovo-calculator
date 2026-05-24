@@ -8,7 +8,9 @@
 #ifndef STDAFX_H
 #define STDAFX_H
 
+#ifndef NDEBUG
 #define BOOST_SPIRIT_DEBUG
+#endif
 #define BOOST_SPIRIT_UNICODE
 
 #if defined(_MSC_VER)
