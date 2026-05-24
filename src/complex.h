@@ -14,7 +14,9 @@
 namespace yutovo_calculator
 {
 
+#ifdef max
 #undef max
+#endif
 
 extern Real exp(const int precision);
 extern Real pi(const int precision);
