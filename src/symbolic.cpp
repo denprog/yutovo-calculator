@@ -97,6 +97,8 @@ std::string Symbolic<Real>::ToStdString(int exp) const
             }
         }
         s = result;
+        s = ReplaceAll(s, "inf.", "∞");
+        s = ReplaceAll(s, "inf", "∞");
         s = ReplaceAll(s, "zoo", "∞");
         s = ReplaceAll(s, "oo", "∞");
         return ReplacePowerOperator(s);
@@ -142,6 +144,10 @@ std::string Symbolic<Real>::ToStdString(int exp) const
     {
         auto mpfr_basic = SymEngine::rcp_dynamic_cast<const SymEngine::RealMPFR>(basic);
         mpfr_srcptr value = mpfr_basic->as_mpfr().get_mpfr_t();
+        if (mpfr_inf_p(value))
+            return mpfr_sgn(value) > 0 ? "∞" : "-∞";
+        if (mpfr_nan_p(value))
+            return "nan";
         std::string str = basic->__str__();
         str.erase(std::remove(str.begin(), str.end(), ' '), str.end());
         int order = GetDecimalOrder(str);
@@ -256,6 +262,10 @@ std::string Symbolic<Real>::ToStdString(int exp) const
     if (!real_double.is_null())
     {
         double value = real_double->as_double();
+        if (std::isinf(value))
+            return value > 0.0 ? "∞" : "-∞";
+        if (std::isnan(value))
+            return "nan";
         std::ostringstream oss;
         oss << std::fixed << std::setprecision(precision) << value;
         std::string fixed_str = oss.str();
@@ -293,6 +303,8 @@ std::string Symbolic<Real>::ToStdString(int exp) const
 
     std::string s = evaluated->__str__();
     s.erase(std::remove(s.begin(), s.end(), ' '), s.end());
+    s = ReplaceAll(s, "inf.", "∞");
+    s = ReplaceAll(s, "inf", "∞");
     s = ReplaceAll(s, "zoo", "∞");
     s = ReplaceAll(s, "oo", "∞");
     return ReplacePowerOperator(s);
@@ -324,7 +336,7 @@ std::string Symbolic<Rational>::ToStdString(int exp) const
     s.erase(std::remove(s.begin(), s.end(), ' '), s.end());
     if (s.find("zoo") != std::string::npos)
         s = "zoo";
-    return ReplacePowerOperator(ReplaceAll(ReplaceAll(s, "zoo", "∞"), "oo", "∞"));
+    return ReplacePowerOperator(ReplaceAll(ReplaceAll(ReplaceAll(ReplaceAll(s, "inf.", "∞"), "inf", "∞"), "zoo", "∞"), "oo", "∞"));
 }
 
 template<>
@@ -449,7 +461,7 @@ std::string Symbolic<Complex>::ToStdString(int exp) const
             ++i;
         }
     }
-    return RemoveInsignificantPoint(ReplacePowerOperator(ReplaceAll(ReplaceAll(result, "zoo", "∞"), "oo", "∞")));
+    return RemoveInsignificantPoint(ReplacePowerOperator(ReplaceAll(ReplaceAll(ReplaceAll(ReplaceAll(result, "inf.", "∞"), "inf", "∞"), "zoo", "∞"), "oo", "∞")));
 }
 
 template<>

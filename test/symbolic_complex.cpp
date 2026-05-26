@@ -1072,4 +1072,98 @@ TEST_F(CalcTestSymbolicComplex, scientific1)
     ASSERT_TRUE(res.ToStdString(10) == "123000") << res.ToStdString(10);
 }
 
+TEST_F(CalcTestSymbolicComplex, hyperbolic_sinh)
+{
+    Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"sinh(0);");
+    ASSERT_TRUE(res.ToStdString(10) == "0") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicComplex, hyperbolic_cosh)
+{
+    Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"cosh(0);");
+    ASSERT_TRUE(res.ToStdString(10) == "1") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicComplex, hyperbolic_tanh)
+{
+    Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"tanh(0);");
+    ASSERT_TRUE(res.ToStdString(10) == "0") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicComplex, hyperbolic_coth0)
+{
+    auto res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"subs(coth(x),x,0);");
+    ASSERT_TRUE(res.ToStdString(10) == "∞") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicComplex, hyperbolic_sech)
+{
+    Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"sech(0);");
+    ASSERT_TRUE(res.ToStdString(10) == "1") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicComplex, hyperbolic_csch0)
+{
+    auto res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"subs(csch(x),x,0);");
+    ASSERT_TRUE(res.ToStdString(10) == "∞") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicComplex, hyperbolic_asinh)
+{
+    Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"arsinh(0);");
+    ASSERT_TRUE(res.ToStdString(10) == "0") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicComplex, hyperbolic_acosh)
+{
+    Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"arcosh(1);");
+    ASSERT_TRUE(res.ToStdString(10) == "0") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicComplex, hyperbolic_atanh)
+{
+    Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"artanh(0);");
+    ASSERT_TRUE(res.ToStdString(10) == "0") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicComplex, hyperbolic_acoth1)
+{
+    auto res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"subs(arcoth(x),x,1);");
+    ASSERT_TRUE(res.ToStdString(10) == "∞") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicComplex, hyperbolic_asech)
+{
+    Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"arsech(1);");
+    ASSERT_TRUE(res.ToStdString(10) == "0") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicComplex, hyperbolic_acsch0)
+{
+    auto res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"subs(arcsch(x),x,0);");
+    ASSERT_TRUE(res.ToStdString(10) == "∞") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicComplex, hyperbolic_symbolic)
+{
+    Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"sinh(x);");
+    ASSERT_TRUE(res.ToStdString(10) == "sinh(x)") << res.ToStdString(10);
+    res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"arcosh(x);");
+    ASSERT_TRUE(res.ToStdString(10) == "acosh(x)") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicComplex, hyperbolic_alias)
+{
+    Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"cosech(0);");
+    ASSERT_TRUE(res.ToStdString(10) == "∞") << res.ToStdString(10);
+    res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"arcosech(1);");
+    ASSERT_TRUE(res.ToStdString(10) == "0.881") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicComplex, hyperbolic_acosh_nan)
+{
+    Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"arcosh(nan);");
+    ASSERT_TRUE(res.ToStdString(10) == "nan") << res.ToStdString(10);
+}
+
 }

@@ -371,6 +371,90 @@ public:
         return res;
     }
     
+    friend Symbolic<Number> sinh(const Symbolic<Number>& num)
+    {
+        Symbolic<Number> res(num.precision);
+        *res.expr = SymEngine::sinh(*num.expr);
+        return res;
+    }
+    
+    friend Symbolic<Number> cosh(const Symbolic<Number>& num)
+    {
+        Symbolic<Number> res(num.precision);
+        *res.expr = SymEngine::cosh(*num.expr);
+        return res;
+    }
+    
+    friend Symbolic<Number> tanh(const Symbolic<Number>& num)
+    {
+        Symbolic<Number> res(num.precision);
+        *res.expr = SymEngine::tanh(*num.expr);
+        return res;
+    }
+    
+    friend Symbolic<Number> coth(const Symbolic<Number>& num)
+    {
+        Symbolic<Number> res(num.precision);
+        *res.expr = SymEngine::coth(*num.expr);
+        return res;
+    }
+    
+    friend Symbolic<Number> sech(const Symbolic<Number>& num)
+    {
+        Symbolic<Number> res(num.precision);
+        *res.expr = SymEngine::sech(*num.expr);
+        return res;
+    }
+    
+    friend Symbolic<Number> csch(const Symbolic<Number>& num)
+    {
+        Symbolic<Number> res(num.precision);
+        *res.expr = SymEngine::csch(*num.expr);
+        return res;
+    }
+    
+    friend Symbolic<Number> asinh(const Symbolic<Number>& num)
+    {
+        Symbolic<Number> res(num.precision);
+        *res.expr = SymEngine::asinh(*num.expr);
+        return res;
+    }
+    
+    friend Symbolic<Number> acosh(const Symbolic<Number>& num)
+    {
+        Symbolic<Number> res(num.precision);
+        *res.expr = SymEngine::acosh(*num.expr);
+        return res;
+    }
+    
+    friend Symbolic<Number> atanh(const Symbolic<Number>& num)
+    {
+        Symbolic<Number> res(num.precision);
+        *res.expr = SymEngine::atanh(*num.expr);
+        return res;
+    }
+    
+    friend Symbolic<Number> acoth(const Symbolic<Number>& num)
+    {
+        Symbolic<Number> res(num.precision);
+        *res.expr = SymEngine::acoth(*num.expr);
+        return res;
+    }
+    
+    friend Symbolic<Number> asech(const Symbolic<Number>& num)
+    {
+        Symbolic<Number> res(num.precision);
+        *res.expr = SymEngine::asech(*num.expr);
+        return res;
+    }
+    
+    friend Symbolic<Number> acsch(const Symbolic<Number>& num)
+    {
+        Symbolic<Number> res(num.precision);
+        *res.expr = SymEngine::acsch(*num.expr);
+        return res;
+    }
+    
     friend Symbolic<Number> exp(const Symbolic<Number>& num)
     {
         Symbolic<Number> res(num.precision);

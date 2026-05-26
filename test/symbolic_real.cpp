@@ -1178,4 +1178,118 @@ TEST_F(CalcTestSymbolicReal, scientific1)
     ASSERT_TRUE(res.ToStdString(10) == "123000") << res.ToStdString(10);
 }
 
+TEST_F(CalcTestSymbolicReal, hyperbolic_sinh)
+{
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"sinh(0);");
+    ASSERT_TRUE(res.ToStdString(10) == "0.") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicReal, hyperbolic_cosh)
+{
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"cosh(0);");
+    ASSERT_TRUE(res.ToStdString(10) == "1.") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicReal, hyperbolic_tanh)
+{
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"tanh(0);");
+    ASSERT_TRUE(res.ToStdString(10) == "0.") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicReal, hyperbolic_coth0)
+{
+    auto res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"subs(coth(x),x,0);");
+    ASSERT_TRUE(res.ToStdString(10) == "∞") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicReal, hyperbolic_sech)
+{
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"sech(0);");
+    ASSERT_TRUE(res.ToStdString(10) == "1.") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicReal, hyperbolic_csch0)
+{
+    auto res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"subs(csch(x),x,0);");
+    ASSERT_TRUE(res.ToStdString(10) == "∞") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicReal, hyperbolic_asinh)
+{
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"arsinh(0);");
+    ASSERT_TRUE(res.ToStdString(10) == "0.") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicReal, hyperbolic_acosh)
+{
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"arcosh(1);");
+    ASSERT_TRUE(res.ToStdString(10) == "0.") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicReal, hyperbolic_atanh)
+{
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"artanh(0);");
+    ASSERT_TRUE(res.ToStdString(10) == "0.") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicReal, hyperbolic_acoth1)
+{
+    auto res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"subs(arcoth(x),x,1);");
+    ASSERT_TRUE(res.ToStdString(10) == "∞") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicReal, hyperbolic_asech)
+{
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"arsech(1);");
+    ASSERT_TRUE(res.ToStdString(10) == "0.") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicReal, hyperbolic_acsch0)
+{
+    auto res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"subs(arcsch(x),x,0);");
+    ASSERT_TRUE(res.ToStdString(10) == "∞") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicReal, hyperbolic_symbolic)
+{
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"sinh(x);");
+    ASSERT_TRUE(res.ToStdString(10) == "sinh(x)") << res.ToStdString(10);
+    res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"arcosh(x);");
+    ASSERT_TRUE(res.ToStdString(10) == "acosh(x)") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicReal, hyperbolic_alias)
+{
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"cosech(0);");
+    ASSERT_TRUE(res.ToStdString(10) == "∞") << res.ToStdString(10);
+    res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"arcosech(1);");
+    ASSERT_TRUE(res.ToStdString(10) == "0.881") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicReal, hyperbolic_acosh_nan)
+{
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"arcosh(nan);");
+    ASSERT_TRUE(res.ToStdString(10) == "nan") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicReal, hyperbolic_asech_nan)
+{
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"arsech(2);");
+    std::string s = res.ToStdString(10);
+    ASSERT_TRUE(s == "nan" || s == "-nan.") << s;
+}
+
+TEST_F(CalcTestSymbolicReal, hyperbolic_artanh_nan)
+{
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"artanh(2);");
+    std::string s = res.ToStdString(10);
+    ASSERT_TRUE(s == "nan" || s == "-nan.") << s;
+}
+
+TEST_F(CalcTestSymbolicReal, hyperbolic_arcoth_nan)
+{
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"arcoth(nan);");
+    ASSERT_TRUE(res.ToStdString(10) == "nan") << res.ToStdString(10);
+}
+
 }

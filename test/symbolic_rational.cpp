@@ -1037,4 +1037,98 @@ TEST_F(CalcTestSymbolicRational, power4)
     ASSERT_TRUE(json == "{\"type\":46,\"elements\":[{\"type\":7,\"elements\":[{\"type\":12,\"symbol\":\"-\"},{\"type\":14,\"elements\":[{\"type\":7,\"elements\":[{\"type\":8,\"elements\":\"1\"}]},{\"type\":10,\"elements\":[]},{\"type\":7,\"elements\":[{\"type\":8,\"elements\":\"10000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\"}]}]}]}]}") << json;
 }
 
+TEST_F(CalcTestSymbolicRational, hyperbolic_sinh)
+{
+    Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"sinh(0);");
+    ASSERT_TRUE(res.ToStdString(0) == "0") << res.ToStdString(0);
+}
+
+TEST_F(CalcTestSymbolicRational, hyperbolic_cosh)
+{
+    Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"cosh(0);");
+    ASSERT_TRUE(res.ToStdString(0) == "1") << res.ToStdString(0);
+}
+
+TEST_F(CalcTestSymbolicRational, hyperbolic_tanh)
+{
+    Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"tanh(0);");
+    ASSERT_TRUE(res.ToStdString(0) == "0") << res.ToStdString(0);
+}
+
+TEST_F(CalcTestSymbolicRational, hyperbolic_coth0)
+{
+    auto res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"subs(coth(x),x,0);");
+    ASSERT_TRUE(res.ToStdString(10) == "∞") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicRational, hyperbolic_sech)
+{
+    Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"sech(0);");
+    ASSERT_TRUE(res.ToStdString(0) == "1") << res.ToStdString(0);
+}
+
+TEST_F(CalcTestSymbolicRational, hyperbolic_csch0)
+{
+    auto res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"subs(csch(x),x,0);");
+    ASSERT_TRUE(res.ToStdString(10) == "∞") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicRational, hyperbolic_asinh)
+{
+    Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"arsinh(0);");
+    ASSERT_TRUE(res.ToStdString(0) == "0") << res.ToStdString(0);
+}
+
+TEST_F(CalcTestSymbolicRational, hyperbolic_acosh)
+{
+    Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"arcosh(1);");
+    ASSERT_TRUE(res.ToStdString(0) == "0") << res.ToStdString(0);
+}
+
+TEST_F(CalcTestSymbolicRational, hyperbolic_atanh)
+{
+    Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"artanh(0);");
+    ASSERT_TRUE(res.ToStdString(0) == "0") << res.ToStdString(0);
+}
+
+TEST_F(CalcTestSymbolicRational, hyperbolic_acoth1)
+{
+    auto res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"subs(arcoth(x),x,1);");
+    ASSERT_TRUE(res.ToStdString(10) == "acoth(1)") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicRational, hyperbolic_asech)
+{
+    Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"arsech(1);");
+    ASSERT_TRUE(res.ToStdString(0) == "0") << res.ToStdString(0);
+}
+
+TEST_F(CalcTestSymbolicRational, hyperbolic_acsch0)
+{
+    auto res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"subs(arcsch(x),x,0);");
+    ASSERT_TRUE(res.ToStdString(10) == "acsch(0)") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicRational, hyperbolic_symbolic)
+{
+    Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"sinh(x);");
+    ASSERT_TRUE(res.ToStdString(0) == "sinh(x)") << res.ToStdString(0);
+    res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"arcosh(x);");
+    ASSERT_TRUE(res.ToStdString(0) == "acosh(x)") << res.ToStdString(0);
+}
+
+TEST_F(CalcTestSymbolicRational, hyperbolic_alias)
+{
+    Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"cosech(0);");
+    ASSERT_TRUE(res.ToStdString(10) == "∞") << res.ToStdString(10);
+    res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"arcosech(1);");
+    ASSERT_TRUE(res.ToStdString(0) == "log(1+sqrt(2))") << res.ToStdString(0);
+}
+
+TEST_F(CalcTestSymbolicRational, hyperbolic_acosh_nan)
+{
+    Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"arcosh(nan);");
+    ASSERT_TRUE(res.ToStdString(10) == "nan") << res.ToStdString(10);
+}
+
 }
