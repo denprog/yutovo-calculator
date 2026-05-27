@@ -661,17 +661,17 @@ TEST_F(CalcTestSymbolicRational, log3)
     ASSERT_TRUE(s == "log(2)/log(8)") << s;
     std::string json = res.ToJson(10);
     ASSERT_TRUE(json ==
-        R"({"type":46,"elements":[)"
-            R"({"type":14,"elements":[)"
-                R"({"type":7,"elements":[)"
-                    R"str({"type":7,"elements":[{"type":8,"elements":"log(2)"}]})str"
-                R"(]},)"
-                R"({"type":10,"elements":[]},)"
-                R"({"type":7,"elements":[)"
-                    R"str({"type":7,"elements":[{"type":8,"elements":"log(8)"}]})str"
-                R"(]})"
-            R"(]})"
-        R"(]})" ) << json;
+        R"r({"type":46,"elements":[)r"
+            R"r({"type":14,"elements":[)r"
+                R"r({"type":7,"elements":[)r"
+                    R"r({"type":7,"elements":[{"type":8,"elements":"log"},{"type":19,"symbol":"("},{"type":8,"elements":"2"},{"type":20,"symbol":")"}]})r"
+                R"r(]},)r"
+                R"r({"type":10,"elements":[]},)r"
+                R"r({"type":7,"elements":[)r"
+                    R"r({"type":7,"elements":[{"type":8,"elements":"log"},{"type":19,"symbol":"("},{"type":8,"elements":"8"},{"type":20,"symbol":")"}]})r"
+                R"r(]})r"
+            R"r(]})r"
+        R"r(]})r" ) << json;
 }
 
 TEST_F(CalcTestSymbolicRational, diff_tojson)
@@ -772,7 +772,7 @@ TEST_F(CalcTestSymbolicRational, log_ratio)
     Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"log(2,4);");
     ASSERT_TRUE(res.ToStdString(0) == "log(4)/log(2)") << res.ToStdString(0);
     ASSERT_TRUE(res.ToJson(10) ==
-        R"r({"type":46,"elements":[{"type":14,"elements":[{"type":7,"elements":[{"type":7,"elements":[{"type":8,"elements":"log(4)"}]}]},{"type":10,"elements":[]},{"type":7,"elements":[{"type":7,"elements":[{"type":8,"elements":"log(2)"}]}]}]}]})r" ) << res.ToJson(10);
+        R"r({"type":46,"elements":[{"type":14,"elements":[{"type":7,"elements":[{"type":7,"elements":[{"type":8,"elements":"log"},{"type":19,"symbol":"("},{"type":8,"elements":"4"},{"type":20,"symbol":")"}]}]},{"type":10,"elements":[]},{"type":7,"elements":[{"type":7,"elements":[{"type":8,"elements":"log"},{"type":19,"symbol":"("},{"type":8,"elements":"2"},{"type":20,"symbol":")"}]}]}]}]})r" ) << res.ToJson(10);
 }
 
 TEST_F(CalcTestSymbolicRational, sqrt_half)
@@ -1129,6 +1129,36 @@ TEST_F(CalcTestSymbolicRational, hyperbolic_acosh_nan)
 {
     Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"arcosh(nan);");
     ASSERT_TRUE(res.ToStdString(10) == "nan") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicRational, log_x_base)
+{
+    Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"log(x,2);");
+    ASSERT_TRUE(res.ToStdString(0) == "log(2)/log(x)") << res.ToStdString(0);
+    ASSERT_TRUE(res.ToJson(10) ==
+        R"r({"type":46,"elements":[{"type":14,"elements":[{"type":7,"elements":[{"type":7,"elements":[{"type":8,"elements":"log"},{"type":19,"symbol":"("},{"type":8,"elements":"2"},{"type":20,"symbol":")"}]}]},{"type":10,"elements":[]},{"type":7,"elements":[{"type":7,"elements":[{"type":8,"elements":"log"},{"type":19,"symbol":"("},{"type":8,"elements":"x"},{"type":20,"symbol":")"}]}]}]}]})r" ) << res.ToJson(10);
+}
+
+TEST_F(CalcTestSymbolicRational, cot_tojson)
+{
+    Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"cot(x);");
+    ASSERT_TRUE(res.ToJson(10) ==
+        R"r({"type":46,"elements":[{"type":7,"elements":[{"type":8,"elements":"cot"},{"type":19,"symbol":"("},{"type":8,"elements":"x"},{"type":20,"symbol":")"}]}]})r" ) << res.ToJson(10);
+}
+
+TEST_F(CalcTestSymbolicRational, sec_tojson)
+{
+    Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"sec(x);");
+    ASSERT_TRUE(res.ToJson(10) ==
+        R"r({"type":46,"elements":[{"type":7,"elements":[{"type":8,"elements":"sec"},{"type":19,"symbol":"("},{"type":8,"elements":"x"},{"type":20,"symbol":")"}]}]})r" ) << res.ToJson(10);
+}
+
+TEST_F(CalcTestSymbolicRational, nested_functions_brackets)
+{
+    Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"csc(coth(x));");
+    ASSERT_TRUE(res.ToStdString(0) == "csc(coth(x))") << res.ToStdString(0);
+    ASSERT_TRUE(res.ToJson(10) ==
+        R"r({"type":46,"elements":[{"type":7,"elements":[{"type":8,"elements":"csc"},{"type":19,"symbol":"("},{"type":8,"elements":"coth"},{"type":19,"symbol":"("},{"type":8,"elements":"x"},{"type":20,"symbol":")"},{"type":20,"symbol":")"}]}]})r" ) << res.ToJson(10);
 }
 
 }

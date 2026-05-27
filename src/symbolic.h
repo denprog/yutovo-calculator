@@ -1225,30 +1225,31 @@ private:
         if (SymEngine::is_a<const SymEngine::Pow>(expr))
             return {BasicToJson(expr, precision, exp, format)};
 
-        if (SymEngine::is_a<const SymEngine::Sin>(expr))
+        if (const auto* func = dynamic_cast<const SymEngine::Function*>(&expr))
         {
-            const auto& sin = static_cast<const SymEngine::Sin&>(expr);
-            auto arg_elements = BasicToJsonElements(*sin.get_arg(), precision, exp, format);
-            std::vector<std::string> items;
-            items.push_back(JsonCodeString("sin"));
-            items.push_back(JsonOpenRoundBracket());
-            for (auto& el : arg_elements)
-                items.push_back(el);
-            items.push_back(JsonCloseRoundBracket());
-            return items;
-        }
-
-        if (SymEngine::is_a<const SymEngine::Cos>(expr))
-        {
-            const auto& cos = static_cast<const SymEngine::Cos&>(expr);
-            auto arg_elements = BasicToJsonElements(*cos.get_arg(), precision, exp, format);
-            std::vector<std::string> items;
-            items.push_back(JsonCodeString("cos"));
-            items.push_back(JsonOpenRoundBracket());
-            for (auto& el : arg_elements)
-                items.push_back(el);
-            items.push_back(JsonCloseRoundBracket());
-            return items;
+            std::string str = func->__str__();
+            size_t pos = str.find('(');
+            if (pos != std::string::npos)
+            {
+                std::string name = str.substr(0, pos);
+                auto args = func->get_args();
+                std::vector<std::string> items;
+                items.push_back(JsonCodeString(name));
+                items.push_back(JsonOpenRoundBracket());
+                for (size_t i = 0; i < args.size(); ++i)
+                {
+                    if (i > 0)
+                    {
+                        items.push_back(JsonCodeString(","));
+                        items.push_back(JsonCodeString(" "));
+                    }
+                    auto arg_elems = BasicToJsonElements(*args[i], precision, exp, format);
+                    for (auto& el : arg_elems)
+                        items.push_back(el);
+                }
+                items.push_back(JsonCloseRoundBracket());
+                return items;
+            }
         }
 
         if (SymEngine::is_a<const SymEngine::Mul>(expr))
