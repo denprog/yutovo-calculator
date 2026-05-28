@@ -496,9 +496,9 @@ public:
     }
 
 public:
-    std::u32string ToString(int exp) const;
-    std::string ToStdString(int exp) const;
-    std::string ToJson(int exp = -1) const;
+    std::u32string ToString(int exp, Language language = Language::English) const;
+    std::string ToStdString(int exp, Language language = Language::English) const;
+    std::string ToJson(int exp = -1, Language language = Language::English) const;
 
     int GetPrecision() const
     {
@@ -696,6 +696,40 @@ public:
         {
             str.replace(start_pos, from.length(), to);
             start_pos += to.length();
+        }
+        return str;
+    }
+
+    static std::string ReplaceLogWithLn(std::string str, Language language)
+    {
+        if (language != Language::Russian)
+            return str;
+        size_t pos = 0;
+        while ((pos = str.find("log(", pos)) != std::string::npos)
+        {
+            size_t end = pos + 4;
+            int depth = 1;
+            bool has_comma = false;
+            while (end < str.size() && depth > 0)
+            {
+                if (str[end] == '(')
+                    ++depth;
+                else if (str[end] == ')')
+                    --depth;
+                else if (str[end] == ',' && depth == 1)
+                    has_comma = true;
+                if (depth > 0)
+                    ++end;
+            }
+            if (!has_comma)
+            {
+                str.replace(pos, 4, "ln(");
+                pos += 3;
+            }
+            else
+            {
+                pos += 4;
+            }
         }
         return str;
     }
@@ -1008,13 +1042,20 @@ private:
         return num.__str__();
     }
 
-    static std::string BasicToJson(const SymEngine::Basic& expr, int precision, int exp, JsonNumberFormat format)
+    static std::string BasicToJson(const SymEngine::Basic& expr, int precision, int exp, JsonNumberFormat format, Language language = Language::English)
     {
         if (SymEngine::is_a<const SymEngine::Pow>(expr))
         {
             const SymEngine::Pow& pow = static_cast<const SymEngine::Pow&>(expr);
-            std::string base = BasicToJson(*pow.get_base(), precision, exp, format);
-            std::string exp_str = BasicToJson(*pow.get_exp(), precision, exp, format);
+            const auto& base_expr = *pow.get_base();
+            std::string base = BasicToJson(base_expr, precision, exp, format, language);
+            if (SymEngine::is_a<const SymEngine::Add>(base_expr) ||
+                SymEngine::is_a<const SymEngine::Mul>(base_expr) ||
+                SymEngine::is_a<const SymEngine::Pow>(base_expr))
+            {
+                base = JsonCodeRow({JsonOpenRoundBracket(), base, JsonCloseRoundBracket()});
+            }
+            std::string exp_str = BasicToJson(*pow.get_exp(), precision, exp, format, language);
             auto exp_basic = pow.get_exp();
             if (SymEngine::is_a<const SymEngine::Integer>(*exp_basic))
             {
@@ -1040,7 +1081,7 @@ private:
             }
             return JsonPower(base, exp_str);
         }
-        auto items = BasicToJsonElements(expr, precision, exp, format);
+        auto items = BasicToJsonElements(expr, precision, exp, format, language);
         bool is_division_like = (items.size() == 1) && (SymEngine::is_a<const SymEngine::Mul>(expr) ||
             (SymEngine::is_a<const SymEngine::Rational>(expr) && format == JsonNumberFormat::RATIONAL));
         if (is_division_like)
@@ -1048,7 +1089,7 @@ private:
         return JsonCodeRow(items);
     }
 
-    static std::vector<std::string> BasicToJsonElements(const SymEngine::Basic& expr, int precision, int exp, JsonNumberFormat format)
+    static std::vector<std::string> BasicToJsonElements(const SymEngine::Basic& expr, int precision, int exp, JsonNumberFormat format, Language language = Language::English)
     {
         if (SymEngine::is_a<const SymEngine::Symbol>(expr))
             return {JsonCodeString(expr.__str__())};
@@ -1137,7 +1178,7 @@ private:
 
             if (!coef->is_zero())
             {
-                auto coef_elements = BasicToJsonElements(*coef, precision, exp, format);
+                auto coef_elements = BasicToJsonElements(*coef, precision, exp, format, language);
                 items.insert(items.end(), coef_elements.begin(), coef_elements.end());
             }
 
@@ -1149,8 +1190,8 @@ private:
             for (const auto& entry : sorted)
             {
                 const auto& p = entry.second;
-                auto term_elements = BasicToJsonElements(*p.first, precision, exp, format);
-                auto coeff_elements = BasicToJsonElements(*p.second, precision, exp, format);
+                auto term_elements = BasicToJsonElements(*p.first, precision, exp, format, language);
+                auto coeff_elements = BasicToJsonElements(*p.second, precision, exp, format, language);
                 bool pos = true;
 
                 if (SymEngine::is_a<const SymEngine::Integer>(*p.second))
@@ -1160,7 +1201,7 @@ private:
                     {
                         pos = false;
                         auto neg = coeff_int.neg();
-                        coeff_elements = BasicToJsonElements(*neg, precision, exp, format);
+                        coeff_elements = BasicToJsonElements(*neg, precision, exp, format, language);
                     }
                 }
                 else if (SymEngine::is_a<const SymEngine::Rational>(*p.second))
@@ -1170,7 +1211,7 @@ private:
                     {
                         pos = false;
                         auto neg_rat = coeff_rat.neg();
-                        coeff_elements = BasicToJsonElements(*neg_rat, precision, exp, format);
+                        coeff_elements = BasicToJsonElements(*neg_rat, precision, exp, format, language);
                     }
                 }
                 else if (SymEngine::is_a<const SymEngine::RealDouble>(*p.second))
@@ -1223,7 +1264,7 @@ private:
         }
 
         if (SymEngine::is_a<const SymEngine::Pow>(expr))
-            return {BasicToJson(expr, precision, exp, format)};
+            return {BasicToJson(expr, precision, exp, format, language)};
 
         if (const auto* func = dynamic_cast<const SymEngine::Function*>(&expr))
         {
@@ -1233,6 +1274,8 @@ private:
             {
                 std::string name = str.substr(0, pos);
                 auto args = func->get_args();
+                if (name == "log" && args.size() == 1 && language == Language::Russian)
+                    name = "ln";
                 std::vector<std::string> items;
                 items.push_back(JsonCodeString(name));
                 items.push_back(JsonOpenRoundBracket());
@@ -1243,7 +1286,7 @@ private:
                         items.push_back(JsonCodeString(","));
                         items.push_back(JsonCodeString(" "));
                     }
-                    auto arg_elems = BasicToJsonElements(*args[i], precision, exp, format);
+                    auto arg_elems = BasicToJsonElements(*args[i], precision, exp, format, language);
                     for (auto& el : arg_elems)
                         items.push_back(el);
                 }
@@ -1264,7 +1307,7 @@ private:
 
             if (!coef->is_zero() && !coef->is_one() && !coef->is_minus_one())
             {
-                auto coef_elems = BasicToJsonElements(*coef, precision, exp, format);
+                auto coef_elems = BasicToJsonElements(*coef, precision, exp, format, language);
                 if (coef_elems.size() == 1)
                     positive.push_back(coef_elems[0]);
                 else
@@ -1291,7 +1334,7 @@ private:
                         base_json = JsonCodeRow(base_elems);
                 }
                 else
-                    base_json = BasicToJson(*p.first, precision, exp, format);
+                    base_json = BasicToJson(*p.first, precision, exp, format, language);
 
                 bool is_neg_int = false;
                 if (SymEngine::is_a<const SymEngine::Integer>(*p.second))
@@ -1306,7 +1349,16 @@ private:
                         if (exp_json == JsonCodeString("1.") || exp_json == JsonCodeString("1"))
                             negative.push_back(base_json);
                         else
-                            negative.push_back(JsonPower(JsonCodeRow({base_json}), JsonCodeRow({exp_json})));
+                        {
+                            std::string power_base = base_json;
+                            if (SymEngine::is_a<const SymEngine::Add>(*p.first) ||
+                                SymEngine::is_a<const SymEngine::Mul>(*p.first) ||
+                                SymEngine::is_a<const SymEngine::Pow>(*p.first))
+                            {
+                                power_base = JsonCodeRow({JsonOpenRoundBracket(), base_json, JsonCloseRoundBracket()});
+                            }
+                            negative.push_back(JsonPower(JsonCodeRow({power_base}), JsonCodeRow({exp_json})));
+                        }
                     }
                 }
 
@@ -1324,13 +1376,22 @@ private:
                     }
                     else
                     {
-                        auto exp_elems = BasicToJsonElements(*p.second, precision, exp, format);
+                        auto exp_elems = BasicToJsonElements(*p.second, precision, exp, format, language);
                         exp_json = exp_elems.size() == 1 ? exp_elems[0] : JsonCodeRow(exp_elems);
                     }
                     if (exp_json == JsonCodeString("1.") || exp_json == JsonCodeString("1"))
                         positive.push_back(base_json);
                     else
-                        positive.push_back(JsonPower(JsonCodeRow({base_json}), JsonCodeRow({exp_json})));
+                    {
+                        std::string power_base = base_json;
+                        if (SymEngine::is_a<const SymEngine::Add>(*p.first) ||
+                            SymEngine::is_a<const SymEngine::Mul>(*p.first) ||
+                            SymEngine::is_a<const SymEngine::Pow>(*p.first))
+                        {
+                            power_base = JsonCodeRow({JsonOpenRoundBracket(), base_json, JsonCloseRoundBracket()});
+                        }
+                        positive.push_back(JsonPower(JsonCodeRow({power_base}), JsonCodeRow({exp_json})));
+                    }
                 }
             }
 

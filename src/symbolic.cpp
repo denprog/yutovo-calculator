@@ -48,7 +48,7 @@ SymEngine::Expression Symbolic<Real>::ToExpression(const Real& num) const
 }
 
 template<>
-std::string Symbolic<Real>::ToStdString(int exp) const
+std::string Symbolic<Real>::ToStdString(int exp, Language language) const
 {
     if (!expr)
         return {};
@@ -101,6 +101,8 @@ std::string Symbolic<Real>::ToStdString(int exp) const
         s = ReplaceAll(s, "inf", "∞");
         s = ReplaceAll(s, "zoo", "∞");
         s = ReplaceAll(s, "oo", "∞");
+        if (language == Language::Russian)
+            s = ReplaceLogWithLn(s, language);
         return ReplacePowerOperator(s);
     }
 
@@ -137,6 +139,8 @@ std::string Symbolic<Real>::ToStdString(int exp) const
             }
             mpfr_clear(num);
         }
+        if (language == Language::Russian)
+            s = ReplaceLogWithLn(s, language);
         return ReplacePowerOperator(s);
     }
 
@@ -307,11 +311,13 @@ std::string Symbolic<Real>::ToStdString(int exp) const
     s = ReplaceAll(s, "inf", "∞");
     s = ReplaceAll(s, "zoo", "∞");
     s = ReplaceAll(s, "oo", "∞");
+    if (language == Language::Russian)
+        s = ReplaceLogWithLn(s, language);
     return ReplacePowerOperator(s);
 }
 
 template<>
-std::u32string Symbolic<Real>::ToString(int exp) const
+std::u32string Symbolic<Real>::ToString(int exp, Language language) const
 {
     return ToUtfString(ToStdString(exp));
 }
@@ -325,7 +331,7 @@ SymEngine::Expression Symbolic<Rational>::ToExpression(const Rational& num) cons
 }
 
 template<>
-std::string Symbolic<Rational>::ToStdString(int exp) const
+std::string Symbolic<Rational>::ToStdString(int exp, Language language) const
 {
     if (!expr)
         return {};
@@ -336,11 +342,13 @@ std::string Symbolic<Rational>::ToStdString(int exp) const
     s.erase(std::remove(s.begin(), s.end(), ' '), s.end());
     if (s.find("zoo") != std::string::npos)
         s = "zoo";
+    if (language == Language::Russian)
+        s = ReplaceLogWithLn(s, language);
     return ReplacePowerOperator(ReplaceAll(ReplaceAll(ReplaceAll(ReplaceAll(s, "inf.", "∞"), "inf", "∞"), "zoo", "∞"), "oo", "∞"));
 }
 
 template<>
-std::u32string Symbolic<Rational>::ToString(int exp) const
+std::u32string Symbolic<Rational>::ToString(int exp, Language language) const
 {
     return ToUtfString(ToStdString(exp));
 }
@@ -354,7 +362,7 @@ SymEngine::Expression Symbolic<Complex>::ToExpression(const Complex& num) const
 }
 
 template<>
-std::string Symbolic<Complex>::ToStdString(int exp) const
+std::string Symbolic<Complex>::ToStdString(int exp, Language language) const
 {
     if (!expr)
         return {};
@@ -461,17 +469,19 @@ std::string Symbolic<Complex>::ToStdString(int exp) const
             ++i;
         }
     }
+    if (language == Language::Russian)
+        result = ReplaceLogWithLn(result, language);
     return RemoveInsignificantPoint(ReplacePowerOperator(ReplaceAll(ReplaceAll(ReplaceAll(ReplaceAll(result, "inf.", "∞"), "inf", "∞"), "zoo", "∞"), "oo", "∞")));
 }
 
 template<>
-std::u32string Symbolic<Complex>::ToString(int exp) const
+std::u32string Symbolic<Complex>::ToString(int exp, Language language) const
 {
     return ToUtfString(ToStdString(exp));
 }
 
 template<>
-std::string Symbolic<Real>::ToJson(int exp) const
+std::string Symbolic<Real>::ToJson(int exp, Language language) const
 {
     if (!expr)
         return {};
@@ -479,12 +489,12 @@ std::string Symbolic<Real>::ToJson(int exp) const
     std::string str = basic->__str__();
     if (str.find("zoo") != std::string::npos)
         return JsonResultWrapper(45, JsonCodeRow({JsonCodeString("∞")}));
-    std::string content = BasicToJson(*basic, precision, exp, JsonNumberFormat::REAL);
+    std::string content = BasicToJson(*basic, precision, exp, JsonNumberFormat::REAL, language);
     return JsonResultWrapper(45, content); // SYMBOLIC_REAL_RESULT
 }
 
 template<>
-std::string Symbolic<Rational>::ToJson(int exp) const
+std::string Symbolic<Rational>::ToJson(int exp, Language language) const
 {
     if (!expr)
         return {};
@@ -492,12 +502,12 @@ std::string Symbolic<Rational>::ToJson(int exp) const
     std::string str = basic->__str__();
     if (str.find("zoo") != std::string::npos)
         return JsonResultWrapper(46, JsonCodeRow({JsonCodeString("∞")}));
-    std::string content = BasicToJson(*basic, precision, exp, JsonNumberFormat::RATIONAL);
+    std::string content = BasicToJson(*basic, precision, exp, JsonNumberFormat::RATIONAL, language);
     return JsonResultWrapper(46, content); // SYMBOLIC_RATIONAL_RESULT
 }
 
 template<>
-std::string Symbolic<Complex>::ToJson(int exp) const
+std::string Symbolic<Complex>::ToJson(int exp, Language language) const
 {
     if (!expr)
         return {};
@@ -505,7 +515,7 @@ std::string Symbolic<Complex>::ToJson(int exp) const
     std::string str = basic->__str__();
     if (str.find("zoo") != std::string::npos)
         return JsonResultWrapper(47, JsonCodeRow({JsonCodeString("∞")}));
-    std::string content = BasicToJson(*basic, precision, exp, JsonNumberFormat::COMPLEX);
+    std::string content = BasicToJson(*basic, precision, exp, JsonNumberFormat::COMPLEX, language);
     return JsonResultWrapper(47, content); // SYMBOLIC_COMPLEX_RESULT
 }
 
