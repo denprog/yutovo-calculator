@@ -869,6 +869,12 @@ private:
     static std::vector<std::string> NumberToJsonElements(const SymEngine::Number& num, int precision, int exp, JsonNumberFormat format)
     {
         std::string s = FormatNumberForJson(num, precision, exp, format);
+        if (s == "inf")
+            return {JsonCodeString("∞")};
+        if (s == "-inf")
+            return {JsonMinus(), JsonCodeString("∞")};
+        if (s == "nan")
+            return {JsonCodeString("nan")};
         if (s.find('E') != std::string::npos)
             return JsonScientificElements(s);
         if (!s.empty() && s[0] == '-')
@@ -987,6 +993,10 @@ private:
         if (SymEngine::is_a<const SymEngine::RealDouble>(num))
         {
             double value = static_cast<const SymEngine::RealDouble&>(num).as_double();
+            if (std::isinf(value))
+                return value > 0.0 ? "inf" : "-inf";
+            if (std::isnan(value))
+                return "nan";
             std::ostringstream oss;
             oss << std::fixed << std::setprecision(precision) << value;
             std::string fixed_str = oss.str();
@@ -1023,6 +1033,10 @@ private:
         if (SymEngine::is_a<const SymEngine::RealMPFR>(num))
         {
             mpfr_srcptr value = static_cast<const SymEngine::RealMPFR&>(num).as_mpfr().get_mpfr_t();
+            if (mpfr_inf_p(value))
+                return mpfr_sgn(value) > 0 ? "inf" : "-inf";
+            if (mpfr_nan_p(value))
+                return "nan";
             std::string str = num.__str__();
             str.erase(std::remove(str.begin(), str.end(), ' '), str.end());
             int order = GetDecimalOrder(str);

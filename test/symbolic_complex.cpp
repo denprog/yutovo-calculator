@@ -841,6 +841,15 @@ TEST_F(CalcTestSymbolicComplex, evalf_exp)
         R"r({"type":47,"elements":[{"type":7,"elements":[{"type":8,"elements":"2.6881171418"},{"type":13,"symbol":"·"},{"type":15,"elements":[{"type":7,"elements":[{"type":8,"elements":"10"}]},{"type":10,"elements":[]},{"type":7,"elements":[{"type":8,"elements":"43"}]}]}]}]})r" ) << json;
 }
 
+TEST_F(CalcTestSymbolicComplex, evalf_exp1000)
+{
+    Parser<Symbolic<Complex>> parser10(10, Language::English);
+    Symbolic<Complex> res = parser10.Parse(LogicalId{0, 0, 0, 0, 1}, U"evalf(exp(1000));");
+    ASSERT_TRUE(res.ToStdString(10) == "∞") << res.ToStdString(10);
+    ASSERT_TRUE(res.ToJson(10) ==
+        R"r({"type":47,"elements":[{"type":7,"elements":[{"type":8,"elements":"∞"}]}]})r" ) << res.ToJson(10);
+}
+
 TEST_F(CalcTestSymbolicComplex, limit_cot0)
 {
     auto res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"subs(cot(x),x,0);");
