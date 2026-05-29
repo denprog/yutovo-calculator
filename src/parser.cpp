@@ -852,8 +852,6 @@ Parser<yutovo_calculator::Symbolic<yutovo_calculator::Rational>>::Parser(const i
     InitThreadTime();
 
     SymbolicRationalUnaryFunc unary_func;
-    unary_func = &evalf;
-    solver.AddBuiltinFunction(U"evalf", unary_func);
     unary_func = &expand;
     solver.AddBuiltinFunction(U"expand", unary_func);
     unary_func = &simplify;

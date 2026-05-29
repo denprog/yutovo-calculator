@@ -799,23 +799,6 @@ TEST_F(CalcTestSymbolicRational, sqrt_half)
         R"({"type":46,"elements":[{"type":7,"elements":[{"type":14,"elements":[{"type":7,"elements":[{"type":8,"elements":"1"}]},{"type":10,"elements":[]},{"type":7,"elements":[{"type":8,"elements":"2"}]}]},{"type":13,"symbol":"·"},{"type":15,"elements":[{"type":7,"elements":[{"type":8,"elements":"2"}]},{"type":10,"elements":[]},{"type":7,"elements":[{"type":8,"elements":"1/2"}]}]}]}]})" ) << res.ToJson(10);
 }
 
-TEST_F(CalcTestSymbolicRational, evalf1)
-{
-    Parser<Symbolic<Rational>> parser10(10, Language::English);
-    Symbolic<Rational> res = parser10.Parse(LogicalId{0, 0, 0, 0, 1}, U"evalf(exp(100));");
-    std::string json = res.ToJson(10);
-    ASSERT_TRUE(json ==
-        R"r({"type":46,"elements":[{"type":7,"elements":[{"type":8,"elements":"2.6881171418"},{"type":13,"symbol":"·"},{"type":15,"elements":[{"type":7,"elements":[{"type":8,"elements":"10"}]},{"type":10,"elements":[]},{"type":7,"elements":[{"type":8,"elements":"43"}]}]}]}]})r" ) << json;
-}
-
-TEST_F(CalcTestSymbolicRational, evalf2)
-{
-    Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"evalf(y+3.4*y);");
-    ASSERT_TRUE(res.ToStdString(0) == "4.4*y") << res.ToStdString(0);
-    ASSERT_TRUE(res.ToJson(10) ==
-        R"r({"type":46,"elements":[{"type":7,"elements":[{"type":8,"elements":"4.4"},{"type":13,"symbol":"·"},{"type":8,"elements":"y"}]}]})r" ) << res.ToJson(10);
-}
-
 TEST_F(CalcTestSymbolicRational, limit_cot0)
 {
     auto res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"subs(cot(x),x,0);");
