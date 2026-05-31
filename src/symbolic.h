@@ -1177,6 +1177,42 @@ private:
             const auto& cd = static_cast<const SymEngine::ComplexDouble&>(expr);
             auto re = cd.real_part();
             auto im = cd.imaginary_part();
+            if (re->is_zero())
+            {
+                if (im->is_one())
+                    return {JsonCodeString("i")};
+                if (im->is_minus_one())
+                    return {JsonMinus(), JsonCodeString("i")};
+                std::vector<std::string> items;
+                std::string im_str = FormatNumberForJson(*im, precision, exp, format);
+                if (im_str.find('E') != std::string::npos)
+                {
+                    auto sci = JsonScientificElements(im_str);
+                    if (!sci.empty() && sci[0] == JsonMinus())
+                    {
+                        items.push_back(JsonMinus());
+                        items.insert(items.end(), sci.begin() + 1, sci.end());
+                    }
+                    else
+                    {
+                        items.push_back(JsonPlus());
+                        items.insert(items.end(), sci.begin(), sci.end());
+                    }
+                }
+                else if (!im_str.empty() && im_str[0] == '-')
+                {
+                    items.push_back(JsonMinus());
+                    items.push_back(JsonCodeString(im_str.substr(1)));
+                }
+                else
+                {
+                    items.push_back(JsonPlus());
+                    items.push_back(JsonCodeString(im_str));
+                }
+                items.push_back(JsonMultiply());
+                items.push_back(JsonCodeString("i"));
+                return items;
+            }
             std::vector<std::string> items;
             std::string re_str = FormatNumberForJson(*re, precision, exp, format);
             if (re_str.find('E') != std::string::npos)
@@ -1191,33 +1227,46 @@ private:
             }
             else
                 items.push_back(JsonCodeString(re_str));
-            std::string im_str = FormatNumberForJson(*im, precision, exp, format);
-            if (im_str.find('E') != std::string::npos)
+            if (im->is_one())
             {
-                auto sci = JsonScientificElements(im_str);
-                if (!sci.empty() && sci[0] == JsonMinus())
+                items.push_back(JsonPlus());
+                items.push_back(JsonCodeString("i"));
+            }
+            else if (im->is_minus_one())
+            {
+                items.push_back(JsonMinus());
+                items.push_back(JsonCodeString("i"));
+            }
+            else
+            {
+                std::string im_str = FormatNumberForJson(*im, precision, exp, format);
+                if (im_str.find('E') != std::string::npos)
+                {
+                    auto sci = JsonScientificElements(im_str);
+                    if (!sci.empty() && sci[0] == JsonMinus())
+                    {
+                        items.push_back(JsonMinus());
+                        items.insert(items.end(), sci.begin() + 1, sci.end());
+                    }
+                    else
+                    {
+                        items.push_back(JsonPlus());
+                        items.insert(items.end(), sci.begin(), sci.end());
+                    }
+                }
+                else if (!im_str.empty() && im_str[0] == '-')
                 {
                     items.push_back(JsonMinus());
-                    items.insert(items.end(), sci.begin() + 1, sci.end());
+                    items.push_back(JsonCodeString(im_str.substr(1)));
                 }
                 else
                 {
                     items.push_back(JsonPlus());
-                    items.insert(items.end(), sci.begin(), sci.end());
+                    items.push_back(JsonCodeString(im_str));
                 }
+                items.push_back(JsonMultiply());
+                items.push_back(JsonCodeString("i"));
             }
-            else if (!im_str.empty() && im_str[0] == '-')
-            {
-                items.push_back(JsonMinus());
-                items.push_back(JsonCodeString(im_str.substr(1)));
-            }
-            else
-            {
-                items.push_back(JsonPlus());
-                items.push_back(JsonCodeString(im_str));
-            }
-            items.push_back(JsonMultiply());
-            items.push_back(JsonCodeString("i"));
             return items;
         }
 
@@ -1232,6 +1281,10 @@ private:
                 return NumberToJsonElements(*re, precision, exp, format);
             if (re_zero)
             {
+                if (im->is_one())
+                    return {JsonCodeString("i")};
+                if (im->is_minus_one())
+                    return {JsonMinus(), JsonCodeString("i")};
                 auto im_elems = NumberToJsonElements(*im, precision, exp, format);
                 std::vector<std::string> items;
                 items.insert(items.end(), im_elems.begin(), im_elems.end());
@@ -1242,19 +1295,32 @@ private:
             std::vector<std::string> items;
             auto re_elems = NumberToJsonElements(*re, precision, exp, format);
             items.insert(items.end(), re_elems.begin(), re_elems.end());
-            auto im_elems = NumberToJsonElements(*im, precision, exp, format);
-            if (!im_elems.empty() && im_elems[0] == JsonMinus())
+            if (im->is_one())
+            {
+                items.push_back(JsonPlus());
+                items.push_back(JsonCodeString("i"));
+            }
+            else if (im->is_minus_one())
             {
                 items.push_back(JsonMinus());
-                items.insert(items.end(), im_elems.begin() + 1, im_elems.end());
+                items.push_back(JsonCodeString("i"));
             }
             else
             {
-                items.push_back(JsonPlus());
-                items.insert(items.end(), im_elems.begin(), im_elems.end());
+                auto im_elems = NumberToJsonElements(*im, precision, exp, format);
+                if (!im_elems.empty() && im_elems[0] == JsonMinus())
+                {
+                    items.push_back(JsonMinus());
+                    items.insert(items.end(), im_elems.begin() + 1, im_elems.end());
+                }
+                else
+                {
+                    items.push_back(JsonPlus());
+                    items.insert(items.end(), im_elems.begin(), im_elems.end());
+                }
+                items.push_back(JsonMultiply());
+                items.push_back(JsonCodeString("i"));
             }
-            items.push_back(JsonMultiply());
-            items.push_back(JsonCodeString("i"));
             return items;
         }
 
