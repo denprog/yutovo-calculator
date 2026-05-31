@@ -1163,6 +1163,43 @@ private:
             return items;
         }
 
+        if (SymEngine::is_a<const SymEngine::Complex>(expr))
+        {
+            const auto& c = static_cast<const SymEngine::Complex&>(expr);
+            auto re = c.real_part();
+            auto im = c.imaginary_part();
+            bool re_zero = re->is_zero();
+            bool im_zero = im->is_zero();
+            if (im_zero)
+                return NumberToJsonElements(*re, precision, exp, format);
+            if (re_zero)
+            {
+                auto im_elems = NumberToJsonElements(*im, precision, exp, format);
+                std::vector<std::string> items;
+                items.insert(items.end(), im_elems.begin(), im_elems.end());
+                items.push_back(JsonMultiply());
+                items.push_back(JsonCodeString("i"));
+                return items;
+            }
+            std::vector<std::string> items;
+            auto re_elems = NumberToJsonElements(*re, precision, exp, format);
+            items.insert(items.end(), re_elems.begin(), re_elems.end());
+            auto im_elems = NumberToJsonElements(*im, precision, exp, format);
+            if (!im_elems.empty() && im_elems[0] == JsonMinus())
+            {
+                items.push_back(JsonMinus());
+                items.insert(items.end(), im_elems.begin() + 1, im_elems.end());
+            }
+            else
+            {
+                items.push_back(JsonPlus());
+                items.insert(items.end(), im_elems.begin(), im_elems.end());
+            }
+            items.push_back(JsonMultiply());
+            items.push_back(JsonCodeString("i"));
+            return items;
+        }
+
         if (SymEngine::is_a<const SymEngine::Rational>(expr))
         {
             const SymEngine::Rational& rat = static_cast<const SymEngine::Rational&>(expr);
