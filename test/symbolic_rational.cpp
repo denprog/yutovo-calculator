@@ -344,7 +344,7 @@ TEST_F(CalcTestSymbolicRational, sin_pi_12)
     Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"simplify(sin(pi/12));");
     ASSERT_TRUE(res.ToStdString(0) == "(1/4)*sqrt(2)*(-1+sqrt(3))") << res.ToStdString(0);
     std::string json = res.ToJson(10);
-    ASSERT_TRUE(json == R"xxx({"type":46,"elements":[{"type":7,"elements":[{"type":12,"symbol":"-"},{"type":14,"elements":[{"type":7,"elements":[{"type":8,"elements":"1"}]},{"type":10,"elements":[]},{"type":7,"elements":[{"type":8,"elements":"4"}]}]},{"type":13,"symbol":"·"},{"type":15,"elements":[{"type":7,"elements":[{"type":8,"elements":"2"}]},{"type":10,"elements":[]},{"type":7,"elements":[{"type":14,"elements":[{"type":7,"elements":[{"type":8,"elements":"1"}]},{"type":10,"elements":[]},{"type":7,"elements":[{"type":8,"elements":"2"}]}]}]}]},{"type":13,"symbol":"·"},{"type":7,"elements":[{"type":19,"symbol":"("},{"type":7,"elements":[{"type":8,"elements":"1"},{"type":12,"symbol":"-"},{"type":15,"elements":[{"type":7,"elements":[{"type":8,"elements":"3"}]},{"type":10,"elements":[]},{"type":14,"elements":[{"type":7,"elements":[{"type":8,"elements":"1"}]},{"type":10,"elements":[]},{"type":7,"elements":[{"type":8,"elements":"2"}]}]}]}]},{"type":20,"symbol":")"}]}]}]})xxx") << json;
+    ASSERT_TRUE(json == R"xxx({"type":46,"elements":[{"type":7,"elements":[{"type":12,"symbol":"-"},{"type":14,"elements":[{"type":7,"elements":[{"type":8,"elements":"1"}]},{"type":10,"elements":[]},{"type":7,"elements":[{"type":8,"elements":"4"}]}]},{"type":13,"symbol":"·"},{"type":16,"elements":[{"type":10,"elements":[]},{"type":7,"elements":[{"type":8,"elements":"2"}]}]},{"type":13,"symbol":"·"},{"type":7,"elements":[{"type":19,"symbol":"("},{"type":7,"elements":[{"type":8,"elements":"1"},{"type":12,"symbol":"-"},{"type":16,"elements":[{"type":10,"elements":[]},{"type":7,"elements":[{"type":8,"elements":"3"}]}]}]},{"type":20,"symbol":")"}]}]}]})xxx") << json;
 }
 
 TEST_F(CalcTestSymbolicRational, mul_neg_add)
@@ -352,7 +352,7 @@ TEST_F(CalcTestSymbolicRational, mul_neg_add)
     Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"x*(-1+sqrt(3));");
     ASSERT_TRUE(res.ToStdString(0) == "x*(-1+sqrt(3))") << res.ToStdString(0);
     std::string json = res.ToJson(10);
-    ASSERT_TRUE(json == R"xxx({"type":46,"elements":[{"type":7,"elements":[{"type":12,"symbol":"-"},{"type":8,"elements":"x"},{"type":13,"symbol":"·"},{"type":7,"elements":[{"type":19,"symbol":"("},{"type":7,"elements":[{"type":8,"elements":"1"},{"type":12,"symbol":"-"},{"type":15,"elements":[{"type":7,"elements":[{"type":8,"elements":"3"}]},{"type":10,"elements":[]},{"type":14,"elements":[{"type":7,"elements":[{"type":8,"elements":"1"}]},{"type":10,"elements":[]},{"type":7,"elements":[{"type":8,"elements":"2"}]}]}]}]},{"type":20,"symbol":")"}]}]}]})xxx") << json;
+    ASSERT_TRUE(json == R"xxx({"type":46,"elements":[{"type":7,"elements":[{"type":12,"symbol":"-"},{"type":8,"elements":"x"},{"type":13,"symbol":"·"},{"type":7,"elements":[{"type":19,"symbol":"("},{"type":7,"elements":[{"type":8,"elements":"1"},{"type":12,"symbol":"-"},{"type":16,"elements":[{"type":10,"elements":[]},{"type":7,"elements":[{"type":8,"elements":"3"}]}]}]},{"type":20,"symbol":")"}]}]}]})xxx") << json;
 }
 
 TEST_F(CalcTestSymbolicRational, diff2)
@@ -626,19 +626,10 @@ TEST_F(CalcTestSymbolicRational, sqrt1)
     json = res.ToJson(10);
     ASSERT_TRUE(json ==
         R"({"type":46,"elements":[)"
-            R"({"type":15,"elements":[)"
+            R"({"type":16,"elements":[)"
+                R"({"type":10,"elements":[]},)"
                 R"({"type":7,"elements":[)"
                     R"({"type":8,"elements":"x"})"
-                R"(]},)"
-                R"({"type":10,"elements":[]},)"
-                R"({"type":14,"elements":[)"
-                    R"({"type":7,"elements":[)"
-                        R"({"type":8,"elements":"1"})"
-                    R"(]},)"
-                    R"({"type":10,"elements":[]},)"
-                    R"({"type":7,"elements":[)"
-                        R"({"type":8,"elements":"2"})"
-                    R"(]})"
                 R"(]})"
             R"(]})"
         R"(]})" ) << json;
@@ -821,7 +812,7 @@ TEST_F(CalcTestSymbolicRational, sqrt_half)
     Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"sqrt(1/2);");
     ASSERT_TRUE(res.ToStdString(0) == "(1/2)*sqrt(2)") << res.ToStdString(0);
     ASSERT_TRUE(res.ToJson(10) ==
-        R"({"type":46,"elements":[{"type":7,"elements":[{"type":14,"elements":[{"type":7,"elements":[{"type":8,"elements":"1"}]},{"type":10,"elements":[]},{"type":7,"elements":[{"type":8,"elements":"2"}]}]},{"type":13,"symbol":"·"},{"type":15,"elements":[{"type":7,"elements":[{"type":8,"elements":"2"}]},{"type":10,"elements":[]},{"type":7,"elements":[{"type":14,"elements":[{"type":7,"elements":[{"type":8,"elements":"1"}]},{"type":10,"elements":[]},{"type":7,"elements":[{"type":8,"elements":"2"}]}]}]}]}]}]})" ) << res.ToJson(10);
+        R"({"type":46,"elements":[{"type":7,"elements":[{"type":14,"elements":[{"type":7,"elements":[{"type":8,"elements":"1"}]},{"type":10,"elements":[]},{"type":7,"elements":[{"type":8,"elements":"2"}]}]},{"type":13,"symbol":"·"},{"type":16,"elements":[{"type":10,"elements":[]},{"type":7,"elements":[{"type":8,"elements":"2"}]}]}]}]})" ) << res.ToJson(10);
 }
 
 TEST_F(CalcTestSymbolicRational, limit_cot0)

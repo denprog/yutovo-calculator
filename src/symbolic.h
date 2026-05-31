@@ -961,6 +961,16 @@ private:
         return R"({"type":15,"elements":[)" + base + "," + JsonShape() + "," + exp + "]}";
     }
 
+    static std::string JsonSquareRoot(const std::string& base)
+    {
+        return R"({"type":16,"elements":[{"type":10,"elements":[]},)" + base + "]}";
+    }
+
+    static std::string JsonNthRoot(const std::string& n, const std::string& base)
+    {
+        return R"({"type":17,"elements":[)" + n + "," + JsonShape() + "," + base + "]}";
+    }
+
     static std::string JsonDivision(const std::string& num, const std::string& den)
     {
         return R"({"type":14,"elements":[)" + num + "," + JsonShape() + "," + den + "]}";
@@ -1083,8 +1093,42 @@ private:
             {
                 base = JsonCodeRow({JsonOpenRoundBracket(), base, JsonCloseRoundBracket()});
             }
-            std::string exp_str = BasicToJson(*pow.get_exp(), precision, exp, format, language);
+
             auto exp_basic = pow.get_exp();
+            bool is_inverse_root = false;
+            bool is_negative_root = false;
+            int root_degree = 0;
+
+            if (SymEngine::is_a<const SymEngine::Rational>(*exp_basic))
+            {
+                const auto& exp_rat = static_cast<const SymEngine::Rational&>(*exp_basic);
+                auto num = exp_rat.get_num();
+                auto den = exp_rat.get_den();
+                if ((num->is_one() || num->is_minus_one()) && !den->is_one())
+                {
+                    is_inverse_root = true;
+                    is_negative_root = num->is_minus_one();
+                    root_degree = den->as_int();
+                }
+            }
+
+            if (is_inverse_root && root_degree == 2)
+            {
+                std::string root = JsonSquareRoot(base);
+                if (is_negative_root)
+                    return JsonDivision(JsonCodeRow({JsonCodeString("1")}), root);
+                return root;
+            }
+            else if (is_inverse_root && root_degree > 2)
+            {
+                std::string n_json = JsonCodeRow({JsonCodeString(std::to_string(root_degree))});
+                std::string root = JsonNthRoot(n_json, base);
+                if (is_negative_root)
+                    return JsonDivision(JsonCodeRow({JsonCodeString("1")}), root);
+                return root;
+            }
+
+            std::string exp_str = BasicToJson(*exp_basic, precision, exp, format, language);
             if (SymEngine::is_a<const SymEngine::Integer>(*exp_basic))
             {
                 const auto& exp_int = static_cast<const SymEngine::Integer&>(*exp_basic);
@@ -1440,6 +1484,40 @@ private:
                     }
                     if (!negated_add)
                         base_json = BasicToJson(*p.first, precision, exp, format, language);
+                }
+
+                bool is_root_exp = false;
+                bool is_root_negative = false;
+                int root_degree = 0;
+                if (SymEngine::is_a<const SymEngine::Rational>(*p.second))
+                {
+                    const auto& exp_rat = static_cast<const SymEngine::Rational&>(*p.second);
+                    auto num = exp_rat.get_num();
+                    auto den = exp_rat.get_den();
+                    if ((num->is_one() || num->is_minus_one()) && !den->is_one())
+                    {
+                        is_root_exp = true;
+                        is_root_negative = num->is_minus_one();
+                        root_degree = den->as_int();
+                    }
+                }
+
+                if (is_root_exp)
+                {
+                    std::string root_base = JsonCodeRow({base_json});
+                    std::string root_json;
+                    if (root_degree == 2)
+                        root_json = JsonSquareRoot(root_base);
+                    else
+                    {
+                        std::string n_json = JsonCodeRow({JsonCodeString(std::to_string(root_degree))});
+                        root_json = JsonNthRoot(n_json, root_base);
+                    }
+                    if (is_root_negative)
+                        negative.push_back(root_json);
+                    else
+                        positive.push_back(root_json);
+                    continue;
                 }
 
                 bool is_neg_int = false;
