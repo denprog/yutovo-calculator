@@ -1399,7 +1399,48 @@ private:
                         base_json = JsonCodeRow(base_elems);
                 }
                 else
-                    base_json = BasicToJson(*p.first, precision, exp, format, language);
+                {
+                    bool negated_add = false;
+                    if (SymEngine::is_a<const SymEngine::Add>(*p.first))
+                    {
+                        const auto& add = static_cast<const SymEngine::Add&>(*p.first);
+                        if (add.get_coef()->is_negative())
+                        {
+                            bool exp_is_one = false;
+                            if (SymEngine::is_a<const SymEngine::Integer>(*p.second))
+                            {
+                                const auto& exp_int = static_cast<const SymEngine::Integer&>(*p.second);
+                                if (exp_int.is_one())
+                                    exp_is_one = true;
+                            }
+                            else if (SymEngine::is_a<const SymEngine::Rational>(*p.second))
+                            {
+                                const auto& exp_rat = static_cast<const SymEngine::Rational&>(*p.second);
+                                if (exp_rat.is_one())
+                                    exp_is_one = true;
+                            }
+                            if (exp_is_one)
+                            {
+                                negated_add = true;
+                                leading_minus = !leading_minus;
+                                auto new_coef = SymEngine::rcp_dynamic_cast<const SymEngine::Number>(
+                                    SymEngine::mul(SymEngine::minus_one, add.get_coef()));
+                                SymEngine::umap_basic_num new_dict;
+                                for (const auto& dp : add.get_dict())
+                                {
+                                    auto new_val = SymEngine::rcp_dynamic_cast<const SymEngine::Number>(
+                                        SymEngine::mul(SymEngine::minus_one, dp.second));
+                                    new_dict[dp.first] = new_val;
+                                }
+                                auto new_add = SymEngine::Add::from_dict(new_coef, std::move(new_dict));
+                                base_json = BasicToJson(*new_add, precision, exp, format, language);
+                                base_json = JsonCodeRow({JsonOpenRoundBracket(), base_json, JsonCloseRoundBracket()});
+                            }
+                        }
+                    }
+                    if (!negated_add)
+                        base_json = BasicToJson(*p.first, precision, exp, format, language);
+                }
 
                 bool is_neg_int = false;
                 if (SymEngine::is_a<const SymEngine::Integer>(*p.second))

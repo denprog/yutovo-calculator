@@ -362,7 +362,7 @@ TEST_F(CalcTestSymbolicComplex, sin_pi_12)
     Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"simplify(sin(pi/12));");
     ASSERT_TRUE(res.ToStdString(10) == "0.259") << res.ToStdString(10);
     std::string json = res.ToJson(10);
-    ASSERT_TRUE(json == R"xxx({"type":47,"elements":[{"type":7,"elements":[{"type":8,"elements":"0.25"},{"type":13,"symbol":"·"},{"type":15,"elements":[{"type":7,"elements":[{"type":8,"elements":"2"}]},{"type":10,"elements":[]},{"type":7,"elements":[{"type":8,"elements":"0.5"}]}]},{"type":13,"symbol":"·"},{"type":7,"elements":[{"type":12,"symbol":"-"},{"type":8,"elements":"1"},{"type":11,"symbol":"+"},{"type":15,"elements":[{"type":7,"elements":[{"type":8,"elements":"3"}]},{"type":10,"elements":[]},{"type":7,"elements":[{"type":8,"elements":"0.5"}]}]}]}]}]})xxx") << json;
+    ASSERT_TRUE(json == R"xxx({"type":47,"elements":[{"type":7,"elements":[{"type":12,"symbol":"-"},{"type":8,"elements":"0.25"},{"type":13,"symbol":"·"},{"type":15,"elements":[{"type":7,"elements":[{"type":8,"elements":"2"}]},{"type":10,"elements":[]},{"type":7,"elements":[{"type":8,"elements":"0.5"}]}]},{"type":13,"symbol":"·"},{"type":7,"elements":[{"type":19,"symbol":"("},{"type":7,"elements":[{"type":8,"elements":"1"},{"type":12,"symbol":"-"},{"type":15,"elements":[{"type":7,"elements":[{"type":8,"elements":"3"}]},{"type":10,"elements":[]},{"type":7,"elements":[{"type":8,"elements":"0.5"}]}]}]},{"type":20,"symbol":")"}]}]}]})xxx") << json;
 }
 
 TEST_F(CalcTestSymbolicComplex, diff2)
@@ -1077,6 +1077,14 @@ TEST_F(CalcTestSymbolicComplex, division3)
     Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"0 / 0;");
     ASSERT_TRUE(res.ToStdString(10) == "nan") << res.ToStdString(10);
     ASSERT_TRUE(res.ToJson(10) == "{\"type\":47,\"elements\":[{\"type\":7,\"elements\":[{\"type\":8,\"elements\":\"nan\"}]}]}") << res.ToJson(10);
+}
+
+TEST_F(CalcTestSymbolicComplex, mul_neg_add)
+{
+    Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"x*(-1+y);");
+    ASSERT_TRUE(res.ToStdString(10) == "x*(-1.+y)") << res.ToStdString(10);
+    std::string json = res.ToJson(10);
+    ASSERT_TRUE(json == R"xxx({"type":47,"elements":[{"type":7,"elements":[{"type":12,"symbol":"-"},{"type":8,"elements":"x"},{"type":13,"symbol":"·"},{"type":7,"elements":[{"type":19,"symbol":"("},{"type":7,"elements":[{"type":8,"elements":"1"},{"type":12,"symbol":"-"},{"type":8,"elements":"y"}]},{"type":20,"symbol":")"}]}]}]})xxx") << json;
 }
 
 TEST_F(CalcTestSymbolicComplex, simplify2)
