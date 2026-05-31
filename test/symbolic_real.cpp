@@ -417,6 +417,14 @@ TEST_F(CalcTestSymbolicReal, simplify1)
     ASSERT_TRUE(res.ToString(10) == U"2.*x") << res.ToStdString(10);
 }
 
+TEST_F(CalcTestSymbolicReal, sin_pi_12)
+{
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"simplify(sin(pi/12));");
+    ASSERT_TRUE(res.ToStdString(10) == "0.259") << res.ToStdString(10);
+    std::string json = res.ToJson(10);
+    ASSERT_TRUE(json == R"xxx({"type":45,"elements":[{"type":7,"elements":[{"type":8,"elements":"0.25"},{"type":13,"symbol":"·"},{"type":15,"elements":[{"type":7,"elements":[{"type":8,"elements":"2"}]},{"type":10,"elements":[]},{"type":7,"elements":[{"type":8,"elements":"0.5"}]}]},{"type":13,"symbol":"·"},{"type":7,"elements":[{"type":12,"symbol":"-"},{"type":8,"elements":"1"},{"type":11,"symbol":"+"},{"type":15,"elements":[{"type":7,"elements":[{"type":8,"elements":"3"}]},{"type":10,"elements":[]},{"type":7,"elements":[{"type":8,"elements":"0.5"}]}]}]}]}]})xxx") << json;
+}
+
 TEST_F(CalcTestSymbolicReal, simplify2)
 {
     parser.Parse(LogicalId{0, 0, 1}, U"f(x)=x+x;");

@@ -868,6 +868,20 @@ private:
 
     static std::vector<std::string> NumberToJsonElements(const SymEngine::Number& num, int precision, int exp, JsonNumberFormat format)
     {
+        if (SymEngine::is_a<const SymEngine::Rational>(num) && format == JsonNumberFormat::RATIONAL)
+        {
+            const SymEngine::Rational& rat = static_cast<const SymEngine::Rational&>(num);
+            auto num_int = rat.get_num();
+            auto den_int = rat.get_den();
+            if (num_int->is_negative())
+                num_int = num_int->neg();
+            std::string num_json = JsonCodeString(num_int->__str__());
+            std::string den_json = JsonCodeString(den_int->__str__());
+            std::string div = JsonDivision(JsonCodeRow({num_json}), JsonCodeRow({den_json}));
+            if (rat.is_negative())
+                return {JsonMinus(), div};
+            return {div};
+        }
         std::string s = FormatNumberForJson(num, precision, exp, format);
         if (s == "inf")
             return {JsonCodeString("∞")};
