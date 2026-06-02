@@ -197,9 +197,12 @@ void GetThreadTime(uint64_t& time)
     FILETIME creation_time, exit_time, kernel_time, user_time;
     if (GetThreadTimes(thread_handle, &creation_time, &exit_time, &kernel_time, &user_time))
     {
-        SYSTEMTIME s1, s2;
-        if (FileTimeToSystemTime(&kernel_time, &s1) && FileTimeToSystemTime(&user_time, &s2))
-            time = s1.wMilliseconds + s1.wSecond * 1000 + s1.wMinute * 60 * 1000 + s2.wMilliseconds + s2.wSecond * 1000 + s2.wMinute * 60 * 1000;
+        ULARGE_INTEGER kernel, user;
+        kernel.LowPart = kernel_time.dwLowDateTime;
+        kernel.HighPart = kernel_time.dwHighDateTime;
+        user.LowPart = user_time.dwLowDateTime;
+        user.HighPart = user_time.dwHighDateTime;
+        time = (kernel.QuadPart + user.QuadPart) / 10000;
     }
 #else
     timespec s;
