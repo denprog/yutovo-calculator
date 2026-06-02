@@ -17,6 +17,10 @@
 #include "array.h"
 #include "utils.h"
 
+#ifdef _WIN32
+#undef access
+#endif
+
 namespace yutovo_calculator
 {
 

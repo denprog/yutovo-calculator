@@ -8,6 +8,7 @@
 
 ## Agent Rules
 
+- **Never commit without explicit user permission.** Do not run `git commit`, `git push`, `git reset`, `git rebase`, or any other git mutations unless explicitly asked to do so. Ask for confirmation each time when git mutations are needed.
 - **Never delete existing tests.** When fixing regressions or refactoring, update test expectations to match the new correct behavior, but do not remove tests. If `git checkout` or similar commands are used to revert a file, verify that no user-added tests were lost.
 
 ## Current Work: Symbolic Integration
@@ -126,17 +127,17 @@ ASSERT_TRUE(document.ToHtml() == "<body>...</body>") << document.ToHtml();
 ### Build
 Each component is built and tested from its own `build/debug` subdirectory (in-tree builds are not used):
 ```bash
-cd yutovo-calculator/build/debug && make -j16 yutovo-calculator_tests
+cd yutovo-calculator/build/debug && make -j4 yutovo-calculator_tests
 ./test/yutovo-calculator_tests
 
-cd yutovo-solver/build/debug && make -j16
+cd yutovo-solver/build/debug && make -j4
 
-cd yutovo-editor/build/debug && make -j16 yutovo-editor_tests
+cd yutovo-editor/build/debug && make -j4 yutovo-editor_tests
 ./test/yutovo-editor_tests
 
-cd yutovo-desktop/build/debug && make -j16 yutovo-desktop
+cd yutovo-desktop/build/debug && make -j4 yutovo-desktop
 ```
-Use `-j16` maximum for building to avoid OOM kills.
+Use `-j4` maximum for building on any platform.
 
 ### Test runtime
 Running the full `yutovo-editor_tests` suite takes approximately **25 minutes** (symbolic tests are particularly slow due to WebSocket solver round-trips).

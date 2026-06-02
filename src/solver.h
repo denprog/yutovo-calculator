@@ -236,10 +236,7 @@ struct Solver : public boost::static_visitor<Number>
         return boost::apply_visitor(*this, op.graph);
     }
 
-    Number operator()(LineGraphNode<Number> const& op) const
-    {
-        throw MathException(op.id, IncorrectOperation, op.pos, 1, op.line);
-    }
+    Number operator()(LineGraphNode<Number> const& op) const;
 
     Number operator()(BarGraphNode<Number> const& op) const
     {
@@ -253,11 +250,7 @@ struct Solver : public boost::static_visitor<Number>
         return Number();
     }
 
-    Number operator()(UnitNode<Number> const& op) const
-    {
-        CheckBreak(parser_context);
-        throw MathException(op.id, IncorrectOperation, op.pos, 1, op.line);
-    }
+    Number operator()(UnitNode<Number> const& op) const;
 
     Number operator()(ListNode<Number> const& op) const
     {
@@ -278,363 +271,33 @@ struct Solver : public boost::static_visitor<Number>
         return Number();
     }
 
-    Number operator()(UnaryOperationNode<Number> const& op) const
-    {
-        CheckBreak(parser_context);
-        if constexpr (is_symbolic_v<Number>)
-        {
-            Number arg = boost::apply_visitor(*this, op.operand);
-            switch (op.op)
-            {
-            case '+':
-                return +arg;
-            case '-':
-                return -arg;
-            default:
-                throw SyntaxException(op.id, IncorrectOperation, op.pos, 1, op.line);
-            }
-        }
-        else
-        {
-            throw MathException(op.id, IncorrectOperation, op.pos, 1, op.line);
-        }
-    }
+    Number operator()(UnaryOperationNode<Number> const& op) const;
 
-    Number operator()(OperationNode<Number> const& op) const
-    {
-        CheckBreak(parser_context);
-        if constexpr (is_symbolic_v<Number>)
-        {
-            Number right = boost::apply_visitor(*this, op.operand);
-            switch (op.op)
-            {
-            case '+':
-                return left_value + right;
-            case '-':
-                return left_value - right;
-            case '*':
-                return left_value * right;
-            case '/':
-                return left_value / right;
-            case '^':
-                return left_value ^ right;
-            case '%':
-            case '&':
-            case '|':
-                throw SyntaxException(op.id, IncorrectOperation, op.pos, 1, op.line);
-            default:
-                throw SyntaxException(op.id, IncorrectOperation, op.pos, 1, op.line);
-            }
-        }
-        else
-        {
-            throw MathException(op.id, IncorrectOperation, op.pos, 1, op.line);
-        }
-    }
+    Number operator()(OperationNode<Number> const& op) const;
 
-    Number operator()(PostfixOperationNode<Number> const& op) const
-    {
-        CheckBreak(parser_context);
-        if constexpr (is_symbolic_v<Number>)
-        {
-            throw SyntaxException(op.id, IncorrectOperation, op.pos, 1, op.line);
-        }
-        else
-        {
-            throw MathException(op.id, IncorrectOperation, op.pos, 1, op.line);
-        }
-    }
+    Number operator()(PostfixOperationNode<Number> const& op) const;
 
     Number operator()(MixedDivivsionNode<Number> const& op) const
     {
         return (*this)(op.left) + (*this)(op.numerator) / (*this)(op.denominator);
     }
 
-    Number operator()(FunctionCallNode<Number> const& op) const
-    {
-        CheckBreak(parser_context);
-        if constexpr (is_symbolic_v<Number>)
-        {
-            AddDependency(op.name);
-            Number res;
-            try
-            {
-                FunctionNode<Number>* user_func = FindFunction(op);
-                if (user_func)
-                {
-                    IdentifierNodesIter funcIter = user_func->arguments.begin();
-                    for (ExpressionNodesIter iter = op.arguments.begin(); iter != op.arguments.end(); ++iter, ++funcIter)
-                    {
-                        CheckBreak(parser_context);
-                        Number arg = (*this)(*iter);
-                        PushTempVariable(funcIter->name, arg);
-                    }
-                    bool _exported_id = exported_id;
-                    exported_id = user_func->exported;
-                    res = (*this)(user_func->return_expression);
-                    exported_id = _exported_id;
-                    PopTempVariables(op.arguments.size());
-                    return res;
-                }
-                BuiltinFunction* func = FindBuiltinFunction(op.name.name);
-                if (func)
-                {
-                    try
-                    {
-                        auto u = std::get<typename SolverSymbols<Number>::UnaryFunction>(*func);
-                        if (op.arguments.size() != 1)
-                            throw SyntaxException(op.id, WrongArgumentsCount, U"Wrong arguments count in '" + op.name.name + U"'", op.pos, op.name.name.length(), op.line);
-                        ExpressionNodesIter iter = op.arguments.begin();
-                        Number arg = (*this)(*iter);
-                        return (*u)(arg);
-                    }
-                    catch (const std::bad_variant_access&)
-                    {
-                    }
-                    try
-                    {
-                        auto b = std::get<typename SolverSymbols<Number>::BinaryFunction>(*func);
-                        if (op.arguments.size() != 2)
-                            throw SyntaxException(op.id, WrongArgumentsCount, U"Wrong arguments count in '" + op.name.name + U"'", op.pos, op.name.name.length(), op.line);
-                        ExpressionNodesIter iter = op.arguments.begin();
-                        Number arg1 = (*this)(*iter++);
-                        Number arg2 = (*this)(*iter);
-                        return (*b)(arg1, arg2);
-                    }
-                    catch (const std::bad_variant_access&)
-                    {
-                    }
-                    try
-                    {
-                        auto t = std::get<typename SolverSymbols<Number>::TernaryFunction>(*func);
-                        if (op.arguments.size() != 3)
-                            throw SyntaxException(op.id, WrongArgumentsCount, U"Wrong arguments count in '" + op.name.name + U"'", op.pos, op.name.name.length(), op.line);
-                        ExpressionNodesIter iter = op.arguments.begin();
-                        Number arg1 = (*this)(*iter++);
-                        Number arg2 = (*this)(*iter++);
-                        Number arg3 = (*this)(*iter);
-                        return (*t)(arg1, arg2, arg3);
-                    }
-                    catch (const std::bad_variant_access&)
-                    {
-                    }
-                }
-            }
-            catch (const MathException& e)
-            {
-                throw MathException(op.id, e.ex_id, op.pos, op.line);
-            }
-            catch (const SymEngine::DivisionByZeroError&)
-            {
-                if constexpr (is_symbolic_v<Number>)
-                    return Number(precision, std::u32string(U"zoo"));
-                throw MathException(op.id, DivisionByZero, op.pos, op.line);
-            }
-            catch (const SymEngine::DomainError&)
-            {
-                if constexpr (is_symbolic_v<Number> && (std::is_same_v<Number, Symbolic<Real>> || std::is_same_v<Number, Symbolic<Complex>>))
-                    return Number(precision, std::u32string(U"nan"));
-                throw MathException(op.id, ArgumentIsOver, op.pos, op.line);
-            }
-            catch (const SymEngine::ParseError&)
-            {
-                throw MathException(op.id, SyntaxError, op.pos, op.line);
-            }
-            catch (const SymEngine::NotImplementedError&)
-            {
-                if constexpr (is_symbolic_v<Number> && (std::is_same_v<Number, Symbolic<Real>> || std::is_same_v<Number, Symbolic<Complex>>))
-                    return Number(precision, std::u32string(U"nan"));
-                throw MathException(op.id, NotImplemented, op.pos, op.line);
-            }
-            catch (const SymEngine::SerializationError&)
-            {
-                throw MathException(op.id, NotImplemented, op.pos, op.line);
-            }
-            catch (const ParserException&)
-            {
-                throw;
-            }
-            catch (...)
-            {
-                if constexpr (is_symbolic_v<Number> && (std::is_same_v<Number, Symbolic<Real>> || std::is_same_v<Number, Symbolic<Complex>>))
-                    return Number(precision, std::u32string(U"nan"));
-                throw MathException(op.id, IncorrectOperation, op.pos, op.line);
-            }
-            throw SyntaxException(op.id, UnknownIdentifier, U"Identifier '" + op.name.name + U"' not found", op.pos, op.name.name.length(), op.line);
-        }
-        else
-        {
-            throw MathException(op.id, IncorrectOperation, op.pos, 1, op.line);
-        }
-    }
+    Number operator()(FunctionCallNode<Number> const& op) const;
 
-    Number operator()(FunctionCallStringNode<Number> const& op) const
-    {
-        CheckBreak(parser_context);
-        if constexpr (is_symbolic_v<Number>)
-        {
-            AddDependency(op.name);
-            if (op.name.name == U"subs")
-            {
-                BuiltinFunction* func = FindBuiltinFunction(op.name.name);
-                if (func)
-                {
-                    Number var(precision, op.argument);
-                    throw SyntaxException(op.id, WrongArgumentsCount, U"Incorrect subs arguments", op.pos, op.name.name.length(), op.line);
-                }
-            }
-            throw SyntaxException(op.id, UnknownIdentifier, U"Identifier '" + op.name.name + U"' not found", op.pos, op.name.name.length(), op.line);
-        }
-        else
-        {
-            throw MathException(op.id, IncorrectOperation, op.pos, 1, op.line);
-        }
-    }
+    Number operator()(FunctionCallStringNode<Number> const& op) const;
 
     Number operator()(FunctionParamNode<Number> const& expr) const
     {
         return boost::apply_visitor(*this, expr.op);
     }
 
-    Number operator()(NoFencesFunctionCallNode<Number> const& op) const
-    {
-        CheckBreak(parser_context);
-        throw MathException(op.id, IncorrectOperation, op.pos, 1, op.line);
-    }
+    Number operator()(NoFencesFunctionCallNode<Number> const& op) const;
 
-    Number operator()(IdentifierNode<Number> const& op) const
-    {
-        CheckBreak(parser_context);
-        if constexpr (is_symbolic_v<Number>)
-        {
-            if (!op.subscript.empty())
-                throw SyntaxException(op.id, UnknownIdentifier, U"Identifier '" + op.name + U"' not found", op.pos, op.name.length(), op.line);
-            AddDependency(op);
-            auto* t = FindTempVariable(op.name);
-            if (t)
-                return t->second;
-            auto* v = FindVariable(op.name, op.subscript);
-            if (v)
-            {
-                LogicalId _id = id;
-                bool _exported_id = exported_id;
-                id = v->id;
-                exported_id = v->exported;
-                Number res = (*this)(v->expression);
-                id = _id;
-                exported_id = _exported_id;
-                return res;
-            }
-            auto* var = FindBuiltinVariable(op.name);
-            if (var)
-            {
-                try
-                {
-                    auto pv = std::get<typename SolverSymbols<Number>::PrecisionVariable>(*var);
-                    return (*pv)(precision);
-                }
-                catch (const std::bad_variant_access&)
-                {
-                }
-            }
-            Number builtin_id_val;
-            if (FindBuiltinIdentifier(op.name, builtin_id_val))
-                return builtin_id_val;
-            return Number(precision, op.name);
-        }
-        else
-        {
-            throw MathException(op.id, IncorrectOperation, op.pos, 1, op.line);
-        }
-    }
+    Number operator()(IdentifierNode<Number> const& op) const;
 
-    Number operator()(ImplicitStringMulNode<Number> const& op) const
-    {
-        CheckBreak(parser_context);
-        if constexpr (is_symbolic_v<Number>)
-        {
-            if (!op.identifier.subscript.empty())
-                throw SyntaxException(op.id, UnknownIdentifier, U"Identifier '" + op.identifier.name + U"' not found", op.pos, op.identifier.name.length(), op.line);
-            AddDependency(op.identifier);
-            auto* t = FindTempVariable(op.identifier.name);
-            if (t)
-                return (*this)(op.left) * t->second;
-            auto* v = FindVariable(op.identifier.name, op.identifier.subscript);
-            if (v)
-            {
-                LogicalId _id = id;
-                id = v->id;
-                Number res = (*this)(v->expression);
-                id = _id;
-                return (*this)(op.left) * res;
-            }
-            auto* var = FindBuiltinVariable(op.identifier.name);
-            if (var)
-            {
-                try
-                {
-                    auto pv = std::get<typename SolverSymbols<Number>::PrecisionVariable>(*var);
-                    return (*this)(op.left) * (*pv)(precision);
-                }
-                catch (const std::bad_variant_access&)
-                {
-                }
-            }
-            Number builtin_id_val;
-            if (FindBuiltinIdentifier(op.identifier.name, builtin_id_val))
-                return (*this)(op.left) * builtin_id_val;
-            return (*this)(op.left) * Number(precision, op.identifier.name);
-        }
-        else
-        {
-            throw MathException(op.id, IncorrectOperation, op.pos, 1, op.line);
-        }
-    }
+    Number operator()(ImplicitStringMulNode<Number> const& op) const;
 
-    Number operator()(ImplicitDivMulNode<Number> const& op) const
-    {
-        CheckBreak(parser_context);
-        if constexpr (is_symbolic_v<Number>)
-        {
-            AddDependency(op.identifier);
-            auto* t = FindTempVariable(op.identifier.name);
-            if (t)
-            {
-                return (*this)(op.upper) / (*this)(op.lower) * t->second;
-            }
-            auto* v = FindVariable(op.identifier.name, op.identifier.subscript);
-            if (v)
-            {
-                LogicalId _id = id;
-                id = v->id;
-                Number res = (*this)(v->expression);
-                id = _id;
-                return (*this)(op.upper) / (*this)(op.lower) * res;
-            }
-            auto* var = FindBuiltinVariable(op.identifier.name);
-            if (var)
-            {
-                try
-                {
-                    auto pv = std::get<typename SolverSymbols<Number>::PrecisionVariable>(*var);
-                    return (*this)(op.upper) / (*this)(op.lower) * (*pv)(precision);
-                }
-                catch (const std::bad_variant_access&)
-                {
-                }
-            }
-            Number val;
-            if (FindBuiltinIdentifier(op.identifier.name, val))
-            {
-                return (*this)(op.upper) / (*this)(op.lower) * val;
-            }
-            return (*this)(op.upper) / (*this)(op.lower) * Number(precision, op.identifier.name);
-        }
-        else
-        {
-            throw MathException(op.id, IncorrectOperation, op.pos, 1, op.line);
-        }
-    }
+    Number operator()(ImplicitDivMulNode<Number> const& op) const;
 
     Number operator()(ImplicitMulNode<Number> const& op) const
     {
@@ -725,112 +388,10 @@ struct Solver : public boost::static_visitor<Number>
         }
     }
 
-    Number operator()(ArrayNode<Number> const& op) const
-    {
-        if constexpr (std::is_same_v<Number, Array<Real>>)
-        {
-            CheckBreak(parser_context);
-            Number res;
-            for (auto& operand : op.array)
-            {
-                CheckBreak(parser_context);
-                res.Add((*this)(operand));
-            }
-            return res;
-        }
-        else
-        {
-            throw MathException(op.id, IncorrectOperation, op.pos, 1, op.line);
-        }
-    }
+    Number operator()(ArrayNode<Number> const& op) const;
 
     Number operator()(ScriptNode<Number> const& script, LogicalId _id, AngleMeasure _default_angle_measure,
-        AngleMeasure _result_angle_measure, int _precision, Dependencies* _dependencies) const
-    {
-        if (script.list.empty())
-            throw SyntaxException(_id, ParserExceptionCode::ExpressionExpected, -1, 0, -1);
-
-        id = _id;
-        dependencies = _dependencies;
-        default_angle_measure = _default_angle_measure;
-        result_angle_measure = _result_angle_measure;
-        if (_precision != -1)
-            precision = _precision;
-
-        Number res;
-        if constexpr (is_symbolic_v<Number>)
-        {
-            try
-            {
-                BOOST_FOREACH(typename ScriptNode<Number>::Operand const& op, script.list)
-                {
-                    CheckBreak(parser_context);
-                    res = boost::apply_visitor(*this, op);
-                }
-            }
-            catch (const SymEngine::DivisionByZeroError&)
-            {
-                throw MathException(id, DivisionByZero, -1, -1);
-            }
-            catch (const SymEngine::DomainError&)
-            {
-                if constexpr (std::is_same_v<Number, Symbolic<Real>> || std::is_same_v<Number, Symbolic<Complex>>)
-                    return Number(precision, std::u32string(U"nan"));
-                throw MathException(id, ArgumentIsOver, -1, -1);
-            }
-            catch (const SymEngine::ParseError&)
-            {
-                throw MathException(id, SyntaxError, -1, -1);
-            }
-            catch (const SymEngine::NotImplementedError&)
-            {
-                if constexpr (std::is_same_v<Number, Symbolic<Real>> || std::is_same_v<Number, Symbolic<Complex>>)
-                    return Number(precision, std::u32string(U"nan"));
-                throw MathException(id, NotImplemented, -1, -1);
-            }
-            catch (const SymEngine::SerializationError&)
-            {
-                throw MathException(id, SerializationError, -1, -1);
-            }
-            catch (const ParserException&)
-            {
-                throw;
-            }
-            catch (...)
-            {
-                if constexpr (std::is_same_v<Number, Symbolic<Real>> || std::is_same_v<Number, Symbolic<Complex>>)
-                    return Number(precision, std::u32string(U"nan"));
-                throw;
-            }
-        }
-        else
-        {
-            BOOST_FOREACH(typename ScriptNode<Number>::Operand const& op, script.list)
-            {
-                CheckBreak(parser_context);
-                res = boost::apply_visitor(*this, op);
-            }
-        }
-
-        if constexpr (std::is_same_v<Number, Real>)
-        {
-            if (res.angle_measure != AngleMeasure::None)
-            {
-                switch (result_angle_measure)
-                {
-                case AngleMeasure::Radian:
-                    return res.ToRadian();
-                case AngleMeasure::Degree:
-                    return res.ToDegree();
-                case AngleMeasure::Grad:
-                    return res.ToGrad();
-                case AngleMeasure::None:
-                    break;
-                }
-            }
-        }
-        return res;
-    }
+        AngleMeasure _result_angle_measure, int _precision, Dependencies* _dependencies) const;
 
     void PushTempVariable(const std::u32string& name, Number& value) const
     {
@@ -1109,21 +670,7 @@ struct Solver : public boost::static_visitor<Number>
         symbols->buildin_functions[name] = func;
     }
 
-    void FillBuiltinOperations()
-    {
-        if (!symbols->builtin_operations.empty())
-            return;
-        symbols->builtin_operations.push_back(U"plus");
-        symbols->builtin_operations.push_back(U"minus");
-        symbols->builtin_operations.push_back(U"mul");
-        symbols->builtin_operations.push_back(U"div");
-        symbols->builtin_operations.push_back(U"power");
-        symbols->builtin_operations.push_back(U"sqrt");
-        symbols->builtin_operations.push_back(U"root");
-        symbols->builtin_operations.push_back(U"sub");
-        symbols->builtin_operations.push_back(U"sum");
-        symbols->builtin_operations.push_back(U"prod");
-    }
+    void FillBuiltinOperations();
 
     BuiltinFunction* FindBuiltinFunction(const std::u32string& name) const
     {
@@ -1999,6 +1546,578 @@ private:
 
     int max_cast_unit_size = 2; //max size of each unit in the cast vector
 };
+
+template<typename Number>
+Number Solver<Number>::operator()(LineGraphNode<Number> const& op) const
+    {
+        throw MathException(op.id, IncorrectOperation, op.pos, 1, op.line);
+    }
+
+template<typename Number>
+Number Solver<Number>::operator()(UnaryOperationNode<Number> const& op) const
+    {
+        CheckBreak(parser_context);
+        if constexpr (is_symbolic_v<Number>)
+        {
+            Number arg = boost::apply_visitor(*this, op.operand);
+            switch (op.op)
+            {
+            case '+':
+                return +arg;
+            case '-':
+                return -arg;
+            default:
+                throw SyntaxException(op.id, IncorrectOperation, op.pos, 1, op.line);
+            }
+        }
+        else
+        {
+            throw MathException(op.id, IncorrectOperation, op.pos, 1, op.line);
+        }
+    }
+
+template<typename Number>
+Number Solver<Number>::operator()(OperationNode<Number> const& op) const
+    {
+        CheckBreak(parser_context);
+        if constexpr (is_symbolic_v<Number>)
+        {
+            Number right = boost::apply_visitor(*this, op.operand);
+            switch (op.op)
+            {
+            case '+':
+                return left_value + right;
+            case '-':
+                return left_value - right;
+            case '*':
+                return left_value * right;
+            case '/':
+                return left_value / right;
+            case '^':
+                return left_value ^ right;
+            case '%':
+            case '&':
+            case '|':
+                throw SyntaxException(op.id, IncorrectOperation, op.pos, 1, op.line);
+            default:
+                throw SyntaxException(op.id, IncorrectOperation, op.pos, 1, op.line);
+            }
+        }
+        else
+        {
+            throw MathException(op.id, IncorrectOperation, op.pos, 1, op.line);
+        }
+    }
+
+template<typename Number>
+Number Solver<Number>::operator()(PostfixOperationNode<Number> const& op) const
+    {
+        CheckBreak(parser_context);
+        if constexpr (is_symbolic_v<Number>)
+        {
+            throw SyntaxException(op.id, IncorrectOperation, op.pos, 1, op.line);
+        }
+        else
+        {
+            throw MathException(op.id, IncorrectOperation, op.pos, 1, op.line);
+        }
+    }
+
+template<typename Number>
+Number Solver<Number>::operator()(FunctionCallNode<Number> const& op) const
+    {
+        CheckBreak(parser_context);
+        if constexpr (is_symbolic_v<Number>)
+        {
+            AddDependency(op.name);
+            Number res;
+            try
+            {
+                FunctionNode<Number>* user_func = FindFunction(op);
+                if (user_func)
+                {
+                    IdentifierNodesIter funcIter = user_func->arguments.begin();
+                    for (ExpressionNodesIter iter = op.arguments.begin(); iter != op.arguments.end(); ++iter, ++funcIter)
+                    {
+                        CheckBreak(parser_context);
+                        Number arg = (*this)(*iter);
+                        PushTempVariable(funcIter->name, arg);
+                    }
+                    bool _exported_id = exported_id;
+                    exported_id = user_func->exported;
+                    res = (*this)(user_func->return_expression);
+                    exported_id = _exported_id;
+                    PopTempVariables(op.arguments.size());
+                    return res;
+                }
+                BuiltinFunction* func = FindBuiltinFunction(op.name.name);
+                if (func)
+                {
+                    try
+                    {
+                        auto u = std::get<typename SolverSymbols<Number>::UnaryFunction>(*func);
+                        if (op.arguments.size() != 1)
+                            throw SyntaxException(op.id, WrongArgumentsCount, U"Wrong arguments count in '" + op.name.name + U"'", op.pos, op.name.name.length(), op.line);
+                        ExpressionNodesIter iter = op.arguments.begin();
+                        Number arg = (*this)(*iter);
+                        return (*u)(arg);
+                    }
+                    catch (const std::bad_variant_access&)
+                    {
+                    }
+                    try
+                    {
+                        auto b = std::get<typename SolverSymbols<Number>::BinaryFunction>(*func);
+                        if (op.arguments.size() != 2)
+                            throw SyntaxException(op.id, WrongArgumentsCount, U"Wrong arguments count in '" + op.name.name + U"'", op.pos, op.name.name.length(), op.line);
+                        ExpressionNodesIter iter = op.arguments.begin();
+                        Number arg1 = (*this)(*iter++);
+                        Number arg2 = (*this)(*iter);
+                        return (*b)(arg1, arg2);
+                    }
+                    catch (const std::bad_variant_access&)
+                    {
+                    }
+                    try
+                    {
+                        auto t = std::get<typename SolverSymbols<Number>::TernaryFunction>(*func);
+                        if (op.arguments.size() != 3)
+                            throw SyntaxException(op.id, WrongArgumentsCount, U"Wrong arguments count in '" + op.name.name + U"'", op.pos, op.name.name.length(), op.line);
+                        ExpressionNodesIter iter = op.arguments.begin();
+                        Number arg1 = (*this)(*iter++);
+                        Number arg2 = (*this)(*iter++);
+                        Number arg3 = (*this)(*iter);
+                        return (*t)(arg1, arg2, arg3);
+                    }
+                    catch (const std::bad_variant_access&)
+                    {
+                    }
+                }
+            }
+            catch (const MathException& e)
+            {
+                throw MathException(op.id, e.ex_id, op.pos, op.line);
+            }
+            catch (const SymEngine::DivisionByZeroError&)
+            {
+                if constexpr (is_symbolic_v<Number>)
+                    return Number(precision, std::u32string(U"zoo"));
+                throw MathException(op.id, DivisionByZero, op.pos, op.line);
+            }
+            catch (const SymEngine::DomainError&)
+            {
+                if constexpr (is_symbolic_v<Number> && (std::is_same_v<Number, Symbolic<Real>> || std::is_same_v<Number, Symbolic<Complex>>))
+                    return Number(precision, std::u32string(U"nan"));
+                throw MathException(op.id, ArgumentIsOver, op.pos, op.line);
+            }
+            catch (const SymEngine::ParseError&)
+            {
+                throw MathException(op.id, SyntaxError, op.pos, op.line);
+            }
+            catch (const SymEngine::NotImplementedError&)
+            {
+                if constexpr (is_symbolic_v<Number> && (std::is_same_v<Number, Symbolic<Real>> || std::is_same_v<Number, Symbolic<Complex>>))
+                    return Number(precision, std::u32string(U"nan"));
+                throw MathException(op.id, NotImplemented, op.pos, op.line);
+            }
+            catch (const SymEngine::SerializationError&)
+            {
+                throw MathException(op.id, NotImplemented, op.pos, op.line);
+            }
+            catch (const ParserException&)
+            {
+                throw;
+            }
+            catch (...)
+            {
+                if constexpr (is_symbolic_v<Number> && (std::is_same_v<Number, Symbolic<Real>> || std::is_same_v<Number, Symbolic<Complex>>))
+                    return Number(precision, std::u32string(U"nan"));
+                throw MathException(op.id, IncorrectOperation, op.pos, op.line);
+            }
+            throw SyntaxException(op.id, UnknownIdentifier, U"Identifier '" + op.name.name + U"' not found", op.pos, op.name.name.length(), op.line);
+        }
+        else
+        {
+            throw MathException(op.id, IncorrectOperation, op.pos, 1, op.line);
+        }
+    }
+
+template<typename Number>
+Number Solver<Number>::operator()(FunctionCallStringNode<Number> const& op) const
+    {
+        CheckBreak(parser_context);
+        if constexpr (is_symbolic_v<Number>)
+        {
+            AddDependency(op.name);
+            if (op.name.name == U"subs")
+            {
+                BuiltinFunction* func = FindBuiltinFunction(op.name.name);
+                if (func)
+                {
+                    Number var(precision, op.argument);
+                    throw SyntaxException(op.id, WrongArgumentsCount, U"Incorrect subs arguments", op.pos, op.name.name.length(), op.line);
+                }
+            }
+            throw SyntaxException(op.id, UnknownIdentifier, U"Identifier '" + op.name.name + U"' not found", op.pos, op.name.name.length(), op.line);
+        }
+        else
+        {
+            throw MathException(op.id, IncorrectOperation, op.pos, 1, op.line);
+        }
+    }
+
+template<typename Number>
+Number Solver<Number>::operator()(NoFencesFunctionCallNode<Number> const& op) const
+    {
+        CheckBreak(parser_context);
+        throw MathException(op.id, IncorrectOperation, op.pos, 1, op.line);
+    }
+
+template<typename Number>
+Number Solver<Number>::operator()(IdentifierNode<Number> const& op) const
+    {
+        CheckBreak(parser_context);
+        if constexpr (is_symbolic_v<Number>)
+        {
+            if (!op.subscript.empty())
+                throw SyntaxException(op.id, UnknownIdentifier, U"Identifier '" + op.name + U"' not found", op.pos, op.name.length(), op.line);
+            AddDependency(op);
+            auto* t = FindTempVariable(op.name);
+            if (t)
+                return t->second;
+            auto* v = FindVariable(op.name, op.subscript);
+            if (v)
+            {
+                LogicalId _id = id;
+                bool _exported_id = exported_id;
+                id = v->id;
+                exported_id = v->exported;
+                Number res = (*this)(v->expression);
+                id = _id;
+                exported_id = _exported_id;
+                return res;
+            }
+            auto* var = FindBuiltinVariable(op.name);
+            if (var)
+            {
+                try
+                {
+                    auto pv = std::get<typename SolverSymbols<Number>::PrecisionVariable>(*var);
+                    return (*pv)(precision);
+                }
+                catch (const std::bad_variant_access&)
+                {
+                }
+            }
+            Number builtin_id_val;
+            if (FindBuiltinIdentifier(op.name, builtin_id_val))
+                return builtin_id_val;
+            return Number(precision, op.name);
+        }
+        else
+        {
+            throw MathException(op.id, IncorrectOperation, op.pos, 1, op.line);
+        }
+    }
+
+template<typename Number>
+Number Solver<Number>::operator()(ImplicitStringMulNode<Number> const& op) const
+    {
+        CheckBreak(parser_context);
+        if constexpr (is_symbolic_v<Number>)
+        {
+            if (!op.identifier.subscript.empty())
+                throw SyntaxException(op.id, UnknownIdentifier, U"Identifier '" + op.identifier.name + U"' not found", op.pos, op.identifier.name.length(), op.line);
+            AddDependency(op.identifier);
+            auto* t = FindTempVariable(op.identifier.name);
+            if (t)
+                return (*this)(op.left) * t->second;
+            auto* v = FindVariable(op.identifier.name, op.identifier.subscript);
+            if (v)
+            {
+                LogicalId _id = id;
+                id = v->id;
+                Number res = (*this)(v->expression);
+                id = _id;
+                return (*this)(op.left) * res;
+            }
+            auto* var = FindBuiltinVariable(op.identifier.name);
+            if (var)
+            {
+                try
+                {
+                    auto pv = std::get<typename SolverSymbols<Number>::PrecisionVariable>(*var);
+                    return (*this)(op.left) * (*pv)(precision);
+                }
+                catch (const std::bad_variant_access&)
+                {
+                }
+            }
+            Number builtin_id_val;
+            if (FindBuiltinIdentifier(op.identifier.name, builtin_id_val))
+                return (*this)(op.left) * builtin_id_val;
+            return (*this)(op.left) * Number(precision, op.identifier.name);
+        }
+        else
+        {
+            throw MathException(op.id, IncorrectOperation, op.pos, 1, op.line);
+        }
+    }
+
+template<typename Number>
+Number Solver<Number>::operator()(ImplicitDivMulNode<Number> const& op) const
+    {
+        CheckBreak(parser_context);
+        if constexpr (is_symbolic_v<Number>)
+        {
+            AddDependency(op.identifier);
+            auto* t = FindTempVariable(op.identifier.name);
+            if (t)
+            {
+                return (*this)(op.upper) / (*this)(op.lower) * t->second;
+            }
+            auto* v = FindVariable(op.identifier.name, op.identifier.subscript);
+            if (v)
+            {
+                LogicalId _id = id;
+                id = v->id;
+                Number res = (*this)(v->expression);
+                id = _id;
+                return (*this)(op.upper) / (*this)(op.lower) * res;
+            }
+            auto* var = FindBuiltinVariable(op.identifier.name);
+            if (var)
+            {
+                try
+                {
+                    auto pv = std::get<typename SolverSymbols<Number>::PrecisionVariable>(*var);
+                    return (*this)(op.upper) / (*this)(op.lower) * (*pv)(precision);
+                }
+                catch (const std::bad_variant_access&)
+                {
+                }
+            }
+            Number val;
+            if (FindBuiltinIdentifier(op.identifier.name, val))
+            {
+                return (*this)(op.upper) / (*this)(op.lower) * val;
+            }
+            return (*this)(op.upper) / (*this)(op.lower) * Number(precision, op.identifier.name);
+        }
+        else
+        {
+            throw MathException(op.id, IncorrectOperation, op.pos, 1, op.line);
+        }
+    }
+
+template<typename Number>
+Number Solver<Number>::operator()(ArrayNode<Number> const& op) const
+    {
+        if constexpr (std::is_same_v<Number, Array<Real>>)
+        {
+            CheckBreak(parser_context);
+            Number res;
+            for (auto& operand : op.array)
+            {
+                CheckBreak(parser_context);
+                res.Add((*this)(operand));
+            }
+            return res;
+        }
+        else
+        {
+            throw MathException(op.id, IncorrectOperation, op.pos, 1, op.line);
+        }
+    }
+
+template<typename Number>
+Number Solver<Number>::operator()(ScriptNode<Number> const& script, LogicalId _id, AngleMeasure _default_angle_measure,
+        AngleMeasure _result_angle_measure, int _precision, Dependencies* _dependencies) const
+    {
+        if (script.list.empty())
+            throw SyntaxException(_id, ParserExceptionCode::ExpressionExpected, -1, 0, -1);
+
+        id = _id;
+        dependencies = _dependencies;
+        default_angle_measure = _default_angle_measure;
+        result_angle_measure = _result_angle_measure;
+        if (_precision != -1)
+            precision = _precision;
+
+        Number res;
+        if constexpr (is_symbolic_v<Number>)
+        {
+            try
+            {
+                BOOST_FOREACH(typename ScriptNode<Number>::Operand const& op, script.list)
+                {
+                    CheckBreak(parser_context);
+                    res = boost::apply_visitor(*this, op);
+                }
+            }
+            catch (const SymEngine::DivisionByZeroError&)
+            {
+                throw MathException(id, DivisionByZero, -1, -1);
+            }
+            catch (const SymEngine::DomainError&)
+            {
+                if constexpr (std::is_same_v<Number, Symbolic<Real>> || std::is_same_v<Number, Symbolic<Complex>>)
+                    return Number(precision, std::u32string(U"nan"));
+                throw MathException(id, ArgumentIsOver, -1, -1);
+            }
+            catch (const SymEngine::ParseError&)
+            {
+                throw MathException(id, SyntaxError, -1, -1);
+            }
+            catch (const SymEngine::NotImplementedError&)
+            {
+                if constexpr (std::is_same_v<Number, Symbolic<Real>> || std::is_same_v<Number, Symbolic<Complex>>)
+                    return Number(precision, std::u32string(U"nan"));
+                throw MathException(id, NotImplemented, -1, -1);
+            }
+            catch (const SymEngine::SerializationError&)
+            {
+                throw MathException(id, SerializationError, -1, -1);
+            }
+            catch (const ParserException&)
+            {
+                throw;
+            }
+            catch (...)
+            {
+                if constexpr (std::is_same_v<Number, Symbolic<Real>> || std::is_same_v<Number, Symbolic<Complex>>)
+                    return Number(precision, std::u32string(U"nan"));
+                throw;
+            }
+        }
+        else
+        {
+            BOOST_FOREACH(typename ScriptNode<Number>::Operand const& op, script.list)
+            {
+                CheckBreak(parser_context);
+                res = boost::apply_visitor(*this, op);
+            }
+        }
+
+        if constexpr (std::is_same_v<Number, Real>)
+        {
+            if (res.angle_measure != AngleMeasure::None)
+            {
+                switch (result_angle_measure)
+                {
+                case AngleMeasure::Radian:
+                    return res.ToRadian();
+                case AngleMeasure::Degree:
+                    return res.ToDegree();
+                case AngleMeasure::Grad:
+                    return res.ToGrad();
+                case AngleMeasure::None:
+                    break;
+                }
+            }
+        }
+        return res;
+    }
+
+
+template<typename Number>
+Number Solver<Number>::operator()(UnitNode<Number> const& op) const
+{
+    CheckBreak(parser_context);
+    throw MathException(op.id, IncorrectOperation, op.pos, 1, op.line);
+}
+
+// Explicit specializations declared here so dependent TUs link to the
+// definitions in solver.cpp instead of inlining the primary template.
+template<> Array<Real> Solver<Array<Real>>::operator()(LineGraphNode<Array<Real>> const& op) const;
+template<> Real Solver<Real>::operator()(UnitNode<Real> const& op) const;
+template<> Rational Solver<Rational>::operator()(UnitNode<Rational> const& op) const;
+template<> Array<Real> Solver<Array<Real>>::operator()(UnitNode<Array<Real>> const& op) const;
+template<> Integer Solver<Integer>::operator()(UnitNode<Integer> const& op) const;
+template<> Integer Solver<Integer>::operator()(UnaryOperationNode<Integer> const& op) const;
+template<> Real Solver<Real>::operator()(UnaryOperationNode<Real> const& op) const;
+template<> Rational Solver<Rational>::operator()(UnaryOperationNode<Rational> const& op) const;
+template<> Complex Solver<Complex>::operator()(UnaryOperationNode<Complex> const& op) const;
+template<> Array<Real> Solver<Array<Real>>::operator()(UnaryOperationNode<Array<Real>> const& op) const;
+template<> Integer Solver<Integer>::operator()(OperationNode<Integer> const& op) const;
+template<> Real Solver<Real>::operator()(OperationNode<Real> const& op) const;
+template<> Rational Solver<Rational>::operator()(OperationNode<Rational> const& op) const;
+template<> Complex Solver<Complex>::operator()(OperationNode<Complex> const& op) const;
+template<> Array<Real> Solver<Array<Real>>::operator()(OperationNode<Array<Real>> const& op) const;
+template<> Integer Solver<Integer>::operator()(PostfixOperationNode<Integer> const& op) const;
+template<> Real Solver<Real>::operator()(PostfixOperationNode<Real> const& op) const;
+template<> Rational Solver<Rational>::operator()(PostfixOperationNode<Rational> const& op) const;
+template<> Complex Solver<Complex>::operator()(PostfixOperationNode<Complex> const& op) const;
+template<> Integer Solver<Integer>::operator()(FunctionCallNode<Integer> const& op) const;
+template<> Real Solver<Real>::operator()(FunctionCallNode<Real> const& op) const;
+template<> Rational Solver<Rational>::operator()(FunctionCallNode<Rational> const& op) const;
+template<> Complex Solver<Complex>::operator()(FunctionCallNode<Complex> const& op) const;
+template<> Array<Real> Solver<Array<Real>>::operator()(FunctionCallNode<Array<Real>> const& op) const;
+template<> Integer Solver<Integer>::operator()(FunctionCallStringNode<Integer> const& op) const;
+template<> Real Solver<Real>::operator()(FunctionCallStringNode<Real> const& op) const;
+template<> Rational Solver<Rational>::operator()(FunctionCallStringNode<Rational> const& op) const;
+template<> Complex Solver<Complex>::operator()(FunctionCallStringNode<Complex> const& op) const;
+template<> VariableNode<Array<Real>>* Solver<Array<Real>>::FindVariable(const std::u32string& name, const std::u32string& subscript) const;
+template<> Integer Solver<Integer>::operator()(NoFencesFunctionCallNode<Integer> const& op) const;
+template<> Real Solver<Real>::operator()(NoFencesFunctionCallNode<Real> const& op) const;
+template<> Rational Solver<Rational>::operator()(NoFencesFunctionCallNode<Rational> const& op) const;
+template<> Complex Solver<Complex>::operator()(NoFencesFunctionCallNode<Complex> const& op) const;
+template<> Integer Solver<Integer>::operator()(IdentifierNode<Integer> const& op) const;
+template<> Real Solver<Real>::operator()(IdentifierNode<Real> const& op) const;
+template<> Rational Solver<Rational>::operator()(IdentifierNode<Rational> const& op) const;
+template<> Complex Solver<Complex>::operator()(IdentifierNode<Complex> const& op) const;
+template<> Array<Real> Solver<Array<Real>>::operator()(IdentifierNode<Array<Real>> const& op) const;
+template<> Integer Solver<Integer>::operator()(ImplicitStringMulNode<Integer> const& op) const;
+template<> Real Solver<Real>::operator()(ImplicitStringMulNode<Real> const& op) const;
+template<> Rational Solver<Rational>::operator()(ImplicitStringMulNode<Rational> const& op) const;
+template<> Complex Solver<Complex>::operator()(ImplicitStringMulNode<Complex> const& op) const;
+template<> Array<Real> Solver<Array<Real>>::operator()(ImplicitStringMulNode<Array<Real>> const& op) const;
+template<> Integer Solver<Integer>::operator()(ImplicitDivMulNode<Integer> const& op) const;
+template<> Real Solver<Real>::operator()(ImplicitDivMulNode<Real> const& op) const;
+template<> Rational Solver<Rational>::operator()(ImplicitDivMulNode<Rational> const& op) const;
+template<> Complex Solver<Complex>::operator()(ImplicitDivMulNode<Complex> const& op) const;
+template<> Array<Real> Solver<Array<Real>>::operator()(ImplicitDivMulNode<Array<Real>> const& op) const;
+template<> Array<Real> Solver<Array<Real>>::operator()(ArrayNode<Array<Real>> const& op) const;
+template<> Integer Solver<Integer>::operator()(ScriptNode<Integer> const& script, LogicalId _id, AngleMeasure _default_angle_measure, AngleMeasure _result_angle_measure, int _precision, Dependencies* _dependencies) const;
+template<> Rational Solver<Rational>::operator()(ScriptNode<Rational> const& script, LogicalId _id, AngleMeasure _default_angle_measure, AngleMeasure _result_angle_measure, int _precision, Dependencies* _dependencies) const;
+template<> Complex Solver<Complex>::operator()(ScriptNode<Complex> const& script, LogicalId _id, AngleMeasure _default_angle_measure, AngleMeasure _result_angle_measure, int _precision, Dependencies* _dependencies) const;
+template<> Array<Real> Solver<Array<Real>>::operator()(ScriptNode<Array<Real>> const& script, LogicalId _id, AngleMeasure _default_angle_measure, AngleMeasure _result_angle_measure, int _precision, Dependencies* _dependencies) const;
+template<typename Number>
+void Solver<Number>::FillBuiltinOperations()
+{
+    if (!symbols->builtin_operations.empty())
+        return;
+    symbols->builtin_operations.push_back(U"plus");
+    symbols->builtin_operations.push_back(U"minus");
+    symbols->builtin_operations.push_back(U"mul");
+    symbols->builtin_operations.push_back(U"div");
+    symbols->builtin_operations.push_back(U"power");
+    symbols->builtin_operations.push_back(U"sqrt");
+    symbols->builtin_operations.push_back(U"root");
+    symbols->builtin_operations.push_back(U"sub");
+    symbols->builtin_operations.push_back(U"sum");
+    symbols->builtin_operations.push_back(U"prod");
+}
+
+template<> void Solver<Integer>::FillBuiltinOperations();
+template<> void Solver<Rational>::FillBuiltinOperations();
+template<> void Solver<Symbolic<Real>>::FillBuiltinOperations();
+template<> Real Solver<Real>::GetSuitableUnit(const LogicalId _id, const Real& val, const std::u32string& system, const bool buildin) const;
+template<> Rational Solver<Rational>::GetSuitableUnit(const LogicalId _id, const Rational& val, const std::u32string& system, const bool buildin) const;
+template<> Integer Solver<Integer>::GetSuitableUnit(const LogicalId _id, const Integer& val, const std::u32string& system, const bool buildin) const;
+template<> Complex Solver<Complex>::GetSuitableUnit(const LogicalId _id, const Complex& val, const std::u32string& system, const bool buildin) const;
+template<> Symbolic<Real> Solver<Symbolic<Real>>::GetSuitableUnit(const LogicalId _id, const Symbolic<Real>& val, const std::u32string& system, const bool buildin) const;
+template<> Real Solver<Real>::CastToUnit(const LogicalId id, const Real& val, const Unit& unit) const;
+template<> Rational Solver<Rational>::CastToUnit(const LogicalId id, const Rational& val, const Unit& unit) const;
+template<> Integer Solver<Integer>::CastToUnit(const LogicalId id, const Integer& val, const Unit& unit) const;
+template<> Complex Solver<Complex>::CastToUnit(const LogicalId id, const Complex& val, const Unit& unit) const;
+template<> Symbolic<Real> Solver<Symbolic<Real>>::CastToUnit(const LogicalId id, const Symbolic<Real>& val, const Unit& unit) const;
+template<> void Solver<Symbolic<Rational>>::FillBuiltinOperations();
+template<> Symbolic<Rational> Solver<Symbolic<Rational>>::GetSuitableUnit(const LogicalId _id, const Symbolic<Rational>& val, const std::u32string& system, const bool buildin) const;
+template<> Symbolic<Rational> Solver<Symbolic<Rational>>::CastToUnit(const LogicalId id, const Symbolic<Rational>& val, const Unit& unit) const;
+template<> void Solver<Symbolic<Complex>>::FillBuiltinOperations();
+template<> Symbolic<Complex> Solver<Symbolic<Complex>>::GetSuitableUnit(const LogicalId _id, const Symbolic<Complex>& val, const std::u32string& system, const bool buildin) const;
+template<> Symbolic<Complex> Solver<Symbolic<Complex>>::CastToUnit(const LogicalId id, const Symbolic<Complex>& val, const Unit& unit) const;
 
 };
 

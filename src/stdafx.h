@@ -18,7 +18,12 @@
 #endif
 
 #ifdef _WIN32
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
 #include <windows.h>
+#undef min
+#undef max
 #endif
 
 #include <boost/config/warning_disable.hpp>
@@ -45,6 +50,10 @@
 #include <map>
 
 #include "mpfr.h"
+
+#ifdef _WIN32
+#undef access
+#endif
 
 namespace spirit = boost::spirit;
 namespace qi = spirit::qi;

@@ -90,6 +90,10 @@ add_library(${PROJECT_NAME}
     graph.h
 )
 
+if(WIN32)
+    set_source_files_properties(solver.cpp PROPERTIES COMPILE_FLAGS "/Zc:inline-")
+endif()
+
 if(EMSCRIPTEN)
     target_link_libraries(${PROJECT_NAME} PRIVATE 
         stdc++

@@ -30,6 +30,11 @@
 #include <symengine/derivative.h>
 #include <symengine/infinity.h>
 #include <symengine/nan.h>
+
+#ifdef _WIN32
+#undef ulong
+#endif
+
 #include "math_helper.h"
 #include "parser_exception.h"
 
