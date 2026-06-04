@@ -11,6 +11,7 @@
 #include <string>
 #include <memory>
 #include <regex>
+#include <iomanip>
 #include <cerrno>
 #include <climits>
 #include <symengine/expression.h>
