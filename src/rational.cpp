@@ -449,7 +449,7 @@ bool operator!=(const Rational& num1, const int num2)
 
 bool operator!=(const int num1, const Rational& num2)
 {
-    return mpq_cmp_si(num2.number, num1, 1) == 0;
+    return mpq_cmp_si(num2.number, num1, 1) != 0;
 }
 
 bool operator>(const Rational& num1, const Rational& num2)
@@ -514,7 +514,7 @@ bool operator<=(const int num1, const Rational& num2)
 
 Rational pow(const Rational& num1, const Rational& num2)
 {
-    if (!num2.GetDenomerator() || (num2.GetNumerator() % num2.GetDenomerator() != 0))
+    if (num2.GetDenomerator().IsZero() || (num2.GetNumerator() % num2.GetDenomerator() != 0))
         throw MathException(ArgumentIsOver);
     if (!num2.unit.IsEmpty())
         throw MathException(UnitsAreIncompatible);
