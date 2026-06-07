@@ -539,6 +539,42 @@ Complex Solver<Complex>::operator()(PostfixOperationNode<Complex> const& op) con
 }
 
 template<>
+Symbolic<Real> Solver<Symbolic<Real>>::operator()(PostfixOperationNode<Symbolic<Real>> const& op) const
+{
+    Symbolic<Real> left = boost::apply_visitor(*this, op.operand);
+    switch (op.op)
+    {
+    case '!':
+        return fact(left);
+    }
+    throw SyntaxException(op.id, SyntaxError, op.pos, op.line);
+}
+
+template<>
+Symbolic<Rational> Solver<Symbolic<Rational>>::operator()(PostfixOperationNode<Symbolic<Rational>> const& op) const
+{
+    Symbolic<Rational> left = boost::apply_visitor(*this, op.operand);
+    switch (op.op)
+    {
+    case '!':
+        return fact(left);
+    }
+    throw SyntaxException(op.id, SyntaxError, op.pos, op.line);
+}
+
+template<>
+Symbolic<Complex> Solver<Symbolic<Complex>>::operator()(PostfixOperationNode<Symbolic<Complex>> const& op) const
+{
+    Symbolic<Complex> left = boost::apply_visitor(*this, op.operand);
+    switch (op.op)
+    {
+    case '!':
+        return fact(left);
+    }
+    throw SyntaxException(op.id, SyntaxError, op.pos, op.line);
+}
+
+template<>
 Integer Solver<Integer>::operator()(FunctionCallNode<Integer> const& op) const
 {
     AddDependency(op.name);

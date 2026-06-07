@@ -755,7 +755,7 @@ Expression<Symbolic<Real>>::Expression(LogicalId id, std::u32string& expr, Solve
 
     unary_operation = (char_(U'+') > unary) | (char_(U'-') > unary);
 
-    postfix_operation = ((number | '(' > expression > ')') >> char_(U'!'));
+    postfix_operation = (identifier >> char_(U'!')) | ((number | '(' > expression > ')') >> char_(U'!'));
 
     function_call = identifier >> '(' >> -(expression % ',') > ')';
 
@@ -950,7 +950,7 @@ Expression<Symbolic<Rational>>::Expression(LogicalId id, std::u32string& expr, S
 
     unary_operation = (char_(U'+') > unary) | (char_(U'-') > unary);
 
-    postfix_operation = ((number | '(' > expression > ')') >> char_(U'!'));
+    postfix_operation = (identifier >> char_(U'!')) | ((number | '(' > expression > ')') >> char_(U'!'));
 
     function_call = identifier >> '(' >> -(expression % ',') > ')';
 
@@ -1100,7 +1100,7 @@ Expression<Symbolic<Complex>>::Expression(LogicalId id, std::u32string& expr, So
 
     unary_operation = (char_(U'+') > unary) | (char_(U'-') > unary);
 
-    postfix_operation = ((number | '(' > expression > ')') >> char_(U'!'));
+    postfix_operation = (identifier >> char_(U'!')) | ((number | '(' > expression > ')') >> char_(U'!'));
 
     function_call = identifier >> '(' >> -(expression % ',') > ')';
 

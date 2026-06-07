@@ -377,6 +377,13 @@ public:
         return res;
     }
     
+    friend Symbolic<Number> fact(const Symbolic<Number>& num)
+    {
+        Symbolic<Number> res(num.precision);
+        *res.expr = SymEngine::gamma(*num.expr + SymEngine::Expression(1));
+        return res;
+    }
+    
     friend Symbolic<Number> sinh(const Symbolic<Number>& num)
     {
         Symbolic<Number> res(num.precision);
