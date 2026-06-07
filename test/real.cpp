@@ -2116,7 +2116,7 @@ TEST_F(CalcTestReal, sin_large_arg)
 {
     auto r = parser.Parse(LogicalId{0, 0, 1}, U"sin(pow(10,20));");
     ASSERT_FALSE(r == Real(3, 0)) << r.ToStdString(3, 10);
-    ASSERT_TRUE(r.ToStdString(3, 3) == "-0.747E+0") << r.ToStdString(3, 3);
+    ASSERT_TRUE(r.ToStdString(3, 3) == "-0.645E+0") << r.ToStdString(3, 3);
 }
 
 TEST_F(CalcTestReal, cos_large_arg)
@@ -2124,7 +2124,7 @@ TEST_F(CalcTestReal, cos_large_arg)
     auto r = parser.Parse(LogicalId{0, 0, 1}, U"cos(pow(10,20));");
     ASSERT_FALSE(r == Real(3, 1)) << r.ToStdString(3, 10);
     ASSERT_FALSE(r == Real(3, -1)) << r.ToStdString(3, 10);
-    ASSERT_TRUE(r.ToStdString(3, 3) == "-0.665E+0") << r.ToStdString(3, 3);
+    ASSERT_TRUE(r.ToStdString(3, 3) == "0.764E+0") << r.ToStdString(3, 3);
 }
 
 TEST_F(CalcTestReal, trigonometric_special)
@@ -2141,14 +2141,14 @@ TEST_F(CalcTestReal, tg_large_arg)
 {
     auto r = parser.Parse(LogicalId{0, 0, 1}, U"tg(pow(10,20));");
     ASSERT_FALSE(r == Real(3, 0)) << r.ToStdString(3, 10);
-    ASSERT_TRUE(r.ToStdString(3, 3) == "1.123E+0") << r.ToStdString(3, 3);
+    ASSERT_TRUE(r.ToStdString(3, 3) == "-0.845E+0") << r.ToStdString(3, 3);
 }
 
 TEST_F(CalcTestReal, ctg_large_arg)
 {
     auto r = parser.Parse(LogicalId{0, 0, 1}, U"ctg(pow(10,20));");
     ASSERT_FALSE(r == Real(3, 0)) << r.ToStdString(3, 10);
-    ASSERT_TRUE(r.ToStdString(3, 3) == "0.89E+0") << r.ToStdString(3, 3);
+    ASSERT_TRUE(r.ToStdString(3, 3) == "-1.184E+0") << r.ToStdString(3, 3);
 }
 
 TEST_F(CalcTestReal, sec_large_arg)
@@ -2156,14 +2156,14 @@ TEST_F(CalcTestReal, sec_large_arg)
     auto r = parser.Parse(LogicalId{0, 0, 1}, U"sec(pow(10,20));");
     ASSERT_FALSE(r == Real(3, 1)) << r.ToStdString(3, 10);
     ASSERT_FALSE(r == Real(3, -1)) << r.ToStdString(3, 10);
-    ASSERT_TRUE(r.ToStdString(3, 3) == "-1.504E+0") << r.ToStdString(3, 3);
+    ASSERT_TRUE(r.ToStdString(3, 3) == "1.309E+0") << r.ToStdString(3, 3);
 }
 
 TEST_F(CalcTestReal, cosec_large_arg)
 {
     auto r = parser.Parse(LogicalId{0, 0, 1}, U"cosec(pow(10,20));");
     ASSERT_FALSE(r == Real(3, 0)) << r.ToStdString(3, 10);
-    ASSERT_TRUE(r.ToStdString(3, 3) == "-1.339E+0") << r.ToStdString(3, 3);
+    ASSERT_TRUE(r.ToStdString(3, 3) == "-1.55E+0") << r.ToStdString(3, 3);
 }
 
 TEST_F(CalcTestReal, ln_large_arg)

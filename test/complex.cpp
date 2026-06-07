@@ -859,7 +859,7 @@ TEST_F(CalcTestComplex, sin_large_arg)
     ASSERT_TRUE(res.GetAngleMeasure() == AngleMeasure::None);
     ASSERT_FALSE(res.GetRe() == Real(3, 0)) << res.ToStdString(3, 10);
     ASSERT_TRUE(res.GetIm() == Real(3, 0)) << res.ToStdString(3, 10);
-    ASSERT_TRUE(res.ToStdString(3, 3) == "-0.747E+0") << res.ToStdString(3, 3);
+    ASSERT_TRUE(res.ToStdString(3, 3) == "-0.645E+0") << res.ToStdString(3, 3);
 }
 
 TEST_F(CalcTestComplex, cos_large_arg)
@@ -869,7 +869,7 @@ TEST_F(CalcTestComplex, cos_large_arg)
     ASSERT_FALSE(res.GetRe() == Real(3, 1)) << res.ToStdString(3, 10);
     ASSERT_FALSE(res.GetRe() == Real(3, -1)) << res.ToStdString(3, 10);
     ASSERT_TRUE(res.GetIm() == Real(3, 0)) << res.ToStdString(3, 10);
-    ASSERT_TRUE(res.ToStdString(3, 3) == "-0.665E+0") << res.ToStdString(3, 3);
+    ASSERT_TRUE(res.ToStdString(3, 3) == "0.764E+0") << res.ToStdString(3, 3);
 }
 
 TEST_F(CalcTestComplex, tg_large_arg)
@@ -878,7 +878,7 @@ TEST_F(CalcTestComplex, tg_large_arg)
     ASSERT_TRUE(res.GetAngleMeasure() == AngleMeasure::None);
     ASSERT_FALSE(res.GetRe() == Real(3, 0)) << res.ToStdString(3, 10);
     ASSERT_TRUE(res.GetIm() == Real(3, 0)) << res.ToStdString(3, 10);
-    ASSERT_TRUE(res.ToStdString(3, 3) == "1.123E+0") << res.ToStdString(3, 3);
+    ASSERT_TRUE(res.ToStdString(3, 3) == "-0.845E+0") << res.ToStdString(3, 3);
 }
 
 TEST_F(CalcTestComplex, ctg_large_arg)
@@ -887,7 +887,7 @@ TEST_F(CalcTestComplex, ctg_large_arg)
     ASSERT_TRUE(res.GetAngleMeasure() == AngleMeasure::None);
     ASSERT_FALSE(res.GetRe() == Real(3, 0)) << res.ToStdString(3, 10);
     ASSERT_TRUE(res.GetIm() == Real(3, 0)) << res.ToStdString(3, 10);
-    ASSERT_TRUE(res.ToStdString(3, 3) == "0.89E+0") << res.ToStdString(3, 3);
+    ASSERT_TRUE(res.ToStdString(3, 3) == "-1.184E+0") << res.ToStdString(3, 3);
 }
 
 TEST_F(CalcTestComplex, sec_large_arg)
@@ -897,7 +897,7 @@ TEST_F(CalcTestComplex, sec_large_arg)
     ASSERT_FALSE(res.GetRe() == Real(3, 1)) << res.ToStdString(3, 10);
     ASSERT_FALSE(res.GetRe() == Real(3, -1)) << res.ToStdString(3, 10);
     ASSERT_TRUE(res.GetIm() == Real(3, 0)) << res.ToStdString(3, 10);
-    ASSERT_TRUE(res.ToStdString(3, 3) == "-1.504E+0") << res.ToStdString(3, 3);
+    ASSERT_TRUE(res.ToStdString(3, 3) == "1.309E+0") << res.ToStdString(3, 3);
 }
 
 TEST_F(CalcTestComplex, cosec_large_arg)
@@ -906,7 +906,7 @@ TEST_F(CalcTestComplex, cosec_large_arg)
     ASSERT_TRUE(res.GetAngleMeasure() == AngleMeasure::None);
     ASSERT_FALSE(res.GetRe() == Real(3, 0)) << res.ToStdString(3, 10);
     ASSERT_TRUE(res.GetIm() == Real(3, 0)) << res.ToStdString(3, 10);
-    ASSERT_TRUE(res.ToStdString(3, 3) == "-1.339E+0") << res.ToStdString(3, 3);
+    ASSERT_TRUE(res.ToStdString(3, 3) == "-1.55E+0") << res.ToStdString(3, 3);
 }
 
 TEST_F(CalcTestComplex, ln_large_arg)
