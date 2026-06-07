@@ -816,27 +816,18 @@ Real sin(const Real& num)
         return res;
     }
 
-    Real misc = MathHelper::GetMisc<Real>(_num);
     Real _pi = pi(_num.GetBitPrecision());
-    Real pi2 = pi(_num.GetBitPrecision()) * 2;
+    Real pi2 = _pi * 2;
+    Real r(num.GetBitPrecision());
+    r.CalcFunc(mpfr_remainder, _num, pi2);
+    Real misc = MathHelper::GetMisc<Real>(_num);
 
-    Real mul = round(_num / pi2);
-
-    _num -= mul * pi2;
-    _num = abs(_num);
-
-    if (_num <= misc)
-    {
+    if (abs(r) <= misc || abs(abs(r) - _pi) <= misc)
         res = 0;
-    }
-    else if (abs(_num - _pi) <= misc)
-    {
+    else if (abs(abs(r) - _pi) <= misc)
         res = 0;
-    }
     else
-    {
-        res.CalcFunc(mpfr_sin, num);
-    }
+        res.CalcFunc(mpfr_sin, r);
 
     return res;
 }
@@ -858,33 +849,20 @@ Real cos(const Real& num)
     }
 
     Real _pi = pi(_num.GetBitPrecision());
-    Real pi2 = pi(_num.GetBitPrecision()) * 2;
+    Real pi2 = _pi * 2;
+    Real r(num.GetBitPrecision());
+    r.CalcFunc(mpfr_remainder, _num, pi2);
+    r = abs(r);
+    Real misc = MathHelper::GetMisc<Real>(_num);
 
-    Real mul = round(_num / pi2);
-
-    _num -= mul * pi2;
-    _num = abs(_num);
-
-    if (_num == 0)
-    {
+    if (r <= misc)
         res = 1;
-    }
-    else if (_num == _pi)
-    {
+    else if (abs(r - _pi) <= misc)
         res = -1;
-    }
-    else if (_num == _pi / 2)
-    {
+    else if (abs(r - _pi / 2) <= misc)
         res = 0;
-    }
-    else if (_num == 3 * _pi / 2)
-    {
-        res = 0;
-    }
     else
-    {
-        res.CalcFunc(mpfr_cos, _num);
-    }
+        res.CalcFunc(mpfr_cos, r);
 
     return res;
 }
@@ -901,11 +879,15 @@ Real tg(const Real& num)
     if (_num.angle_measure != AngleMeasure::Radian)
     {
         _num = _num.ToRadian();
-        res.CalcFunc(mpfr_tan, num);
+        res.CalcFunc(mpfr_tan, _num);
         return res;
     }
 
-    res.CalcFunc(mpfr_tan, num);
+    Real _pi = pi(_num.GetBitPrecision());
+    Real pi2 = _pi * 2;
+    Real r(num.GetBitPrecision());
+    r.CalcFunc(mpfr_remainder, _num, pi2);
+    res.CalcFunc(mpfr_tan, r);
 
     if (res.IsInfinity() || res.IsNaN())
         throw MathException(Overflow);
@@ -929,7 +911,11 @@ Real ctg(const Real& num)
         return res;
     }
 
-    res.CalcFunc(mpfr_cot, _num);
+    Real _pi = pi(_num.GetBitPrecision());
+    Real pi2 = _pi * 2;
+    Real r(num.GetBitPrecision());
+    r.CalcFunc(mpfr_remainder, _num, pi2);
+    res.CalcFunc(mpfr_cot, r);
 
     if (res.IsInfinity() || res.IsNaN())
         throw MathException(Overflow);
@@ -951,7 +937,11 @@ Real sec(const Real& num)
         return res;
     }
 
-    res.CalcFunc(mpfr_sec, _num);
+    Real _pi = pi(_num.GetBitPrecision());
+    Real pi2 = _pi * 2;
+    Real r(num.GetBitPrecision());
+    r.CalcFunc(mpfr_remainder, _num, pi2);
+    res.CalcFunc(mpfr_sec, r);
     return res;
 }
 
@@ -969,7 +959,11 @@ Real cosec(const Real& num)
         return res;
     }
 
-    res.CalcFunc(mpfr_csc, _num);
+    Real _pi = pi(_num.GetBitPrecision());
+    Real pi2 = _pi * 2;
+    Real r(num.GetBitPrecision());
+    r.CalcFunc(mpfr_remainder, _num, pi2);
+    res.CalcFunc(mpfr_csc, r);
     return res;
 }
 

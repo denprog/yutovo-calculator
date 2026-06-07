@@ -1377,4 +1377,84 @@ TEST_F(CalcTestSymbolicComplex, complex_2_minus_i)
         R"({"type":47,"elements":[{"type":7,"elements":[{"type":8,"elements":"2"},{"type":12,"symbol":"-"},{"type":8,"elements":"i"}]}]})" ) << res.ToJson(10);
 }
 
+TEST_F(CalcTestSymbolicComplex, sin2)
+{
+    Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"sin(0);");
+    ASSERT_TRUE(res.ToStdString(10) == "0") << res.ToStdString(10);
+    std::string json = res.ToJson(10);
+    ASSERT_TRUE(json ==
+        R"({"type":47,"elements":[{"type":7,"elements":[{"type":8,"elements":"0"}]}]})"
+        ) << json;
+}
+
+TEST_F(CalcTestSymbolicComplex, sin3)
+{
+    Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"sin(x);");
+    ASSERT_TRUE(res.ToStdString(10) == "sin(x)") << res.ToStdString(10);
+    std::string json = res.ToJson(10);
+    ASSERT_TRUE(json ==
+        R"r({"type":47,"elements":[{"type":7,"elements":[{"type":8,"elements":"sin"},{"type":19,"symbol":"("},{"type":8,"elements":"x"},{"type":20,"symbol":")"}]}]})r"
+        ) << json;
+}
+
+TEST_F(CalcTestSymbolicComplex, cos2)
+{
+    Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"cos(0);");
+    ASSERT_TRUE(res.ToStdString(10) == "1") << res.ToStdString(10);
+    std::string json = res.ToJson(10);
+    ASSERT_TRUE(json ==
+        R"({"type":47,"elements":[{"type":7,"elements":[{"type":8,"elements":"1"}]}]})"
+        ) << json;
+}
+
+TEST_F(CalcTestSymbolicComplex, cos3)
+{
+    Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"cos(x);");
+    ASSERT_TRUE(res.ToStdString(10) == "cos(x)") << res.ToStdString(10);
+    std::string json = res.ToJson(10);
+    ASSERT_TRUE(json ==
+        R"r({"type":47,"elements":[{"type":7,"elements":[{"type":8,"elements":"cos"},{"type":19,"symbol":"("},{"type":8,"elements":"x"},{"type":20,"symbol":")"}]}]})r"
+        ) << json;
+}
+
+TEST_F(CalcTestSymbolicComplex, exp1)
+{
+    Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"exp(0);");
+    ASSERT_TRUE(res.ToStdString(10) == "1") << res.ToStdString(10);
+    std::string json = res.ToJson(10);
+    ASSERT_TRUE(json ==
+        R"({"type":47,"elements":[{"type":7,"elements":[{"type":8,"elements":"1"}]}]})"
+        ) << json;
+}
+
+TEST_F(CalcTestSymbolicComplex, exp2)
+{
+    Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"exp(x);");
+    ASSERT_TRUE(res.ToStdString(10) == "exp(x)") << res.ToStdString(10);
+    std::string json = res.ToJson(10);
+    ASSERT_TRUE(json ==
+        R"r({"type":47,"elements":[{"type":15,"elements":[{"type":7,"elements":[{"type":8,"elements":"E"}]},{"type":10,"elements":[]},{"type":7,"elements":[{"type":8,"elements":"x"}]}]}]})r"
+        ) << json;
+}
+
+TEST_F(CalcTestSymbolicComplex, ln2)
+{
+    Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"ln(1);");
+    ASSERT_TRUE(res.ToStdString(10) == "0") << res.ToStdString(10);
+    std::string json = res.ToJson(10);
+    ASSERT_TRUE(json ==
+        R"({"type":47,"elements":[{"type":7,"elements":[{"type":8,"elements":"0"}]}]})"
+        ) << json;
+}
+
+TEST_F(CalcTestSymbolicComplex, ln3)
+{
+    Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"ln(x);");
+    ASSERT_TRUE(res.ToStdString(10) == "log(x)") << res.ToStdString(10);
+    std::string json = res.ToJson(10);
+    ASSERT_TRUE(json ==
+        R"r({"type":47,"elements":[{"type":7,"elements":[{"type":8,"elements":"log"},{"type":19,"symbol":"("},{"type":8,"elements":"x"},{"type":20,"symbol":")"}]}]})r"
+        ) << json;
+}
+
 }

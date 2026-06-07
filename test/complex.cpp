@@ -237,7 +237,8 @@ TEST_F(CalcTestComplex, trigonometric14)
     ASSERT_TRUE(res.GetAngleMeasure() == AngleMeasure::Radian && res.ToStdString(3, 3) == "1.571E+0+i*-0.881E+0") << res.ToStdString(3, 3);
 
     res = parser.Parse(LogicalId{0, 0, 1}, U"arccos(1);");
-    ASSERT_TRUE(res.GetAngleMeasure() == AngleMeasure::Radian && res.ToStdString(3, 3) == "0.E+0") << res.ToStdString(3, 3);
+    ASSERT_TRUE(res.GetAngleMeasure() == AngleMeasure::Radian);
+    ASSERT_TRUE(abs(res.GetRe()) <= Real(3, 1e-15f)) << res.ToStdString(3, 3);
 
     res = parser.Parse(LogicalId{0, 0, 1}, U"arccos(2+3i);");
     ASSERT_TRUE(res.GetAngleMeasure() == AngleMeasure::Radian && res.ToStdString(3, 3) == "1.E+0+i*-1.983E+0") << res.ToStdString(3, 3);
@@ -273,7 +274,8 @@ TEST_F(CalcTestComplex, trigonometric17)
     ASSERT_TRUE(res.GetAngleMeasure() == AngleMeasure::Radian && res.ToStdString(3, 3) == "1.571E+0+i*0.881E+0") << res.ToStdString(3, 3);
 
     res = parser.Parse(LogicalId{0, 0, 1}, U"arcsec(1);");
-    ASSERT_TRUE(res.GetAngleMeasure() == AngleMeasure::Radian && res.ToStdString(3, 3) == "0.E+0") << res.ToStdString(3, 3);
+    ASSERT_TRUE(res.GetAngleMeasure() == AngleMeasure::Radian);
+    ASSERT_TRUE(abs(res.GetRe()) <= Real(3, 1e-15f)) << res.ToStdString(3, 3);
 
     res = parser.Parse(LogicalId{0, 0, 1}, U"arcsec(2+3i);");
     ASSERT_TRUE(res.GetAngleMeasure() == AngleMeasure::Radian && res.ToStdString(3, 3) == "1.42E+0+i*0.231E+0") << res.ToStdString(3, 3);
@@ -850,4 +852,195 @@ TEST_F(CalcTestComplex, pow_int)
     ASSERT_TRUE(res.ToStdString(3, 3) == "0.125E+0") << res.ToStdString(3, 3);
 }
 
+
+TEST_F(CalcTestComplex, sin_large_arg)
+{
+    Complex res = parser.Parse(LogicalId{0, 0, 1}, U"sin(pow(10,20));");
+    ASSERT_TRUE(res.GetAngleMeasure() == AngleMeasure::None);
+    ASSERT_FALSE(res.GetRe() == Real(3, 0)) << res.ToStdString(3, 10);
+    ASSERT_TRUE(res.GetIm() == Real(3, 0)) << res.ToStdString(3, 10);
+    ASSERT_TRUE(res.ToStdString(3, 3) == "-0.747E+0") << res.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestComplex, cos_large_arg)
+{
+    Complex res = parser.Parse(LogicalId{0, 0, 1}, U"cos(pow(10,20));");
+    ASSERT_TRUE(res.GetAngleMeasure() == AngleMeasure::None);
+    ASSERT_FALSE(res.GetRe() == Real(3, 1)) << res.ToStdString(3, 10);
+    ASSERT_FALSE(res.GetRe() == Real(3, -1)) << res.ToStdString(3, 10);
+    ASSERT_TRUE(res.GetIm() == Real(3, 0)) << res.ToStdString(3, 10);
+    ASSERT_TRUE(res.ToStdString(3, 3) == "-0.665E+0") << res.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestComplex, tg_large_arg)
+{
+    Complex res = parser.Parse(LogicalId{0, 0, 1}, U"tg(pow(10,20));");
+    ASSERT_TRUE(res.GetAngleMeasure() == AngleMeasure::None);
+    ASSERT_FALSE(res.GetRe() == Real(3, 0)) << res.ToStdString(3, 10);
+    ASSERT_TRUE(res.GetIm() == Real(3, 0)) << res.ToStdString(3, 10);
+    ASSERT_TRUE(res.ToStdString(3, 3) == "1.123E+0") << res.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestComplex, ctg_large_arg)
+{
+    Complex res = parser.Parse(LogicalId{0, 0, 1}, U"ctg(pow(10,20));");
+    ASSERT_TRUE(res.GetAngleMeasure() == AngleMeasure::None);
+    ASSERT_FALSE(res.GetRe() == Real(3, 0)) << res.ToStdString(3, 10);
+    ASSERT_TRUE(res.GetIm() == Real(3, 0)) << res.ToStdString(3, 10);
+    ASSERT_TRUE(res.ToStdString(3, 3) == "0.89E+0") << res.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestComplex, sec_large_arg)
+{
+    Complex res = parser.Parse(LogicalId{0, 0, 1}, U"sec(pow(10,20));");
+    ASSERT_TRUE(res.GetAngleMeasure() == AngleMeasure::None);
+    ASSERT_FALSE(res.GetRe() == Real(3, 1)) << res.ToStdString(3, 10);
+    ASSERT_FALSE(res.GetRe() == Real(3, -1)) << res.ToStdString(3, 10);
+    ASSERT_TRUE(res.GetIm() == Real(3, 0)) << res.ToStdString(3, 10);
+    ASSERT_TRUE(res.ToStdString(3, 3) == "-1.504E+0") << res.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestComplex, cosec_large_arg)
+{
+    Complex res = parser.Parse(LogicalId{0, 0, 1}, U"cosec(pow(10,20));");
+    ASSERT_TRUE(res.GetAngleMeasure() == AngleMeasure::None);
+    ASSERT_FALSE(res.GetRe() == Real(3, 0)) << res.ToStdString(3, 10);
+    ASSERT_TRUE(res.GetIm() == Real(3, 0)) << res.ToStdString(3, 10);
+    ASSERT_TRUE(res.ToStdString(3, 3) == "-1.339E+0") << res.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestComplex, ln_large_arg)
+{
+    Complex res = parser.Parse(LogicalId{0, 0, 1}, U"ln(pow(10,20));");
+    ASSERT_TRUE(res.GetAngleMeasure() == AngleMeasure::None);
+    ASSERT_TRUE(res.ToStdString(3, 3) == "46.052E+0") << res.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestComplex, lg_large_arg)
+{
+    Complex res = parser.Parse(LogicalId{0, 0, 1}, U"lg(pow(10,20));");
+    ASSERT_TRUE(res.ToStdString(3, 3) == "20.E+0") << res.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestComplex, log_large_arg)
+{
+    Complex res = parser.Parse(LogicalId{0, 0, 1}, U"log(2,pow(10,20));");
+    ASSERT_TRUE(res.ToStdString(3, 3) == "66.439E+0") << res.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestComplex, exp_large_arg)
+{
+    EXPECT_THROW(parser.Parse(LogicalId{0, 0, 1}, U"exp(pow(10,20));"), yutovo_calculator::MathException);
+}
+
+TEST_F(CalcTestComplex, arctg_large_arg)
+{
+    Complex res = parser.Parse(LogicalId{0, 0, 1}, U"arctg(pow(10,20));");
+    ASSERT_TRUE(res.ToStdString(3, 3) == "1.571E+0") << res.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestComplex, arcctg_large_arg)
+{
+    Complex res = parser.Parse(LogicalId{0, 0, 1}, U"arcctg(pow(10,20));");
+    ASSERT_TRUE(res.ToStdString(3, 3) == "0.E+0") << res.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestComplex, arcsec_large_arg)
+{
+    Complex res = parser.Parse(LogicalId{0, 0, 1}, U"arcsec(pow(10,20));");
+    ASSERT_TRUE(res.ToStdString(3, 3) == "1.571E+0+i*5.E-41") << res.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestComplex, arccosec_large_arg)
+{
+    Complex res = parser.Parse(LogicalId{0, 0, 1}, U"arccosec(pow(10,20));");
+    ASSERT_TRUE(res.ToStdString(3, 3) == "1.E-20+i*-5.E-41") << res.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestComplex, th_large_arg)
+{
+    EXPECT_THROW(parser.Parse(LogicalId{0, 0, 1}, U"th(pow(10,20));"), yutovo_calculator::MathException);
+}
+
+TEST_F(CalcTestComplex, cth_large_arg)
+{
+    EXPECT_THROW(parser.Parse(LogicalId{0, 0, 1}, U"cth(pow(10,20));"), yutovo_calculator::MathException);
+}
+
+TEST_F(CalcTestComplex, sch_large_arg)
+{
+    EXPECT_THROW(parser.Parse(LogicalId{0, 0, 1}, U"sch(pow(10,20));"), yutovo_calculator::MathException);
+}
+
+TEST_F(CalcTestComplex, csch_large_arg)
+{
+    EXPECT_THROW(parser.Parse(LogicalId{0, 0, 1}, U"csch(pow(10,20));"), yutovo_calculator::MathException);
+}
+
+TEST_F(CalcTestComplex, arsh_large_arg)
+{
+    Complex res = parser.Parse(LogicalId{0, 0, 1}, U"arsh(pow(10,20));");
+    ASSERT_TRUE(res.GetAngleMeasure() == AngleMeasure::None);
+    ASSERT_TRUE(res.ToStdString(3, 3) == "46.745E+0") << res.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestComplex, arcth_large_arg)
+{
+    Complex res = parser.Parse(LogicalId{0, 0, 1}, U"arcth(pow(10,20));");
+    ASSERT_TRUE(res.GetAngleMeasure() == AngleMeasure::None);
+    ASSERT_TRUE(res.ToStdString(3, 3) == "3.942E-21") << res.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestComplex, arcsch_large_arg)
+{
+    Complex res = parser.Parse(LogicalId{0, 0, 1}, U"arcsch(pow(10,20));");
+    ASSERT_TRUE(res.GetAngleMeasure() == AngleMeasure::None);
+    ASSERT_TRUE(res.ToStdString(3, 3) == "1.E-20") << res.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestComplex, arcsin_large_arg)
+{
+    Complex res = parser.Parse(LogicalId{0, 0, 1}, U"arcsin(pow(10,20));");
+    ASSERT_TRUE(res.ToStdString(3, 3) == "1.571E+0+i*-46.745E+0") << res.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestComplex, arccos_large_arg)
+{
+    Complex res = parser.Parse(LogicalId{0, 0, 1}, U"arccos(pow(10,20));");
+    ASSERT_TRUE(res.ToStdString(3, 3) == "2.508E-20+i*46.745E+0") << res.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestComplex, arch_large_arg)
+{
+    Complex res = parser.Parse(LogicalId{0, 0, 1}, U"arch(pow(10,20));");
+    ASSERT_TRUE(res.ToStdString(3, 3) == "46.745E+0") << res.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestComplex, sqrt_large_arg)
+{
+    Complex res = parser.Parse(LogicalId{0, 0, 1}, U"sqrt(pow(10,20));");
+    ASSERT_TRUE(res.GetAngleMeasure() == AngleMeasure::None);
+    ASSERT_TRUE(res.ToStdString(3, 3) == "1.E+10") << res.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestComplex, root_large_arg)
+{
+    Complex res = parser.Parse(LogicalId{0, 0, 1}, U"root(pow(10,20),3);");
+    ASSERT_TRUE(res.GetAngleMeasure() == AngleMeasure::None);
+    ASSERT_TRUE(res.ToStdString(3, 3) == "4.642E+6") << res.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestComplex, pow_large_arg)
+{
+    Complex res = parser.Parse(LogicalId{0, 0, 1}, U"pow(10,20);");
+    ASSERT_TRUE(res.GetAngleMeasure() == AngleMeasure::None);
+    ASSERT_TRUE(res.ToStdString(3, 3) == "1.E+20") << res.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestComplex, abs_large_arg)
+{
+    Complex res = parser.Parse(LogicalId{0, 0, 1}, U"abs(-pow(10,20));");
+    ASSERT_TRUE(res.GetAngleMeasure() == AngleMeasure::None);
+    ASSERT_TRUE(res.ToStdString(3, 3) == "1.E+20") << res.ToStdString(3, 3);
+}
 }

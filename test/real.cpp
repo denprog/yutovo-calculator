@@ -2111,4 +2111,195 @@ TEST_F(CalcTestReal, pt_locale_switch_back)
     ASSERT_TRUE(s == "1.E+0(hour)") << s;
 }
 
+
+TEST_F(CalcTestReal, sin_large_arg)
+{
+    auto r = parser.Parse(LogicalId{0, 0, 1}, U"sin(pow(10,20));");
+    ASSERT_FALSE(r == Real(3, 0)) << r.ToStdString(3, 10);
+    ASSERT_TRUE(r.ToStdString(3, 3) == "-0.747E+0") << r.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestReal, cos_large_arg)
+{
+    auto r = parser.Parse(LogicalId{0, 0, 1}, U"cos(pow(10,20));");
+    ASSERT_FALSE(r == Real(3, 1)) << r.ToStdString(3, 10);
+    ASSERT_FALSE(r == Real(3, -1)) << r.ToStdString(3, 10);
+    ASSERT_TRUE(r.ToStdString(3, 3) == "-0.665E+0") << r.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestReal, trigonometric_special)
+{
+    Real res = parser.Parse(LogicalId{0, 0, 1}, U"sin(pi);");
+    ASSERT_TRUE(res.ToStdString(3, 3) == parser.Parse(LogicalId{0, 0, 1}, U"0;").ToStdString(3, 3)) << res.ToStdString(3, 3);
+    res = parser.Parse(LogicalId{0, 0, 1}, U"cos(pi);");
+    ASSERT_TRUE(res.ToStdString(3, 3) == parser.Parse(LogicalId{0, 0, 1}, U"-1;").ToStdString(3, 3)) << res.ToStdString(3, 3);
+    res = parser.Parse(LogicalId{0, 0, 1}, U"sin((pi)/(2));");
+    ASSERT_TRUE(res.ToStdString(3, 3) == parser.Parse(LogicalId{0, 0, 1}, U"1;").ToStdString(3, 3)) << res.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestReal, tg_large_arg)
+{
+    auto r = parser.Parse(LogicalId{0, 0, 1}, U"tg(pow(10,20));");
+    ASSERT_FALSE(r == Real(3, 0)) << r.ToStdString(3, 10);
+    ASSERT_TRUE(r.ToStdString(3, 3) == "1.123E+0") << r.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestReal, ctg_large_arg)
+{
+    auto r = parser.Parse(LogicalId{0, 0, 1}, U"ctg(pow(10,20));");
+    ASSERT_FALSE(r == Real(3, 0)) << r.ToStdString(3, 10);
+    ASSERT_TRUE(r.ToStdString(3, 3) == "0.89E+0") << r.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestReal, sec_large_arg)
+{
+    auto r = parser.Parse(LogicalId{0, 0, 1}, U"sec(pow(10,20));");
+    ASSERT_FALSE(r == Real(3, 1)) << r.ToStdString(3, 10);
+    ASSERT_FALSE(r == Real(3, -1)) << r.ToStdString(3, 10);
+    ASSERT_TRUE(r.ToStdString(3, 3) == "-1.504E+0") << r.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestReal, cosec_large_arg)
+{
+    auto r = parser.Parse(LogicalId{0, 0, 1}, U"cosec(pow(10,20));");
+    ASSERT_FALSE(r == Real(3, 0)) << r.ToStdString(3, 10);
+    ASSERT_TRUE(r.ToStdString(3, 3) == "-1.339E+0") << r.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestReal, ln_large_arg)
+{
+    auto r = parser.Parse(LogicalId{0, 0, 1}, U"ln(pow(10,20));");
+    ASSERT_TRUE(r.ToStdString(3, 3) == "46.052E+0") << r.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestReal, lg_large_arg)
+{
+    auto r = parser.Parse(LogicalId{0, 0, 1}, U"lg(pow(10,20));");
+    ASSERT_TRUE(r.ToStdString(3, 3) == "20.E+0") << r.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestReal, log_large_arg)
+{
+    auto r = parser.Parse(LogicalId{0, 0, 1}, U"log(2,pow(10,20));");
+    ASSERT_TRUE(r.ToStdString(3, 3) == "66.439E+0") << r.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestReal, exp_large_arg)
+{
+    auto r = parser.Parse(LogicalId{0, 0, 1}, U"exp(pow(10,20));");
+    ASSERT_TRUE(r.IsInfinity()) << r.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestReal, arctg_large_arg)
+{
+    auto r = parser.Parse(LogicalId{0, 0, 1}, U"arctg(pow(10,20));");
+    ASSERT_TRUE(r.ToStdString(3, 3) == "1.571E+0") << r.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestReal, arcctg_large_arg)
+{
+    auto r = parser.Parse(LogicalId{0, 0, 1}, U"arcctg(pow(10,20));");
+    ASSERT_TRUE(r.ToStdString(3, 3) == "0.E+0") << r.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestReal, arcsec_large_arg)
+{
+    auto r = parser.Parse(LogicalId{0, 0, 1}, U"arcsec(pow(10,20));");
+    ASSERT_TRUE(r.ToStdString(3, 3) == "1.571E+0") << r.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestReal, arccosec_large_arg)
+{
+    auto r = parser.Parse(LogicalId{0, 0, 1}, U"arccosec(pow(10,20));");
+    ASSERT_TRUE(r.ToStdString(3, 3) == "1.E-20") << r.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestReal, th_large_arg)
+{
+    auto r = parser.Parse(LogicalId{0, 0, 1}, U"th(pow(10,20));");
+    ASSERT_TRUE(r.ToStdString(3, 3) == "1.E+0") << r.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestReal, cth_large_arg)
+{
+    auto r = parser.Parse(LogicalId{0, 0, 1}, U"cth(pow(10,20));");
+    ASSERT_TRUE(r.ToStdString(3, 3) == "1.E+0") << r.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestReal, sch_large_arg)
+{
+    auto r = parser.Parse(LogicalId{0, 0, 1}, U"sch(pow(10,20));");
+    ASSERT_TRUE(r.ToStdString(3, 3) == "0.E+0") << r.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestReal, csch_large_arg)
+{
+    auto r = parser.Parse(LogicalId{0, 0, 1}, U"csch(pow(10,20));");
+    ASSERT_TRUE(r.ToStdString(3, 3) == "0.E+0") << r.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestReal, arsh_large_arg)
+{
+    auto r = parser.Parse(LogicalId{0, 0, 1}, U"arsh(pow(10,20));");
+    ASSERT_TRUE(r.ToStdString(3, 3) == "46.745E+0") << r.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestReal, arch_large_arg)
+{
+    auto r = parser.Parse(LogicalId{0, 0, 1}, U"arch(pow(10,20));");
+    ASSERT_TRUE(r.ToStdString(3, 3) == "46.745E+0") << r.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestReal, arcth_large_arg)
+{
+    auto r = parser.Parse(LogicalId{0, 0, 1}, U"arcth(pow(10,20));");
+    ASSERT_TRUE(r.ToStdString(3, 3) == "1.E-20") << r.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestReal, arsch_large_arg)
+{
+    EXPECT_THROW(parser.Parse(LogicalId{0, 0, 1}, U"arsch(pow(10,20));"), yutovo_calculator::MathException);
+}
+
+TEST_F(CalcTestReal, arcsch_large_arg)
+{
+    auto r = parser.Parse(LogicalId{0, 0, 1}, U"arcsch(pow(10,20));");
+    ASSERT_TRUE(r.ToStdString(3, 3) == "1.E-20") << r.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestReal, sqrt_large_arg)
+{
+    auto r = parser.Parse(LogicalId{0, 0, 1}, U"sqrt(pow(10,20));");
+    ASSERT_TRUE(r.ToStdString(3, 3) == "1.E+10") << r.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestReal, root_large_arg)
+{
+    auto r = parser.Parse(LogicalId{0, 0, 1}, U"root(pow(10,20),3);");
+    ASSERT_TRUE(r.ToStdString(3, 3) == "4.642E+6") << r.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestReal, pow_large_arg)
+{
+    auto r = parser.Parse(LogicalId{0, 0, 1}, U"pow(10,20);");
+    ASSERT_TRUE(r.ToStdString(3, 3) == "1.E+20") << r.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestReal, abs_large_arg)
+{
+    auto r = parser.Parse(LogicalId{0, 0, 1}, U"abs(-pow(10,20));");
+    ASSERT_TRUE(r.ToStdString(3, 3) == "1.E+20") << r.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestReal, floor_large_arg)
+{
+    auto r = parser.Parse(LogicalId{0, 0, 1}, U"floor(pow(10,20));");
+    ASSERT_TRUE(r.ToStdString(3, 3) == "1.E+20") << r.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestReal, fract_large_arg)
+{
+    auto r = parser.Parse(LogicalId{0, 0, 1}, U"fract(pow(10,20));");
+    ASSERT_TRUE(r.ToStdString(3, 3) == "0.E+0") << r.ToStdString(3, 3);
+}
 }

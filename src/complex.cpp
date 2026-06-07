@@ -737,8 +737,8 @@ Complex arcsin(const Complex& num, int& res_pos)
 
 Complex arccos(const Complex& num, int& res_pos)
 {
-    Complex j(num.GetBitPrecision(), 0, 1);
-    return 1 / j * ln(num + j * sqrt(1 - pow(num, 2, res_pos), res_pos), res_pos);
+    Complex half_pi(pi(num.GetBitPrecision()) / 2);
+    return half_pi - arcsin(num, res_pos);
 }
 
 Complex arctg(const Complex& num, int& res_pos)
@@ -809,10 +809,7 @@ Complex arsh(const Complex& num, int& res_pos)
 
 Complex arch(const Complex& num, int& res_pos)
 {
-    Complex j(num.GetBitPrecision(), 0, 1);
-    Complex r = j * arccos(num, res_pos);
-    r.SetAngleMeasure(AngleMeasure::None);
-    return r;
+    return ln(num + sqrt(pow(num, 2, res_pos) - 1, res_pos), res_pos);
 }
 
 Complex arth(const Complex& num, int& res_pos)
