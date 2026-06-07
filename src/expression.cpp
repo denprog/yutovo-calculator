@@ -739,7 +739,7 @@ Expression<Symbolic<Real>>::Expression(LogicalId id, std::u32string& expr, Solve
 
     exp_number = +(char_(U'0', U'9') | char_(U'.')) >> raw[lexeme[no_case[char_(U'E')] >> (char_(U'+') | char_(U'-'))]] > +(char_(U'0', U'9'));
 
-    identifier = name >> -('{' > (integer_number_str | name) > '}');
+    identifier = (name | raw[lexeme[char_(U'∞')]]) >> -('{' > (integer_number_str | name) > '}');
 
     implicit_div_mul = '(' >> expression >> ')' >> '/' >> '(' >> expression >> ')' >> identifier;
 
@@ -751,7 +751,7 @@ Expression<Symbolic<Real>>::Expression(LogicalId id, std::u32string& expr, Solve
 
     implicit_post_function_mul = function_call >> identifier;
 
-    name = raw[lexeme[(alpha | char_(U'_') | char_(U'∞')) >> *(alnum | char_(U'_') | char_(U'∞'))]];
+    name = raw[lexeme[(alpha | char_(U'_')) >> *(alnum | char_(U'_'))]];
 
     unary_operation = (char_(U'+') > unary) | (char_(U'-') > unary);
 
@@ -934,7 +934,7 @@ Expression<Symbolic<Rational>>::Expression(LogicalId id, std::u32string& expr, S
 
     exp_number = +(char_(U'0', U'9') | char_(U'.')) >> raw[lexeme[no_case[char_(U'E')] >> (char_(U'+') | char_(U'-'))]] > +(char_(U'0', U'9'));
 
-    identifier = name >> -('{' > (integer_number_str | name) > '}');
+    identifier = (name | raw[lexeme[char_(U'∞')]]) >> -('{' > (integer_number_str | name) > '}');
 
     implicit_div_mul = '(' >> expression >> ')' >> '/' >> '(' >> expression >> ')' >> identifier;
 
@@ -946,7 +946,7 @@ Expression<Symbolic<Rational>>::Expression(LogicalId id, std::u32string& expr, S
 
     implicit_post_function_mul = function_call >> identifier;
 
-    name = raw[lexeme[(alpha | char_(U'_') | char_(U'∞')) >> *(alnum | char_(U'_') | char_(U'∞'))]];
+    name = raw[lexeme[(alpha | char_(U'_')) >> *(alnum | char_(U'_'))]];
 
     unary_operation = (char_(U'+') > unary) | (char_(U'-') > unary);
 
@@ -1084,7 +1084,7 @@ Expression<Symbolic<Complex>>::Expression(LogicalId id, std::u32string& expr, So
 
     exp_number = +(char_(U'0', U'9') | char_(U'.')) >> raw[lexeme[no_case[char_(U'E')] >> (char_(U'+') | char_(U'-'))]] > +(char_(U'0', U'9'));
 
-    identifier = name >> -('{' > (integer_number_str | name) > '}');
+    identifier = (name | raw[lexeme[char_(U'∞')]]) >> -('{' > (integer_number_str | name) > '}');
 
     implicit_div_mul = '(' >> expression >> ')' >> '/' >> '(' >> expression >> ')' >> identifier;
 
@@ -1096,7 +1096,7 @@ Expression<Symbolic<Complex>>::Expression(LogicalId id, std::u32string& expr, So
 
     implicit_post_function_mul = function_call >> identifier;
 
-    name = raw[lexeme[(alpha | char_(U'_') | char_(U'∞')) >> *(alnum | char_(U'_') | char_(U'∞'))]];
+    name = raw[lexeme[(alpha | char_(U'_')) >> *(alnum | char_(U'_'))]];
 
     unary_operation = (char_(U'+') > unary) | (char_(U'-') > unary);
 

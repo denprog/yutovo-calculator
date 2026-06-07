@@ -556,6 +556,8 @@ struct Solver : public boost::static_visitor<Number>
         CheckBreak(parser_context);
         if constexpr (is_symbolic_v<Number>)
         {
+            if (op.identifier.name == std::u32string(1, 0x221E))
+                throw SyntaxException(op.id, SyntaxError, op.pos, static_cast<int>(op.identifier.name.length()), op.line);
             if (!op.identifier.subscript.empty())
                 throw SyntaxException(op.id, UnknownIdentifier, U"Identifier '" + op.identifier.name + U"' not found", op.pos, op.identifier.name.length(), op.line);
             AddDependency(op.identifier);
