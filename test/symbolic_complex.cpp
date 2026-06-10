@@ -1521,4 +1521,21 @@ TEST_F(CalcTestSymbolicComplex, fact4)
         yutovo_calculator::TimeExceedException);
 }
 
+TEST_F(CalcTestSymbolicComplex, gamma1)
+{
+    Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"gamma(5);");
+    ASSERT_TRUE(res.ToStdString(10) == "24") << res.ToStdString(10);
+    std::string json = res.ToJson(10);
+    ASSERT_TRUE(json ==
+        "{\"type\":47,\"elements\":[{\"type\":7,\"elements\":[{\"type\":8,\"elements\":\"24\"}]}]}"
+        ) << json;
+}
+
+TEST_F(CalcTestSymbolicComplex, gamma_tojson)
+{
+    Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"gamma(x);");
+    ASSERT_TRUE(res.ToJson(10) ==
+        R"r({"type":47,"elements":[{"type":7,"elements":[{"type":8,"elements":"gamma"},{"type":19,"symbol":"("},{"type":8,"elements":"x"},{"type":20,"symbol":")"}]}]})r" ) << res.ToJson(10);
+}
+
 }

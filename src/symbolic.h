@@ -380,6 +380,13 @@ public:
         return res;
     }
     
+    friend Symbolic<Number> gamma(const Symbolic<Number>& num)
+    {
+        Symbolic<Number> res(num.precision);
+        *res.expr = SymEngine::gamma(*num.expr);
+        return res;
+    }
+    
     friend Symbolic<Number> fact(const Symbolic<Number>& num, ParserContext* parser_context)
     {
         CheckBreak(parser_context);
