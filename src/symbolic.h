@@ -42,6 +42,9 @@
 namespace yutovo_calculator
 {
 
+struct ParserContext;
+void CheckBreak(ParserContext* parser_context);
+
 template<typename Number> class Symbolic;
 class Rational;
 class Complex;
@@ -377,8 +380,26 @@ public:
         return res;
     }
     
-    friend Symbolic<Number> fact(const Symbolic<Number>& num)
+    friend Symbolic<Number> fact(const Symbolic<Number>& num, ParserContext* parser_context)
     {
+        CheckBreak(parser_context);
+        const SymEngine::Basic& basic = *num.expr->get_basic();
+        if (SymEngine::is_a<const SymEngine::Integer>(basic))
+        {
+            const SymEngine::Integer& int_val = static_cast<const SymEngine::Integer&>(basic);
+            if (!int_val.is_negative())
+            {
+                unsigned long n = int_val.as_uint();
+                Symbolic<Number> res(num.precision);
+                *res.expr = SymEngine::Expression(1);
+                for (unsigned long i = 2; i <= n; ++i)
+                {
+                    CheckBreak(parser_context);
+                    *res.expr = *res.expr * SymEngine::Expression(static_cast<long>(i));
+                }
+                return res;
+            }
+        }
         Symbolic<Number> res(num.precision);
         *res.expr = SymEngine::gamma(*num.expr + SymEngine::Expression(1));
         return res;

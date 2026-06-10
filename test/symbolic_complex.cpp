@@ -1403,26 +1403,6 @@ TEST_F(CalcTestSymbolicComplex, complex_2_minus_i)
         R"({"type":47,"elements":[{"type":7,"elements":[{"type":8,"elements":"2"},{"type":12,"symbol":"-"},{"type":8,"elements":"i"}]}]})" ) << res.ToJson(10);
 }
 
-TEST_F(CalcTestSymbolicComplex, fact1)
-{
-    Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"5!;");
-    ASSERT_TRUE(res.ToStdString(10) == "120") << res.ToStdString(10);
-    std::string json = res.ToJson(10);
-    ASSERT_TRUE(json ==
-        R"({"type":47,"elements":[{"type":7,"elements":[{"type":8,"elements":"120"}]}]})"
-        ) << json;
-}
-
-TEST_F(CalcTestSymbolicComplex, fact2)
-{
-    Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"x!;");
-    ASSERT_TRUE(res.ToStdString(10) == "gamma(1.+x)") << res.ToStdString(10);
-    std::string json = res.ToJson(10);
-    ASSERT_TRUE(json ==
-        R"r({"type":47,"elements":[{"type":7,"elements":[{"type":8,"elements":"gamma"},{"type":19,"symbol":"("},{"type":8,"elements":"1"},{"type":11,"symbol":"+"},{"type":8,"elements":"x"},{"type":20,"symbol":")"}]}]})r"
-        ) << json;
-}
-
 TEST_F(CalcTestSymbolicComplex, sin2)
 {
     Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"sin(0);");
@@ -1501,6 +1481,44 @@ TEST_F(CalcTestSymbolicComplex, ln3)
     ASSERT_TRUE(json ==
         R"r({"type":47,"elements":[{"type":7,"elements":[{"type":8,"elements":"log"},{"type":19,"symbol":"("},{"type":8,"elements":"x"},{"type":20,"symbol":")"}]}]})r"
         ) << json;
+}
+
+TEST_F(CalcTestSymbolicComplex, fact1)
+{
+    Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"5!;");
+    ASSERT_TRUE(res.ToStdString(10) == "120") << res.ToStdString(10);
+    std::string json = res.ToJson(10);
+    ASSERT_TRUE(json ==
+        R"({"type":47,"elements":[{"type":7,"elements":[{"type":8,"elements":"120"}]}]})"
+        ) << json;
+}
+
+TEST_F(CalcTestSymbolicComplex, fact2)
+{
+    Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"x!;");
+    ASSERT_TRUE(res.ToStdString(10) == "gamma(1.+x)") << res.ToStdString(10);
+    std::string json = res.ToJson(10);
+    ASSERT_TRUE(json ==
+        R"r({"type":47,"elements":[{"type":7,"elements":[{"type":8,"elements":"gamma"},{"type":19,"symbol":"("},{"type":8,"elements":"1"},{"type":11,"symbol":"+"},{"type":8,"elements":"x"},{"type":20,"symbol":")"}]}]})r"
+        ) << json;
+}
+
+TEST_F(CalcTestSymbolicComplex, fact3)
+{
+    Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"0!;");
+    ASSERT_TRUE(res.ToStdString(10) == "1") << res.ToStdString(10);
+    res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"1!;");
+    ASSERT_TRUE(res.ToStdString(10) == "1") << res.ToStdString(10);
+    res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"10!;");
+    ASSERT_TRUE(res.ToStdString(10) == "3628800") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicComplex, fact4)
+{
+    yutovo_calculator::ParserContext parser_context;
+    parser_context.Init(100);
+    EXPECT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"100000!;", &parser_context),
+        yutovo_calculator::TimeExceedException);
 }
 
 }

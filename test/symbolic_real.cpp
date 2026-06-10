@@ -1504,26 +1504,6 @@ TEST_F(CalcTestSymbolicReal, log_change_of_base_russian)
         R"r({"type":45,"elements":[{"type":14,"elements":[{"type":7,"elements":[{"type":7,"elements":[{"type":8,"elements":"ln"},{"type":19,"symbol":"("},{"type":8,"elements":"4"},{"type":20,"symbol":")"}]}]},{"type":10,"elements":[]},{"type":7,"elements":[{"type":7,"elements":[{"type":8,"elements":"ln"},{"type":19,"symbol":"("},{"type":8,"elements":"2"},{"type":20,"symbol":")"}]}]}]}]})r" ) << res.ToJson(10, Language::Russian);
 }
 
-TEST_F(CalcTestSymbolicReal, fact1)
-{
-    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"5!;");
-    ASSERT_TRUE(res.ToStdString(10) == "120.") << res.ToStdString(10);
-    std::string json = res.ToJson(10);
-    ASSERT_TRUE(json ==
-        "{\"type\":45,\"elements\":[{\"type\":7,\"elements\":[{\"type\":8,\"elements\":\"120\"}]}]}"
-        ) << json;
-}
-
-TEST_F(CalcTestSymbolicReal, fact2)
-{
-    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"x!;");
-    ASSERT_TRUE(res.ToStdString(10) == "gamma(1.+x)") << res.ToStdString(10);
-    std::string json = res.ToJson(10);
-    ASSERT_TRUE(json ==
-        R"r({"type":45,"elements":[{"type":7,"elements":[{"type":8,"elements":"gamma"},{"type":19,"symbol":"("},{"type":8,"elements":"1"},{"type":11,"symbol":"+"},{"type":8,"elements":"x"},{"type":20,"symbol":")"}]}]})r"
-        ) << json;
-}
-
 TEST_F(CalcTestSymbolicReal, sin2)
 {
     Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"sin(0);");
@@ -1602,6 +1582,44 @@ TEST_F(CalcTestSymbolicReal, ln3)
     ASSERT_TRUE(json ==
         R"r({"type":45,"elements":[{"type":7,"elements":[{"type":8,"elements":"log"},{"type":19,"symbol":"("},{"type":8,"elements":"x"},{"type":20,"symbol":")"}]}]})r"
         ) << json;
+}
+
+TEST_F(CalcTestSymbolicReal, fact1)
+{
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"5!;");
+    ASSERT_TRUE(res.ToStdString(10) == "120.") << res.ToStdString(10);
+    std::string json = res.ToJson(10);
+    ASSERT_TRUE(json ==
+        "{\"type\":45,\"elements\":[{\"type\":7,\"elements\":[{\"type\":8,\"elements\":\"120\"}]}]}"
+        ) << json;
+}
+
+TEST_F(CalcTestSymbolicReal, fact2)
+{
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"x!;");
+    ASSERT_TRUE(res.ToStdString(10) == "gamma(1.+x)") << res.ToStdString(10);
+    std::string json = res.ToJson(10);
+    ASSERT_TRUE(json ==
+        R"r({"type":45,"elements":[{"type":7,"elements":[{"type":8,"elements":"gamma"},{"type":19,"symbol":"("},{"type":8,"elements":"1"},{"type":11,"symbol":"+"},{"type":8,"elements":"x"},{"type":20,"symbol":")"}]}]})r"
+        ) << json;
+}
+
+TEST_F(CalcTestSymbolicReal, fact3)
+{
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"0!;");
+    ASSERT_TRUE(res.ToStdString(10) == "1.") << res.ToStdString(10);
+    res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"1!;");
+    ASSERT_TRUE(res.ToStdString(10) == "1.") << res.ToStdString(10);
+    res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"10!;");
+    ASSERT_TRUE(res.ToStdString(10) == "3628800") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicReal, fact4)
+{
+    yutovo_calculator::ParserContext parser_context;
+    parser_context.Init(100);
+    EXPECT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"100000!;", &parser_context),
+        yutovo_calculator::TimeExceedException);
 }
 
 }

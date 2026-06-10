@@ -18,6 +18,9 @@
 namespace yutovo_calculator
 {
 
+struct ParserContext;
+void CheckBreak(ParserContext* parser_context);
+
 template<typename Number> class Symbolic;
 
 class Real
@@ -215,7 +218,7 @@ public:
 
     friend Real fract(const Real &num);
 
-    friend Real fact(const Real &num);
+    friend Real fact(const Real &num, ParserContext* parser_context);
 
     friend Real roundoff(const Real& num);
 

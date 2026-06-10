@@ -11,6 +11,27 @@
 - **Never commit without explicit user permission.** Do not run `git commit`, `git push`, `git reset`, `git rebase`, or any other git mutations unless explicitly asked to do so. Ask for confirmation each time when git mutations are needed.
 - **Never delete existing tests.** When fixing regressions or refactoring, update test expectations to match the new correct behavior, but do not remove tests. If `git checkout` or similar commands are used to revert a file, verify that no user-added tests were lost.
 
+### Code Style
+Always place braces on their own line for control structures:
+```cpp
+// CORRECT
+try
+{
+    // ...
+}
+catch (...)
+{
+    // ...
+}
+
+// WRONG
+try {
+    // ...
+} catch (...) {
+    // ...
+}
+```
+
 ## Current Work: Symbolic Integration
 
 ### yutovo-calculator
@@ -23,7 +44,7 @@
 - `cot(x)`, `sec(x)`, `csc(x)` are implemented for all symbolic types via SymEngine functions. Friend functions added in `symbolic.h`; registered in `Parser<Symbolic<...>>` constructors in `parser.cpp`.
 - `HAVE_SYMENGINE_MPFR` is commented out in `symengine_config.h`; `evalf` falls back to 53-bit double.
 - SymEngine headers are located at `../yutovo/deploy/include/symengine/`.
-- `fact(x)` (postfix `!`) is implemented for all symbolic types via `SymEngine::gamma(x+1)`. Friend function added in `symbolic.h`; `PostfixOperationNode` specializations added in `solver.cpp`; grammar updated in `expression.cpp` to allow `identifier!`.
+- `fact(x)` (postfix `!`) is implemented for all symbolic types as a product `1*2*...*n` for non-negative integer arguments; returns `factorial(x)` for symbolic/non-integer arguments (no longer uses `SymEngine::gamma`). Friend function added in `symbolic.h`; `PostfixOperationNode` specializations added in `solver.cpp`; grammar updated in `expression.cpp` to allow `identifier!`.
 - `Symbolic<Number>::ToJson()` recursively traverses the SymEngine AST and emits JSON using yutovo-editor element type codes (7=CODE_ROW, 8=CODE_STRING, 10=SHAPE, 11=PLUS, 12=MINUS, 13=MULTIPLY, 14=DIVISION, 15=POWER, 45-47=SYMBOLIC_*_RESULT). This replaces the fragile string-parsing approach in `yutovo-editor::AddSymbolicElements`.
 
 ### yutovo-solver

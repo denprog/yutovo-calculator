@@ -882,9 +882,12 @@ TEST_F(CalcTestSymbolicRational, limit_ln_x)
 TEST_F(CalcTestSymbolicRational, limit_exp_1x)
 {
     bool thrown = false;
-    try {
+    try
+    {
         parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"subs(exp(1/x),x,0);");
-    } catch (...) {
+    }
+    catch (...)
+    {
         thrown = true;
     }
     ASSERT_TRUE(thrown);
@@ -893,9 +896,12 @@ TEST_F(CalcTestSymbolicRational, limit_exp_1x)
 TEST_F(CalcTestSymbolicRational, limit_sin_1x)
 {
     bool thrown = false;
-    try {
+    try
+    {
         parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"subs(sin(1/x),x,0);");
-    } catch (...) {
+    }
+    catch (...)
+    {
         thrown = true;
     }
     ASSERT_TRUE(thrown);
@@ -904,9 +910,12 @@ TEST_F(CalcTestSymbolicRational, limit_sin_1x)
 TEST_F(CalcTestSymbolicRational, limit_cos_1x)
 {
     bool thrown = false;
-    try {
+    try
+    {
         parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"subs(cos(1/x),x,0);");
-    } catch (...) {
+    }
+    catch (...)
+    {
         thrown = true;
     }
     ASSERT_TRUE(thrown);
@@ -921,9 +930,12 @@ TEST_F(CalcTestSymbolicRational, limit_ln_1x)
 TEST_F(CalcTestSymbolicRational, limit_sqrt_noo)
 {
     bool thrown = false;
-    try {
+    try
+    {
         parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"sqrt(-∞);");
-    } catch (...) {
+    }
+    catch (...)
+    {
         thrown = true;
     }
     ASSERT_TRUE(thrown);
@@ -1296,26 +1308,6 @@ TEST_F(CalcTestSymbolicRational, log_change_of_base_russian)
         R"r({"type":46,"elements":[{"type":14,"elements":[{"type":7,"elements":[{"type":7,"elements":[{"type":8,"elements":"ln"},{"type":19,"symbol":"("},{"type":8,"elements":"4"},{"type":20,"symbol":")"}]}]},{"type":10,"elements":[]},{"type":7,"elements":[{"type":7,"elements":[{"type":8,"elements":"ln"},{"type":19,"symbol":"("},{"type":8,"elements":"2"},{"type":20,"symbol":")"}]}]}]}]})r" ) << res.ToJson(10, Language::Russian);
 }
 
-TEST_F(CalcTestSymbolicRational, fact1)
-{
-    Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"5!;");
-    ASSERT_TRUE(res.ToStdString(0) == "120") << res.ToStdString(0);
-    std::string json = res.ToJson(10);
-    ASSERT_TRUE(json ==
-        R"({"type":46,"elements":[{"type":7,"elements":[{"type":8,"elements":"120"}]}]})"
-        ) << json;
-}
-
-TEST_F(CalcTestSymbolicRational, fact2)
-{
-    Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"x!;");
-    ASSERT_TRUE(res.ToStdString(0) == "gamma(1+x)") << res.ToStdString(0);
-    std::string json = res.ToJson(10);
-    ASSERT_TRUE(json ==
-        R"r({"type":46,"elements":[{"type":7,"elements":[{"type":8,"elements":"gamma"},{"type":19,"symbol":"("},{"type":8,"elements":"1"},{"type":11,"symbol":"+"},{"type":8,"elements":"x"},{"type":20,"symbol":")"}]}]})r"
-        ) << json;
-}
-
 TEST_F(CalcTestSymbolicRational, sin2)
 {
     Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"sin(0);");
@@ -1394,6 +1386,44 @@ TEST_F(CalcTestSymbolicRational, ln3)
     ASSERT_TRUE(json ==
         R"r({"type":46,"elements":[{"type":7,"elements":[{"type":8,"elements":"log"},{"type":19,"symbol":"("},{"type":8,"elements":"x"},{"type":20,"symbol":")"}]}]})r"
         ) << json;
+}
+
+TEST_F(CalcTestSymbolicRational, fact1)
+{
+    Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"5!;");
+    ASSERT_TRUE(res.ToStdString(0) == "120") << res.ToStdString(0);
+    std::string json = res.ToJson(10);
+    ASSERT_TRUE(json ==
+        R"({"type":46,"elements":[{"type":7,"elements":[{"type":8,"elements":"120"}]}]})"
+        ) << json;
+}
+
+TEST_F(CalcTestSymbolicRational, fact2)
+{
+    Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"x!;");
+    ASSERT_TRUE(res.ToStdString(0) == "gamma(1+x)") << res.ToStdString(0);
+    std::string json = res.ToJson(10);
+    ASSERT_TRUE(json ==
+        R"r({"type":46,"elements":[{"type":7,"elements":[{"type":8,"elements":"gamma"},{"type":19,"symbol":"("},{"type":8,"elements":"1"},{"type":11,"symbol":"+"},{"type":8,"elements":"x"},{"type":20,"symbol":")"}]}]})r"
+        ) << json;
+}
+
+TEST_F(CalcTestSymbolicRational, fact3)
+{
+    Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"0!;");
+    ASSERT_TRUE(res.ToStdString(0) == "1") << res.ToStdString(0);
+    res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"1!;");
+    ASSERT_TRUE(res.ToStdString(0) == "1") << res.ToStdString(0);
+    res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"10!;");
+    ASSERT_TRUE(res.ToStdString(0) == "3628800") << res.ToStdString(0);
+}
+
+TEST_F(CalcTestSymbolicRational, fact4)
+{
+    yutovo_calculator::ParserContext parser_context;
+    parser_context.Init(100);
+    EXPECT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"100000!;", &parser_context),
+        yutovo_calculator::TimeExceedException);
 }
 
 }

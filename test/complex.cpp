@@ -1043,4 +1043,24 @@ TEST_F(CalcTestComplex, abs_large_arg)
     ASSERT_TRUE(res.GetAngleMeasure() == AngleMeasure::None);
     ASSERT_TRUE(res.ToStdString(3, 3) == "1.E+20") << res.ToStdString(3, 3);
 }
+
+TEST_F(CalcTestComplex, fact1)
+{
+    Complex res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"0!;");
+    ASSERT_TRUE(res.ToStdString(3, 3) == "1.E+0") << res.ToStdString(3, 3);
+    res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"1!;");
+    ASSERT_TRUE(res.ToStdString(3, 3) == "1.E+0") << res.ToStdString(3, 3);
+    res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"5!;");
+    ASSERT_TRUE(res.ToStdString(3, 3) == "120.E+0") << res.ToStdString(3, 3);
+    res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"10!;");
+    ASSERT_TRUE(res.ToStdString(3, 3) == "3.629E+6") << res.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestComplex, fact2)
+{
+    yutovo_calculator::ParserContext parser_context;
+    parser_context.Init(100);
+    EXPECT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"1000000!;", &parser_context),
+        yutovo_calculator::TimeExceedException);
+}
 }

@@ -594,4 +594,20 @@ TEST(UtilsTest, LogicalIdFromString7)
     EXPECT_THROW(LogicalIdFromString("0,1,abc"), yutovo_calculator::ParserException);
 }
 
+TEST_F(CalcTestInteger, fact1)
+{
+    Integer res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"0!;");
+    ASSERT_TRUE(res.ToString(10) == U"1") << res.ToStdString(10);
+    res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"10!;");
+    ASSERT_TRUE(res.ToString(10) == U"3628800") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestInteger, fact2)
+{
+    yutovo_calculator::ParserContext parser_context;
+    parser_context.Init(100);
+    EXPECT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"1000000!;", &parser_context),
+        yutovo_calculator::TimeExceedException);
+}
+
 }

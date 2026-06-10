@@ -1330,14 +1330,24 @@ Real fract(const Real &num)
     return res;
 }
 
-Real fact(const Real& num)
+Real fact(const Real& num, ParserContext* parser_context)
 {
+    CheckBreak(parser_context);
     Real res(num.GetBitPrecision(), num.angle_measure);
 
     if (!num.IsInteger())
         throw MathException(ArgumentIsOver);
 
-    mpfr_fac_ui(res.number, (int)num, DEFAULT_RND);
+    int n = (int)num;
+    if (n < 0)
+        throw MathException(ArgumentIsOver);
+
+    mpfr_set_ui(res.number, 1, DEFAULT_RND);
+    for (unsigned long i = 2; i <= (unsigned long)n; ++i)
+    {
+        CheckBreak(parser_context);
+        mpfr_mul_ui(res.number, res.number, i, DEFAULT_RND);
+    }
 
 #ifdef TRACE_OUTPUT
     res.UpdateNumberStr();

@@ -14,6 +14,9 @@
 namespace yutovo_calculator
 {
 
+struct ParserContext;
+void CheckBreak(ParserContext* parser_context);
+
 #ifdef max
 #undef max
 #endif
@@ -137,7 +140,7 @@ public:
 
     friend Complex mod(const Complex& num);
 
-    friend Complex fact(const Complex& num);
+    friend Complex fact(const Complex& num, ParserContext* parser_context);
 
     friend Complex arg(const Complex& num);
 

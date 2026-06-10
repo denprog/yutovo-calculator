@@ -503,7 +503,7 @@ Integer Solver<Integer>::operator()(PostfixOperationNode<Integer> const& op) con
     switch (op.op)
     {
     case '!':
-        return fact(left);
+        return fact(left, parser_context);
     }
     throw SyntaxException(op.id, SyntaxError, op.pos, op.line);
 }
@@ -515,7 +515,7 @@ Real Solver<Real>::operator()(PostfixOperationNode<Real> const& op) const
     switch (op.op)
     {
     case '!':
-        return fact(left);
+        return fact(left, parser_context);
     }
     throw SyntaxException(op.id, SyntaxError, op.pos, op.line);
 }
@@ -533,7 +533,7 @@ Complex Solver<Complex>::operator()(PostfixOperationNode<Complex> const& op) con
     switch (op.op)
     {
     case '!':
-        return fact(left);
+        return fact(left, parser_context);
     }
     throw SyntaxException(op.id, SyntaxError, op.pos, op.line);
 }
@@ -545,7 +545,7 @@ Symbolic<Real> Solver<Symbolic<Real>>::operator()(PostfixOperationNode<Symbolic<
     switch (op.op)
     {
     case '!':
-        return fact(left);
+        return fact(left, parser_context);
     }
     throw SyntaxException(op.id, SyntaxError, op.pos, op.line);
 }
@@ -557,7 +557,7 @@ Symbolic<Rational> Solver<Symbolic<Rational>>::operator()(PostfixOperationNode<S
     switch (op.op)
     {
     case '!':
-        return fact(left);
+        return fact(left, parser_context);
     }
     throw SyntaxException(op.id, SyntaxError, op.pos, op.line);
 }
@@ -569,7 +569,7 @@ Symbolic<Complex> Solver<Symbolic<Complex>>::operator()(PostfixOperationNode<Sym
     switch (op.op)
     {
     case '!':
-        return fact(left);
+        return fact(left, parser_context);
     }
     throw SyntaxException(op.id, SyntaxError, op.pos, op.line);
 }
@@ -1762,9 +1762,13 @@ Array<Real> Solver<Array<Real>>::operator()(ImplicitDivMulNode<Array<Real>> cons
 template<>
 Array<Real> Solver<Array<Real>>::operator()(ArrayNode<Array<Real>> const& op) const
 {
+    CheckBreak(parser_context);
     Array<Real> res;
     for (const auto& v : op.array)
+    {
+        CheckBreak(parser_context);
         res.Add((*this)(v));
+    }
     return res;
 }
 

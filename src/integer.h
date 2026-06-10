@@ -15,6 +15,9 @@
 namespace yutovo_calculator
 {
 
+struct ParserContext;
+void CheckBreak(ParserContext* parser_context);
+
 //Integer number
 class Integer
 {
@@ -111,7 +114,7 @@ public:
 
     friend Integer abs(const Integer& num);
 
-    friend Integer fact(const Integer& num);
+    friend Integer fact(const Integer& num, ParserContext* parser_context);
 
     friend Integer reminder(const Integer& num1, const Integer& num2);
 

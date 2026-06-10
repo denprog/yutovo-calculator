@@ -488,10 +488,18 @@ Integer abs(const Integer& num)
     return res;
 }
 
-Integer fact(const Integer& num)
+Integer fact(const Integer& num, ParserContext* parser_context)
 {
-    Integer res;
-    mpz_fac_ui(res.number, (int)num);
+    CheckBreak(parser_context);
+    if (num < 0)
+        throw MathException(ArgumentIsOver);
+    Integer res(1);
+    unsigned long n = (unsigned long)num;
+    for (unsigned long i = 2; i <= n; ++i)
+    {
+        CheckBreak(parser_context);
+        mpz_mul_ui(res.number, res.number, i);
+    }
     return res;
 }
 

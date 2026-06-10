@@ -14,6 +14,9 @@
 namespace yutovo_calculator
 {
 
+struct ParserContext;
+void CheckBreak(ParserContext* parser_context);
+
 Real exp(const Real& num);
 Real ln(const Real& num);
 Real lg(const Real& num);
@@ -31,7 +34,7 @@ Real ceil(const Real& num);
 Real round(const Real& num);
 Real integer(const Real& num);
 Real fract(const Real &num);
-Real fact(const Real &num);
+Real fact(const Real &num, ParserContext* parser_context = nullptr);
 Real roundoff(const Real& num);
 
 Real sin(const Real& num);
@@ -492,9 +495,15 @@ public:
         return ForEach(fract, num);
     }
 
-    friend Array<Number> fact(const Array<Number> &num)
+    friend Array<Number> fact(const Array<Number> &num, ParserContext* parser_context)
     {
-        return ForEach(fact, num);
+        Array<Number> r;
+        for (auto& n : num.numbers)
+        {
+            CheckBreak(parser_context);
+            r.numbers.push_back(fact(n, parser_context));
+        }
+        return r;
     }
 
     friend Array<Number> roundoff(const Array<Number>& num)

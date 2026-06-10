@@ -6,6 +6,7 @@
  */
 
 #include "complex.h"
+#include "utils.h"
 
 #ifdef max
 #undef max
@@ -664,12 +665,13 @@ Complex mod(const Complex& num)
     return res;
 }
 
-Complex fact(const Complex& num)
+Complex fact(const Complex& num, ParserContext* parser_context)
 {
+    CheckBreak(parser_context);
     if (!num.IsReal() || !num.re.IsInteger())
         throw MathException(ArgumentIsOver);
 
-    Complex res(fact(num.re));
+    Complex res(fact(num.re, parser_context));
 
     return res;
 }
