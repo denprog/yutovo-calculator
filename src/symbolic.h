@@ -899,6 +899,28 @@ public:
         return result;
     }
 
+    static std::string ReplaceImaginaryUnit(const std::string& s, char imag_unit)
+    {
+        std::string result;
+        for (size_t i = 0; i < s.size(); ++i)
+        {
+            if (s[i] == 'I')
+            {
+                bool boundary_before = (i == 0) ||
+                    (!std::isalnum(static_cast<unsigned char>(s[i - 1])) && s[i - 1] != '.' && s[i - 1] != '_');
+                bool boundary_after = (i + 1 == s.size()) ||
+                    (!std::isalnum(static_cast<unsigned char>(s[i + 1])) && s[i + 1] != '.' && s[i + 1] != '_');
+                if (boundary_before && boundary_after)
+                {
+                    result += imag_unit;
+                    continue;
+                }
+            }
+            result += s[i];
+        }
+        return result;
+    }
+
 private:
     enum class JsonNumberFormat
     {
@@ -952,6 +974,19 @@ private:
     static std::string JsonCodeString(const std::string& text)
     {
         return std::string(R"({"type":8,"elements":")") + JsonEscape(text) + R"("})";
+    }
+
+    static std::string ImaginaryUnitName(Language language)
+    {
+        return language == Language::Russian ? "j" : "i";
+    }
+
+    static std::string SymbolNameToString(const SymEngine::Basic& expr, Language language)
+    {
+        std::string name = expr.__str__();
+        if (name == "I")
+            return ImaginaryUnitName(language);
+        return name;
     }
 
     static std::string JsonCodeRow(const std::vector<std::string>& items)
@@ -1205,7 +1240,7 @@ private:
     static std::vector<std::string> BasicToJsonElements(const SymEngine::Basic& expr, int precision, int exp, JsonNumberFormat format, Language language = Language::English)
     {
         if (SymEngine::is_a<const SymEngine::Symbol>(expr))
-            return {JsonCodeString(expr.__str__())};
+            return {JsonCodeString(SymbolNameToString(expr, language))};
 
         if (SymEngine::is_a<const SymEngine::Integer>(expr) ||
             SymEngine::is_a<const SymEngine::RealDouble>(expr) || SymEngine::is_a<const SymEngine::RealMPFR>(expr))
@@ -1536,7 +1571,7 @@ private:
             {
                 std::string base_json;
                 if (SymEngine::is_a<const SymEngine::Symbol>(*p.first))
-                    base_json = JsonCodeString(p.first->__str__());
+                    base_json = JsonCodeString(SymbolNameToString(*p.first, language));
                 else if (SymEngine::is_a<const SymEngine::Integer>(*p.first) ||
                     SymEngine::is_a<const SymEngine::Rational>(*p.first) ||
                     SymEngine::is_a<const SymEngine::RealDouble>(*p.first) ||

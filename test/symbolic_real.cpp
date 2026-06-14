@@ -121,7 +121,8 @@ TEST_F(CalcTestSymbolicReal, eval8)
 {
     Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"+-x;");
     ASSERT_TRUE(res.ToString(10) == U"-x") << res.ToStdString(10);
-    ASSERT_TRUE(res.ToJson(10) == "{\"type\":45,\"elements\":[{\"type\":7,\"elements\":[{\"type\":12,\"symbol\":\"-\"},{\"type\":8,\"elements\":\"x\"}]}]}") << res.ToJson(10);
+    ASSERT_TRUE(res.ToJson(10) == "{\"type\":45,\"elements\":[{\"type\":7,\"elements\":[{\"type\":12,\"symbol\":\"-\"},{\"type\":8,\"elements\":\"x\"}]}]}") << 
+        res.ToJson(10);
 }
 
 TEST_F(CalcTestSymbolicReal, eval9)

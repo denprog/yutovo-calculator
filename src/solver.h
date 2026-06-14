@@ -543,6 +543,13 @@ struct Solver : public boost::static_visitor<Number>
             Number builtin_id_val;
             if (FindBuiltinIdentifier(op.name, builtin_id_val))
                 return builtin_id_val;
+            if constexpr (std::is_same_v<Number, Symbolic<Complex>>)
+            {
+                if (op.name == U"i" || op.name == U"I")
+                    return Number(precision, std::string("I"));
+                if (op.name == U"j" && im == U"j")
+                    return Number(precision, std::string("I"));
+            }
             return Number(precision, op.name);
         }
         else
@@ -588,6 +595,13 @@ struct Solver : public boost::static_visitor<Number>
             Number builtin_id_val;
             if (FindBuiltinIdentifier(op.identifier.name, builtin_id_val))
                 return (*this)(op.left) * builtin_id_val;
+            if constexpr (std::is_same_v<Number, Symbolic<Complex>>)
+            {
+                if (op.identifier.name == U"i" || op.identifier.name == U"I")
+                    return (*this)(op.left) * Number(precision, std::string("I"));
+                if (op.identifier.name == U"j" && im == U"j")
+                    return (*this)(op.left) * Number(precision, std::string("I"));
+            }
             return (*this)(op.left) * Number(precision, op.identifier.name);
         }
         else
@@ -632,6 +646,13 @@ struct Solver : public boost::static_visitor<Number>
             if (FindBuiltinIdentifier(op.identifier.name, val))
             {
                 return (*this)(op.upper) / (*this)(op.lower) * val;
+            }
+            if constexpr (std::is_same_v<Number, Symbolic<Complex>>)
+            {
+                if (op.identifier.name == U"i" || op.identifier.name == U"I")
+                    return (*this)(op.upper) / (*this)(op.lower) * Number(precision, std::string("I"));
+                if (op.identifier.name == U"j" && im == U"j")
+                    return (*this)(op.upper) / (*this)(op.lower) * Number(precision, std::string("I"));
             }
             return (*this)(op.upper) / (*this)(op.lower) * Number(precision, op.identifier.name);
         }

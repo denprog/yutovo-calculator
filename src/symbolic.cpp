@@ -401,6 +401,21 @@ std::string Symbolic<Complex>::ToStdString(int exp, Language language) const
             throw MathException(LogicalId{}, NotImplemented);
         }
         
+        std::string imag_unit = (language == Language::Russian) ? "j" : "i";
+        auto is_one_approx = [](const SymEngine::RCP<const SymEngine::Number>& n) -> bool {
+            if (n->is_one())
+                return true;
+            if (SymEngine::is_a<SymEngine::RealDouble>(*n))
+                return static_cast<const SymEngine::RealDouble&>(*n).as_double() == 1.0;
+            return false;
+        };
+        auto is_minus_one_approx = [](const SymEngine::RCP<const SymEngine::Number>& n) -> bool {
+            if (n->is_minus_one())
+                return true;
+            if (SymEngine::is_a<SymEngine::RealDouble>(*n))
+                return static_cast<const SymEngine::RealDouble&>(*n).as_double() == -1.0;
+            return false;
+        };
         if (SymEngine::is_a<SymEngine::ComplexDouble>(*evaluated))
         {
             auto cd = SymEngine::rcp_dynamic_cast<const SymEngine::ComplexDouble>(evaluated);
@@ -417,16 +432,59 @@ std::string Symbolic<Complex>::ToStdString(int exp, Language language) const
             std::string re_str = re_sym.ToStdString(exp);
             if (re->is_zero())
             {
+                if (is_one_approx(im))
+                    return imag_unit;
+                if (is_minus_one_approx(im))
+                    return "-" + imag_unit;
                 Symbolic<Real> im_sym(precision);
                 *im_sym.expr = SymEngine::Expression(im);
-                return im_sym.ToStdString(exp) + "*i";
+                return im_sym.ToStdString(exp) + std::string("*") + imag_unit;
             }
             Symbolic<Real> im_sym(precision);
             *im_sym.expr = SymEngine::Expression(im);
             std::string im_str = im_sym.ToStdString(exp);
+            if (is_one_approx(im))
+                return re_str + "+" + imag_unit;
+            if (is_minus_one_approx(im))
+                return re_str + "-" + imag_unit;
             if (!im_str.empty() && im_str[0] == '-')
-                return re_str + im_str + "*i";
-            return re_str + "+" + im_str + "*i";
+                return re_str + im_str + std::string("*") + imag_unit;
+            return re_str + "+" + im_str + std::string("*") + imag_unit;
+        }
+        if (SymEngine::is_a<SymEngine::Complex>(*evaluated))
+        {
+            const auto& c = static_cast<const SymEngine::Complex&>(*evaluated);
+            auto re = c.real_part();
+            auto im = c.imaginary_part();
+            if (im->is_zero())
+            {
+                Symbolic<Real> temp(precision);
+                *temp.expr = SymEngine::Expression(re);
+                return RemoveInsignificantPoint(temp.ToStdString(exp));
+            }
+            Symbolic<Real> re_sym(precision);
+            *re_sym.expr = SymEngine::Expression(re);
+            std::string re_str = re_sym.ToStdString(exp);
+            if (re->is_zero())
+            {
+                if (is_one_approx(im))
+                    return imag_unit;
+                if (is_minus_one_approx(im))
+                    return "-" + imag_unit;
+                Symbolic<Real> im_sym(precision);
+                *im_sym.expr = SymEngine::Expression(im);
+                return im_sym.ToStdString(exp) + std::string("*") + imag_unit;
+            }
+            Symbolic<Real> im_sym(precision);
+            *im_sym.expr = SymEngine::Expression(im);
+            std::string im_str = im_sym.ToStdString(exp);
+            if (is_one_approx(im))
+                return re_str + "+" + imag_unit;
+            if (is_minus_one_approx(im))
+                return re_str + "-" + imag_unit;
+            if (!im_str.empty() && im_str[0] == '-')
+                return re_str + im_str + std::string("*") + imag_unit;
+            return re_str + "+" + im_str + std::string("*") + imag_unit;
         }
         Symbolic<Real> temp(precision);
         *temp.expr = SymEngine::Expression(evaluated);
@@ -437,7 +495,8 @@ std::string Symbolic<Complex>::ToStdString(int exp, Language language) const
     s.erase(std::remove(s.begin(), s.end(), ' '), s.end());
     if (s.find("zoo") != std::string::npos)
         s = "zoo";
-    std::replace(s.begin(), s.end(), 'I', 'i');
+    char imag_unit = (language == Language::Russian) ? 'j' : 'i';
+    s = ReplaceImaginaryUnit(s, imag_unit);
     s = ReplaceRationalNumbers(s, std::numeric_limits<int>::max(), precision);
     s = RemoveNumberParentheses(s);
     s = FormatNumberInExpression(s, exp, precision);
