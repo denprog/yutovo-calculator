@@ -579,7 +579,7 @@ Integer Rational::GetNumerator() const
 
     mpq_get_num(numer, number);
     numerator = numer;
-
+    mpz_clear(numer);
     return numerator;
 }
 
@@ -591,7 +591,7 @@ Integer Rational::GetDenomerator() const
 
     mpq_get_den(denom, number);
     denomerator = denom;
-
+    mpz_clear(denom);
     return denomerator;
 }
 
