@@ -153,7 +153,8 @@ struct Parser
         }
         if (results.empty())
         {
-            _context->no_result = true;
+            if (_context)
+                _context->no_result = true;
             return Number();
         }
         return results[0];
