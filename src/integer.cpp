@@ -241,8 +241,7 @@ Integer operator/(const Integer& num1, const int num2)
     if (num2 == 0)
         throw MathException(DivisionByZero);
 
-    //mpz_div(res.number, num1.number, _num2.number);
-    mpz_divexact(res.number, num1.number, _num2.number);
+    mpz_tdiv_q(res.number, num1.number, _num2.number);
 
     return res;
 }
@@ -255,8 +254,7 @@ Integer operator/(const int num1, const Integer& num2)
     if (num2 == 0)
         throw MathException(DivisionByZero);
 
-    //mpz_div(res.number, _num1.number, num2.number);
-    mpz_divexact(res.number, _num1.number, num2.number);
+    mpz_tdiv_q(res.number, _num1.number, num2.number);
 
     return res;
 }

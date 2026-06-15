@@ -68,6 +68,51 @@ TEST_F(CalcTestInteger, integers3)
         parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"(-7)/(-3);");
 }
 
+TEST_F(CalcTestInteger, division_int_operands)
+{
+    // Non-exact division must use truncated division, not mpz_divexact.
+    Integer a(7);
+    Integer b = a / 3;
+    ASSERT_TRUE(b == 2) << b.ToStdString(10);
+
+    Integer c = 7 / Integer(3);
+    ASSERT_TRUE(c == 2) << c.ToStdString(10);
+
+    Integer d(7);
+    d /= Integer(3);
+    ASSERT_TRUE(d == 2) << d.ToStdString(10);
+
+    // Exact division must still work.
+    Integer e(6);
+    Integer f = e / 3;
+    ASSERT_TRUE(f == 2) << f.ToStdString(10);
+
+    Integer g = 6 / Integer(3);
+    ASSERT_TRUE(g == 2) << g.ToStdString(10);
+
+    // Negative operands.
+    ASSERT_TRUE(Integer(-7) / 3 == -2) << (Integer(-7) / 3).ToStdString(10);
+    ASSERT_TRUE(Integer(7) / -3 == -2) << (Integer(7) / -3).ToStdString(10);
+    ASSERT_TRUE(Integer(-7) / -3 == 2) << (Integer(-7) / -3).ToStdString(10);
+    ASSERT_TRUE(-7 / Integer(3) == -2) << (-7 / Integer(3)).ToStdString(10);
+    ASSERT_TRUE(7 / Integer(-3) == -2) << (7 / Integer(-3)).ToStdString(10);
+    ASSERT_TRUE(-7 / Integer(-3) == 2) << (-7 / Integer(-3)).ToStdString(10);
+
+    // Dividend smaller than divisor.
+    ASSERT_TRUE(Integer(2) / 5 == 0) << (Integer(2) / 5).ToStdString(10);
+    ASSERT_TRUE(2 / Integer(5) == 0) << (2 / Integer(5)).ToStdString(10);
+    ASSERT_TRUE(Integer(-2) / 5 == 0) << (Integer(-2) / 5).ToStdString(10);
+    ASSERT_TRUE(-2 / Integer(5) == 0) << (-2 / Integer(5)).ToStdString(10);
+
+    // Division by one.
+    ASSERT_TRUE(Integer(123456) / 1 == 123456) << (Integer(123456) / 1).ToStdString(10);
+    ASSERT_TRUE(123456 / Integer(1) == 123456) << (123456 / Integer(1)).ToStdString(10);
+
+    // Division by zero throws.
+    ASSERT_THROW(Integer(5) / 0, MathException);
+    ASSERT_THROW(5 / Integer(0), MathException);
+}
+
 TEST_F(CalcTestInteger, integers4)
 {
     Integer res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"+5;");
