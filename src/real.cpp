@@ -532,10 +532,15 @@ void Real::operator/=(const float num)
 
 Real::operator int() const
 {
-    if (IsInteger())
-        return mpfr_get_si(number, DEFAULT_RND);
-    else
+    if (IsNaN())
+        throw MathException(Overflow);
+    if (IsInfinity())
+        throw MathException(Overflow);
+    if (!IsInteger())
         throw MathException(ConversionDoesNotFit);
+    if (mpfr_fits_sint_p(number, DEFAULT_RND) == 0)
+        throw MathException(ConversionDoesNotFit);
+    return mpfr_get_si(number, DEFAULT_RND);
 }
 
 bool operator==(const Real& num1, const Real& num2)
