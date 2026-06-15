@@ -98,6 +98,7 @@ Integer& Integer::operator=(const Integer& source)
 
 Integer& Integer::operator=(const std::u32string& num)
 {
+    mpz_clear(number);
     mpz_init(number);
     mpz_set_str(number, (ToBasicString(num)).c_str(), 10);
 
