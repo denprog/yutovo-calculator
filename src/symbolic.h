@@ -561,23 +561,47 @@ private:
 
     std::string ReplacePowerOperator(std::string s) const
     {
-        int pos = 0;
+        size_t pos = 0;
         while ((pos = s.find("**", pos)) != std::string::npos)
         {
-            int base_end = pos;
-            int base_start = base_end;
+            size_t base_end = pos;
+            size_t base_start = base_end;
             if (base_start > 0 && s[base_start - 1] == ')')
             {
+                if (base_start < 2)
+                {
+                    //malformed input: ')' at position 0 has no matching '('
+                    ++pos;
+                    continue;
+                }
+
                 int depth = 1;
                 base_start -= 2;
-                while (base_start != std::string::npos && depth > 0)
+                bool found = false;
+                while (true)
                 {
                     if (s[base_start] == ')')
                         ++depth;
                     else if (s[base_start] == '(')
+                    {
                         --depth;
-                    if (depth > 0)
-                        --base_start;
+                        if (depth == 0)
+                        {
+                            found = true;
+                            break;
+                        }
+                    }
+
+                    if (base_start == 0)
+                        break;
+                    --base_start;
+                }
+
+                if (!found)
+                {
+                    //malformed input: no matching opening parenthesis
+                    ++pos;
+                    continue;
                 }
             }
             else
@@ -586,8 +610,8 @@ private:
                     --base_start;
             }
 
-            int exp_start = pos + 2;
-            int exp_end = exp_start;
+            size_t exp_start = pos + 2;
+            size_t exp_end = exp_start;
             if (exp_start < s.size() && s[exp_start] == '(')
             {
                 int depth = 1;
