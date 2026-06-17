@@ -1169,6 +1169,19 @@ TEST_F(CalcTestSymbolicComplex, nested_power1)
         R"json({"type":47,"elements":[{"type":15,"elements":[{"type":7,"elements":[{"type":19,"symbol":"("},{"type":15,"elements":[{"type":7,"elements":[{"type":19,"symbol":"("},{"type":7,"elements":[{"type":8,"elements":"x"},{"type":11,"symbol":"+"},{"type":8,"elements":"y"}]},{"type":20,"symbol":")"}]},{"type":10,"elements":[]},{"type":7,"elements":[{"type":8,"elements":"2"}]}]},{"type":20,"symbol":")"}]},{"type":10,"elements":[]},{"type":7,"elements":[{"type":8,"elements":"z"}]}]}]})json" ) << json;
 }
 
+TEST_F(CalcTestSymbolicComplex, power_chain)
+{
+    //power operator must be parsed by the 'power' rule, not by 'multiply'
+    Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"x^y^z;");
+    ASSERT_TRUE(res.ToStdString(10) == "pow(pow(x,y),z)") << res.ToStdString(10);
+
+    res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"x^(y^z);");
+    ASSERT_TRUE(res.ToStdString(10) == "pow(x,y**z)") << res.ToStdString(10);
+
+    res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"(x^y)^z;");
+    ASSERT_TRUE(res.ToStdString(10) == "pow(pow(x,y),z)") << res.ToStdString(10);
+}
+
 TEST_F(CalcTestSymbolicComplex, sqrt2)
 {
     Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"sqrt(x);");

@@ -1060,7 +1060,7 @@ Expression<Symbolic<Complex>>::Expression(LogicalId id, std::u32string& expr, So
 
     multiplication = power >> *(multiply);
 
-    multiply = char_(U'*') > power | char_(U'/') > power | char_(U'%') > power | char_(U'^') > power;
+    multiply = char_(U'*') > power | char_(U'/') > power | char_(U'%') > power;
 
     power = unary >> *(char_(U'^') > unary);
 
