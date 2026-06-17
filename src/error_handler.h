@@ -31,7 +31,7 @@ namespace yutovo_calculator
 			while (k != p)
 			{
 				char32_t ch = *k;
-				if (ch == U'\r')
+				if (ch == U'\r' || ch == U'\n')
 				{
 					++k;
 					++j;
