@@ -929,6 +929,63 @@ TEST_F(CalcTestReal, trigonometric8)
         res.ToStdString(3, 3) << "\n" << (int)res.angle_measure;
 }
 
+//Angle measures and arithmetic operations
+TEST_F(CalcTestReal, trigonometric9)
+{
+    Real deg180 = parser.Parse(LogicalId{0, 0, 1}, U"180deg;", AngleMeasure::Radian, AngleMeasure::Degree);
+    Real rad_pi = parser.Parse(LogicalId{0, 0, 1}, U"rad(pi);", AngleMeasure::Radian, AngleMeasure::Radian);
+    Real one(deg180.GetBitPrecision(), 1);
+    Real half(deg180.GetBitPrecision(), 0.5f);
+
+    Real res = deg180 - 1;
+    ASSERT_TRUE(res.angle_measure == AngleMeasure::Radian) << (int)res.angle_measure;
+    ASSERT_TRUE(res.ToStdString(3, 3) == (rad_pi - one).ToStdString(3, 3)) << res.ToStdString(3, 3);
+
+    res = 1 - deg180;
+    ASSERT_TRUE(res.angle_measure == AngleMeasure::Radian) << (int)res.angle_measure;
+    ASSERT_TRUE(res.ToStdString(3, 3) == (one - rad_pi).ToStdString(3, 3)) << res.ToStdString(3, 3);
+
+    res = deg180 + 1;
+    ASSERT_TRUE(res.angle_measure == AngleMeasure::Radian) << (int)res.angle_measure;
+    ASSERT_TRUE(res.ToStdString(3, 3) == (rad_pi + one).ToStdString(3, 3)) << res.ToStdString(3, 3);
+
+    res = 1 + deg180;
+    ASSERT_TRUE(res.angle_measure == AngleMeasure::Radian) << (int)res.angle_measure;
+    ASSERT_TRUE(res.ToStdString(3, 3) == (one + rad_pi).ToStdString(3, 3)) << res.ToStdString(3, 3);
+
+    res = deg180 - 0.5f;
+    ASSERT_TRUE(res.angle_measure == AngleMeasure::Radian) << (int)res.angle_measure;
+    ASSERT_TRUE(res.ToStdString(3, 3) == (rad_pi - half).ToStdString(3, 3)) << res.ToStdString(3, 3);
+
+    res = 0.5f - deg180;
+    ASSERT_TRUE(res.angle_measure == AngleMeasure::Radian) << (int)res.angle_measure;
+    ASSERT_TRUE(res.ToStdString(3, 3) == (half - rad_pi).ToStdString(3, 3)) << res.ToStdString(3, 3);
+
+    res = deg180 + 0.5f;
+    ASSERT_TRUE(res.angle_measure == AngleMeasure::Radian) << (int)res.angle_measure;
+    ASSERT_TRUE(res.ToStdString(3, 3) == (rad_pi + half).ToStdString(3, 3)) << res.ToStdString(3, 3);
+
+    res = 0.5f + deg180;
+    ASSERT_TRUE(res.angle_measure == AngleMeasure::Radian) << (int)res.angle_measure;
+    ASSERT_TRUE(res.ToStdString(3, 3) == (half + rad_pi).ToStdString(3, 3)) << res.ToStdString(3, 3);
+
+    Real plain = parser.Parse(LogicalId{0, 0, 1}, U"5;", AngleMeasure::Radian, AngleMeasure::Radian);
+    res = plain - 2;
+    ASSERT_TRUE(res.angle_measure == AngleMeasure::None) << (int)res.angle_measure;
+    ASSERT_TRUE(res.ToStdString(3, 3) == parser.Parse(LogicalId{0, 0, 1}, U"3;", AngleMeasure::Radian, AngleMeasure::Radian).ToStdString(3, 3)) << 
+        res.ToStdString(3, 3);
+
+    res = deg180 * 2;
+    ASSERT_TRUE(res.angle_measure == AngleMeasure::Degree) << (int)res.angle_measure;
+    ASSERT_TRUE(res.ToStdString(3, 3) == parser.Parse(LogicalId{0, 0, 1}, U"360deg;", AngleMeasure::Radian, AngleMeasure::Degree).ToStdString(3, 3)) << 
+        res.ToStdString(3, 3);
+
+    res = deg180 / 2;
+    ASSERT_TRUE(res.angle_measure == AngleMeasure::Degree) << (int)res.angle_measure;
+    ASSERT_TRUE(res.ToStdString(3, 3) == parser.Parse(LogicalId{0, 0, 1}, U"90deg;", AngleMeasure::Radian, AngleMeasure::Degree).ToStdString(3, 3)) << 
+        res.ToStdString(3, 3);
+}
+
 TEST_F(CalcTestReal, units1)
 {
     std::string s = parser.GetSuitableUnit(LogicalId{0, 0, 0, 0, 1}, parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"1m;")).ToStdString(3, 3);

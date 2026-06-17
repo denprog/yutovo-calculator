@@ -278,32 +278,40 @@ Real operator+(const Real& num1, const Real& num2)
 
 Real operator+(const Real& num1, const int num2)
 {
-    Real res(num1.GetBitPrecision(), num1.angle_measure);
-    res.CalcFunc(mpfr_add_si, num1, num2);
+    bool convert = num1.angle_measure != AngleMeasure::None;
+    Real _num1 = convert ? num1.ToRadian() : num1;
+    Real res(_num1.GetBitPrecision(), convert ? AngleMeasure::Radian : AngleMeasure::None);
+    res.CalcFunc(mpfr_add_si, _num1, num2);
     res.unit = num1.unit + num2;
     return res;
 }
 
 Real operator+(const int num1, const Real& num2)
 {
-    Real res(num2.GetBitPrecision(), num2.angle_measure);
-    res.CalcFunc(mpfr_add_si, num2, num1);
+    bool convert = num2.angle_measure != AngleMeasure::None;
+    Real _num2 = convert ? num2.ToRadian() : num2;
+    Real res(_num2.GetBitPrecision(), convert ? AngleMeasure::Radian : AngleMeasure::None);
+    res.CalcFunc(mpfr_add_si, _num2, num1);
     res.unit = num1 + num2.unit;
     return res;
 }
 
 Real operator+(const Real& num1, const float num2)
 {
-    Real res(num1.GetBitPrecision(), num1.angle_measure);
-    res.CalcFunc(mpfr_add_d, num1, num2);
+    bool convert = num1.angle_measure != AngleMeasure::None;
+    Real _num1 = convert ? num1.ToRadian() : num1;
+    Real res(_num1.GetBitPrecision(), convert ? AngleMeasure::Radian : AngleMeasure::None);
+    res.CalcFunc(mpfr_add_d, _num1, num2);
     res.unit = num1.unit + num2;
     return res;
 }
 
 Real operator+(const float num1, const Real& num2)
 {
-    Real res(num2.GetBitPrecision(), num2.angle_measure);
-    res.CalcFunc(mpfr_add_d, num2, num1);
+    bool convert = num2.angle_measure != AngleMeasure::None;
+    Real _num2 = convert ? num2.ToRadian() : num2;
+    Real res(_num2.GetBitPrecision(), convert ? AngleMeasure::Radian : AngleMeasure::None);
+    res.CalcFunc(mpfr_add_d, _num2, num1);
     res.unit = num1 + num2.unit;
     return res;
 }
@@ -324,32 +332,40 @@ Real operator-(const Real& num1, const Real& num2)
 
 Real operator-(const Real& num1, const int num2)
 {
-    Real res(num1.GetBitPrecision(), num1.angle_measure);
-    res.CalcFunc(mpfr_sub_si, num1, num2);
+    bool convert = num1.angle_measure != AngleMeasure::None;
+    Real _num1 = convert ? num1.ToRadian() : num1;
+    Real res(_num1.GetBitPrecision(), convert ? AngleMeasure::Radian : AngleMeasure::None);
+    res.CalcFunc(mpfr_sub_si, _num1, num2);
     res.unit = num1.unit - num2;
     return res;
 }
 
 Real operator-(const int num1, const Real& num2)
 {
-    Real res(num2.GetBitPrecision(), num2.angle_measure);
-    res.CalcFunc(mpfr_si_sub, num1, num2);
+    bool convert = num2.angle_measure != AngleMeasure::None;
+    Real _num2 = convert ? num2.ToRadian() : num2;
+    Real res(_num2.GetBitPrecision(), convert ? AngleMeasure::Radian : AngleMeasure::None);
+    res.CalcFunc(mpfr_si_sub, num1, _num2);
     res.unit = num1 - num2.unit;
     return res;
 }
 
 Real operator-(const Real& num1, const float num2)
 {
-    Real res(num1.GetBitPrecision(), num1.angle_measure);
-    res.CalcFunc(mpfr_sub_d, num1, num2);
+    bool convert = num1.angle_measure != AngleMeasure::None;
+    Real _num1 = convert ? num1.ToRadian() : num1;
+    Real res(_num1.GetBitPrecision(), convert ? AngleMeasure::Radian : AngleMeasure::None);
+    res.CalcFunc(mpfr_sub_d, _num1, num2);
     res.unit = num1.unit - num2;
     return res;
 }
 
 Real operator-(const float num1, const Real& num2)
 {
-    Real res(num2.GetBitPrecision(), num2.angle_measure);
-    res.CalcFunc(mpfr_d_sub, num1, num2);
+    bool convert = num2.angle_measure != AngleMeasure::None;
+    Real _num2 = convert ? num2.ToRadian() : num2;
+    Real res(_num2.GetBitPrecision(), convert ? AngleMeasure::Radian : AngleMeasure::None);
+    res.CalcFunc(mpfr_d_sub, num1, _num2);
     res.unit = num1 - num2.unit;
     return res;
 }
