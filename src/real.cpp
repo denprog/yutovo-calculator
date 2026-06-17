@@ -314,7 +314,7 @@ Real operator-(const Real& num1, const Real& num2)
     Real _num2 = num2;
     ToCommonAngleMeasure(_num1, _num2);
     Real res(std::max(_num1.GetBitPrecision(), _num2.GetBitPrecision()), _num1.angle_measure);
-    res.CalcFunc(mpfr_sub, num1, num2);
+    res.CalcFunc(mpfr_sub, _num1, _num2);
     res.unit = num1.unit - num2.unit;
 #ifdef TRACE_OUTPUT
     res.UpdateNumberStr();
@@ -420,7 +420,7 @@ Real operator/(const Real& num1, const Real& num2)
     Real _num2 = num2;
     ToCommonAngleMeasure(_num1, _num2);
     Real res(std::max(_num1.GetBitPrecision(), _num2.GetBitPrecision()), _num1.angle_measure);
-    res.CalcFunc(mpfr_div, num1, num2);
+    res.CalcFunc(mpfr_div, _num1, _num2);
     if (res.IsInfinity() || res.IsNaN())
         throw MathException(DivisionByZero);
     res.unit = num1.unit / num2.unit;

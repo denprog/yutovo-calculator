@@ -916,6 +916,19 @@ TEST_F(CalcTestReal, trigonometric7)
     ASSERT_TRUE(res.angle_measure == AngleMeasure::Radian && res.ToStdString(3, 10) == "0.0314159257E+0") << res.ToStdString(3, 10);
 }
 
+TEST_F(CalcTestReal, trigonometric8)
+{
+    //180deg - rad(pi) should be 0 after converting to a common angle measure.
+    Real res = parser.Parse(LogicalId{0, 0, 1}, U"180deg - rad(pi);", AngleMeasure::Radian, AngleMeasure::Degree);
+    ASSERT_TRUE(res.angle_measure == AngleMeasure::Degree && res.ToStdString(3, 3) == parser.Parse(LogicalId{0, 0, 1}, U"0;").ToStdString(3, 3)) <<
+        res.ToStdString(3, 3) << "\n" << (int)res.angle_measure;
+
+    //180deg / rad(pi) should be 1 after converting to a common angle measure.
+    res = parser.Parse(LogicalId{0, 0, 1}, U"180deg / rad(pi);", AngleMeasure::Radian, AngleMeasure::Degree);
+    ASSERT_TRUE(res.angle_measure == AngleMeasure::Degree && res.ToStdString(3, 3) == parser.Parse(LogicalId{0, 0, 1}, U"1;").ToStdString(3, 3)) <<
+        res.ToStdString(3, 3) << "\n" << (int)res.angle_measure;
+}
+
 TEST_F(CalcTestReal, units1)
 {
     std::string s = parser.GetSuitableUnit(LogicalId{0, 0, 0, 0, 1}, parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"1m;")).ToStdString(3, 3);
