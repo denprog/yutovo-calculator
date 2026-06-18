@@ -177,7 +177,7 @@ Expression<Real>::Expression(LogicalId id, std::u32string& expr, Solver<Real>* _
     
     number = exp_number | digits_number;
     
-    digits_number = +(char_(U'0', U'9') | char_(U'.'));
+    digits_number = (+char_(U'0', U'9') >> -(char_(U'.') >> *char_(U'0', U'9'))) | (char_(U'.') >> +char_(U'0', U'9'));
 
     integer_number_str = +char_(U'0', U'9');
 
@@ -193,7 +193,7 @@ Expression<Real>::Expression(LogicalId id, std::u32string& expr, Solver<Real>* _
 
     real_number = digits_number;
 
-    exp_number = +(char_(U'0', U'9') | char_(U'.')) >> raw[lexeme[no_case[char_(U'E')] >> (char_(U'+') | char_(U'-'))]] > +(char_(U'0', U'9'));
+    exp_number = digits_number >> raw[lexeme[no_case[char_(U'E')] >> (char_(U'+') | char_(U'-'))]] > +(char_(U'0', U'9'));
 
     identifier = name >> -('{' > (integer_number_str | name) > '}');
 
@@ -340,7 +340,7 @@ Expression<yutovo_calculator::Rational>::Expression(LogicalId id, std::u32string
 
     implicit_post_function_mul = function_call >> identifier;
     
-    digits_number = +char_("0-9.");
+    digits_number = (+char_("0-9") >> -(char_('.') >> *char_("0-9"))) | (char_('.') >> +char_("0-9"));
 
     number = digits_number;
 
@@ -438,7 +438,7 @@ Expression<Complex>::Expression(LogicalId id, std::u32string& expr, Solver<Compl
     
     number = exp_number | digits_number;
     
-    digits_number = +char_("0-9.");
+    digits_number = (+char_("0-9") >> -(char_('.') >> *char_("0-9"))) | (char_('.') >> +char_("0-9"));
 
     integer_number_str = +char_("0-9");
 
@@ -450,7 +450,7 @@ Expression<Complex>::Expression(LogicalId id, std::u32string& expr, Solver<Compl
 
     real_number = digits_number;
 
-    exp_number = +char_("0-9.") >> raw[lexeme[(no_case[char_("E")] > (char_('+') | char_('-')))]] > +(char_("0-9"));
+    exp_number = digits_number >> raw[lexeme[(no_case[char_("E")] > (char_('+') | char_('-')))]] > +(char_("0-9"));
 
     identifier = name >> -('{' > (integer_number_str | name) > '}');
 
@@ -573,7 +573,7 @@ Expression<Array<Real>>::Expression(LogicalId id, std::u32string& expr, Solver<A
     
     number = exp_number | digits_number;
     
-    digits_number = +char_("0-9.");
+    digits_number = (+char_("0-9") >> -(char_('.') >> *char_("0-9"))) | (char_('.') >> +char_("0-9"));
 
     integer_number_str = +char_("0-9");
 
@@ -589,7 +589,7 @@ Expression<Array<Real>>::Expression(LogicalId id, std::u32string& expr, Solver<A
 
     real_number = digits_number;
 
-    exp_number = +char_("0-9.") >> raw[lexeme[(no_case[char_("E")] > (char_('+') | char_('-')))]] > +(char_("0-9"));
+    exp_number = digits_number >> raw[lexeme[(no_case[char_("E")] > (char_('+') | char_('-')))]] > +(char_("0-9"));
 
     identifier = name >> -('{' > (integer_number_str | name) > '}');
 
@@ -725,7 +725,7 @@ Expression<Symbolic<Real>>::Expression(LogicalId id, std::u32string& expr, Solve
 
     number = exp_number | digits_number;
 
-    digits_number = +(char_(U'0', U'9') | char_(U'.'));
+    digits_number = (+char_(U'0', U'9') >> -(char_(U'.') >> *char_(U'0', U'9'))) | (char_(U'.') >> +char_(U'0', U'9'));
 
     integer_number_str = +char_(U'0', U'9');
 
@@ -737,7 +737,7 @@ Expression<Symbolic<Real>>::Expression(LogicalId id, std::u32string& expr, Solve
 
     real_number = digits_number;
 
-    exp_number = +(char_(U'0', U'9') | char_(U'.')) >> raw[lexeme[no_case[char_(U'E')] >> (char_(U'+') | char_(U'-'))]] > +(char_(U'0', U'9'));
+    exp_number = digits_number >> raw[lexeme[no_case[char_(U'E')] >> (char_(U'+') | char_(U'-'))]] > +(char_(U'0', U'9'));
 
     identifier = (name | raw[lexeme[char_(U'∞')]]) >> -('{' > (integer_number_str | name) > '}');
 
@@ -920,7 +920,7 @@ Expression<Symbolic<Rational>>::Expression(LogicalId id, std::u32string& expr, S
 
     number = exp_number | digits_number;
 
-    digits_number = +(char_(U'0', U'9') | char_(U'.'));
+    digits_number = (+char_(U'0', U'9') >> -(char_(U'.') >> *char_(U'0', U'9'))) | (char_(U'.') >> +char_(U'0', U'9'));
 
     integer_number_str = +char_(U'0', U'9');
 
@@ -932,7 +932,7 @@ Expression<Symbolic<Rational>>::Expression(LogicalId id, std::u32string& expr, S
 
     real_number = digits_number;
 
-    exp_number = +(char_(U'0', U'9') | char_(U'.')) >> raw[lexeme[no_case[char_(U'E')] >> (char_(U'+') | char_(U'-'))]] > +(char_(U'0', U'9'));
+    exp_number = digits_number >> raw[lexeme[no_case[char_(U'E')] >> (char_(U'+') | char_(U'-'))]] > +(char_(U'0', U'9'));
 
     identifier = (name | raw[lexeme[char_(U'∞')]]) >> -('{' > (integer_number_str | name) > '}');
 
@@ -1070,7 +1070,7 @@ Expression<Symbolic<Complex>>::Expression(LogicalId id, std::u32string& expr, So
 
     number = exp_number | digits_number;
 
-    digits_number = +(char_(U'0', U'9') | char_(U'.'));
+    digits_number = (+char_(U'0', U'9') >> -(char_(U'.') >> *char_(U'0', U'9'))) | (char_(U'.') >> +char_(U'0', U'9'));
 
     integer_number_str = +char_(U'0', U'9');
 
@@ -1082,7 +1082,7 @@ Expression<Symbolic<Complex>>::Expression(LogicalId id, std::u32string& expr, So
 
     real_number = digits_number;
 
-    exp_number = +(char_(U'0', U'9') | char_(U'.')) >> raw[lexeme[no_case[char_(U'E')] >> (char_(U'+') | char_(U'-'))]] > +(char_(U'0', U'9'));
+    exp_number = digits_number >> raw[lexeme[no_case[char_(U'E')] >> (char_(U'+') | char_(U'-'))]] > +(char_(U'0', U'9'));
 
     identifier = (name | raw[lexeme[char_(U'∞')]]) >> -('{' > (integer_number_str | name) > '}');
 

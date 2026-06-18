@@ -71,6 +71,17 @@ TEST_F(CalcTestSymbolicReal, numbers9)
     ASSERT_TRUE(s.find("2.3") != std::string::npos) << s;
 }
 
+TEST_F(CalcTestSymbolicReal, numbers10)
+{
+    EXPECT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"."), yutovo_calculator::SyntaxException);
+    EXPECT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"..2"), yutovo_calculator::SyntaxException);
+    EXPECT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"1..2"), yutovo_calculator::SyntaxException);
+    EXPECT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"1.2.3"), yutovo_calculator::SyntaxException);
+    EXPECT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"2.3.4"), yutovo_calculator::SyntaxException);
+    EXPECT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 1}, U".1.2"), yutovo_calculator::SyntaxException);
+    EXPECT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"1.2."), yutovo_calculator::SyntaxException);
+}
+
 TEST_F(CalcTestSymbolicReal, eval1)
 {
     Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"x;");

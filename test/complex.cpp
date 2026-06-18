@@ -26,6 +26,17 @@ TEST_F(CalcTestComplex, numbers1)
     ASSERT_TRUE(res == "0.2E+0") << res;
 }
 
+TEST_F(CalcTestComplex, numbers_invalid_dots)
+{
+    EXPECT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"."), yutovo_calculator::SyntaxException);
+    EXPECT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"..2"), yutovo_calculator::SyntaxException);
+    EXPECT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"1..2"), yutovo_calculator::SyntaxException);
+    EXPECT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"1.2.3"), yutovo_calculator::SyntaxException);
+    EXPECT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"2.3.4"), yutovo_calculator::SyntaxException);
+    EXPECT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 1}, U".1.2"), yutovo_calculator::SyntaxException);
+    EXPECT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"1.2."), yutovo_calculator::SyntaxException);
+}
+
 TEST_F(CalcTestComplex, numbers2)
 {
     std::string res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"1i;").ToStdString(3, 3);
