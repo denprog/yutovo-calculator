@@ -122,6 +122,12 @@ Rational& Rational::operator=(const Rational& source)
 
 Rational& Rational::operator=(const std::u32string& source)
 {
+    if (source.empty())
+    {
+        mpq_set_si(number, 0, 1);
+        return *this;
+    }
+
     if (source.find(L'.') != -1)
     {
         std::u32string int_part, fract_part;
@@ -158,9 +164,15 @@ Rational& Rational::operator=(const std::u32string& source)
 
             return *this;
         }
+        else if (!int_part.empty())
+        {
+            *this = Rational(int_part);
+            return *this;
+        }
     }
 
-    mpq_set_str(number, ToBasicString(source).c_str(), DEFAULT_BASE);
+    if (mpq_set_str(number, ToBasicString(source).c_str(), DEFAULT_BASE) != 0)
+        throw SyntaxException(SyntaxError);
 
 #ifdef TRACE_OUTPUT
     UpdateNumberStr();

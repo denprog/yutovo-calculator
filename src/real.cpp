@@ -65,7 +65,8 @@ Real::Real(int precision, AngleMeasure _angle_measure) :
 Real::Real(int precision, const char* num)
 {
     mpfr_init2(number, std::max((int)mpfr_get_default_prec(), precision));
-    mpfr_set_str(number, num, DEFAULT_BASE, MPFR_RNDZ);
+    if (mpfr_set_str(number, num, DEFAULT_BASE, MPFR_RNDZ) != 0)
+        throw SyntaxException(SyntaxError);
     string_number = ToUtfString(num);
     //mpfr_prec_round(number, precision / 2, GMP_RNDN);
     //addPrecision = (int)strchr(num, '.');
@@ -113,7 +114,8 @@ Real::Real(const std::u32string& num)
 {
     string_number = num;
     mpfr_init2(number, std::max((int)mpfr_get_default_prec(), MathHelper::ToBitPrecision(num.length() * 2)) + 1);
-    mpfr_set_str(number, ToBasicString(num).c_str(), DEFAULT_BASE, MPFR_RNDA);
+    if (mpfr_set_str(number, ToBasicString(num).c_str(), DEFAULT_BASE, MPFR_RNDA) != 0)
+        throw SyntaxException(SyntaxError);
     SetPrecision(GetPrecision() + GetExp() - 1);
 
 #ifdef TRACE_OUTPUT
@@ -1567,7 +1569,11 @@ void Real::SetPrecision(int precision)
     {
         SetBitPrecision(std::max((int)mpfr_get_default_prec(), MathHelper::ToBitPrecision(precision + 2)));
         //renew the number because of not being precios getting by std::u32string
-        mpfr_set_str(number, ToBasicString(string_number).c_str(), DEFAULT_BASE, MPFR_RNDA);
+        mpfr_t tmp;
+        mpfr_init2(tmp, mpfr_get_prec(number));
+        if (mpfr_set_str(tmp, ToBasicString(string_number).c_str(), DEFAULT_BASE, MPFR_RNDA) == 0)
+            mpfr_set(number, tmp, MPFR_RNDA);
+        mpfr_clear(tmp);
     }
     //SetBitPrecision(MathHelper::ToBitPrecision(precision + addPrecision + 1));
 

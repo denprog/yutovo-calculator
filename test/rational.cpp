@@ -282,6 +282,14 @@ TEST_F(CalcTestRational, rationals9)
     EXPECT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"1.2."), yutovo_calculator::SyntaxException);
 }
 
+TEST_F(CalcTestRational, rationals10)
+{
+    Rational r;
+    EXPECT_THROW(r = U"abc", yutovo_calculator::SyntaxException);
+    EXPECT_THROW(r = U"x/y", yutovo_calculator::SyntaxException);
+    EXPECT_THROW(r = U"1/2/3", yutovo_calculator::SyntaxException);
+}
+
 TEST_F(CalcTestRational, rationals6)
 {
     parser.SetLocale(Language::Russian);

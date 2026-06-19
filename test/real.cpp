@@ -101,6 +101,13 @@ TEST_F(CalcTestReal, numbers9)
     EXPECT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"1.2."), yutovo_calculator::SyntaxException);
 }
 
+TEST_F(CalcTestReal, numbers10)
+{
+    EXPECT_THROW(Real(53, "abc"), yutovo_calculator::SyntaxException);
+    EXPECT_THROW(Real(53, "1.2.3"), yutovo_calculator::SyntaxException);
+    EXPECT_THROW(Real(53, "x+y"), yutovo_calculator::SyntaxException);
+}
+
 TEST_F(CalcTestReal, scientific1)
 {
     auto res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"1.23e-5;").ToStdString(3, 3);
