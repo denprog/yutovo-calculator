@@ -645,8 +645,6 @@ Integer Solver<Integer>::operator()(FunctionCallNode<Integer> const& op) const
 
     //there is no such a function		
     throw SyntaxException(op.id, UnknownIdentifier, op.pos, op.name.name.length(), op.line);
-    
-    return res;
 }
 
 template<>
@@ -726,8 +724,6 @@ Rational Solver<Rational>::operator()(FunctionCallNode<Rational> const& op) cons
 
     //there is no such a function		
     throw SyntaxException(op.id, UnknownIdentifier, U"Identifier '" + op.name.name + U"' not found", op.pos, op.name.name.length(), op.line);
-    
-    return res;
 }
 
 template<>
@@ -764,8 +760,6 @@ Integer Solver<Integer>::operator()(FunctionCallStringNode<Integer> const& op) c
 
     //there is no such a function		
     throw SyntaxException(op.id, UnknownIdentifier, op.pos, op.name.name.length(), op.line);
-    
-    return res;
 }
 
 template<>
@@ -879,8 +873,6 @@ Integer Solver<Integer>::operator()(IdentifierNode<Integer> const& op) const
     
     //there is no such an identifier
     throw SyntaxException(op.id, UnknownIdentifier, U"Identifier '" + op.name + U"' not found", op.pos, op.name.length(), op.line);
-    
-    return 0;
 }
 
 template<>

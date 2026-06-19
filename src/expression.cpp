@@ -203,7 +203,7 @@ Expression<Real>::Expression(LogicalId id, std::u32string& expr, Solver<Real>* _
 
     implicit_mul = real_number >> '(' >> expression > ')';
 
-    //0x00B0 = U'°', 39 = U'\'', 0x20BD = U'₽', 0x00A2 = U'¢', 0x0024 = U'$', 0x00A2 = U'€', 0x00A5 = U'¥', 0x20B9 = U'₹'
+    //0x00B0 = U'°', 39 = U'\'', 0x20BD = U'₽', 0x00A2 = U'¢', 0x0024 = U'$', 0x20AC = U'€', 0x00A5 = U'¥', 0x20B9 = U'₹'
     name = (raw[lexeme[(alpha | char_(0x00B0) | char_(39) | char_(U'_') | char_(0x20BD) | char_(0x0024) | char_(0x00A2) | char_(0x20AC) | char_(0x00A5) |
         char_(0x20B9)) >> *(alnum | char_(39) | char_(U'_') | char_(0x0024))]]);
 

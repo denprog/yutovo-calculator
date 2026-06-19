@@ -1086,9 +1086,9 @@ struct Solver : public boost::static_visitor<Number>
         else
         {
             if (j == -1)
-                symbols->functions.push_back((FunctionNode<Number>&)func);
+                symbols->functions.push_back(func);
             else
-                symbols->functions.insert(symbols->functions.begin() + j, (FunctionNode<Number>&)func);
+                symbols->functions.insert(symbols->functions.begin() + j, func);
         }
 
         //parse for adding dependencies
