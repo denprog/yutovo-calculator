@@ -45,6 +45,14 @@ TEST_F(CalcTestSymbolicComplex, numbers4)
     EXPECT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"1.2."), yutovo_calculator::SyntaxException);
 }
 
+TEST_F(CalcTestSymbolicComplex, numbers5)
+{
+    Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"z+0.12345678901234567890123456789012345678901234567890+0.98765432109876543210987654321098765432109876543210*i;", 50);
+    std::string s = res.ToStdString(50);
+    ASSERT_TRUE(s.find("0.123456789012345678901234567890123456789012345678") != std::string::npos) << s;
+    ASSERT_TRUE(s.find("0.987654321098765432109876543210987654321098765432") != std::string::npos) << s;
+}
+
 TEST_F(CalcTestSymbolicComplex, eval1)
 {
     Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"x;");

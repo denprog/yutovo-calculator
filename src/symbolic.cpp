@@ -358,7 +358,10 @@ SymEngine::Expression Symbolic<Complex>::ToExpression(const Complex& num) const
 {
     if (!num.GetRe().unit.IsEmpty() || !num.GetIm().unit.IsEmpty())
         throw ParserException({}, ParserExceptionCode::CannotCastToUnit);
-    return SymEngine::Expression(std::complex<double>(static_cast<double>(num.GetRe()), static_cast<double>(num.GetIm())));
+    auto re = SymEngine::real_mpfr(SymEngine::mpfr_class(num.GetRe().number));
+    auto im = SymEngine::real_mpfr(SymEngine::mpfr_class(num.GetIm().number));
+    return SymEngine::Expression(SymEngine::rcp_static_cast<const SymEngine::Basic>(re)) + 
+        SymEngine::Expression(SymEngine::rcp_static_cast<const SymEngine::Basic>(im)) * SymEngine::Expression(SymEngine::I);
 }
 
 template<>

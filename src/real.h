@@ -23,6 +23,8 @@ void CheckBreak(ParserContext* parser_context);
 
 template<typename Number> class Symbolic;
 
+class Complex;
+
 class Real
 {
 public:
@@ -344,6 +346,7 @@ public:
 
 private:
     friend class Symbolic<Real>;
+    friend class Symbolic<Complex>;
 
     mpfr_t number;
     std::u32string string_number;
