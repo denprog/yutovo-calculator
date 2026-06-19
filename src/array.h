@@ -139,24 +139,28 @@ public:
 
     Array<Number>& operator=(const int num)
     {
+        numbers.clear();
         numbers.emplace_back(num);
         return *this;
     }
 
     Array<Number>& operator=(const double num)
     {
+        numbers.clear();
         numbers.emplace_back(num);
         return *this;
     }
 
     Array<Number>& operator=(const char* source)
     {
+        numbers.clear();
         numbers.emplace_back(source);
         return *this;
     }
 
     Array<Number>& operator=(const std::u32string& num)
     {
+        numbers.clear();
         numbers.emplace_back(num);
         return *this;
     }
