@@ -779,6 +779,9 @@ void Export::Clear()
     units_real.clear();
     units_rational.clear();
     units_array_real.clear();
+
+    lists.clear();
+    strings.clear();
 }
 
 }
