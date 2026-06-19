@@ -371,7 +371,16 @@ struct Solver : public boost::static_visitor<Number>
                     }
                     bool _exported_id = exported_id;
                     exported_id = user_func->exported;
-                    res = (*this)(user_func->return_expression);
+                    try
+                    {
+                        res = (*this)(user_func->return_expression);
+                    }
+                    catch (...)
+                    {
+                        exported_id = _exported_id;
+                        PopTempVariables(op.arguments.size());
+                        throw;
+                    }
                     exported_id = _exported_id;
                     PopTempVariables(op.arguments.size());
                     return res;
@@ -523,10 +532,19 @@ struct Solver : public boost::static_visitor<Number>
                 bool _exported_id = exported_id;
                 id = v->id;
                 exported_id = v->exported;
-                Number res = (*this)(v->expression);
-                id = _id;
-                exported_id = _exported_id;
-                return res;
+                try
+                {
+                    Number res = (*this)(v->expression);
+                    id = _id;
+                    exported_id = _exported_id;
+                    return res;
+                }
+                catch (...)
+                {
+                    id = _id;
+                    exported_id = _exported_id;
+                    throw;
+                }
             }
             auto* var = FindBuiltinVariable(op.name);
             if (var)
@@ -1874,8 +1892,9 @@ private:
                 {
                     res = (*this)(user_func->return_expression);
                 }
-                catch (const MathException& e)
+                catch (...)
                 {
+                    exported_id = _exported_id;
                     PopTempVariables(op.arguments.size());
                     throw;
                 }
