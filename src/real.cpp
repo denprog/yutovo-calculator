@@ -619,12 +619,12 @@ bool operator==(const double num1, const Real& num2)
 
 bool operator==(const Real& num1, const char* num2)
 {
-    return num1 == Real(num1.GetBitPrecision(), num2);
+    return num1.ToStdString(3, 3) == num2;
 }
 
 bool operator==(const char* num1, const Real& num2)
 {
-    return Real(num2.GetBitPrecision(), num1) == num2;
+    return num2 == num1;
 }
 
 bool operator!=(const Real& num1, const Real& num2)
