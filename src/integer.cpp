@@ -471,6 +471,15 @@ Integer pow(const Integer& num1, const Integer& num2)
     if (num1.IsZero() && num2 <= 0)
         throw MathException(Overflow);
 
+    if (num2 < 0)
+    {
+        if (num1 == 1)
+            return Integer(1);
+        if (num1 == -1)
+            return Integer(mpz_even_p(num2.number) ? 1 : -1);
+        throw MathException(Overflow);
+    }
+
     Integer res;
 
     if (abs(num2) >= INT_MAX)
