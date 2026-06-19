@@ -277,7 +277,7 @@ public:
 
     int GetExp() const
     {
-        if (mpfr_zero_p(number))
+        if (IsZero() || IsNaN() || IsInfinity())
             return 0;
         return static_cast<int>(std::floor(mpfr_get_exp(number) * 0.3010299956639812));
     }
