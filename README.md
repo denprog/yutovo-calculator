@@ -24,7 +24,7 @@ If you haven't yet, build [yutovo-logger](https://github.com/denprog/yutovo-logg
 Install the dependencies:
 
 ```
-sudo update && sudo apt install -y libboost-iostreams1.83-dev libgtest-dev libgmock-dev libmpfr-dev
+sudo apt update && sudo apt install -y libboost-iostreams1.83-dev libgtest-dev libgmock-dev libmpfr-dev
 ```
 This variable should be set to the yutovo directory:
 
