@@ -14,6 +14,7 @@
 #include "export.h"
 #include <chrono>
 #include <variant>
+#include <set>
 #include <symengine/symengine_exception.h>
 
 namespace yutovo_calculator
@@ -1436,6 +1437,12 @@ struct Solver : public boost::static_visitor<Number>
 
     void GetCastUnitsImpl(const LogicalId _id, const Number& val, const std::u32string& system, std::vector<Unit>& _cast_units)
     {
+        std::set<LogicalId> visited;
+        GetCastUnitsImpl(_id, val, system, _cast_units, visited);
+    }
+
+    void GetCastUnitsImpl(const LogicalId _id, const Number& val, const std::u32string& system, std::vector<Unit>& _cast_units, std::set<LogicalId>& visited)
+    {
         if (val.unit.IsEmpty())
             return;
 
@@ -1491,21 +1498,31 @@ struct Solver : public boost::static_visitor<Number>
                         if (j != t.unit.unit.size())
                             continue;
                     }
-                    
+
+                    if (visited.count(custom_unit.id))
+                        continue;
+                    visited.insert(custom_unit.id);
                     if (t.unit.unit.size() <= max_cast_unit_size)
-                        GetCastUnitsImpl(_id, t, system, _cast_units);
+                        GetCastUnitsImpl(_id, t, system, _cast_units, visited);
                     else
                     {
                         Unit _unit = t.unit;
                         _unit.Sort();
                         _cast_units.push_back(_unit);
                     }
+                    visited.erase(custom_unit.id);
                 }
             }
         }
     }
 
     void GetCastUnitsImpl(const LogicalId _id, const Number& val, const std::u32string& system, std::vector<Number>& _cast_units) const
+    {
+        std::set<LogicalId> visited;
+        GetCastUnitsImpl(_id, val, system, _cast_units, visited);
+    }
+
+    void GetCastUnitsImpl(const LogicalId _id, const Number& val, const std::u32string& system, std::vector<Number>& _cast_units, std::set<LogicalId>& visited) const
     {
         if (val.unit.IsEmpty())
             return;
@@ -1524,18 +1541,22 @@ struct Solver : public boost::static_visitor<Number>
                 Number t = val;
                 if (custom_unit.Cast(t))
                 {
+                    if (visited.count(custom_unit.id))
+                        continue;
+                    visited.insert(custom_unit.id);
                     if (t.unit.unit.size() <= max_cast_unit_size)
-                        GetCastUnitsImpl(_id, t, system, _cast_units);
+                        GetCastUnitsImpl(_id, t, system, _cast_units, visited);
                     else
                         _cast_units.push_back(t);
+                    visited.erase(custom_unit.id);
                 }
             }
         }
 
-        GetCastExportUnitsImpl(_id, val, system, _cast_units);
+        GetCastExportUnitsImpl(_id, val, system, _cast_units, visited);
     }
 
-    void GetCastExportUnitsImpl(const LogicalId _id, const Number& val, const std::u32string& system, std::vector<Number>& _cast_units) const
+    void GetCastExportUnitsImpl(const LogicalId _id, const Number& val, const std::u32string& system, std::vector<Number>& _cast_units, std::set<LogicalId>& visited) const
     {
         if (!parser_context)
             return;
@@ -1546,10 +1567,14 @@ struct Solver : public boost::static_visitor<Number>
             Number t = val;
             if (unit.Cast(t))
             {
+                if (visited.count(unit.id))
+                    continue;
+                visited.insert(unit.id);
                 if (t.unit.unit.size() <= max_cast_unit_size)
-                    GetCastUnitsImpl(_id, t, system, _cast_units);
+                    GetCastUnitsImpl(_id, t, system, _cast_units, visited);
                 else
                     _cast_units.push_back(t);
+                visited.erase(unit.id);
             }
         }
     }

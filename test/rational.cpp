@@ -9,6 +9,7 @@
 #include "mock.h"
 #include <chrono>
 #include "parser_exception.h"
+#include "export.h"
 
 namespace yutovo_calc_test
 {
@@ -583,6 +584,27 @@ TEST_F(CalcTestRational, units22)
     ASSERT_TRUE(s == "1(МОм)") << s;
     s = parser.GetSuitableUnit(LogicalId{0, 0, 0, 0, 1}, parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"(1)/(Гц*мкФ);")).ToStdString();
     ASSERT_TRUE(s == "1(МОм)") << s;
+}
+
+TEST_F(CalcTestRational, units23)
+{
+    auto exports = std::make_shared<yutovo_calculator::Export>();
+
+    Unit meter_unit(U"meter");
+    Unit foot_unit(U"foot");
+    Rational meter_value(U"328084/100000");
+    meter_value.unit = foot_unit;
+    Rational foot_value(U"3048/10000");
+    foot_value.unit = meter_unit;
+
+    exports->AddUnit<Rational>(CustomUnit<Rational>(LogicalId{0, 0, 0, 0, 1}, U"meter", U"SI", meter_value, false));
+    exports->AddUnit<Rational>(CustomUnit<Rational>(LogicalId{0, 0, 0, 0, 2}, U"foot", U"SI", foot_value, false));
+
+    yutovo_calculator::ParserContext parser_context;
+    parser_context.Init(1000);
+    parser_context.exports = exports;
+    auto r = parser.Parse(LogicalId{0, 0, 0, 0, 3}, U"5meter;", &parser_context);
+    EXPECT_NO_THROW(parser.GetSuitableUnit(LogicalId{0, 0, 0, 0, 3}, r).ToStdString());
 }
 
 TEST_F(CalcTestRational, compare1)

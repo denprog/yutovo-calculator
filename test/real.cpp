@@ -9,6 +9,7 @@
 #include "mock.h"
 #include <chrono>
 #include "parser_exception.h"
+#include "export.h"
 
 namespace yutovo_calc_test
 {
@@ -1735,6 +1736,51 @@ TEST_F(CalcTestReal, units76)
     Real r = parser.Parse({0, 0, 0, 0, 1}, U"0.*Кл;");
     std::string s = parser.GetSuitableUnit(LogicalId{0, 0, 0, 0, 1}, r).ToStdString(3, 3);
     ASSERT_TRUE(s == "0.E+0(Кл)") << s;
+}
+
+TEST_F(CalcTestReal, units77)
+{
+    auto exports = std::make_shared<yutovo_calculator::Export>();
+
+    Unit meter_unit(U"meter");
+    Unit foot_unit(U"foot");
+    Real meter_value(3, "3.28084");
+    meter_value.unit = foot_unit;
+    Real foot_value(3, "0.3048");
+    foot_value.unit = meter_unit;
+
+    exports->AddUnit<Real>(CustomUnit<Real>(LogicalId{0, 0, 0, 0, 1}, U"meter", U"SI", meter_value, false));
+    exports->AddUnit<Real>(CustomUnit<Real>(LogicalId{0, 0, 0, 0, 2}, U"foot", U"SI", foot_value, false));
+
+    yutovo_calculator::ParserContext parser_context;
+    parser_context.Init(1000);
+    parser_context.exports = exports;
+    auto r = parser.Parse(LogicalId{0, 0, 0, 0, 3}, U"5meter;", &parser_context);
+    EXPECT_NO_THROW(parser.GetSuitableUnit(LogicalId{0, 0, 0, 0, 3}, r).ToStdString(3, 3));
+}
+
+TEST_F(CalcTestReal, units78)
+{
+    yutovo_calculator::Solver<yutovo_calculator::Real> solver(3, yutovo_calculator::AngleMeasure::Radian);
+
+    yutovo_calculator::Unit meter_unit(U"meter");
+    yutovo_calculator::Unit foot_unit(U"foot");
+    yutovo_calculator::Real meter_value(3, "3.28084");
+    meter_value.unit = foot_unit;
+    yutovo_calculator::Real foot_value(3, "0.3048");
+    foot_value.unit = meter_unit;
+
+    solver.symbols->units.push_back(yutovo_calculator::CustomUnit<yutovo_calculator::Real>(LogicalId{0, 0, 0, 0, 1}, U"meter", U"SI", meter_value, false));
+    solver.symbols->units.push_back(yutovo_calculator::CustomUnit<yutovo_calculator::Real>(LogicalId{0, 0, 0, 0, 2}, U"foot", U"SI", foot_value, false));
+
+    yutovo_calculator::Real val(3, "5");
+    val.unit = meter_unit;
+    yutovo_calculator::ParserContext parser_context;
+    parser_context.Init(1000);
+    solver.SetParserContext(&parser_context);
+
+    std::vector<yutovo_calculator::Unit> cast_units;
+    EXPECT_NO_THROW(solver.GetCastUnits(LogicalId{0, 0, 0, 0, 3}, val, U"SI", cast_units));
 }
 
 TEST_F(CalcTestReal, compare1)
