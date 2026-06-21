@@ -287,9 +287,9 @@ struct Solver : public boost::static_visitor<Number>
             Number arg = boost::apply_visitor(*this, op.operand);
             switch (op.op)
             {
-            case '+':
+            case U'+':
                 return +arg;
-            case '-':
+            case U'-':
                 return -arg;
             default:
                 throw SyntaxException(op.id, IncorrectOperation, op.pos, 1, op.line);
@@ -309,19 +309,19 @@ struct Solver : public boost::static_visitor<Number>
             Number right = boost::apply_visitor(*this, op.operand);
             switch (op.op)
             {
-            case '+':
+            case U'+':
                 return left_value + right;
-            case '-':
+            case U'-':
                 return left_value - right;
-            case '*':
+            case U'*':
                 return left_value * right;
-            case '/':
+            case U'/':
                 return left_value / right;
-            case '^':
+            case U'^':
                 return left_value ^ right;
-            case '%':
-            case '&':
-            case '|':
+            case U'%':
+            case U'&':
+            case U'|':
                 throw SyntaxException(op.id, IncorrectOperation, op.pos, 1, op.line);
             default:
                 throw SyntaxException(op.id, IncorrectOperation, op.pos, 1, op.line);

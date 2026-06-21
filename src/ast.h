@@ -137,7 +137,7 @@ struct UnaryOperationNode : public ExpressionPosition
 		boost::recursive_wrapper<ExpressionNode<Number>>> 
 		Operand;
 	
-	char op;
+	char32_t op;
 	Operand operand;
 };
 
@@ -167,7 +167,7 @@ struct OperationNode : ExpressionPosition
 		boost::recursive_wrapper<ExpressionNode<Number>>> 
 		Operand;
 	
-	char op;
+	char32_t op;
 	Operand operand;
 };
 
@@ -197,7 +197,7 @@ struct PostfixOperationNode : ExpressionPosition
 		boost::recursive_wrapper<ExpressionNode<Number>>> 
 		Operand;
 	
-	char op;
+	char32_t op;
 	Operand operand;
 };
 
@@ -448,13 +448,13 @@ using namespace yutovo_calculator;
 //Integer adaptors
 
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::UnaryOperationNode<yutovo_calculator::Integer>, 
-	(char, op)(yutovo_calculator::UnaryOperationNode<yutovo_calculator::Integer>::Operand, operand))
+	(char32_t, op)(yutovo_calculator::UnaryOperationNode<yutovo_calculator::Integer>::Operand, operand))
 
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::OperationNode<yutovo_calculator::Integer>, 
-	(char, op)(yutovo_calculator::OperationNode<yutovo_calculator::Integer>::Operand, operand))
+	(char32_t, op)(yutovo_calculator::OperationNode<yutovo_calculator::Integer>::Operand, operand))
 
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::PostfixOperationNode<yutovo_calculator::Integer>, 
-	(yutovo_calculator::PostfixOperationNode<yutovo_calculator::Integer>::Operand, operand)(char, op))
+	(yutovo_calculator::PostfixOperationNode<yutovo_calculator::Integer>::Operand, operand)(char32_t, op))
 
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::NumberNode<yutovo_calculator::Integer>, 
 	(std::u32string, number))
@@ -576,16 +576,16 @@ BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::GraphNode<yutovo_calculator::Intege
 //Real adaptors
 
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::UnaryOperationNode<yutovo_calculator::Real>, 
-	(char, op)(yutovo_calculator::UnaryOperationNode<yutovo_calculator::Real>::Operand, operand))
+	(char32_t, op)(yutovo_calculator::UnaryOperationNode<yutovo_calculator::Real>::Operand, operand))
 
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::NumberNode<yutovo_calculator::Real>, 
 	(std::u32string, number))
 
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::OperationNode<yutovo_calculator::Real>, 
-	(char, op)(yutovo_calculator::OperationNode<yutovo_calculator::Real>::Operand, operand))
+	(char32_t, op)(yutovo_calculator::OperationNode<yutovo_calculator::Real>::Operand, operand))
 
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::PostfixOperationNode<yutovo_calculator::Real>, 
-	(yutovo_calculator::PostfixOperationNode<yutovo_calculator::Real>::Operand, operand)(char, op))
+	(yutovo_calculator::PostfixOperationNode<yutovo_calculator::Real>::Operand, operand)(char32_t, op))
 
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::MixedDivivsionNode<yutovo_calculator::Real>, 
 	(yutovo_calculator::NumberNode<yutovo_calculator::Real>, left)
@@ -704,16 +704,16 @@ BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::GraphNode<yutovo_calculator::Real>,
 //Rational adaptors
 
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::UnaryOperationNode<yutovo_calculator::Rational>, 
-	(char, op)(yutovo_calculator::UnaryOperationNode<yutovo_calculator::Rational>::Operand, operand))
+	(char32_t, op)(yutovo_calculator::UnaryOperationNode<yutovo_calculator::Rational>::Operand, operand))
 
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::NumberNode<yutovo_calculator::Rational>, 
 	(std::u32string, number))
 
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::OperationNode<yutovo_calculator::Rational>, 
-	(char, op)(yutovo_calculator::OperationNode<yutovo_calculator::Rational>::Operand, operand))
+	(char32_t, op)(yutovo_calculator::OperationNode<yutovo_calculator::Rational>::Operand, operand))
 
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::PostfixOperationNode<yutovo_calculator::Rational>, 
-	(yutovo_calculator::PostfixOperationNode<yutovo_calculator::Rational>::Operand, operand)(char, op))
+	(yutovo_calculator::PostfixOperationNode<yutovo_calculator::Rational>::Operand, operand)(char32_t, op))
 
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::MixedDivivsionNode<yutovo_calculator::Rational>, 
 	(yutovo_calculator::NumberNode<yutovo_calculator::Rational>, left)
@@ -832,16 +832,16 @@ BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::GraphNode<yutovo_calculator::Ration
 //Complex adaptors
 
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::UnaryOperationNode<yutovo_calculator::Complex>, 
-	(char, op)(yutovo_calculator::UnaryOperationNode<yutovo_calculator::Complex>::Operand, operand))
+	(char32_t, op)(yutovo_calculator::UnaryOperationNode<yutovo_calculator::Complex>::Operand, operand))
 
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::NumberNode<yutovo_calculator::Complex>, 
 	(std::u32string, number))
 
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::OperationNode<yutovo_calculator::Complex>, 
-	(char, op)(yutovo_calculator::OperationNode<yutovo_calculator::Complex>::Operand, operand))
+	(char32_t, op)(yutovo_calculator::OperationNode<yutovo_calculator::Complex>::Operand, operand))
 
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::PostfixOperationNode<yutovo_calculator::Complex>, 
-	(yutovo_calculator::PostfixOperationNode<yutovo_calculator::Complex>::Operand, operand)(char, op))
+	(yutovo_calculator::PostfixOperationNode<yutovo_calculator::Complex>::Operand, operand)(char32_t, op))
 
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::MixedDivivsionNode<yutovo_calculator::Complex>, 
 	(yutovo_calculator::NumberNode<yutovo_calculator::Complex>, left)
@@ -960,16 +960,16 @@ BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::GraphNode<yutovo_calculator::Comple
 //Symbolic adaptors
 
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::UnaryOperationNode<yutovo_calculator::Symbolic<Real>>, 
-	(char, op)(yutovo_calculator::UnaryOperationNode<yutovo_calculator::Symbolic<Real>>::Operand, operand))
+	(char32_t, op)(yutovo_calculator::UnaryOperationNode<yutovo_calculator::Symbolic<Real>>::Operand, operand))
 
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::NumberNode<yutovo_calculator::Symbolic<Real>>, 
 	(std::u32string, number))
 
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::OperationNode<yutovo_calculator::Symbolic<Real>>, 
-	(char, op)(yutovo_calculator::OperationNode<yutovo_calculator::Symbolic<Real>>::Operand, operand))
+	(char32_t, op)(yutovo_calculator::OperationNode<yutovo_calculator::Symbolic<Real>>::Operand, operand))
 
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::PostfixOperationNode<yutovo_calculator::Symbolic<Real>>, 
-	(yutovo_calculator::PostfixOperationNode<yutovo_calculator::Symbolic<Real>>::Operand, operand)(char, op))
+	(yutovo_calculator::PostfixOperationNode<yutovo_calculator::Symbolic<Real>>::Operand, operand)(char32_t, op))
 
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::MixedDivivsionNode<yutovo_calculator::Symbolic<Real>>, 
 	(yutovo_calculator::NumberNode<yutovo_calculator::Symbolic<Real>>, left)
@@ -1086,16 +1086,16 @@ BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::GraphNode<yutovo_calculator::Symbol
 	(yutovo_calculator::GraphNode<yutovo_calculator::Symbolic<Real>>::Graph, graph))
 
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::UnaryOperationNode<yutovo_calculator::Symbolic<Rational>>, 
-	(char, op)(yutovo_calculator::UnaryOperationNode<yutovo_calculator::Symbolic<Rational>>::Operand, operand))
+	(char32_t, op)(yutovo_calculator::UnaryOperationNode<yutovo_calculator::Symbolic<Rational>>::Operand, operand))
 
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::NumberNode<yutovo_calculator::Symbolic<Rational>>, 
 	(std::u32string, number))
 
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::OperationNode<yutovo_calculator::Symbolic<Rational>>, 
-	(char, op)(yutovo_calculator::OperationNode<yutovo_calculator::Symbolic<Rational>>::Operand, operand))
+	(char32_t, op)(yutovo_calculator::OperationNode<yutovo_calculator::Symbolic<Rational>>::Operand, operand))
 
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::PostfixOperationNode<yutovo_calculator::Symbolic<Rational>>, 
-	(yutovo_calculator::PostfixOperationNode<yutovo_calculator::Symbolic<Rational>>::Operand, operand)(char, op))
+	(yutovo_calculator::PostfixOperationNode<yutovo_calculator::Symbolic<Rational>>::Operand, operand)(char32_t, op))
 
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::MixedDivivsionNode<yutovo_calculator::Symbolic<Rational>>, 
 	(yutovo_calculator::NumberNode<yutovo_calculator::Symbolic<Rational>>, left)
@@ -1212,16 +1212,16 @@ BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::GraphNode<yutovo_calculator::Symbol
 	(yutovo_calculator::GraphNode<yutovo_calculator::Symbolic<Rational>>::Graph, graph))
 
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::UnaryOperationNode<yutovo_calculator::Symbolic<Complex>>, 
-	(char, op)(yutovo_calculator::UnaryOperationNode<yutovo_calculator::Symbolic<Complex>>::Operand, operand))
+	(char32_t, op)(yutovo_calculator::UnaryOperationNode<yutovo_calculator::Symbolic<Complex>>::Operand, operand))
 
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::NumberNode<yutovo_calculator::Symbolic<Complex>>, 
 	(std::u32string, number))
 
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::OperationNode<yutovo_calculator::Symbolic<Complex>>, 
-	(char, op)(yutovo_calculator::OperationNode<yutovo_calculator::Symbolic<Complex>>::Operand, operand))
+	(char32_t, op)(yutovo_calculator::OperationNode<yutovo_calculator::Symbolic<Complex>>::Operand, operand))
 
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::PostfixOperationNode<yutovo_calculator::Symbolic<Complex>>, 
-	(yutovo_calculator::PostfixOperationNode<yutovo_calculator::Symbolic<Complex>>::Operand, operand)(char, op))
+	(yutovo_calculator::PostfixOperationNode<yutovo_calculator::Symbolic<Complex>>::Operand, operand)(char32_t, op))
 
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::MixedDivivsionNode<yutovo_calculator::Symbolic<Complex>>, 
 	(yutovo_calculator::NumberNode<yutovo_calculator::Symbolic<Complex>>, left)
@@ -1340,16 +1340,16 @@ BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::GraphNode<yutovo_calculator::Symbol
 //Array<Real> adaptors
 
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::UnaryOperationNode<yutovo_calculator::Array<yutovo_calculator::Real>>, 
-	(char, op)(yutovo_calculator::UnaryOperationNode<yutovo_calculator::Array<yutovo_calculator::Real>>::Operand, operand))
+	(char32_t, op)(yutovo_calculator::UnaryOperationNode<yutovo_calculator::Array<yutovo_calculator::Real>>::Operand, operand))
 
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::NumberNode<yutovo_calculator::Array<yutovo_calculator::Real>>, 
 	(std::u32string, number))
 
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::OperationNode<yutovo_calculator::Array<yutovo_calculator::Real>>, 
-	(char, op)(yutovo_calculator::OperationNode<yutovo_calculator::Array<yutovo_calculator::Real>>::Operand, operand))
+	(char32_t, op)(yutovo_calculator::OperationNode<yutovo_calculator::Array<yutovo_calculator::Real>>::Operand, operand))
 
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::PostfixOperationNode<yutovo_calculator::Array<yutovo_calculator::Real>>, 
-	(yutovo_calculator::PostfixOperationNode<yutovo_calculator::Array<yutovo_calculator::Real>>::Operand, operand)(char, op))
+	(yutovo_calculator::PostfixOperationNode<yutovo_calculator::Array<yutovo_calculator::Real>>::Operand, operand)(char32_t, op))
 
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::MixedDivivsionNode<yutovo_calculator::Array<yutovo_calculator::Real>>, 
 	(yutovo_calculator::NumberNode<yutovo_calculator::Array<yutovo_calculator::Real>>, left)

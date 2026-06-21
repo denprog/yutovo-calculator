@@ -260,11 +260,11 @@ Integer Solver<Integer>::operator()(UnaryOperationNode<Integer> const& op) const
     Integer right = boost::apply_visitor(*this, op.operand);
     switch (op.op)
     {
-    case '+':
+    case U'+':
         return right;
-    case '-':
+    case U'-':
         return -right;
-    case '!':
+    case U'¬':
         return !right;
     }
     throw SyntaxException(op.id, SyntaxError, op.pos, 1, op.line);
@@ -278,9 +278,9 @@ Real Solver<Real>::operator()(UnaryOperationNode<Real> const& op) const
     Real right = boost::apply_visitor(*this, op.operand);
     switch (op.op)
     {
-    case '+':
+    case U'+':
         return right;
-    case '-':
+    case U'-':
         return -right;
     }
     throw SyntaxException(op.id, SyntaxError, op.pos, 1, op.line);
@@ -294,9 +294,9 @@ Rational Solver<Rational>::operator()(UnaryOperationNode<Rational> const& op) co
     Rational right = boost::apply_visitor(*this, op.operand);
     switch (op.op)
     {
-    case '+':
+    case U'+':
         return right;
-    case '-':
+    case U'-':
         return -right;
     }
     throw SyntaxException(op.id, SyntaxError, op.pos, 1, op.line);
@@ -310,9 +310,9 @@ Complex Solver<Complex>::operator()(UnaryOperationNode<Complex> const& op) const
     Complex right = boost::apply_visitor(*this, op.operand);
     switch (op.op)
     {
-    case '+':
+    case U'+':
         return right;
-    case '-':
+    case U'-':
         return -right;
     }
     throw SyntaxException(op.id, SyntaxError, op.pos, 1, op.line);
@@ -326,9 +326,9 @@ Array<Real> Solver<Array<Real>>::operator()(UnaryOperationNode<Array<Real>> cons
     Array<Real> right = boost::apply_visitor(*this, op.operand);
     switch (op.op)
     {
-    case '+':
+    case U'+':
         return right;
-    case '-':
+    case U'-':
         return -right;
     }
     throw SyntaxException(op.id, SyntaxError, op.pos, 1, op.line);
@@ -346,20 +346,22 @@ Integer Solver<Integer>::operator()(OperationNode<Integer> const& op) const
         //calculate the operation
         switch (op.op)
         {
-        case '+':
+        case U'+':
             return left_value + right;
-        case '-':
+        case U'-':
             return left_value - right;
-        case '*':
+        case U'*':
             return left_value * right;
-        case '/':
+        case U'/':
             return left_value / right;
-        case '&':
+        case U'∧':
             return left_value & right;
-        case '|':
+        case U'∨':
             return left_value | right;
-        case '^':
+        case U'⊕':
             return left_value ^ right;
+        case U'^':
+            return pow(left_value, right);
         }
     }
     catch (MathException e)
@@ -382,15 +384,15 @@ Real Solver<Real>::operator()(OperationNode<Real> const& op) const
         //calculate the operation
         switch (op.op)
         {
-        case '+':
+        case U'+':
             return left_value + right;
-        case '-':
+        case U'-':
             return left_value - right;
-        case '*':
+        case U'*':
             return left_value * right;
-        case '/':
+        case U'/':
             return left_value / right;
-        case '%':
+        case U'%':
             return left_value * (float)0.01 * right;
         }
     }
@@ -414,15 +416,15 @@ Rational Solver<Rational>::operator()(OperationNode<Rational> const& op) const
         //calculate the operation
         switch (op.op)
         {
-        case '+':
+        case U'+':
             return left_value + right;
-        case '-':
+        case U'-':
             return left_value - right;
-        case '*':
+        case U'*':
             return left_value * right;
-        case '/':
+        case U'/':
             return left_value / right;
-        case '%':
+        case U'%':
             return left_value / 100 * right;
         }
     }
@@ -446,15 +448,15 @@ Complex Solver<Complex>::operator()(OperationNode<Complex> const& op) const
         //calculate the operation
         switch (op.op)
         {
-        case '+':
+        case U'+':
             return left_value + right;
-        case '-':
+        case U'-':
             return left_value - right;
-        case '*':
+        case U'*':
             return left_value * right;
-        case '/':
+        case U'/':
             return left_value / right;
-        case '%':
+        case U'%':
             return left_value * (float)0.01 * right;
         }
     }
@@ -476,15 +478,15 @@ Array<Real> Solver<Array<Real>>::operator()(OperationNode<Array<Real>> const& op
         //calculate the operation
         switch (op.op)
         {
-        case '+':
+        case U'+':
             return left_value + right;
-        case '-':
+        case U'-':
             return left_value - right;
-        case '*':
+        case U'*':
             return left_value * right;
-        case '/':
+        case U'/':
             return left_value / right;
-        case '%':
+        case U'%':
             return left_value * (float)0.01 * right;
         }
     }
@@ -502,7 +504,7 @@ Integer Solver<Integer>::operator()(PostfixOperationNode<Integer> const& op) con
     Integer left = boost::apply_visitor(*this, op.operand);
     switch (op.op)
     {
-    case '!':
+    case U'!':
         return fact(left, parser_context);
     }
     throw SyntaxException(op.id, SyntaxError, op.pos, op.line);
@@ -514,7 +516,7 @@ Real Solver<Real>::operator()(PostfixOperationNode<Real> const& op) const
     Real left = boost::apply_visitor(*this, op.operand);
     switch (op.op)
     {
-    case '!':
+    case U'!':
         return fact(left, parser_context);
     }
     throw SyntaxException(op.id, SyntaxError, op.pos, op.line);
@@ -532,7 +534,7 @@ Complex Solver<Complex>::operator()(PostfixOperationNode<Complex> const& op) con
     Complex left = boost::apply_visitor(*this, op.operand);
     switch (op.op)
     {
-    case '!':
+    case U'!':
         return fact(left, parser_context);
     }
     throw SyntaxException(op.id, SyntaxError, op.pos, op.line);
@@ -544,7 +546,7 @@ Symbolic<Real> Solver<Symbolic<Real>>::operator()(PostfixOperationNode<Symbolic<
     Symbolic<Real> left = boost::apply_visitor(*this, op.operand);
     switch (op.op)
     {
-    case '!':
+    case U'!':
         return fact(left, parser_context);
     }
     throw SyntaxException(op.id, SyntaxError, op.pos, op.line);
@@ -556,7 +558,7 @@ Symbolic<Rational> Solver<Symbolic<Rational>>::operator()(PostfixOperationNode<S
     Symbolic<Rational> left = boost::apply_visitor(*this, op.operand);
     switch (op.op)
     {
-    case '!':
+    case U'!':
         return fact(left, parser_context);
     }
     throw SyntaxException(op.id, SyntaxError, op.pos, op.line);
@@ -568,7 +570,7 @@ Symbolic<Complex> Solver<Symbolic<Complex>>::operator()(PostfixOperationNode<Sym
     Symbolic<Complex> left = boost::apply_visitor(*this, op.operand);
     switch (op.op)
     {
-    case '!':
+    case U'!':
         return fact(left, parser_context);
     }
     throw SyntaxException(op.id, SyntaxError, op.pos, op.line);

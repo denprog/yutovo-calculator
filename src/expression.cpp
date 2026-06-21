@@ -37,9 +37,11 @@ Expression<Integer>::Expression(LogicalId id, std::u32string& expr, Solver<Integ
     
     addition = multiplication >> *((char_('+') > multiplication) | (char_('-') > multiplication));
     
-    multiplication = unary >> *(multiply);
+    multiplication = power >> *(multiply);
 
-    multiply = char_('*') > unary | char_('/') > unary | char_('&') > unary | char_('|') > unary | char_('^') > unary;
+    power = unary >> *(char_(U'^') > unary);
+
+    multiply = char_(U'*') > power | char_(U'/') > power | char_(U'∧') > power | char_(U'∨') > power | char_(U'⊕') > power;
 
     if (solver->default_notation == 16)
     {
@@ -65,9 +67,9 @@ Expression<Integer>::Expression(LogicalId id, std::u32string& expr, Solver<Integ
     
     name = raw[lexeme[(alpha | '_') >> *(alnum | '_')]];
 
-    unary_operation = (char_('+') > unary) | (char_('-') > unary) | (char_('!') > unary);
+    unary_operation = (char_(U'+') > unary) | (char_(U'-') > unary) | (char_(U'¬') > unary);
 
-    postfix_operation = (identifier >> char_('!')) | ((number | '(' > expression > ')') >> char_('!'));
+    postfix_operation = (identifier >> char_(U'!')) | ((number | '(' > expression > ')') >> char_(U'!'));
 
     implicit_string_mul = (number >> identifier);
     
