@@ -13,6 +13,10 @@ if(WIN32)
 	set(CMAKE_PREFIX_PATH "${INSTALL_PATH}")
     pkg_check_modules(mpfr REQUIRED IMPORTED_TARGET mpfr)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /utf-8 /bigobj /EHsc /MP")
+elseif(NOT EMSCRIPTEN)
+    find_package(PkgConfig REQUIRED)
+    pkg_check_modules(mpfr REQUIRED IMPORTED_TARGET mpfr)
+    pkg_check_modules(gmp REQUIRED IMPORTED_TARGET gmp)
 endif()
 
 if(EMSCRIPTEN)
@@ -109,8 +113,8 @@ else()
     else()
         target_link_libraries(${PROJECT_NAME} PRIVATE 
             stdc++
-            ${INSTALL_PATH}/lib/libmpfr.a
-            ${INSTALL_PATH}/lib/libgmp.a
+            PkgConfig::mpfr
+            PkgConfig::gmp
             ${SYMENGINE_LIBRARIES}
         )
     endif()

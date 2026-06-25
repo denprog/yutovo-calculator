@@ -46,12 +46,14 @@ try {
 - SymEngine headers are located at `../yutovo/deploy/include/symengine/`.
 - `fact(x)` (postfix `!`) is implemented for all symbolic types as a product `1*2*...*n` for non-negative integer arguments; returns `factorial(x)` for symbolic/non-integer arguments (no longer uses `SymEngine::gamma`). Friend function added in `symbolic.h`; `PostfixOperationNode` specializations added in `solver.cpp`; grammar updated in `expression.cpp` to allow `identifier!`.
 - `Symbolic<Number>::ToJson()` recursively traverses the SymEngine AST and emits JSON using yutovo-editor element type codes (7=CODE_ROW, 8=CODE_STRING, 10=SHAPE, 11=PLUS, 12=MINUS, 13=MULTIPLY, 14=DIVISION, 15=POWER, 45-47=SYMBOLIC_*_RESULT). This replaces the fragile string-parsing approach in `yutovo-editor::AddSymbolicElements`.
+- On Linux `yutovo-calculator` links the **system** MPFR/GMP libraries via `pkg_check_modules(mpfr ...)` / `pkg_check_modules(gmp ...)`. The Emscripten/wasm build still links the static archives `${INSTALL_PATH}/wasm/libmpfr.a` and `${INSTALL_PATH}/wasm/libgmp.a`.
+- Linux consumers of the installed `yutovo-calculator` target (e.g. `yutovo-solver`, `yutovo-editor`, `yutovo-desktop`) must also call `pkg_check_modules(mpfr REQUIRED IMPORTED_TARGET mpfr)` and `pkg_check_modules(gmp REQUIRED IMPORTED_TARGET gmp)` because they are recorded in the imported target's `INTERFACE_LINK_LIBRARIES`.
 
 ### yutovo-solver
 - `ResultType::SYMBOLIC` added in `types.h`.
 - `CalculatorSolver` has `symbolic_parser` and `SolveSymbolic()`.
 - `AUTO` mode tries `SYMBOLIC` last in `results_order[6]`.
-- `CMakeLists.txt` links `libmpfr.a`, `libgmp.a`, `${SYMENGINE_LIBRARIES}`.
+- On Linux `yutovo-solver` does **not** link GMP/MPFR directly; it inherits them transitively from `yutovo-calculator` / SymEngine.
 
 ### yutovo-editor
 - `ElementType::SYMBOLIC_RESULT` added.
