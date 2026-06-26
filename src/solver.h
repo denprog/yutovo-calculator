@@ -2068,6 +2068,84 @@ private:
     int max_cast_unit_size = 2; //max size of each unit in the cast vector
 };
 
+//explicit specializations declared here so dependent TUs link to the definitions in solver.cpp instead of inlining the primary template
+template<> Array<Real> Solver<Array<Real>>::operator()(LineGraphNode<Array<Real>> const& op) const;
+template<> Real Solver<Real>::operator()(UnitNode<Real> const& op) const;
+template<> Rational Solver<Rational>::operator()(UnitNode<Rational> const& op) const;
+template<> Array<Real> Solver<Array<Real>>::operator()(UnitNode<Array<Real>> const& op) const;
+template<> Integer Solver<Integer>::operator()(UnitNode<Integer> const& op) const;
+template<> Integer Solver<Integer>::operator()(UnaryOperationNode<Integer> const& op) const;
+template<> Real Solver<Real>::operator()(UnaryOperationNode<Real> const& op) const;
+template<> Rational Solver<Rational>::operator()(UnaryOperationNode<Rational> const& op) const;
+template<> Complex Solver<Complex>::operator()(UnaryOperationNode<Complex> const& op) const;
+template<> Array<Real> Solver<Array<Real>>::operator()(UnaryOperationNode<Array<Real>> const& op) const;
+template<> Integer Solver<Integer>::operator()(OperationNode<Integer> const& op) const;
+template<> Real Solver<Real>::operator()(OperationNode<Real> const& op) const;
+template<> Rational Solver<Rational>::operator()(OperationNode<Rational> const& op) const;
+template<> Complex Solver<Complex>::operator()(OperationNode<Complex> const& op) const;
+template<> Array<Real> Solver<Array<Real>>::operator()(OperationNode<Array<Real>> const& op) const;
+template<> Integer Solver<Integer>::operator()(PostfixOperationNode<Integer> const& op) const;
+template<> Real Solver<Real>::operator()(PostfixOperationNode<Real> const& op) const;
+template<> Rational Solver<Rational>::operator()(PostfixOperationNode<Rational> const& op) const;
+template<> Complex Solver<Complex>::operator()(PostfixOperationNode<Complex> const& op) const;
+template<> Integer Solver<Integer>::operator()(FunctionCallNode<Integer> const& op) const;
+template<> Real Solver<Real>::operator()(FunctionCallNode<Real> const& op) const;
+template<> Rational Solver<Rational>::operator()(FunctionCallNode<Rational> const& op) const;
+template<> Complex Solver<Complex>::operator()(FunctionCallNode<Complex> const& op) const;
+template<> Array<Real> Solver<Array<Real>>::operator()(FunctionCallNode<Array<Real>> const& op) const;
+template<> Integer Solver<Integer>::operator()(FunctionCallStringNode<Integer> const& op) const;
+template<> Real Solver<Real>::operator()(FunctionCallStringNode<Real> const& op) const;
+template<> Rational Solver<Rational>::operator()(FunctionCallStringNode<Rational> const& op) const;
+template<> Complex Solver<Complex>::operator()(FunctionCallStringNode<Complex> const& op) const;
+template<> VariableNode<Array<Real>>* Solver<Array<Real>>::FindVariable(const std::u32string& name, const std::u32string& subscript) const;
+template<> Integer Solver<Integer>::operator()(NoFencesFunctionCallNode<Integer> const& op) const;
+template<> Real Solver<Real>::operator()(NoFencesFunctionCallNode<Real> const& op) const;
+template<> Rational Solver<Rational>::operator()(NoFencesFunctionCallNode<Rational> const& op) const;
+template<> Complex Solver<Complex>::operator()(NoFencesFunctionCallNode<Complex> const& op) const;
+template<> Integer Solver<Integer>::operator()(IdentifierNode<Integer> const& op) const;
+template<> Real Solver<Real>::operator()(IdentifierNode<Real> const& op) const;
+template<> Rational Solver<Rational>::operator()(IdentifierNode<Rational> const& op) const;
+template<> Complex Solver<Complex>::operator()(IdentifierNode<Complex> const& op) const;
+template<> Array<Real> Solver<Array<Real>>::operator()(IdentifierNode<Array<Real>> const& op) const;
+template<> Integer Solver<Integer>::operator()(ImplicitStringMulNode<Integer> const& op) const;
+template<> Real Solver<Real>::operator()(ImplicitStringMulNode<Real> const& op) const;
+template<> Rational Solver<Rational>::operator()(ImplicitStringMulNode<Rational> const& op) const;
+template<> Complex Solver<Complex>::operator()(ImplicitStringMulNode<Complex> const& op) const;
+template<> Array<Real> Solver<Array<Real>>::operator()(ImplicitStringMulNode<Array<Real>> const& op) const;
+template<> Integer Solver<Integer>::operator()(ImplicitDivMulNode<Integer> const& op) const;
+template<> Real Solver<Real>::operator()(ImplicitDivMulNode<Real> const& op) const;
+template<> Rational Solver<Rational>::operator()(ImplicitDivMulNode<Rational> const& op) const;
+template<> Complex Solver<Complex>::operator()(ImplicitDivMulNode<Complex> const& op) const;
+template<> Array<Real> Solver<Array<Real>>::operator()(ImplicitDivMulNode<Array<Real>> const& op) const;
+template<> Array<Real> Solver<Array<Real>>::operator()(ArrayNode<Array<Real>> const& op) const;
+template<> Integer Solver<Integer>::operator()(ScriptNode<Integer> const& script, LogicalId _id, AngleMeasure _default_angle_measure, 
+    AngleMeasure _result_angle_measure, int _precision, Dependencies* _dependencies) const;
+template<> Rational Solver<Rational>::operator()(ScriptNode<Rational> const& script, LogicalId _id, AngleMeasure _default_angle_measure, 
+    AngleMeasure _result_angle_measure, int _precision, Dependencies* _dependencies) const;
+template<> Complex Solver<Complex>::operator()(ScriptNode<Complex> const& script, LogicalId _id, AngleMeasure _default_angle_measure, 
+    AngleMeasure _result_angle_measure, int _precision, Dependencies* _dependencies) const;
+template<> Array<Real> Solver<Array<Real>>::operator()(ScriptNode<Array<Real>> const& script, LogicalId _id, AngleMeasure _default_angle_measure, 
+    AngleMeasure _result_angle_measure, int _precision, Dependencies* _dependencies) const;
+template<> Real Solver<Real>::GetSuitableUnit(const LogicalId _id, const Real& val, const std::u32string& system, const bool buildin) const;
+template<> Rational Solver<Rational>::GetSuitableUnit(const LogicalId _id, const Rational& val, const std::u32string& system, const bool buildin) const;
+template<> Integer Solver<Integer>::GetSuitableUnit(const LogicalId _id, const Integer& val, const std::u32string& system, const bool buildin) const;
+template<> Complex Solver<Complex>::GetSuitableUnit(const LogicalId _id, const Complex& val, const std::u32string& system, const bool buildin) const;
+template<> Symbolic<Real> Solver<Symbolic<Real>>::GetSuitableUnit(const LogicalId _id, const Symbolic<Real>& val, const std::u32string& system, 
+    const bool buildin) const;
+template<> Real Solver<Real>::CastToUnit(const LogicalId id, const Real& val, const Unit& unit) const;
+template<> Rational Solver<Rational>::CastToUnit(const LogicalId id, const Rational& val, const Unit& unit) const;
+template<> Integer Solver<Integer>::CastToUnit(const LogicalId id, const Integer& val, const Unit& unit) const;
+template<> Complex Solver<Complex>::CastToUnit(const LogicalId id, const Complex& val, const Unit& unit) const;
+template<> Symbolic<Real> Solver<Symbolic<Real>>::CastToUnit(const LogicalId id, const Symbolic<Real>& val, const Unit& unit) const;
+template<> void Solver<Symbolic<Rational>>::FillBuiltinOperations();
+template<> Symbolic<Rational> Solver<Symbolic<Rational>>::GetSuitableUnit(const LogicalId _id, const Symbolic<Rational>& val, const std::u32string& system, 
+    const bool buildin) const;
+template<> Symbolic<Rational> Solver<Symbolic<Rational>>::CastToUnit(const LogicalId id, const Symbolic<Rational>& val, const Unit& unit) const;
+template<> void Solver<Symbolic<Complex>>::FillBuiltinOperations();
+template<> Symbolic<Complex> Solver<Symbolic<Complex>>::GetSuitableUnit(const LogicalId _id, const Symbolic<Complex>& val, const std::u32string& system, 
+    const bool buildin) const;
+template<> Symbolic<Complex> Solver<Symbolic<Complex>>::CastToUnit(const LogicalId id, const Symbolic<Complex>& val, const Unit& unit) const;
+
 };
 
 #endif
