@@ -1,8 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 
-project(yutovo-calculator
-    LANGUAGES CXX
-)
+project(yutovo-calculator LANGUAGES CXX C)
 
 set(PROJECT_LICENSE "GPL-3.0-only")
 
