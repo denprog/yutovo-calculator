@@ -2006,4 +2006,25 @@ Symbolic<Complex> Solver<Symbolic<Complex>>::CastToUnit(const LogicalId id, cons
     throw MathException(id, ParserExceptionCode::CannotCastToUnit);
 }
 
+#ifdef _MSC_VER
+//force the symbols into yutovo-calculator.lib in Windows Release build
+template Real Solver<Real>::operator()(UnitNode<Real> const&) const;
+template Real Solver<Real>::operator()(UnaryOperationNode<Real> const&) const;
+template Real Solver<Real>::operator()(OperationNode<Real> const&) const;
+template Real Solver<Real>::operator()(PostfixOperationNode<Real> const&) const;
+template Real Solver<Real>::operator()(FunctionCallNode<Real> const&) const;
+template Real Solver<Real>::operator()(FunctionCallStringNode<Real> const&) const;
+template Real Solver<Real>::operator()(NoFencesFunctionCallNode<Real> const&) const;
+template Real Solver<Real>::operator()(IdentifierNode<Real> const&) const;
+template Real Solver<Real>::operator()(ImplicitStringMulNode<Real> const&) const;
+template Real Solver<Real>::operator()(ImplicitDivMulNode<Real> const&) const;
+template Real Solver<Real>::operator()(ScriptNode<Real> const&, LogicalId, AngleMeasure, AngleMeasure, int, Dependencies*) const;
+template Array<Real> Solver<Array<Real>>::operator()(ScriptNode<Array<Real>> const&, LogicalId, AngleMeasure, AngleMeasure, int, Dependencies*) const;
+template Rational Solver<Rational>::operator()(ScriptNode<Rational> const&, LogicalId, AngleMeasure, AngleMeasure, int, Dependencies*) const;
+template Integer Solver<Integer>::operator()(ScriptNode<Integer> const&, LogicalId, AngleMeasure, AngleMeasure, int, Dependencies*) const;
+template Complex Solver<Complex>::operator()(ScriptNode<Complex> const&, LogicalId, AngleMeasure, AngleMeasure, int, Dependencies*) const;
+template void Solver<Symbolic<Rational>>::FillBuiltinOperations();
+template void Solver<Symbolic<Complex>>::FillBuiltinOperations();
+#endif
+
 }
