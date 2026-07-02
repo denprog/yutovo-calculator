@@ -469,6 +469,40 @@ public:
         return ForEach(abs, num);
     }
 
+    friend Array<Number> min(const Array<Number>& num)
+    {
+        if (num.numbers.empty())
+            throw MathException(IncorrectOperation);
+
+        Number r = num.numbers[0];
+        for (size_t i = 1; i < num.numbers.size(); ++i)
+        {
+            if (num.numbers[i] < r)
+                r = num.numbers[i];
+        }
+
+        Array<Number> res;
+        res.numbers.push_back(r);
+        return res;
+    }
+
+    friend Array<Number> max(const Array<Number>& num)
+    {
+        if (num.numbers.empty())
+            throw MathException(IncorrectOperation);
+
+        Number r = num.numbers[0];
+        for (size_t i = 1; i < num.numbers.size(); ++i)
+        {
+            if (num.numbers[i] > r)
+                r = num.numbers[i];
+        }
+
+        Array<Number> res;
+        res.numbers.push_back(r);
+        return res;
+    }
+
     friend Array<Number> floor(const Array<Number>& num)
     {
         return ForEach(floor, num);

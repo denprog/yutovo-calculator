@@ -684,4 +684,22 @@ TEST_F(CalcTestInteger, fact2)
         yutovo_calculator::TimeExceedException);
 }
 
+TEST_F(CalcTestInteger, min_max1)
+{
+    Integer res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"min(2,3);");
+    ASSERT_TRUE(res.ToString(10) == U"2") << res.ToStdString(10);
+
+    res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"max(2,3);");
+    ASSERT_TRUE(res.ToString(10) == U"3") << res.ToStdString(10);
+
+    res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"min(-5,-1);");
+    ASSERT_TRUE(res.ToString(10) == U"-5") << res.ToStdString(10);
+
+    res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"max(-5,-1);");
+    ASSERT_TRUE(res.ToString(10) == U"-1") << res.ToStdString(10);
+
+    res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"min(7,7);");
+    ASSERT_TRUE(res.ToString(10) == U"7") << res.ToStdString(10);
+}
+
 }

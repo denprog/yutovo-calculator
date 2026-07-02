@@ -344,7 +344,27 @@ public:
         *res.expr = SymEngine::subs(*num.expr, subs_map);
         return res;
     }
-    
+
+    friend Symbolic<Number> min(const Symbolic<Number>& num1, const Symbolic<Number>& num2)
+    {
+        Symbolic<Number> res(num1.precision);
+        SymEngine::vec_basic v;
+        v.push_back(num1.expr->get_basic());
+        v.push_back(num2.expr->get_basic());
+        *res.expr = SymEngine::min(v);
+        return res;
+    }
+
+    friend Symbolic<Number> max(const Symbolic<Number>& num1, const Symbolic<Number>& num2)
+    {
+        Symbolic<Number> res(num1.precision);
+        SymEngine::vec_basic v;
+        v.push_back(num1.expr->get_basic());
+        v.push_back(num2.expr->get_basic());
+        *res.expr = SymEngine::max(v);
+        return res;
+    }
+
     friend Symbolic<Number> sin(const Symbolic<Number>& num)
     {
         Symbolic<Number> res(num.precision);

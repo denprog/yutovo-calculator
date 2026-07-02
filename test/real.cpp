@@ -2465,4 +2465,19 @@ TEST_F(CalcTestReal, fact2)
         yutovo_calculator::TimeExceedException);
 }
 
+TEST_F(CalcTestReal, min_max1)
+{
+    auto res = parser.Parse(LogicalId{0, 0, 1}, U"min(2.5,3.7);", 3);
+    ASSERT_TRUE(res.ToStdString(3, 3) == "2.5E+0") << res.ToStdString(3, 3);
+
+    res = parser.Parse(LogicalId{0, 0, 1}, U"max(2.5,3.7);", 3);
+    ASSERT_TRUE(res.ToStdString(3, 3) == "3.7E+0") << res.ToStdString(3, 3);
+
+    res = parser.Parse(LogicalId{0, 0, 1}, U"min(-1.2,-1.5);", 3);
+    ASSERT_TRUE(res.ToStdString(3, 3) == "-1.5E+0") << res.ToStdString(3, 3);
+
+    res = parser.Parse(LogicalId{0, 0, 1}, U"max(-1.2,-1.5);", 3);
+    ASSERT_TRUE(res.ToStdString(3, 3) == "-1.2E+0") << res.ToStdString(3, 3);
+}
+
 }

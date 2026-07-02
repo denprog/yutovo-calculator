@@ -301,4 +301,19 @@ TEST_F(CalcTestArrayReal, errors1)
     EXPECT_THROW(parser.Parse(LogicalId{0, 0, 1}, U"(1)/(0);"), yutovo_calculator::MathException);
 }
 
+TEST_F(CalcTestArrayReal, min_max1)
+{
+    auto res = parser.Parse(LogicalId{0, 0, 1}, U"min([3,1,4,1,5,9,2,6]);", 3);
+    ASSERT_TRUE(res.ToStdString(3, 3) == "[1.E+0]") << res.ToStdString(3, 3);
+
+    res = parser.Parse(LogicalId{0, 0, 1}, U"max([3,1,4,1,5,9,2,6]);", 3);
+    ASSERT_TRUE(res.ToStdString(3, 3) == "[9.E+0]") << res.ToStdString(3, 3);
+
+    res = parser.Parse(LogicalId{0, 0, 1}, U"min([-2.5,-3.5,-1.5]);", 3);
+    ASSERT_TRUE(res.ToStdString(3, 3) == "[-3.5E+0]") << res.ToStdString(3, 3);
+
+    res = parser.Parse(LogicalId{0, 0, 1}, U"max([-2.5,-3.5,-1.5]);", 3);
+    ASSERT_TRUE(res.ToStdString(3, 3) == "[-1.5E+0]") << res.ToStdString(3, 3);
+}
+
 }

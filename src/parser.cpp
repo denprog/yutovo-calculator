@@ -21,12 +21,18 @@ Integer reminder(const Integer& num1, const Integer& num2);
 
 Integer abs(const Integer &num);
 
+Integer min(const Integer& num1, const Integer& num2);
+Integer max(const Integer& num1, const Integer& num2);
+
 Real pow(const Real& num1, const Real& num2);
 Complex pow(const Complex& num1, const Complex& num2, int& res_pos);
 
 Rational pow(const Rational& num1, const Rational& num2);
 
 Rational abs(const Rational &num);
+
+Rational min(const Rational& num1, const Rational& num2);
+Rational max(const Rational& num1, const Rational& num2);
 
 Real sin(const Real& num);
 Real cos(const Real& num);
@@ -67,6 +73,8 @@ Real root(const Real& num1, const Real& num2);
 Real integer(const Real &num);
 Real fract(const Real &num);
 Real abs(const Real &num);
+Real min(const Real& num1, const Real& num2);
+Real max(const Real& num1, const Real& num2);
 Real ceil(const Real &num);
 Real floor(const Real &num);
 Real round(const Real &num);
@@ -115,6 +123,8 @@ Complex sqrt(const Complex& num, int& res_pos);
 Complex root(const Complex& num1, const Complex& num2, int& res_pos);
 
 Complex abs(const Complex &num);
+Complex min(const Complex& num1, const Complex& num2, int& res_pos);
+Complex max(const Complex& num1, const Complex& num2, int& res_pos);
 
 Complex rad(const Complex& num, int& res_pos);
 Complex deg(const Complex& num, int& res_pos);
@@ -179,6 +189,8 @@ Array<Real> second(const Array<Real>& num);
 Array<Real> grad(const Array<Real>& num);
 
 Array<Real> size(const Array<Real> &num);
+Array<Real> min(const Array<Real>& num);
+Array<Real> max(const Array<Real>& num);
 
 Symbolic<Real> evalf(const Symbolic<Real>& num);
 Symbolic<Real> evalf(const Symbolic<Real>& num, const Symbolic<Real>& prec);
@@ -210,6 +222,8 @@ Symbolic<Real> acsch(const Symbolic<Real>& num);
 Symbolic<Real> exp(const Symbolic<Real>& num);
 Symbolic<Real> sqrt(const Symbolic<Real>& num);
 Symbolic<Real> ln(const Symbolic<Real>& num);
+Symbolic<Real> min(const Symbolic<Real>& num1, const Symbolic<Real>& num2);
+Symbolic<Real> max(const Symbolic<Real>& num1, const Symbolic<Real>& num2);
 
 extern template class Symbolic<Rational>;
 extern template class Symbolic<Complex>;
@@ -244,6 +258,8 @@ Symbolic<Rational> acsch(const Symbolic<Rational>& num);
 Symbolic<Rational> exp(const Symbolic<Rational>& num);
 Symbolic<Rational> sqrt(const Symbolic<Rational>& num);
 Symbolic<Rational> ln(const Symbolic<Rational>& num);
+Symbolic<Rational> min(const Symbolic<Rational>& num1, const Symbolic<Rational>& num2);
+Symbolic<Rational> max(const Symbolic<Rational>& num1, const Symbolic<Rational>& num2);
 
 Symbolic<Complex> evalf(const Symbolic<Complex>& num);
 Symbolic<Complex> evalf(const Symbolic<Complex>& num, const Symbolic<Complex>& prec);
@@ -275,6 +291,8 @@ Symbolic<Complex> acsch(const Symbolic<Complex>& num);
 Symbolic<Complex> exp(const Symbolic<Complex>& num);
 Symbolic<Complex> sqrt(const Symbolic<Complex>& num);
 Symbolic<Complex> ln(const Symbolic<Complex>& num);
+Symbolic<Complex> min(const Symbolic<Complex>& num1, const Symbolic<Complex>& num2);
+Symbolic<Complex> max(const Symbolic<Complex>& num1, const Symbolic<Complex>& num2);
 
 template<>
 Parser<yutovo_calculator::Integer>::Parser(const int precision, const Language _language) : 
@@ -300,6 +318,11 @@ Parser<yutovo_calculator::Integer>::Parser(const int precision, const Language _
 
     IntegerUnaryFunc unary_func = &abs;
     solver.AddBuiltinFunction(U"abs", unary_func);
+
+    binary_func = &min;
+    solver.AddBuiltinFunction(U"min", binary_func);
+    binary_func = &max;
+    solver.AddBuiltinFunction(U"max", binary_func);
 }
 
 template<>
@@ -426,6 +449,10 @@ Parser<yutovo_calculator::Real>::Parser(const int precision, const Language _lan
     solver.AddBuiltinFunction(U"log", binary_func);
     binary_func = &root;
     solver.AddBuiltinFunction(U"root", binary_func);
+    binary_func = &min;
+    solver.AddBuiltinFunction(U"min", binary_func);
+    binary_func = &max;
+    solver.AddBuiltinFunction(U"max", binary_func);
 
     InitUnits();
     InitPhisicalConstants();
@@ -444,6 +471,11 @@ Parser<yutovo_calculator::Rational>::Parser(const int precision, const Language 
 
     RationalUnaryFunc unary_func = &abs;
     solver.AddBuiltinFunction(U"abs", unary_func);
+
+    binary_func = &min;
+    solver.AddBuiltinFunction(U"min", binary_func);
+    binary_func = &max;
+    solver.AddBuiltinFunction(U"max", binary_func);
 
     InitUnits();
 }
@@ -550,6 +582,10 @@ Parser<yutovo_calculator::Complex>::Parser(const int precision, const Language _
     solver.AddBuiltinFunction(U"log", binary_func);
     binary_func = &root;
     solver.AddBuiltinFunction(U"root", binary_func);
+    binary_func = &min;
+    solver.AddBuiltinFunction(U"min", binary_func);
+    binary_func = &max;
+    solver.AddBuiltinFunction(U"max", binary_func);
 
     switch (language)
     {
@@ -613,6 +649,10 @@ Parser<yutovo_calculator::Array<yutovo_calculator::Real>>::Parser(const int prec
 
     unary_func = &size;
     solver.AddBuiltinFunction(U"size", unary_func);
+    unary_func = &min;
+    solver.AddBuiltinFunction(U"min", unary_func);
+    unary_func = &max;
+    solver.AddBuiltinFunction(U"max", unary_func);
 
     ArrayRealTrigonometricFunc trigonometric_func;
     trigonometric_func = &sin;
@@ -762,6 +802,10 @@ Parser<yutovo_calculator::Symbolic<yutovo_calculator::Real>>::Parser(const int p
     solver.AddBuiltinFunction(U"log", binary_func);
     binary_func = &root;
     solver.AddBuiltinFunction(U"root", binary_func);
+    binary_func = &min;
+    solver.AddBuiltinFunction(U"min", binary_func);
+    binary_func = &max;
+    solver.AddBuiltinFunction(U"max", binary_func);
 
     SymbolicTernaryFunc ternary_func;
     ternary_func = &subs;
@@ -915,6 +959,10 @@ Parser<yutovo_calculator::Symbolic<yutovo_calculator::Rational>>::Parser(const i
     solver.AddBuiltinFunction(U"log", binary_func);
     binary_func = &root;
     solver.AddBuiltinFunction(U"root", binary_func);
+    binary_func = &min;
+    solver.AddBuiltinFunction(U"min", binary_func);
+    binary_func = &max;
+    solver.AddBuiltinFunction(U"max", binary_func);
 
     SymbolicRationalTernaryFunc ternary_func;
     ternary_func = &subs;
@@ -1021,6 +1069,10 @@ Parser<yutovo_calculator::Symbolic<yutovo_calculator::Complex>>::Parser(const in
     solver.AddBuiltinFunction(U"log", binary_func);
     binary_func = &root;
     solver.AddBuiltinFunction(U"root", binary_func);
+    binary_func = &min;
+    solver.AddBuiltinFunction(U"min", binary_func);
+    binary_func = &max;
+    solver.AddBuiltinFunction(U"max", binary_func);
 
     SymbolicComplexTernaryFunc ternary_func;
     ternary_func = &subs;

@@ -114,6 +114,10 @@ public:
 
     friend Integer abs(const Integer& num);
 
+    friend Integer min(const Integer& num1, const Integer& num2);
+
+    friend Integer max(const Integer& num1, const Integer& num2);
+
     friend Integer fact(const Integer& num, ParserContext* parser_context);
 
     friend Integer reminder(const Integer& num1, const Integer& num2);

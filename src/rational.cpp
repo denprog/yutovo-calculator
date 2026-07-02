@@ -583,6 +583,16 @@ Rational abs(const Rational &num)
     return num;
 }
 
+Rational min(const Rational& num1, const Rational& num2)
+{
+    return num1 < num2 ? num1 : num2;
+}
+
+Rational max(const Rational& num1, const Rational& num2)
+{
+    return num1 > num2 ? num1 : num2;
+}
+
 Integer Rational::GetNumerator() const
 {
     Integer numerator;

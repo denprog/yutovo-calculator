@@ -1454,4 +1454,31 @@ TEST_F(CalcTestSymbolicRational, gamma_tojson)
         R"r({"type":46,"elements":[{"type":7,"elements":[{"type":8,"elements":"gamma"},{"type":19,"symbol":"("},{"type":8,"elements":"x"},{"type":20,"symbol":")"}]}]})r" ) << res.ToJson(10);
 }
 
+TEST_F(CalcTestSymbolicRational, min_max1)
+{
+    Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"min(x,y);");
+    ASSERT_TRUE(res.ToStdString(0) == "min(x,y)") << res.ToStdString(0);
+
+    res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"max(x,y);");
+    ASSERT_TRUE(res.ToStdString(0) == "max(x,y)") << res.ToStdString(0);
+
+    res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"min(1/2,1/3);");
+    ASSERT_TRUE(res.ToStdString(0) == "1/3") << res.ToStdString(0);
+
+    res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"max(1/2,1/3);");
+    ASSERT_TRUE(res.ToStdString(0) == "1/2") << res.ToStdString(0);
+}
+
+TEST_F(CalcTestSymbolicRational, min_max2)
+{
+    parser.Parse(LogicalId{0, 0, 1}, U"a=5;");
+    parser.Parse(LogicalId{0, 0, 2}, U"b=3;");
+
+    Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 3}, U"min(a,b);");
+    ASSERT_TRUE(res.ToStdString(0) == "3") << res.ToStdString(0);
+
+    res = parser.Parse(LogicalId{0, 0, 4}, U"max(a,b);");
+    ASSERT_TRUE(res.ToStdString(0) == "5") << res.ToStdString(0);
+}
+
 }

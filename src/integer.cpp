@@ -496,6 +496,16 @@ Integer abs(const Integer& num)
     return res;
 }
 
+Integer min(const Integer& num1, const Integer& num2)
+{
+    return num1 < num2 ? num1 : num2;
+}
+
+Integer max(const Integer& num1, const Integer& num2)
+{
+    return num1 > num2 ? num1 : num2;
+}
+
 Integer fact(const Integer& num, ParserContext* parser_context)
 {
     CheckBreak(parser_context);

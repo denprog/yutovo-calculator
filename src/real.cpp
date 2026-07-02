@@ -1288,6 +1288,16 @@ Real abs(const Real& num)
     return res;
 }
 
+Real min(const Real& num1, const Real& num2)
+{
+    return num1 < num2 ? num1 : num2;
+}
+
+Real max(const Real& num1, const Real& num2)
+{
+    return num1 > num2 ? num1 : num2;
+}
+
 Real floor(const Real& num)
 {
     Real res(num.GetBitPrecision(), num.angle_measure);

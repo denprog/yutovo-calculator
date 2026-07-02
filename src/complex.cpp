@@ -658,6 +658,18 @@ Complex abs(const Complex& num)
     return res;
 }
 
+Complex min(const Complex& num1, const Complex& num2, int& res_pos)
+{
+    (void)res_pos;
+    return num1 < num2 ? num1 : num2;
+}
+
+Complex max(const Complex& num1, const Complex& num2, int& res_pos)
+{
+    (void)res_pos;
+    return num1 > num2 ? num1 : num2;
+}
+
 Complex mod(const Complex& num)
 {
     Complex res(module(num));

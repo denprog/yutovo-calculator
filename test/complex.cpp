@@ -1074,4 +1074,20 @@ TEST_F(CalcTestComplex, fact2)
     EXPECT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"1000000!;", &parser_context),
         yutovo_calculator::TimeExceedException);
 }
+
+TEST_F(CalcTestComplex, min_max1)
+{
+    Complex res = parser.Parse(LogicalId{0, 0, 1}, U"min(1,2);");
+    ASSERT_TRUE(res.ToStdString(3, 3) == "1.E+0") << res.ToStdString(3, 3);
+
+    res = parser.Parse(LogicalId{0, 0, 1}, U"max(1,2);");
+    ASSERT_TRUE(res.ToStdString(3, 3) == "2.E+0") << res.ToStdString(3, 3);
+
+    res = parser.Parse(LogicalId{0, 0, 1}, U"min(1+2i,3+4i);");
+    ASSERT_TRUE(res.ToStdString(3, 3) == "1.E+0+i*2.E+0") << res.ToStdString(3, 3);
+
+    res = parser.Parse(LogicalId{0, 0, 1}, U"max(1+2i,3+4i);");
+    ASSERT_TRUE(res.ToStdString(3, 3) == "3.E+0+i*4.E+0") << res.ToStdString(3, 3);
+}
+
 }

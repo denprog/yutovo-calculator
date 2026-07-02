@@ -1618,4 +1618,31 @@ TEST_F(CalcTestSymbolicComplex, gamma_tojson)
         R"r({"type":47,"elements":[{"type":7,"elements":[{"type":8,"elements":"gamma"},{"type":19,"symbol":"("},{"type":8,"elements":"x"},{"type":20,"symbol":")"}]}]})r" ) << res.ToJson(10);
 }
 
+TEST_F(CalcTestSymbolicComplex, min_max1)
+{
+    Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"min(x,y);");
+    ASSERT_TRUE(res.ToStdString(10) == "min(x,y)") << res.ToStdString(10);
+
+    res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"max(x,y);");
+    ASSERT_TRUE(res.ToStdString(10) == "max(x,y)") << res.ToStdString(10);
+
+    res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"min(1,2);");
+    ASSERT_TRUE(res.ToStdString(10) == "1") << res.ToStdString(10);
+
+    res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"max(1,2);");
+    ASSERT_TRUE(res.ToStdString(10) == "2") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicComplex, min_max2)
+{
+    parser.Parse(LogicalId{0, 0, 1}, U"a=5;");
+    parser.Parse(LogicalId{0, 0, 2}, U"b=3;");
+
+    Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 3}, U"min(a,b);");
+    ASSERT_TRUE(res.ToStdString(10) == "3") << res.ToStdString(10);
+
+    res = parser.Parse(LogicalId{0, 0, 4}, U"max(a,b);");
+    ASSERT_TRUE(res.ToStdString(10) == "5") << res.ToStdString(10);
+}
+
 }

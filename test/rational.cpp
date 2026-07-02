@@ -851,4 +851,19 @@ TEST_F(CalcTestRational, pow_int)
     ASSERT_TRUE(res.ToStdString() == "1/8") << res.ToStdString();
 }
 
+TEST_F(CalcTestRational, min_max1)
+{
+    auto res = parser.Parse(LogicalId{0, 0, 1}, U"min(1/2,1/3);", 3);
+    ASSERT_TRUE(res.ToStdString() == "1/3") << res.ToStdString();
+
+    res = parser.Parse(LogicalId{0, 0, 1}, U"max(1/2,1/3);", 3);
+    ASSERT_TRUE(res.ToStdString() == "1/2") << res.ToStdString();
+
+    res = parser.Parse(LogicalId{0, 0, 1}, U"min(-3/2,-1/2);", 3);
+    ASSERT_TRUE(res.ToStdString() == "-3/2") << res.ToStdString();
+
+    res = parser.Parse(LogicalId{0, 0, 1}, U"max(-3/2,-1/2);", 3);
+    ASSERT_TRUE(res.ToStdString() == "-1/2") << res.ToStdString();
+}
+
 }

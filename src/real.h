@@ -208,6 +208,10 @@ public:
 
     friend Real abs(const Real& num);
 
+    friend Real min(const Real& num1, const Real& num2);
+
+    friend Real max(const Real& num1, const Real& num2);
+
     friend Real floor(const Real& num);
 
     friend Real trunc(const Real& num);
