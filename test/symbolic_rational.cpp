@@ -1251,6 +1251,55 @@ TEST_F(CalcTestSymbolicRational, hyperbolic_alias)
     ASSERT_TRUE(res.ToStdString(0) == "log(1+sqrt(2))") << res.ToStdString(0);
 }
 
+TEST_F(CalcTestSymbolicRational, hyperbolic_inverse_synonyms)
+{
+    Symbolic<Rational> a = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"asinh(0);");
+    Symbolic<Rational> b = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"arsinh(0);");
+    Symbolic<Rational> c = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"arcsinh(0);");
+    ASSERT_TRUE(a.ToStdString(0) == "0") << a.ToStdString(0);
+    ASSERT_TRUE(b.ToStdString(0) == "0") << b.ToStdString(0);
+    ASSERT_TRUE(c.ToStdString(0) == "0") << c.ToStdString(0);
+
+    a = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"acosh(1);");
+    b = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"arcosh(1);");
+    c = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"arccosh(1);");
+    ASSERT_TRUE(a.ToStdString(0) == "0") << a.ToStdString(0);
+    ASSERT_TRUE(b.ToStdString(0) == "0") << b.ToStdString(0);
+    ASSERT_TRUE(c.ToStdString(0) == "0") << c.ToStdString(0);
+
+    a = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"atanh(0);");
+    b = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"artanh(0);");
+    c = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"arctanh(0);");
+    ASSERT_TRUE(a.ToStdString(0) == "0") << a.ToStdString(0);
+    ASSERT_TRUE(b.ToStdString(0) == "0") << b.ToStdString(0);
+    ASSERT_TRUE(c.ToStdString(0) == "0") << c.ToStdString(0);
+
+    a = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"acoth(1);");
+    b = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"arcoth(1);");
+    c = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"arccoth(1);");
+    ASSERT_TRUE(a.ToStdString(10) == "acoth(1)") << a.ToStdString(10);
+    ASSERT_TRUE(b.ToStdString(10) == "acoth(1)") << b.ToStdString(10);
+    ASSERT_TRUE(c.ToStdString(10) == "acoth(1)") << c.ToStdString(10);
+
+    a = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"asech(1);");
+    b = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"arsech(1);");
+    c = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"arcsech(1);");
+    ASSERT_TRUE(a.ToStdString(0) == "0") << a.ToStdString(0);
+    ASSERT_TRUE(b.ToStdString(0) == "0") << b.ToStdString(0);
+    ASSERT_TRUE(c.ToStdString(0) == "0") << c.ToStdString(0);
+
+    a = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"acsch(0);");
+    b = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"arcsch(0);");
+    c = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"arccsch(0);");
+    Symbolic<Rational> d = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"arcosech(0);");
+    Symbolic<Rational> e = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"arccosech(0);");
+    ASSERT_TRUE(a.ToStdString(10) == "acsch(0)") << a.ToStdString(10);
+    ASSERT_TRUE(b.ToStdString(10) == "acsch(0)") << b.ToStdString(10);
+    ASSERT_TRUE(c.ToStdString(10) == "acsch(0)") << c.ToStdString(10);
+    ASSERT_TRUE(d.ToStdString(10) == "acsch(0)") << d.ToStdString(10);
+    ASSERT_TRUE(e.ToStdString(10) == "acsch(0)") << e.ToStdString(10);
+}
+
 TEST_F(CalcTestSymbolicRational, hyperbolic_acosh_nan)
 {
     Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"arcosh(nan);");

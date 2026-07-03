@@ -42,6 +42,7 @@ try {
 - `factor()` and `integrate()` throw `NotImplemented = 302` (not available in SymEngine 0.14.0).
 - `sqrt(x)` is implemented for all symbolic types via `root(x, 2)` (i.e. `pow(x, 1/2)`). Friend function added in `symbolic.h`; registered in `Parser<Symbolic<...>>` constructors in `parser.cpp`.
 - `cot(x)`, `sec(x)`, `csc(x)` are implemented for all symbolic types via SymEngine functions. Friend functions added in `symbolic.h`; registered in `Parser<Symbolic<...>>` constructors in `parser.cpp`.
+- Inverse hyperbolic functions (`asinh`, `acosh`, `atanh`, `acoth`, `asech`, `acsch`) and their `arc...`/`ars...` synonyms are registered for all symbolic parsers in `parser.cpp`; existing `arsinh`/`arcosh`/`artanh`/`arcoth`/`arsech`/`arcsch`/`arcosech` aliases are preserved.
 - `HAVE_SYMENGINE_MPFR` is commented out in `symengine_config.h`; `evalf` falls back to 53-bit double.
 - SymEngine headers are located at `../yutovo/deploy/include/symengine/`.
 - `fact(x)` (postfix `!`) is implemented for all symbolic types as a product `1*2*...*n` for non-negative integer arguments; returns `factorial(x)` for symbolic/non-integer arguments (no longer uses `SymEngine::gamma`). Friend function added in `symbolic.h`; `PostfixOperationNode` specializations added in `solver.cpp`; grammar updated in `expression.cpp` to allow `identifier!`.
@@ -183,8 +184,10 @@ Running the full `yutovo-editor_tests` suite takes approximately **25 minutes** 
 
 - `yutovo-calculator/test/symbolic.cpp` — added `variables_rational`, `variables_complex`, `user_functions_rational`, `user_functions_complex` tests
 - `yutovo-calculator/src/symbolic.cpp` — fixed `ReplacePowerOperator` to correctly handle parenthesized exponents (e.g. `x**(-1)` → `pow(x,-1)`)
+- `yutovo-calculator/src/parser.cpp` — registered `asinh`/`acosh`/`atanh`/`acoth`/`asech`/`acsch` and `arcsinh`/`arccosh`/`arctanh`/`arccoth`/`arcsech`/`arccsch`/`arccosech` synonyms for symbolic parsers
+- `yutovo-calculator/test/symbolic_real.cpp`, `symbolic_rational.cpp`, `symbolic_complex.cpp` — added `hyperbolic_inverse_synonyms` tests
 - `yutovo-editor/src/formulas/result.cpp` — `SymbolicResult::AddSymbolicElements` now parses `pow(base,exp)` into `Power` formula elements
 - `yutovo-editor/src/formulas/power.h` — added `GetBaseRow()` and `GetExponentRow()` public helpers
 
 ## Next Steps / Blockers
-- All new tests pass. Calculator: 498 tests, Editor: 16 symbolic tests (9 direct + 7 auto fallback).
+- All new tests pass. Calculator: 501 tests, Editor: 16 symbolic tests (9 direct + 7 auto fallback).
