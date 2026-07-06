@@ -483,6 +483,18 @@ TEST_F(CalcTestSymbolicReal, simplify6)
     ASSERT_TRUE(res.ToString(10) == U"-1.+x") << res.ToStdString(10);
 }
 
+TEST_F(CalcTestSymbolicReal, simplify7)
+{
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"pow(var,2)*pow(var,4);");
+    ASSERT_TRUE(res.ToString(10) == U"pow(var,6.)") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicReal, simplify8)
+{
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"(pow(var,5))/(pow(var,2));");
+    ASSERT_TRUE(res.ToString(10) == U"pow(var,3.)") << res.ToStdString(10);
+}
+
 TEST_F(CalcTestSymbolicReal, power_mul_base1)
 {
     Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"pow(x*y, z);");

@@ -86,8 +86,36 @@ namespace detail
             return false;
         }
     }
-}
 
+    inline bool IsPower(const giac::gen& g, giac::gen& base, giac::gen& exp)
+    {
+        if (g.type == giac::_SYMB && g._SYMBptr->sommet == giac::at_pow)
+        {
+            const giac::gen& f = g._SYMBptr->feuille;
+            if (f.type == giac::_VECT && f._VECTptr->size() == 2)
+            {
+                base = (*f._VECTptr)[0];
+                exp = (*f._VECTptr)[1];
+                return true;
+            }
+        }
+        return false;
+    }
+
+    inline giac::gen SimplifyPowerDivision(const giac::gen& n, const giac::gen& d, giac::context* ctx)
+    {
+        giac::gen n_base, n_exp, d_base, d_exp;
+        bool n_is_pow = IsPower(n, n_base, n_exp);
+        bool d_is_pow = IsPower(d, d_base, d_exp);
+        if (n_is_pow && d_is_pow && n_base == d_base)
+            return giac::pow(n_base, n_exp - d_exp, ctx);
+        if (n_is_pow && !d_is_pow && n_base == d)
+            return giac::pow(n_base, n_exp - giac::gen(1), ctx);
+        if (!n_is_pow && d_is_pow && d_base == n)
+            return giac::pow(d_base, giac::gen(1) - d_exp, ctx);
+        return n / d;
+    }
+}
 #endif
 
 #ifndef EMSCRIPTEN
@@ -239,7 +267,7 @@ public:
     friend Symbolic<Number> operator/(const Symbolic<Number>& num1, const Symbolic<Number>& num2)
     {
         Symbolic<Number> res(num1.precision);
-        *res.expr = *num1.expr / *num2.expr;
+        *res.expr = detail::SimplifyPowerDivision(*num1.expr, *num2.expr, &res.context);
         return res;
     }
 
@@ -269,7 +297,7 @@ public:
 
     void operator/=(const Symbolic<Number>& num)
     {
-        *expr = *expr / *num.expr;
+        *expr = detail::SimplifyPowerDivision(*expr, *num.expr, &context);
     }
 
     void operator^=(const Symbolic<Number>& num)
