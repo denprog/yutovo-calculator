@@ -824,10 +824,10 @@ Parser<yutovo_calculator::Symbolic<yutovo_calculator::Real>>::Parser(const int p
     ternary_func = &subs;
     solver.AddBuiltinFunction(U"subs", ternary_func);
 
-    solver.AddBuiltinIdentifier(U"inf", Symbolic<Real>(precision, "oo"));
-    solver.AddBuiltinIdentifier(U"infinity", Symbolic<Real>(precision, "oo"));
-    solver.AddBuiltinIdentifier(std::u32string(1, 0x221E).c_str(), Symbolic<Real>(precision, "oo"));
-    solver.AddBuiltinIdentifier(U"nan", Symbolic<Real>(precision, "nan"));
+    solver.AddBuiltinIdentifier(U"inf", Symbolic<Real>(precision, "+infinity"));
+    solver.AddBuiltinIdentifier(U"infinity", Symbolic<Real>(precision, "+infinity"));
+    solver.AddBuiltinIdentifier(std::u32string(1, 0x221E).c_str(), Symbolic<Real>(precision, "+infinity"));
+    solver.AddBuiltinIdentifier(U"nan", Symbolic<Real>(precision, "undef"));
 
     switch (language)
     {
@@ -994,10 +994,10 @@ Parser<yutovo_calculator::Symbolic<yutovo_calculator::Rational>>::Parser(const i
     ternary_func = &subs;
     solver.AddBuiltinFunction(U"subs", ternary_func);
 
-    solver.AddBuiltinIdentifier(U"inf", Symbolic<Rational>(precision, "oo"));
-    solver.AddBuiltinIdentifier(U"infinity", Symbolic<Rational>(precision, "oo"));
-    solver.AddBuiltinIdentifier(std::u32string(1, 0x221E).c_str(), Symbolic<Rational>(precision, "oo"));
-    solver.AddBuiltinIdentifier(U"nan", Symbolic<Rational>(precision, "nan"));
+    solver.AddBuiltinIdentifier(U"inf", Symbolic<Rational>(precision, "+infinity"));
+    solver.AddBuiltinIdentifier(U"infinity", Symbolic<Rational>(precision, "+infinity"));
+    solver.AddBuiltinIdentifier(std::u32string(1, 0x221E).c_str(), Symbolic<Rational>(precision, "+infinity"));
+    solver.AddBuiltinIdentifier(U"nan", Symbolic<Rational>(precision, "undef"));
 
     switch (language)
     {
@@ -1117,10 +1117,10 @@ Parser<yutovo_calculator::Symbolic<yutovo_calculator::Complex>>::Parser(const in
     ternary_func = &subs;
     solver.AddBuiltinFunction(U"subs", ternary_func);
 
-    solver.AddBuiltinIdentifier(U"inf", Symbolic<Complex>(precision, "oo"));
-    solver.AddBuiltinIdentifier(U"infinity", Symbolic<Complex>(precision, "oo"));
-    solver.AddBuiltinIdentifier(std::u32string(1, 0x221E).c_str(), Symbolic<Complex>(precision, "oo"));
-    solver.AddBuiltinIdentifier(U"nan", Symbolic<Complex>(precision, "nan"));
+    solver.AddBuiltinIdentifier(U"inf", Symbolic<Complex>(precision, "+infinity"));
+    solver.AddBuiltinIdentifier(U"infinity", Symbolic<Complex>(precision, "+infinity"));
+    solver.AddBuiltinIdentifier(std::u32string(1, 0x221E).c_str(), Symbolic<Complex>(precision, "+infinity"));
+    solver.AddBuiltinIdentifier(U"nan", Symbolic<Complex>(precision, "undef"));
 
     switch (language)
     {

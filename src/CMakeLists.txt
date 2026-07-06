@@ -23,7 +23,17 @@ if(EMSCRIPTEN)
     set(CMAKE_FIND_ROOT_PATH ${INSTALL_PATH}/wasm/cmake/)
 else()
     find_package(Boost 1.83.0 REQUIRED)
-    find_package(SymEngine 0.14.0 PATHS ${INSTALL_PATH}/lib/cmake/)
+    find_library(GIAC_LIBRARY NAMES giac PATHS ${INSTALL_PATH}/lib NO_DEFAULT_PATH)
+    find_path(GIAC_INCLUDE_DIR NAMES giac/giac.h PATHS ${INSTALL_PATH}/include NO_DEFAULT_PATH)
+    if (NOT GIAC_LIBRARY OR NOT GIAC_INCLUDE_DIR)
+        message(FATAL_ERROR "giac library not found in ${INSTALL_PATH}. Run ./build_giac.sh first.")
+    endif()
+    message(STATUS "Found giac: ${GIAC_LIBRARY}")
+    add_library(giac_imported STATIC IMPORTED)
+    set_target_properties(giac_imported PROPERTIES
+        IMPORTED_LOCATION ${GIAC_LIBRARY}
+        INTERFACE_INCLUDE_DIRECTORIES ${GIAC_INCLUDE_DIR}
+    )
     if (CMAKE_BUILD_TYPE STREQUAL "Debug")
         if (NOT WIN32)
             if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
@@ -57,7 +67,7 @@ endif()
 
 set(CMAKE_DEBUG_POSTFIX d)
 
-add_library(${PROJECT_NAME}
+set(CALCULATOR_SOURCES
     parser.cpp
     expression.cpp
     integer.cpp
@@ -65,13 +75,12 @@ add_library(${PROJECT_NAME}
     rational.cpp
     real.cpp
     complex.cpp
-    symbolic.cpp
     script.cpp
     solver.cpp
     utils.cpp
     unit.cpp
     export.cpp
- 
+
     stdafx.h
     utils.h
     script.h
@@ -96,6 +105,12 @@ add_library(${PROJECT_NAME}
     graph.h
 )
 
+if(NOT EMSCRIPTEN)
+    list(APPEND CALCULATOR_SOURCES symbolic.cpp)
+endif()
+
+add_library(${PROJECT_NAME} ${CALCULATOR_SOURCES})
+
 if(WIN32)
     set_source_files_properties(solver.cpp PROPERTIES COMPILE_FLAGS "/Zc:inline-")
 endif()
@@ -105,7 +120,6 @@ if(EMSCRIPTEN)
         stdc++
         ${INSTALL_PATH}/wasm/libmpfr.a
         ${INSTALL_PATH}/wasm/libgmp.a
-        ${INSTALL_PATH}/wasm/libsymengine.a
     )
     target_link_options(${PROJECT_NAME} PUBLIC "-fexceptions -s DISABLE_EXCEPTION_THROWING=0")
     target_compile_options(${PROJECT_NAME} PUBLIC -Wno-overloaded-shift-op-parentheses)
@@ -117,14 +131,40 @@ else()
             stdc++
             PkgConfig::mpfr
             PkgConfig::gmp
-            ${SYMENGINE_LIBRARIES}
+            giac_imported
+            pthread
         )
     endif()
 endif()
 
 target_include_directories(${PROJECT_NAME} PUBLIC
 	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
-    ${INSTALL_PATH}/include
+)
+
+if(NOT EMSCRIPTEN)
+    target_include_directories(${PROJECT_NAME} PUBLIC
+        $<BUILD_INTERFACE:${GIAC_INCLUDE_DIR}>
+    )
+endif()
+
+target_include_directories(${PROJECT_NAME} PRIVATE
+    # ${INSTALL_PATH}/include
+    # ${GIAC_INCLUDE_DIR}
+)
+
+target_compile_definitions(${PROJECT_NAME} PUBLIC
+    $<$<NOT:$<BOOL:${EMSCRIPTEN}>>:HAVE_NO_HOME_DIRECTORY>
+    $<$<NOT:$<BOOL:${EMSCRIPTEN}>>:GIAC_GGB>
+    $<$<NOT:$<BOOL:${EMSCRIPTEN}>>:IN_GIAC>
+    $<$<NOT:$<BOOL:${EMSCRIPTEN}>>:HAVE_LIB_PTHREAD>
+    $<$<NOT:$<BOOL:${EMSCRIPTEN}>>:GIAC_GENERIC_CONSTANTS>
+    $<$<NOT:$<BOOL:${EMSCRIPTEN}>>:TIMEOUT>
+    $<$<NOT:$<BOOL:${EMSCRIPTEN}>>:SIZEOF_VOID_P=8>
+    $<$<NOT:$<BOOL:${EMSCRIPTEN}>>:HAVE_LIBMPFR>
+    $<$<NOT:$<BOOL:${EMSCRIPTEN}>>:HAVE_SYS_TIMES_H>
+    $<$<NOT:$<BOOL:${EMSCRIPTEN}>>:HAVE_UNISTD_H>
+    $<$<NOT:$<BOOL:${EMSCRIPTEN}>>:HAVE_SYS_TIME_H>
+    $<$<NOT:$<BOOL:${EMSCRIPTEN}>>:HAVE_SYSCONF>
 )
 
 target_include_directories(${PROJECT_NAME} PUBLIC
