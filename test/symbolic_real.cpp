@@ -423,12 +423,6 @@ TEST_F(CalcTestSymbolicReal, expand1)
     ASSERT_TRUE(res.ToString(10) == U"1.+2.*x+pow(x,2.)") << res.ToStdString(10);
 }
 
-TEST_F(CalcTestSymbolicReal, simplify1)
-{
-    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"simplify(x + x);");
-    ASSERT_TRUE(res.ToString(10) == U"2.*x") << res.ToStdString(10);
-}
-
 TEST_F(CalcTestSymbolicReal, sin_pi_12)
 {
     Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"simplify(sin(pi/12));");
@@ -443,6 +437,12 @@ TEST_F(CalcTestSymbolicReal, mul_neg_add)
     ASSERT_TRUE(res.ToStdString(10) == "x*(-1.+y)") << res.ToStdString(10);
     std::string json = res.ToJson(10);
     ASSERT_TRUE(json == R"xxx({"type":45,"elements":[{"type":7,"elements":[{"type":12,"symbol":"-"},{"type":8,"elements":"x"},{"type":13,"symbol":"·"},{"type":7,"elements":[{"type":19,"symbol":"("},{"type":7,"elements":[{"type":8,"elements":"1"},{"type":12,"symbol":"-"},{"type":8,"elements":"y"}]},{"type":20,"symbol":")"}]}]}]})xxx") << json;
+}
+
+TEST_F(CalcTestSymbolicReal, simplify1)
+{
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"simplify(x + x);");
+    ASSERT_TRUE(res.ToString(10) == U"2.*x") << res.ToStdString(10);
 }
 
 TEST_F(CalcTestSymbolicReal, simplify2)
@@ -475,6 +475,12 @@ TEST_F(CalcTestSymbolicReal, simplify5)
     std::string json = res.ToJson(10);
     ASSERT_TRUE(json ==
         R"json({"type":45,"elements":[{"type":7,"elements":[{"type":8,"elements":"2"},{"type":13,"symbol":"·"},{"type":15,"elements":[{"type":7,"elements":[{"type":7,"elements":[{"type":19,"symbol":"("},{"type":7,"elements":[{"type":8,"elements":"x"},{"type":11,"symbol":"+"},{"type":8,"elements":"y"}]},{"type":20,"symbol":")"}]}]},{"type":10,"elements":[]},{"type":7,"elements":[{"type":8,"elements":"2"}]}]}]}]})json" ) << json;
+}
+
+TEST_F(CalcTestSymbolicReal, simplify6)
+{
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"simplify(pow(x-1,2)/(x-1));");
+    ASSERT_TRUE(res.ToString(10) == U"-1.+x") << res.ToStdString(10);
 }
 
 TEST_F(CalcTestSymbolicReal, power_mul_base1)

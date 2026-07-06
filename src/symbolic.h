@@ -409,12 +409,20 @@ public:
 
     friend Symbolic<Number> simplify(const Symbolic<Number>& num)
     {
-        if (num.expr && !detail::HasUnknownSymbol(*num.expr))
+        if (num.expr)
         {
             try
             {
-                giac::gen g = giac::_texpand(*num.expr, detail::GetContext(&num.context));
-                g = giac::normal(g, detail::GetContext(&num.context));
+                giac::gen g;
+                if (!detail::HasUnknownSymbol(*num.expr))
+                {
+                    g = giac::_texpand(*num.expr, detail::GetContext(&num.context));
+                    g = giac::normal(g, detail::GetContext(&num.context));
+                }
+                else
+                {
+                    g = giac::factor(*num.expr, false, detail::GetContext(&num.context));
+                }
                 Symbolic<Number> res(num.precision);
                 *res.expr = g;
                 return res;
