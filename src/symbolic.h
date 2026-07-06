@@ -406,8 +406,21 @@ public:
     friend Symbolic<Number> evalf(const Symbolic<Number>& num)
     {
         Symbolic<Number> res(num.precision);
-        giac::decimal_digits(std::max(1, num.precision + 1), &res.context);
-        *res.expr = giac::evalf(*num.expr, 1, &res.context);
+        giac::decimal_digits(std::max(1, num.precision + 10), &res.context);
+        giac::gen g = giac::evalf(*num.expr, 1, &res.context);
+        if (g.type == giac::_REAL || g.type == giac::_DOUBLE_ || g.type == giac::_CPLX)
+        {
+            static const giac::gen threshold(1.7976931348623157e308);
+            giac::gen abs_g = giac::abs(g, &res.context);
+            if (giac::is_greater(abs_g, threshold, &res.context))
+            {
+                if (giac::is_positive(-g, &res.context))
+                    g = giac::minus_inf;
+                else
+                    g = giac::plus_inf;
+            }
+        }
+        *res.expr = g;
         return res;
     }
 

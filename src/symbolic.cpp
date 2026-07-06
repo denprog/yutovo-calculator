@@ -719,6 +719,8 @@ namespace
             return "∞";
         if (n == "undef")
             return "nan";
+        if (n == "pi")
+            return "π";
         return n;
     }
 
@@ -1814,7 +1816,17 @@ namespace
             ReorderFactors(e);
             bool is_arith = IsArithmeticConstantExpr(e);
             if (is_arith)
-                return EvaluateArithmeticExpr(std::move(e), ctx);
+            {
+                Expr r = EvaluateArithmeticExpr(std::move(e), ctx);
+                if (r.kind == Expr::Number && IsNegativeNumberString(r.value))
+                {
+                    negative = !negative;
+                    r.value = r.value.substr(1);
+                }
+                if (negative)
+                    return Expr(Expr::Neg, std::move(r));
+                return r;
+            }
             if (negative)
                 return Expr(Expr::Neg, std::move(e));
             return e;
@@ -2102,7 +2114,7 @@ namespace
 
     // Returns the JSON element for the absolute value of a number.
     // The caller is responsible for emitting a leading minus when the value is negative.
-    std::string JsonNumberRaw(const std::string& value, const FormatCtx& ctx)
+    std::vector<std::string> JsonNumberRaw(const std::string& value, const FormatCtx& ctx)
     {
         if (ctx.mode == FormatCtx::Rational)
         {
@@ -2113,18 +2125,17 @@ namespace
             {
                 std::string num = pos.substr(0, slash);
                 std::string den = pos.substr(slash + 1);
-                return Symbolic<Real>::JsonDivision(
+                return {Symbolic<Real>::JsonDivision(
                     Symbolic<Real>::JsonCodeRow({Symbolic<Real>::JsonCodeString(num)}),
-                    Symbolic<Real>::JsonCodeRow({Symbolic<Real>::JsonCodeString(den)}));
+                    Symbolic<Real>::JsonCodeRow({Symbolic<Real>::JsonCodeString(den)}))};
             }
-            return Symbolic<Real>::JsonCodeString(pos);
+            return {Symbolic<Real>::JsonCodeString(pos)};
         }
 
         std::string formatted = RealNumberStr(value, ctx.precision, ctx.exp);
         if (formatted.find_first_of("eE") != std::string::npos)
         {
-            auto elems = Symbolic<Real>::JsonScientificElements(formatted);
-            return Symbolic<Real>::JsonCodeRow(elems);
+            return Symbolic<Real>::JsonScientificElements(formatted);
         }
         std::string pos = !formatted.empty() && formatted[0] == '-' ? formatted.substr(1) : formatted;
         // strip trailing dot from integers in JSON
@@ -2144,7 +2155,7 @@ namespace
             if (all_digits)
                 pos.pop_back();
         }
-        return Symbolic<Real>::JsonCodeString(pos);
+        return {Symbolic<Real>::JsonCodeString(pos)};
     }
 
     bool IsNegativeNumberValue(const std::string& value)
@@ -2174,15 +2185,19 @@ namespace
         {
         case Expr::Number:
         {
-            std::string raw = JsonNumberRaw(e.value, ctx);
+            auto raw = JsonNumberRaw(e.value, ctx);
             if (IsNegativeNumberValue(e.value))
             {
-                // scientific notation already includes the minus sign in its CodeRow
-                if (raw.size() >= 10 && raw.substr(0, 10) == R"({"type":7,)")
-                    return {raw};
-                return {Symbolic<Real>::JsonMinus(), raw};
+                // scientific notation already includes the minus sign in its elements
+                if (!raw.empty() && raw[0].find(R"({"type":12,)") == 0)
+                    return raw;
+                std::vector<std::string> res;
+                res.reserve(raw.size() + 1);
+                res.push_back(Symbolic<Real>::JsonMinus());
+                res.insert(res.end(), raw.begin(), raw.end());
+                return res;
             }
-            return {raw};
+            return raw;
         }
         case Expr::Ident:
             return {Symbolic<Real>::JsonCodeString(MapSpecialIdent(e.value))};
@@ -2258,6 +2273,9 @@ namespace
                     elem = inner[0];
                 else
                     elem = Symbolic<Real>::JsonCodeRow(inner);
+                //avoid nested CodeRow if the operand already produced one
+                if (elem.size() >= 10 && elem.substr(0, 10) == R"({"type":7,)")
+                    return elem;
                 return Symbolic<Real>::JsonCodeRow({elem});
             };
             return {Symbolic<Real>::JsonDivision(

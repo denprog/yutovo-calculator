@@ -44,7 +44,7 @@ try {
 - `cot(x)`, `sec(x)`, `csc(x)`, `coth(x)`, `sech(x)`, `csch(x)` are rendered as inert functions (`yut_cot`, etc.) so that poles map to `∞` instead of being simplified away.
 - Inverse hyperbolic functions (`asinh`, `acosh`, `atanh`, `acoth`, `asech`, `acsch`) and their `arc...`/`ars...` synonyms are registered for all symbolic parsers. Inert wrappers preserve names; singularities such as `acoth(1)` and `acsch(0)` evaluate to `∞` for Real/Complex and remain symbolic for Rational.
 - `fact(x)` (postfix `!`) is implemented for all symbolic types as a product `1*2*...*n` for non-negative integer arguments; returns `factorial(x)` for symbolic/non-integer arguments.
-- `Symbolic<Number>::ToJson()` builds an AST from the giac-printed string and emits JSON using yutovo-editor element type codes (7=CODE_ROW, 8=CODE_STRING, 10=SHAPE, 11=PLUS, 12=MINUS, 13=MULTIPLY, 14=DIVISION, 15=POWER, 16=SQUARE_ROOT, 17=NTH_ROOT, 45-47=SYMBOLIC_*_RESULT).
+- `Symbolic<Number>::ToJson()` builds an AST from the giac-printed string and emits JSON using yutovo-editor element type codes (7=CODE_ROW, 8=CODE_STRING, 10=SHAPE, 11=PLUS, 12=MINUS, 13=MULTIPLY, 14=DIVISION, 15=POWER, 16=SQUARE_ROOT, 17=NTH_ROOT, 45-47=SYMBOLIC_*_RESULT). Division operands are wrapped in a single `CODE_ROW`; scientific numbers are emitted as flat elements so they do not add extra nesting inside sums or products.
 - `subs` uses `giac::limit` to detect essential singularities of `exp`, `sin`, `cos`, `sinh`, `cosh` and returns `nan` for Real/Complex (throws for Rational).
 - On Linux `yutovo-calculator` links the **system** MPFR/GMP libraries and a static **giac** library found in `${INSTALL_PATH}/lib`. The Emscripten/wasm build links `${INSTALL_PATH}/wasm/libmpfr.a` and `${INSTALL_PATH}/wasm/libgmp.a`.
 - For Emscripten/wasm builds, `src/symbolic.cpp` is excluded from the library and `src/symbolic.h` provides a preprocessor-guarded header-only stub `Symbolic<T>` that has no giac dependency. The stub exposes the same public API and returns default values or throws `IncorrectOperation` so that the explicit `Symbolic<Real/Rational/Complex>` specializations in `parser.cpp`, `expression.cpp`, `solver.cpp`, and `export.cpp` compile.
@@ -190,5 +190,6 @@ Running the full `yutovo-editor_tests` suite takes approximately **25 minutes** 
 - `yutovo-editor/src/formulas/power.h` — added `GetBaseRow()` and `GetExponentRow()` public helpers
 
 ## Next Steps / Blockers
-- All Linux calculator tests pass (1103 tests across Real, Complex, Integer, Rational, Array, etc.).
+- All Linux calculator tests pass (1110 tests across Real, Complex, Integer, Rational, Array, etc.).
+- The three failing `SolverSymbolicTest` editor tests (`solver17`, `solver18`, `solver22`) have been fixed by adjusting calculator JSON output; no editor tests were modified.
 - The Emscripten/wasm symbolic stub is implemented; native behavior is unchanged.

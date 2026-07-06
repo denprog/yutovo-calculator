@@ -361,7 +361,7 @@ TEST_F(CalcTestSymbolicRational, log2)
     Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"log(x,y);");
     ASSERT_TRUE(res.ToStdString(0, Language::Russian) == "ln(y)/ln(x)") << res.ToStdString(0, Language::Russian);
     ASSERT_TRUE(res.ToJson(10, Language::Russian) ==
-        R"r({"type":46,"elements":[{"type":14,"elements":[{"type":7,"elements":[{"type":7,"elements":[{"type":8,"elements":"ln"},{"type":19,"symbol":"("},{"type":8,"elements":"y"},{"type":20,"symbol":")"}]}]},{"type":10,"elements":[]},{"type":7,"elements":[{"type":7,"elements":[{"type":8,"elements":"ln"},{"type":19,"symbol":"("},{"type":8,"elements":"x"},{"type":20,"symbol":")"}]}]}]}]})r" ) << res.ToJson(10, Language::Russian);
+        R"r({"type":46,"elements":[{"type":14,"elements":[{"type":7,"elements":[{"type":8,"elements":"ln"},{"type":19,"symbol":"("},{"type":8,"elements":"y"},{"type":20,"symbol":")"}]},{"type":10,"elements":[]},{"type":7,"elements":[{"type":8,"elements":"ln"},{"type":19,"symbol":"("},{"type":8,"elements":"x"},{"type":20,"symbol":")"}]}]}]})r" ) << res.ToJson(10, Language::Russian);
 }
 
 TEST_F(CalcTestSymbolicRational, root1)
@@ -724,11 +724,11 @@ TEST_F(CalcTestSymbolicRational, log3)
         R"r({"type":46,"elements":[)r"
             R"r({"type":14,"elements":[)r"
                 R"r({"type":7,"elements":[)r"
-                    R"r({"type":7,"elements":[{"type":8,"elements":"log"},{"type":19,"symbol":"("},{"type":8,"elements":"2"},{"type":20,"symbol":")"}]})r"
+                    R"r({"type":8,"elements":"log"},{"type":19,"symbol":"("},{"type":8,"elements":"2"},{"type":20,"symbol":")"})r"
                 R"r(]},)r"
                 R"r({"type":10,"elements":[]},)r"
                 R"r({"type":7,"elements":[)r"
-                    R"r({"type":7,"elements":[{"type":8,"elements":"log"},{"type":19,"symbol":"("},{"type":8,"elements":"8"},{"type":20,"symbol":")"}]})r"
+                    R"r({"type":8,"elements":"log"},{"type":19,"symbol":"("},{"type":8,"elements":"8"},{"type":20,"symbol":")"})r"
                 R"r(]})r"
             R"r(]})r"
         R"r(]})r" ) << json;
@@ -794,7 +794,7 @@ TEST_F(CalcTestSymbolicRational, division_nested1)
     Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"(x+1)/(x-1);");
     ASSERT_TRUE(res.ToStdString(0) == "(1+x)/(-1+x)") << res.ToStdString(0);
     ASSERT_TRUE(res.ToJson(10) ==
-        R"({"type":46,"elements":[{"type":14,"elements":[{"type":7,"elements":[{"type":7,"elements":[{"type":8,"elements":"1"},{"type":11,"symbol":"+"},{"type":8,"elements":"x"}]}]},{"type":10,"elements":[]},{"type":7,"elements":[{"type":7,"elements":[{"type":12,"symbol":"-"},{"type":8,"elements":"1"},{"type":11,"symbol":"+"},{"type":8,"elements":"x"}]}]}]}]})" ) << res.ToJson(10);
+        R"({"type":46,"elements":[{"type":14,"elements":[{"type":7,"elements":[{"type":8,"elements":"1"},{"type":11,"symbol":"+"},{"type":8,"elements":"x"}]},{"type":10,"elements":[]},{"type":7,"elements":[{"type":12,"symbol":"-"},{"type":8,"elements":"1"},{"type":11,"symbol":"+"},{"type":8,"elements":"x"}]}]}]})" ) << res.ToJson(10);
 }
 
 TEST_F(CalcTestSymbolicRational, diff_power5)
@@ -841,7 +841,7 @@ TEST_F(CalcTestSymbolicRational, log_ratio)
     Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"log(2,4);");
     ASSERT_TRUE(res.ToStdString(0) == "log(4)/log(2)") << res.ToStdString(0);
     ASSERT_TRUE(res.ToJson(10) ==
-        R"r({"type":46,"elements":[{"type":14,"elements":[{"type":7,"elements":[{"type":7,"elements":[{"type":8,"elements":"log"},{"type":19,"symbol":"("},{"type":8,"elements":"4"},{"type":20,"symbol":")"}]}]},{"type":10,"elements":[]},{"type":7,"elements":[{"type":7,"elements":[{"type":8,"elements":"log"},{"type":19,"symbol":"("},{"type":8,"elements":"2"},{"type":20,"symbol":")"}]}]}]}]})r" ) << res.ToJson(10);
+        R"r({"type":46,"elements":[{"type":14,"elements":[{"type":7,"elements":[{"type":8,"elements":"log"},{"type":19,"symbol":"("},{"type":8,"elements":"4"},{"type":20,"symbol":")"}]},{"type":10,"elements":[]},{"type":7,"elements":[{"type":8,"elements":"log"},{"type":19,"symbol":"("},{"type":8,"elements":"2"},{"type":20,"symbol":")"}]}]}]})r" ) << res.ToJson(10);
 }
 
 TEST_F(CalcTestSymbolicRational, sqrt_half)
@@ -1311,7 +1311,7 @@ TEST_F(CalcTestSymbolicRational, log_x_base)
     Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"log(x,2);");
     ASSERT_TRUE(res.ToStdString(0) == "log(2)/log(x)") << res.ToStdString(0);
     ASSERT_TRUE(res.ToJson(10) ==
-        R"r({"type":46,"elements":[{"type":14,"elements":[{"type":7,"elements":[{"type":7,"elements":[{"type":8,"elements":"log"},{"type":19,"symbol":"("},{"type":8,"elements":"2"},{"type":20,"symbol":")"}]}]},{"type":10,"elements":[]},{"type":7,"elements":[{"type":7,"elements":[{"type":8,"elements":"log"},{"type":19,"symbol":"("},{"type":8,"elements":"x"},{"type":20,"symbol":")"}]}]}]}]})r" ) << res.ToJson(10);
+        R"r({"type":46,"elements":[{"type":14,"elements":[{"type":7,"elements":[{"type":8,"elements":"log"},{"type":19,"symbol":"("},{"type":8,"elements":"2"},{"type":20,"symbol":")"}]},{"type":10,"elements":[]},{"type":7,"elements":[{"type":8,"elements":"log"},{"type":19,"symbol":"("},{"type":8,"elements":"x"},{"type":20,"symbol":")"}]}]}]})r" ) << res.ToJson(10);
 }
 
 TEST_F(CalcTestSymbolicRational, cot_tojson)
@@ -1365,7 +1365,7 @@ TEST_F(CalcTestSymbolicRational, log_change_of_base_russian)
     Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"log(2,4);");
     ASSERT_TRUE(res.ToStdString(0, Language::Russian) == "ln(4)/ln(2)") << res.ToStdString(0, Language::Russian);
     ASSERT_TRUE(res.ToJson(10, Language::Russian) ==
-        R"r({"type":46,"elements":[{"type":14,"elements":[{"type":7,"elements":[{"type":7,"elements":[{"type":8,"elements":"ln"},{"type":19,"symbol":"("},{"type":8,"elements":"4"},{"type":20,"symbol":")"}]}]},{"type":10,"elements":[]},{"type":7,"elements":[{"type":7,"elements":[{"type":8,"elements":"ln"},{"type":19,"symbol":"("},{"type":8,"elements":"2"},{"type":20,"symbol":")"}]}]}]}]})r" ) << res.ToJson(10, Language::Russian);
+        R"r({"type":46,"elements":[{"type":14,"elements":[{"type":7,"elements":[{"type":8,"elements":"ln"},{"type":19,"symbol":"("},{"type":8,"elements":"4"},{"type":20,"symbol":")"}]},{"type":10,"elements":[]},{"type":7,"elements":[{"type":8,"elements":"ln"},{"type":19,"symbol":"("},{"type":8,"elements":"2"},{"type":20,"symbol":")"}]}]}]})r" ) << res.ToJson(10, Language::Russian);
 }
 
 TEST_F(CalcTestSymbolicRational, sin2)
