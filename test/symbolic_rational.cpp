@@ -1424,7 +1424,7 @@ TEST_F(CalcTestSymbolicRational, exp2)
     ASSERT_TRUE(res.ToStdString(0) == "exp(x)") << res.ToStdString(0);
     std::string json = res.ToJson(10);
     ASSERT_TRUE(json ==
-        R"r({"type":46,"elements":[{"type":15,"elements":[{"type":7,"elements":[{"type":8,"elements":"E"}]},{"type":10,"elements":[]},{"type":7,"elements":[{"type":8,"elements":"x"}]}]}]})r"
+        R"r({"type":46,"elements":[{"type":15,"elements":[{"type":7,"elements":[{"type":8,"elements":"e"}]},{"type":10,"elements":[]},{"type":7,"elements":[{"type":8,"elements":"x"}]}]}]})r"
         ) << json;
 }
 

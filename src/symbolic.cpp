@@ -2209,7 +2209,7 @@ namespace
             if (name == "exp" && e.args.size() == 1)
             {
                 return {Symbolic<Real>::JsonPower(
-                    Symbolic<Real>::JsonCodeRow({Symbolic<Real>::JsonCodeString("E")}),
+                    Symbolic<Real>::JsonCodeRow({Symbolic<Real>::JsonCodeString("e")}),
                     Symbolic<Real>::JsonCodeRow(EmitJson(e.args[0], ctx)))};
             }
             std::vector<std::string> elems;

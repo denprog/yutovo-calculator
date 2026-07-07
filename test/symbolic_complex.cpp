@@ -1588,7 +1588,7 @@ TEST_F(CalcTestSymbolicComplex, exp2)
     ASSERT_TRUE(res.ToStdString(10) == "exp(x)") << res.ToStdString(10);
     std::string json = res.ToJson(10);
     ASSERT_TRUE(json ==
-        R"r({"type":47,"elements":[{"type":15,"elements":[{"type":7,"elements":[{"type":8,"elements":"E"}]},{"type":10,"elements":[]},{"type":7,"elements":[{"type":8,"elements":"x"}]}]}]})r"
+        R"r({"type":47,"elements":[{"type":15,"elements":[{"type":7,"elements":[{"type":8,"elements":"e"}]},{"type":10,"elements":[]},{"type":7,"elements":[{"type":8,"elements":"x"}]}]}]})r"
         ) << json;
 }
 
@@ -1692,6 +1692,17 @@ TEST_F(CalcTestSymbolicComplex, min_max2)
 
     res = parser.Parse(LogicalId{0, 0, 4}, U"max(a,b);");
     ASSERT_TRUE(res.ToStdString(10) == "5") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicComplex, exp_derivative_e_base)
+{
+    Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"diff(pow(e, 2*i*x), x);");
+    std::string text = res.ToStdString(10);
+    std::string json = res.ToJson(10);
+    ASSERT_TRUE(text == "2.*i*exp(2.*i*x)") << text;
+    ASSERT_TRUE(json ==
+        R"r({"type":47,"elements":[{"type":7,"elements":[{"type":8,"elements":"2"},{"type":13,"symbol":"·"},{"type":8,"elements":"i"},{"type":13,"symbol":"·"},{"type":15,"elements":[{"type":7,"elements":[{"type":8,"elements":"e"}]},{"type":10,"elements":[]},{"type":7,"elements":[{"type":8,"elements":"2"},{"type":13,"symbol":"·"},{"type":8,"elements":"i"},{"type":13,"symbol":"·"},{"type":8,"elements":"x"}]}]}]}]})r"
+        ) << json;
 }
 
 }
