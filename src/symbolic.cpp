@@ -826,16 +826,17 @@ namespace
                 name = "log";
             if ((name == "factorial") && e.args.size() == 1)
             {
-                // x! is rendered as gamma(1+x)
+                //x! is rendered as gamma(1+x)
                 std::string arg = EmitString(e.args[0], ctx);
                 return "gamma(1.+" + arg + ")";
             }
-            // in text output, log/ln of a single numeric argument omits parentheses
-            if ((name == "log" || name == "ln") && e.args.size() == 1 &&
-                e.args[0].kind == Expr::Number && ctx.mode != FormatCtx::Rational)
+            //in text output, log/ln of a single numeric argument omits parentheses
+            if ((name == "log" || name == "ln") && e.args.size() == 1 && e.args[0].kind == Expr::Number && ctx.mode != FormatCtx::Rational)
             {
                 return name + EmitString(e.args[0], ctx);
             }
+            if (name == "exp" && e.args.size() == 1 && e.args[0].kind == Expr::Number && IsOne(e.args[0].value))
+                return "e";
             std::string s = name + "(";
             for (size_t i = 0; i < e.args.size(); ++i)
             {
@@ -857,17 +858,18 @@ namespace
         case Expr::Power:
         {
             std::string exp_str = EmitString(e.args[1], ctx);
+            if (e.args[1].kind == Expr::Number && IsOne(e.args[1].value))
+                return EmitString(e.args[0], ctx);
             if (e.args[0].kind == Expr::Func)
             {
                 std::string name = MapFuncName(e.args[0].value);
                 return name + "pow(" + EmitFuncArgs(e.args[0], ctx) + "," + exp_str + ")";
             }
-            // Preserve explicit right-associative chains as pow(base,exp1**exp2).
+            //preserve explicit right-associative chains as pow(base,exp1**exp2)
             if (e.args[1].kind == Expr::Power)
             {
                 const Expr& inner = e.args[1];
-                bool inner_simple =
-                    (inner.args[0].kind == Expr::Ident || inner.args[0].kind == Expr::Number) &&
+                bool inner_simple = (inner.args[0].kind == Expr::Ident || inner.args[0].kind == Expr::Number) &&
                     (inner.args[1].kind == Expr::Ident || inner.args[1].kind == Expr::Number);
                 if (inner_simple)
                 {
@@ -898,8 +900,7 @@ namespace
         case Expr::Neg:
         {
             std::string operand = EmitString(e.args[0], ctx);
-            if (e.args[0].kind == Expr::Sum || e.args[0].kind == Expr::Div ||
-                e.args[0].kind == Expr::Power)
+            if (e.args[0].kind == Expr::Sum || e.args[0].kind == Expr::Div || e.args[0].kind == Expr::Power)
                 operand = "(" + operand + ")";
             return "-" + operand;
         }
@@ -917,13 +918,15 @@ namespace
         }
         case Expr::Product:
         {
-            auto emit_factor = [&](const Expr& f) -> std::string {
-                std::string fs = EmitString(f, ctx);
-                if (f.kind == Expr::Sum || f.kind == Expr::Div || f.kind == Expr::Neg ||
-                    (ctx.mode == FormatCtx::Rational && f.kind == Expr::Number && f.value.find('/') != std::string::npos))
-                    fs = "(" + fs + ")";
-                return fs;
-            };
+            auto emit_factor = 
+                [&](const Expr& f) -> std::string
+                {
+                    std::string fs = EmitString(f, ctx);
+                    if (f.kind == Expr::Sum || f.kind == Expr::Div || f.kind == Expr::Neg ||
+                        (ctx.mode == FormatCtx::Rational && f.kind == Expr::Number && f.value.find('/') != std::string::npos))
+                        fs = "(" + fs + ")";
+                    return fs;
+                };
             std::string s = emit_factor(e.args[0]);
             for (size_t i = 1; i < e.args.size(); ++i)
                 s += "*" + emit_factor(e.args[i]);
@@ -958,7 +961,7 @@ namespace
     {
         if (e.kind == Expr::Product)
         {
-            // ignore numeric/constant coefficients when ordering terms
+            //ignore numeric/constant coefficients when ordering terms
             std::string key;
             for (const auto& f : e.args)
             {
@@ -979,18 +982,19 @@ namespace
 
     int FunctionSortRank(const std::string& text)
     {
-        // Canonical function ordering used by SymEngine for same-degree terms.
-        static const std::vector<std::string> order = {
-            "sin", "cos", "tan", "cot", "sec", "csc",
-            "sinh", "cosh", "tanh", "coth", "sech", "csch",
-            "asin", "acos", "atan", "acot", "asec", "acsc",
-            "asinh", "acosh", "atanh", "acoth", "asech", "acsch"
-        };
+        //canonical function ordering used by SymEngine for same-degree terms
+        static const std::vector<std::string> order = 
+            {
+                "sin", "cos", "tan", "cot", "sec", "csc",
+                "sinh", "cosh", "tanh", "coth", "sech", "csch",
+                "asin", "acos", "atan", "acot", "asec", "acsc",
+                "asinh", "acosh", "atanh", "acoth", "asech", "acsch"
+            };
         std::string name = text;
         size_t paren = name.find('(');
         if (paren != std::string::npos)
             name = name.substr(0, paren);
-        // powers of functions are emitted as sinpow(...), cospow(...)
+        //powers of functions are emitted as sinpow(...), cospow(...)
         if (name.size() > 3 && name.substr(name.size() - 3) == "pow")
             name = name.substr(0, name.size() - 3);
         auto it = std::find(order.begin(), order.end(), name);
@@ -1174,10 +1178,7 @@ namespace
 
     bool IsConstantPower(const Expr& e)
     {
-        return e.kind == Expr::Power &&
-            e.args[0].kind == Expr::Number &&
-            e.args[1].kind == Expr::Number &&
-            IsIntegerString(StripDot(e.args[1].value));
+        return e.kind == Expr::Power && e.args[0].kind == Expr::Number && e.args[1].kind == Expr::Number && IsIntegerString(StripDot(e.args[1].value));
     }
 
     std::string EvaluateConstantPower(const Expr& base, const Expr& exp, const FormatCtx& ctx)
@@ -2208,6 +2209,8 @@ namespace
                 name = "log";
             if (name == "exp" && e.args.size() == 1)
             {
+                if (e.args[0].kind == Expr::Number && IsOne(e.args[0].value))
+                    return {Symbolic<Real>::JsonCodeString("e")};
                 return {Symbolic<Real>::JsonPower(
                     Symbolic<Real>::JsonCodeRow({Symbolic<Real>::JsonCodeString("e")}),
                     Symbolic<Real>::JsonCodeRow(EmitJson(e.args[0], ctx)))};
@@ -2234,9 +2237,10 @@ namespace
         case Expr::Power:
         {
             auto base_elems = EmitJson(e.args[0], ctx);
+            if (e.args[1].kind == Expr::Number && IsOne(e.args[1].value))
+                return base_elems;
             bool base_needs_parens = e.args[0].kind == Expr::Sum || e.args[0].kind == Expr::Product ||
-                                     e.args[0].kind == Expr::Div || e.args[0].kind == Expr::Neg ||
-                                     e.args[0].kind == Expr::Power || e.args[0].kind == Expr::Root;
+                e.args[0].kind == Expr::Div || e.args[0].kind == Expr::Neg || e.args[0].kind == Expr::Power || e.args[0].kind == Expr::Root;
             std::string base_inner;
             if (base_elems.size() == 1 && !IsCodeStringJson(base_elems[0]))
                 base_inner = base_elems[0];
@@ -2245,10 +2249,7 @@ namespace
             std::string base_row;
             if (base_needs_parens)
             {
-                base_row = Symbolic<Real>::JsonCodeRow({
-                    Symbolic<Real>::JsonOpenRoundBracket(),
-                    base_inner,
-                    Symbolic<Real>::JsonCloseRoundBracket()});
+                base_row = Symbolic<Real>::JsonCodeRow({Symbolic<Real>::JsonOpenRoundBracket(), base_inner, Symbolic<Real>::JsonCloseRoundBracket()});
                 if (ctx.in_product)
                     base_row = Symbolic<Real>::JsonCodeRow({base_row});
             }
@@ -2266,21 +2267,21 @@ namespace
         }
         case Expr::Div:
         {
-            auto wrap_operand = [&](const Expr& op) -> std::string {
-                auto inner = EmitJson(op, ctx);
-                std::string elem;
-                if (inner.size() == 1)
-                    elem = inner[0];
-                else
-                    elem = Symbolic<Real>::JsonCodeRow(inner);
-                //avoid nested CodeRow if the operand already produced one
-                if (elem.size() >= 10 && elem.substr(0, 10) == R"({"type":7,)")
-                    return elem;
-                return Symbolic<Real>::JsonCodeRow({elem});
-            };
-            return {Symbolic<Real>::JsonDivision(
-                wrap_operand(e.args[0]),
-                wrap_operand(e.args[1]))};
+            auto wrap_operand = 
+                [&](const Expr& op) -> std::string
+                {
+                    auto inner = EmitJson(op, ctx);
+                    std::string elem;
+                    if (inner.size() == 1)
+                        elem = inner[0];
+                    else
+                        elem = Symbolic<Real>::JsonCodeRow(inner);
+                    //avoid nested CodeRow if the operand already produced one
+                    if (elem.size() >= 10 && elem.substr(0, 10) == R"({"type":7,)")
+                        return elem;
+                    return Symbolic<Real>::JsonCodeRow({elem});
+                };
+            return {Symbolic<Real>::JsonDivision(wrap_operand(e.args[0]), wrap_operand(e.args[1]))};
         }
         case Expr::Neg:
         {
@@ -2316,22 +2317,19 @@ namespace
         {
             FormatCtx product_ctx = ctx;
             product_ctx.in_product = true;
-            auto emit_factor = [&](const Expr& f) -> std::vector<std::string> {
-                auto elems = EmitJson(f, product_ctx);
-                if (f.kind == Expr::Sum)
+            auto emit_factor = 
+                [&](const Expr& f) -> std::vector<std::string>
                 {
-                    std::string row = Symbolic<Real>::JsonCodeRow(elems);
-                    if (!ContainsImaginaryUnit(f))
+                    auto elems = EmitJson(f, product_ctx);
+                    if (f.kind == Expr::Sum)
                     {
-                        return {Symbolic<Real>::JsonCodeRow({
-                            Symbolic<Real>::JsonOpenRoundBracket(),
-                            row,
-                            Symbolic<Real>::JsonCloseRoundBracket()})};
+                        std::string row = Symbolic<Real>::JsonCodeRow(elems);
+                        if (!ContainsImaginaryUnit(f))
+                            return {Symbolic<Real>::JsonCodeRow({Symbolic<Real>::JsonOpenRoundBracket(), row, Symbolic<Real>::JsonCloseRoundBracket()})};
+                        return {row};
                     }
-                    return {row};
-                }
-                return elems;
-            };
+                    return elems;
+                };
             std::vector<std::string> res = emit_factor(e.args[0]);
             for (size_t i = 1; i < e.args.size(); ++i)
             {
@@ -2381,7 +2379,7 @@ namespace detail
         {
             const giac::symbolic& s = *expr._SYMBptr;
             bool ambiguous = (s.sommet == giac::at_exp || s.sommet == giac::at_sin || s.sommet == giac::at_cos ||
-                              s.sommet == giac::at_sinh || s.sommet == giac::at_cosh);
+                s.sommet == giac::at_sinh || s.sommet == giac::at_cosh);
             if (ambiguous)
             {
                 giac::gen lim = giac::limit(s.feuille, var, value, 1, ctx);
@@ -2391,15 +2389,9 @@ namespace detail
             return HasAmbiguousPoleArgument(s.feuille, var, value, ctx);
         }
         if (expr.type == giac::_FRAC)
-        {
-            return HasAmbiguousPoleArgument(expr._FRACptr->num, var, value, ctx) ||
-                   HasAmbiguousPoleArgument(expr._FRACptr->den, var, value, ctx);
-        }
+            return HasAmbiguousPoleArgument(expr._FRACptr->num, var, value, ctx) || HasAmbiguousPoleArgument(expr._FRACptr->den, var, value, ctx);
         if (expr.type == giac::_CPLX)
-        {
-            return HasAmbiguousPoleArgument(expr._CPLXptr[0], var, value, ctx) ||
-                   HasAmbiguousPoleArgument(expr._CPLXptr[1], var, value, ctx);
-        }
+            return HasAmbiguousPoleArgument(expr._CPLXptr[0], var, value, ctx) || HasAmbiguousPoleArgument(expr._CPLXptr[1], var, value, ctx);
         if (expr.type == giac::_VECT)
         {
             const giac::vecteur& v = *expr._VECTptr;
@@ -2435,29 +2427,19 @@ std::string Symbolic<Real>::ToStdString(int exp, Language language) const
             return AddDotIfInteger(RealNumberStr(int_str, precision, exp));
         return int_str;
     }
-    if (!e.is_integer() && e.type != giac::_REAL && e.type != giac::_DOUBLE_ &&
-        !detail::HasUnknownSymbol(e))
-    {
+    if (!e.is_integer() && e.type != giac::_REAL && e.type != giac::_DOUBLE_ && !detail::HasUnknownSymbol(e))
         e = giac::evalf(e, 1, &context);
-    }
     std::string s = e.print(&context);
-    // Yutovo convention: ln(0) is +infinity, not -infinity
-    if ((s == "-inf" || s == "-infinity" || s == "-oo") &&
-        !explicit_negative_infinity)
-    {
+    //convention: ln(0) is +infinity, not -infinity
+    if ((s == "-inf" || s == "-infinity" || s == "-oo") && !explicit_negative_infinity)
         s = "oo";
-    }
-    // real sqrt of -infinity is undefined
+    //real sqrt of -infinity is undefined
     if (expr->type == giac::_SYMB && expr->_SYMBptr->sommet == giac::at_sqrt)
     {
         giac::gen arg = giac::eval(expr->_SYMBptr->feuille, 1, &context);
         std::string arg_str = arg.print(&context);
-        if (arg_str.find("-inf") != std::string::npos ||
-            arg_str.find("-infinity") != std::string::npos ||
-            arg_str.find("-oo") != std::string::npos)
-        {
+        if (arg_str.find("-inf") != std::string::npos || arg_str.find("-infinity") != std::string::npos || arg_str.find("-oo") != std::string::npos)
             s = "nan";
-        }
     }
 
     if (e.is_integer())

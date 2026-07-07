@@ -35,7 +35,7 @@ try {
 ## Current Work: Symbolic Integration
 
 ### yutovo-calculator
-- **Class `Symbolic`** (`src/symbolic.h/cpp`) now wraps `giac::gen` via `std::unique_ptr`. SymEngine has been removed.
+- **Class `Symbolic`** (`src/symbolic.h/cpp`) wraps `giac::gen` via `std::unique_ptr`.
 - `Parser<Symbolic>`, `Solver<Symbolic>`, `Expression<Symbolic>` are specialized for `Symbolic<Real>`, `Symbolic<Rational>`, and `Symbolic<Complex>`.
 - `^` is parsed left-associatively in the generic grammar. Giac flattens `(x^y)^z` to `x^(y*z)`; the formatter reconstructs `pow(pow(x,y),z)` for left-associative chains and prints explicit right-associative chains like `x^(y^z)` as `pow(x,y**z)`.
 - `evalf` returns `Symbolic`; explicit `to_real()` / `to_complex()` perform casting.
@@ -54,7 +54,7 @@ try {
 - `ResultType::SYMBOLIC` added in `types.h`.
 - `CalculatorSolver` has `symbolic_parser` and `SolveSymbolic()`.
 - `AUTO` mode tries `SYMBOLIC` last in `results_order[6]`.
-- On Linux `yutovo-solver` does **not** link GMP/MPFR directly; it inherits them transitively from `yutovo-calculator` / SymEngine.
+- On Linux `yutovo-solver` does **not** link GMP/MPFR directly; it inherits them transitively from `yutovo-calculator` / giac.
 
 ### yutovo-editor
 - `ElementType::SYMBOLIC_RESULT` added.
@@ -65,7 +65,7 @@ try {
 - `ResultTask::Execute` **must** handle `ElementType::SYMBOLIC_RESULT` to deliver the solver response to `SymbolicResult::PutResult`; missing this leaves the waiting symbol (`~`) forever.
 
 ### yutovo-desktop
-- `CMakeLists.txt` needs `find_package(SymEngine REQUIRED)` and `${SYMENGINE_LIBRARIES}` in `target_link_libraries` for Linux, because static libraries (`yutovo-calculator`, `yutovo-solver`) now depend on SymEngine.
+- `src/CMakeLists.txt` locates the static **giac** library with `find_library(GIAC_LIBRARY ...)` and creates an imported `giac_imported` target for Linux, because static libraries (`yutovo-calculator`, `yutovo-solver`) now depend on giac.
 - Same for `test/CMakeLists.txt`.
 - Added "Symbolic" tab in `ResultSettingsForm` (precision setting).
 - Added `Present as → Symbolic` in context menu (`DocumentWindow`).
@@ -174,8 +174,8 @@ Running the full `yutovo-editor_tests` suite takes approximately **25 minutes** 
 - `yutovo-editor/src/formulas/result.cpp` — `SymbolicResult::AddSymbolicElements` parses result string into formula elements
 - `yutovo-editor/test/solver_symbolic.cpp` — rewritten to use proper element insertion and exact HTML checks, including undo assertions; added `solver6` (fraction result), `solver7` (complex result), `solver8` (power result `1/x`), `solver9` (power result `x^-1`)
 - `yutovo-editor/test/solver_auto.cpp` — added 5 AUTO-mode symbolic fallback tests (`symbolic1..symbolic5`) using `ToText()` checks; added `symbolic6` (fraction) and `symbolic7` (complex)
-- `yutovo-desktop/src/CMakeLists.txt` — added `find_package(SymEngine)` and `${SYMENGINE_LIBRARIES}` in `target_link_libraries`
-- `yutovo-desktop/test/CMakeLists.txt` — added `find_package(SymEngine)` and `${SYMENGINE_LIBRARIES}` in `target_link_libraries`
+- `yutovo-desktop/src/CMakeLists.txt` — added `find_library(GIAC_LIBRARY ...)` and imported `giac_imported` target
+- `yutovo-desktop/test/CMakeLists.txt` — added `find_library(GIAC_LIBRARY ...)` and imported `giac_imported` target
 - `yutovo-desktop/src/result_settings_form.ui` / `.cpp` — added "Symbolic" tab with precision
 - `yutovo-desktop/src/document_window.cpp` / `.h` — `Present as → Symbolic` is now a submenu containing checkable items `Real`, `Rational`, `Complex`
 - `yutovo-desktop/src/command_map.cpp` — added `\eq_sym` command
@@ -190,6 +190,6 @@ Running the full `yutovo-editor_tests` suite takes approximately **25 minutes** 
 - `yutovo-editor/src/formulas/power.h` — added `GetBaseRow()` and `GetExponentRow()` public helpers
 
 ## Next Steps / Blockers
-- All Linux calculator tests pass (1110 tests across Real, Complex, Integer, Rational, Array, etc.).
+- All Linux calculator tests pass (1111 tests across Real, Complex, Integer, Rational, Array, etc.).
 - The three failing `SolverSymbolicTest` editor tests (`solver17`, `solver18`, `solver22`) have been fixed by adjusting calculator JSON output; no editor tests were modified.
 - The Emscripten/wasm symbolic stub is implemented; native behavior is unchanged.

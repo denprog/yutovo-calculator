@@ -1705,4 +1705,15 @@ TEST_F(CalcTestSymbolicComplex, exp_derivative_e_base)
         ) << json;
 }
 
+TEST_F(CalcTestSymbolicComplex, e_times_x)
+{
+    Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"e*x;");
+    std::string text = res.ToStdString(10);
+    std::string json = res.ToJson(10);
+    ASSERT_TRUE(text == "e*x") << text;
+    ASSERT_TRUE(json ==
+        R"r({"type":47,"elements":[{"type":7,"elements":[{"type":8,"elements":"e"},{"type":13,"symbol":"·"},{"type":8,"elements":"x"}]}]})r"
+        ) << json;
+}
+
 }
