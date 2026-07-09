@@ -26,13 +26,19 @@ namespace yutovo_calculator
 //Symbolic
 
 template<>
+bool Symbolic<Real>::IsNegativeInfinityNumber(const Real& num)
+{
+    return num.IsInfinity() && num.GetSign();
+}
+
+template<>
 giac::gen Symbolic<Real>::ToExpression(const Real& num) const
 {
     if (!num.unit.IsEmpty())
         throw ParserException({}, ParserExceptionCode::CannotCastToUnit);
 
     std::string s = yutovo_calculator::ToBasicString(num.ToString());
-    return giac::gen(s.c_str(), const_cast<giac::context*>(&context));
+    return yutovo_calculator::detail::ParseGen(s, &context);
 }
 
 template<>
@@ -42,7 +48,7 @@ giac::gen Symbolic<Rational>::ToExpression(const Rational& num) const
         throw ParserException({}, ParserExceptionCode::CannotCastToUnit);
 
     std::string s = yutovo_calculator::ToBasicString(num.ToString());
-    return giac::gen(s.c_str(), const_cast<giac::context*>(&context));
+    return yutovo_calculator::detail::ParseGen(s, &context);
 }
 
 template<>
@@ -57,7 +63,7 @@ giac::gen Symbolic<Complex>::ToExpression(const Complex& num) const
         expr = "(" + re + im + "*i)";
     else
         expr = "(" + re + "+" + im + "*i)";
-    return giac::gen(expr.c_str(), const_cast<giac::context*>(&context));
+    return yutovo_calculator::detail::ParseGen(expr, &context);
 }
 
 namespace

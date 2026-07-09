@@ -20,7 +20,21 @@ elseif(NOT EMSCRIPTEN)
 endif()
 
 if(EMSCRIPTEN)
-    set(CMAKE_FIND_ROOT_PATH ${INSTALL_PATH}/wasm/cmake/)
+    set(Boost_INCLUDE_DIR ${INSTALL_PATH}/wasm)
+    if (NOT EXISTS ${Boost_INCLUDE_DIR})
+        message(FATAL_ERROR "Boost headers not found in ${Boost_INCLUDE_DIR}")
+    endif()
+    set(GIAC_LIBRARY ${INSTALL_PATH}/wasm/libgiac.a)
+    set(GIAC_INCLUDE_DIR ${INSTALL_PATH}/include)
+    if (NOT EXISTS ${GIAC_LIBRARY} OR NOT EXISTS ${GIAC_INCLUDE_DIR}/giac/giac.h)
+        message(FATAL_ERROR "giac library not found in ${INSTALL_PATH}/wasm. Run ./build_giac.sh first.")
+    endif()
+    message(STATUS "Found wasm giac: ${GIAC_LIBRARY}")
+    add_library(giac_imported STATIC IMPORTED)
+    set_target_properties(giac_imported PROPERTIES
+        IMPORTED_LOCATION ${GIAC_LIBRARY}
+        INTERFACE_INCLUDE_DIRECTORIES ${GIAC_INCLUDE_DIR}
+    )
 else()
     find_package(Boost 1.83.0 REQUIRED)
     find_library(GIAC_LIBRARY NAMES giac PATHS ${INSTALL_PATH}/lib NO_DEFAULT_PATH)
@@ -105,9 +119,7 @@ set(CALCULATOR_SOURCES
     graph.h
 )
 
-if(NOT EMSCRIPTEN)
-    list(APPEND CALCULATOR_SOURCES symbolic.cpp)
-endif()
+list(APPEND CALCULATOR_SOURCES symbolic.cpp)
 
 add_library(${PROJECT_NAME} ${CALCULATOR_SOURCES})
 
@@ -116,10 +128,17 @@ if(WIN32)
 endif()
 
 if(EMSCRIPTEN)
+    target_include_directories(${PROJECT_NAME} PUBLIC 
+        ${Boost_INCLUDE_DIR}
+        ${INSTALL_PATH}/include
+        ${INSTALL_PATH}/include/giac
+    )
     target_link_libraries(${PROJECT_NAME} PRIVATE 
         stdc++
+        giac_imported
         ${INSTALL_PATH}/wasm/libmpfr.a
         ${INSTALL_PATH}/wasm/libgmp.a
+        ${INSTALL_PATH}/wasm/libgmpxx.a
     )
     target_link_options(${PROJECT_NAME} PUBLIC "-fexceptions -s DISABLE_EXCEPTION_THROWING=0")
     target_compile_options(${PROJECT_NAME} PUBLIC -Wno-overloaded-shift-op-parentheses)
@@ -153,14 +172,19 @@ target_include_directories(${PROJECT_NAME} PRIVATE
 )
 
 target_compile_definitions(${PROJECT_NAME} PUBLIC
-    $<$<NOT:$<BOOL:${EMSCRIPTEN}>>:HAVE_NO_HOME_DIRECTORY>
-    $<$<NOT:$<BOOL:${EMSCRIPTEN}>>:GIAC_GGB>
-    $<$<NOT:$<BOOL:${EMSCRIPTEN}>>:IN_GIAC>
-    $<$<NOT:$<BOOL:${EMSCRIPTEN}>>:HAVE_LIB_PTHREAD>
-    $<$<NOT:$<BOOL:${EMSCRIPTEN}>>:GIAC_GENERIC_CONSTANTS>
-    $<$<NOT:$<BOOL:${EMSCRIPTEN}>>:TIMEOUT>
+    HAVE_NO_HOME_DIRECTORY
+    GIAC_GGB
+    IN_GIAC
+    GIAC_GENERIC_CONSTANTS
+    TIMEOUT
+    HAVE_LIBMPFR
+    $<$<BOOL:${EMSCRIPTEN}>:HAVE_CONFIG_H>
+    $<$<BOOL:${EMSCRIPTEN}>:HAVE_UNISTD_H>
+    $<$<BOOL:${EMSCRIPTEN}>:HAVE_LIBPTHREAD>
+    $<$<BOOL:${EMSCRIPTEN}>:EMCC2>
+    $<$<BOOL:${EMSCRIPTEN}>:gammaf=tgammaf>
     $<$<NOT:$<BOOL:${EMSCRIPTEN}>>:SIZEOF_VOID_P=8>
-    $<$<NOT:$<BOOL:${EMSCRIPTEN}>>:HAVE_LIBMPFR>
+    $<$<NOT:$<BOOL:${EMSCRIPTEN}>>:HAVE_LIB_PTHREAD>
     $<$<NOT:$<BOOL:${EMSCRIPTEN}>>:HAVE_SYS_TIMES_H>
     $<$<NOT:$<BOOL:${EMSCRIPTEN}>>:HAVE_UNISTD_H>
     $<$<NOT:$<BOOL:${EMSCRIPTEN}>>:HAVE_SYS_TIME_H>

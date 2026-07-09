@@ -46,8 +46,7 @@ try {
 - `fact(x)` (postfix `!`) is implemented for all symbolic types as a product `1*2*...*n` for non-negative integer arguments; returns `factorial(x)` for symbolic/non-integer arguments.
 - `Symbolic<Number>::ToJson()` builds an AST from the giac-printed string and emits JSON using yutovo-editor element type codes (7=CODE_ROW, 8=CODE_STRING, 10=SHAPE, 11=PLUS, 12=MINUS, 13=MULTIPLY, 14=DIVISION, 15=POWER, 16=SQUARE_ROOT, 17=NTH_ROOT, 45-47=SYMBOLIC_*_RESULT). Division operands are wrapped in a single `CODE_ROW`; scientific numbers are emitted as flat elements so they do not add extra nesting inside sums or products.
 - `subs` uses `giac::limit` to detect essential singularities of `exp`, `sin`, `cos`, `sinh`, `cosh` and returns `nan` for Real/Complex (throws for Rational).
-- On Linux `yutovo-calculator` links the **system** MPFR/GMP libraries and a static **giac** library found in `${INSTALL_PATH}/lib`. The Emscripten/wasm build links `${INSTALL_PATH}/wasm/libmpfr.a` and `${INSTALL_PATH}/wasm/libgmp.a`.
-- For Emscripten/wasm builds, `src/symbolic.cpp` is excluded from the library and `src/symbolic.h` provides a preprocessor-guarded header-only stub `Symbolic<T>` that has no giac dependency. The stub exposes the same public API and returns default values or throws `IncorrectOperation` so that the explicit `Symbolic<Real/Rational/Complex>` specializations in `parser.cpp`, `expression.cpp`, `solver.cpp`, and `export.cpp` compile.
+- On Linux `yutovo-calculator` links the **system** MPFR/GMP libraries and a static **giac** library found in `${INSTALL_PATH}/lib`. The Emscripten/wasm build links `${INSTALL_PATH}/wasm/libgiac.a`, `${INSTALL_PATH}/wasm/libmpfr.a`, `${INSTALL_PATH}/wasm/libgmp.a`, and `${INSTALL_PATH}/wasm/libgmpxx.a`, and compiles `src/symbolic.cpp` against the wasm build of giac; the former header-only stub has been removed.
 - Linux consumers of the installed `yutovo-calculator` target must also call `pkg_check_modules(mpfr REQUIRED IMPORTED_TARGET mpfr)` and `pkg_check_modules(gmp REQUIRED IMPORTED_TARGET gmp)` because they are recorded in the imported target's `INTERFACE_LINK_LIBRARIES`.
 
 ### yutovo-solver
@@ -162,6 +161,9 @@ cd yutovo-editor/build/debug && make -j4 yutovo-editor_tests
 ./test/yutovo-editor_tests
 
 cd yutovo-desktop/build/debug && make -j4 yutovo-desktop
+
+# Emscripten/wasm build (from yutovo-calculator)
+cd yutovo-calculator/build_web/debug && make -j4 yutovo-calculator
 ```
 Use `-j4` maximum for building on any platform.
 

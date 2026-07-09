@@ -17,11 +17,10 @@
 #include <climits>
 #include <set>
 #include <cmath>
-#ifndef EMSCRIPTEN
+#include <mutex>
 #include <giac/giac.h>
 #include <giac/lin.h>
 #include <giac/series.h>
-#endif
 
 #ifdef _WIN32
 #undef ulong
@@ -40,9 +39,29 @@ template<typename Number> class Symbolic;
 class Rational;
 class Complex;
 
-#ifndef EMSCRIPTEN
 namespace detail
 {
+    // Giac's parser/lexer uses thread-unsafe lazy static initialization and
+    // mutates shared tables during parsing. Serialize all parser entry points
+    // to avoid memory corruption when multiple threads call giac::gen(string).
+    inline std::mutex& GiacParserMutex()
+    {
+        static std::mutex m;
+        return m;
+    }
+
+    inline giac::gen ParseGen(const char* s, const giac::context* ctx)
+    {
+        std::lock_guard<std::mutex> lock(GiacParserMutex());
+        return giac::gen(s, ctx);
+    }
+
+    inline giac::gen ParseGen(const std::string& s, const giac::context* ctx)
+    {
+        std::lock_guard<std::mutex> lock(GiacParserMutex());
+        return giac::gen(s, ctx);
+    }
+
     inline giac::context* GetContext(const giac::context* ctx)
     {
         return const_cast<giac::context*>(ctx);
@@ -116,9 +135,7 @@ namespace detail
         return n / d;
     }
 }
-#endif
 
-#ifndef EMSCRIPTEN
 template<class Number>
 class Symbolic
 {
@@ -143,10 +160,7 @@ public:
         giac::decimal_digits(std::max(1, _precision + 1), &context);
     }
 
-    static bool IsNegativeInfinityNumber(const Real& num)
-    {
-        return num.IsInfinity() && num.GetSign() < 0;
-    }
+    static bool IsNegativeInfinityNumber(const Real& num);
 
     explicit Symbolic(int _precision, float num) :
         precision(_precision),
@@ -552,7 +566,7 @@ public:
     {
         Symbolic<Number> res(num.precision);
         std::string arg = num.expr->print(detail::GetContext(&num.context));
-        *res.expr = giac::gen(("yut_cot(" + arg + ")").c_str(), &res.context);
+        *res.expr = detail::ParseGen(std::string("yut_cot(") + arg + ")", &res.context);
         return res;
     }
 
@@ -560,7 +574,7 @@ public:
     {
         Symbolic<Number> res(num.precision);
         std::string arg = num.expr->print(detail::GetContext(&num.context));
-        *res.expr = giac::gen(("yut_sec(" + arg + ")").c_str(), &res.context);
+        *res.expr = detail::ParseGen(std::string("yut_sec(") + arg + ")", &res.context);
         return res;
     }
 
@@ -568,7 +582,7 @@ public:
     {
         Symbolic<Number> res(num.precision);
         std::string arg = num.expr->print(detail::GetContext(&num.context));
-        *res.expr = giac::gen(("yut_csc(" + arg + ")").c_str(), &res.context);
+        *res.expr = detail::ParseGen(std::string("yut_csc(") + arg + ")", &res.context);
         return res;
     }
 
@@ -595,7 +609,7 @@ public:
         }
         Symbolic<Number> res(num.precision);
         std::string s = "factorial(" + num.expr->print(&res.context) + ")";
-        *res.expr = giac::gen(s.c_str(), &res.context);
+        *res.expr = detail::ParseGen(s, &res.context);
         return res;
     }
 
@@ -624,7 +638,7 @@ public:
     {
         Symbolic<Number> res(num.precision);
         std::string arg = num.expr->print(detail::GetContext(&num.context));
-        *res.expr = giac::gen(("yut_coth(" + arg + ")").c_str(), &res.context);
+        *res.expr = detail::ParseGen(std::string("yut_coth(") + arg + ")", &res.context);
         return res;
     }
 
@@ -632,7 +646,7 @@ public:
     {
         Symbolic<Number> res(num.precision);
         std::string arg = num.expr->print(detail::GetContext(&num.context));
-        *res.expr = giac::gen(("yut_sech(" + arg + ")").c_str(), &res.context);
+        *res.expr = detail::ParseGen(std::string("yut_sech(") + arg + ")", &res.context);
         return res;
     }
 
@@ -640,7 +654,7 @@ public:
     {
         Symbolic<Number> res(num.precision);
         std::string arg = num.expr->print(detail::GetContext(&num.context));
-        *res.expr = giac::gen(("yut_csch(" + arg + ")").c_str(), &res.context);
+        *res.expr = detail::ParseGen(std::string("yut_csch(") + arg + ")", &res.context);
         return res;
     }
 
@@ -648,7 +662,7 @@ public:
     {
         Symbolic<Number> res(num.precision);
         std::string arg = num.expr->print(detail::GetContext(&num.context));
-        *res.expr = giac::gen(("yut_asinh(" + arg + ")").c_str(), &res.context);
+        *res.expr = detail::ParseGen(std::string("yut_asinh(") + arg + ")", &res.context);
         return res;
     }
 
@@ -656,7 +670,7 @@ public:
     {
         Symbolic<Number> res(num.precision);
         std::string arg = num.expr->print(detail::GetContext(&num.context));
-        *res.expr = giac::gen(("yut_acosh(" + arg + ")").c_str(), &res.context);
+        *res.expr = detail::ParseGen(std::string("yut_acosh(") + arg + ")", &res.context);
         return res;
     }
 
@@ -664,7 +678,7 @@ public:
     {
         Symbolic<Number> res(num.precision);
         std::string arg = num.expr->print(detail::GetContext(&num.context));
-        *res.expr = giac::gen(("yut_atanh(" + arg + ")").c_str(), &res.context);
+        *res.expr = detail::ParseGen(std::string("yut_atanh(") + arg + ")", &res.context);
         return res;
     }
 
@@ -679,7 +693,7 @@ public:
         }
         Symbolic<Number> res(num.precision);
         std::string arg = num.expr->print(detail::GetContext(&num.context));
-        *res.expr = giac::gen(("yut_acoth(" + arg + ")").c_str(), &res.context);
+        *res.expr = detail::ParseGen(std::string("yut_acoth(") + arg + ")", &res.context);
         return res;
     }
 
@@ -687,7 +701,7 @@ public:
     {
         Symbolic<Number> res(num.precision);
         std::string arg = num.expr->print(detail::GetContext(&num.context));
-        *res.expr = giac::gen(("yut_asech(" + arg + ")").c_str(), &res.context);
+        *res.expr = detail::ParseGen(std::string("yut_asech(") + arg + ")", &res.context);
         return res;
     }
 
@@ -700,7 +714,7 @@ public:
         }
         Symbolic<Number> res(num.precision);
         std::string arg = num.expr->print(detail::GetContext(&num.context));
-        *res.expr = giac::gen(("yut_acsch(" + arg + ")").c_str(), &res.context);
+        *res.expr = detail::ParseGen(std::string("yut_acsch(") + arg + ")", &res.context);
         return res;
     }
 
@@ -784,14 +798,14 @@ public:
         std::string utf8 = yutovo_calculator::ToBasicString(s);
         // giac uses i for the imaginary unit; uppercase I is our canonical form
         if (utf8 == "I")
-            return giac::gen("i", giac::context0);
+            return detail::ParseGen("i", giac::context0);
         if (utf8 == "oo" || utf8 == "+oo")
             return giac::plus_inf;
         if (utf8 == "-oo")
             return giac::minus_inf;
         if (utf8 == "nan")
             return giac::undef;
-        return giac::gen(utf8.c_str(), giac::context0);
+        return detail::ParseGen(utf8, giac::context0);
     }
 
     static std::string ReplacePowerOperator(std::string s)
@@ -1596,428 +1610,6 @@ private:
     bool explicit_negative_infinity = false;
 };
 
-#else // EMSCRIPTEN
-
-template<class Number>
-class Symbolic
-{
-public:
-    Symbolic() :
-        precision(3)
-    {
-    }
-
-    explicit Symbolic(int _precision) :
-        precision(_precision)
-    {
-    }
-
-    explicit Symbolic(int _precision, int) :
-        precision(_precision)
-    {
-    }
-
-    explicit Symbolic(int _precision, float) :
-        precision(_precision)
-    {
-    }
-
-    explicit Symbolic(int _precision, const Number&) :
-        precision(_precision)
-    {
-    }
-
-    explicit Symbolic(int _precision, const std::u32string&) :
-        precision(_precision)
-    {
-    }
-
-    explicit Symbolic(int _precision, const std::string&) :
-        precision(_precision)
-    {
-    }
-
-    Symbolic(const Symbolic& source) :
-        precision(source.precision)
-    {
-    }
-
-public:
-    typedef Symbolic<Number> value_type;
-
-    Symbolic<Number>& operator=(const Symbolic<Number>& source)
-    {
-        precision = source.precision;
-        return *this;
-    }
-
-    Symbolic<Number>& operator=(const int)
-    {
-        return *this;
-    }
-
-    Symbolic<Number>& operator=(const double)
-    {
-        return *this;
-    }
-
-    Symbolic<Number>& operator=(const std::u32string&)
-    {
-        return *this;
-    }
-
-    Symbolic<Number>& operator=(const Number&)
-    {
-        return *this;
-    }
-
-    Symbolic<Number> operator+() const
-    {
-        return *this;
-    }
-
-    Symbolic<Number> operator-() const
-    {
-        return Symbolic<Number>(precision);
-    }
-
-    friend Symbolic<Number> operator+(const Symbolic<Number>& num1, const Symbolic<Number>&)
-    {
-        return Symbolic<Number>(num1.precision);
-    }
-
-    friend Symbolic<Number> operator-(const Symbolic<Number>& num1, const Symbolic<Number>&)
-    {
-        return Symbolic<Number>(num1.precision);
-    }
-
-    friend Symbolic<Number> operator*(const Symbolic<Number>& num1, const Symbolic<Number>&)
-    {
-        return Symbolic<Number>(num1.precision);
-    }
-
-    friend Symbolic<Number> operator/(const Symbolic<Number>& num1, const Symbolic<Number>&)
-    {
-        return Symbolic<Number>(num1.precision);
-    }
-
-    friend Symbolic<Number> operator^(const Symbolic<Number>& num1, const Symbolic<Number>&)
-    {
-        return Symbolic<Number>(num1.precision);
-    }
-
-    void operator+=(const Symbolic<Number>&)
-    {
-    }
-
-    void operator-=(const Symbolic<Number>&)
-    {
-    }
-
-    void operator*=(const Symbolic<Number>&)
-    {
-    }
-
-    void operator/=(const Symbolic<Number>&)
-    {
-    }
-
-    void operator^=(const Symbolic<Number>&)
-    {
-    }
-
-    friend bool operator==(const Symbolic<Number>&, const Symbolic<Number>&)
-    {
-        return false;
-    }
-
-    friend bool operator==(const Symbolic<Number>&, const int)
-    {
-        return false;
-    }
-
-    friend bool operator==(const int, const Symbolic<Number>&)
-    {
-        return false;
-    }
-
-    friend bool operator!=(const Symbolic<Number>&, const Symbolic<Number>&)
-    {
-        return true;
-    }
-
-    friend bool operator!=(const Symbolic<Number>&, const int)
-    {
-        return true;
-    }
-
-    friend bool operator!=(const int, const Symbolic<Number>&)
-    {
-        return true;
-    }
-
-    friend bool operator>(const Symbolic<Number>&, const Symbolic<Number>&)
-    {
-        throw ParserException({}, ParserExceptionCode::IncorrectOperation);
-    }
-
-    friend bool operator>(const Symbolic<Number>&, const int)
-    {
-        throw ParserException({}, ParserExceptionCode::IncorrectOperation);
-    }
-
-    friend bool operator>(const int, const Symbolic<Number>&)
-    {
-        throw ParserException({}, ParserExceptionCode::IncorrectOperation);
-    }
-
-    friend bool operator>=(const Symbolic<Number>&, const Symbolic<Number>&)
-    {
-        throw ParserException({}, ParserExceptionCode::IncorrectOperation);
-    }
-
-    friend bool operator>=(const Symbolic<Number>&, const int)
-    {
-        throw ParserException({}, ParserExceptionCode::IncorrectOperation);
-    }
-
-    friend bool operator>=(const int, const Symbolic<Number>&)
-    {
-        throw ParserException({}, ParserExceptionCode::IncorrectOperation);
-    }
-
-    friend bool operator<(const Symbolic<Number>&, const Symbolic<Number>&)
-    {
-        throw ParserException({}, ParserExceptionCode::IncorrectOperation);
-    }
-
-    friend bool operator<(const Symbolic<Number>&, const int)
-    {
-        throw ParserException({}, ParserExceptionCode::IncorrectOperation);
-    }
-
-    friend bool operator<(const int, const Symbolic<Number>&)
-    {
-        throw ParserException({}, ParserExceptionCode::IncorrectOperation);
-    }
-
-    friend bool operator<=(const Symbolic<Number>&, const Symbolic<Number>&)
-    {
-        throw ParserException({}, ParserExceptionCode::IncorrectOperation);
-    }
-
-    friend bool operator<=(const Symbolic<Number>&, const int)
-    {
-        throw ParserException({}, ParserExceptionCode::IncorrectOperation);
-    }
-
-    friend bool operator<=(const int, const Symbolic<Number>&)
-    {
-        throw ParserException({}, ParserExceptionCode::IncorrectOperation);
-    }
-
-public:
-    friend Symbolic<Number> evalf(const Symbolic<Number>& num)
-    {
-        return Symbolic<Number>(num.precision);
-    }
-
-    friend Symbolic<Number> evalf(const Symbolic<Number>& num, const Symbolic<Number>&)
-    {
-        return Symbolic<Number>(num.precision);
-    }
-
-    friend Symbolic<Number> expand(const Symbolic<Number>& num)
-    {
-        return Symbolic<Number>(num.precision);
-    }
-
-    friend Symbolic<Number> simplify(const Symbolic<Number>& num)
-    {
-        return Symbolic<Number>(num.precision);
-    }
-
-    friend Symbolic<Number> diff(const Symbolic<Number>& num, const Symbolic<Number>&)
-    {
-        throw ParserException({}, ParserExceptionCode::IncorrectOperation);
-    }
-
-    friend Symbolic<Number> subs(const Symbolic<Number>& num, const Symbolic<Number>&, const Symbolic<Number>&)
-    {
-        return Symbolic<Number>(num.precision);
-    }
-
-    friend Symbolic<Number> min(const Symbolic<Number>& num1, const Symbolic<Number>&)
-    {
-        return Symbolic<Number>(num1.precision);
-    }
-
-    friend Symbolic<Number> max(const Symbolic<Number>& num1, const Symbolic<Number>&)
-    {
-        return Symbolic<Number>(num1.precision);
-    }
-
-    friend Symbolic<Number> sin(const Symbolic<Number>& num)
-    {
-        return Symbolic<Number>(num.precision);
-    }
-
-    friend Symbolic<Number> cos(const Symbolic<Number>& num)
-    {
-        return Symbolic<Number>(num.precision);
-    }
-
-    friend Symbolic<Number> cot(const Symbolic<Number>& num)
-    {
-        return Symbolic<Number>(num.precision);
-    }
-
-    friend Symbolic<Number> sec(const Symbolic<Number>& num)
-    {
-        return Symbolic<Number>(num.precision);
-    }
-
-    friend Symbolic<Number> csc(const Symbolic<Number>& num)
-    {
-        return Symbolic<Number>(num.precision);
-    }
-
-    friend Symbolic<Number> gamma(const Symbolic<Number>& num)
-    {
-        return Symbolic<Number>(num.precision);
-    }
-
-    friend Symbolic<Number> fact(const Symbolic<Number>& num, ParserContext*)
-    {
-        return Symbolic<Number>(num.precision);
-    }
-
-    friend Symbolic<Number> sinh(const Symbolic<Number>& num)
-    {
-        return Symbolic<Number>(num.precision);
-    }
-
-    friend Symbolic<Number> cosh(const Symbolic<Number>& num)
-    {
-        return Symbolic<Number>(num.precision);
-    }
-
-    friend Symbolic<Number> tanh(const Symbolic<Number>& num)
-    {
-        return Symbolic<Number>(num.precision);
-    }
-
-    friend Symbolic<Number> coth(const Symbolic<Number>& num)
-    {
-        return Symbolic<Number>(num.precision);
-    }
-
-    friend Symbolic<Number> sech(const Symbolic<Number>& num)
-    {
-        return Symbolic<Number>(num.precision);
-    }
-
-    friend Symbolic<Number> csch(const Symbolic<Number>& num)
-    {
-        return Symbolic<Number>(num.precision);
-    }
-
-    friend Symbolic<Number> asinh(const Symbolic<Number>& num)
-    {
-        return Symbolic<Number>(num.precision);
-    }
-
-    friend Symbolic<Number> acosh(const Symbolic<Number>& num)
-    {
-        return Symbolic<Number>(num.precision);
-    }
-
-    friend Symbolic<Number> atanh(const Symbolic<Number>& num)
-    {
-        return Symbolic<Number>(num.precision);
-    }
-
-    friend Symbolic<Number> acoth(const Symbolic<Number>& num)
-    {
-        return Symbolic<Number>(num.precision);
-    }
-
-    friend Symbolic<Number> asech(const Symbolic<Number>& num)
-    {
-        return Symbolic<Number>(num.precision);
-    }
-
-    friend Symbolic<Number> acsch(const Symbolic<Number>& num)
-    {
-        return Symbolic<Number>(num.precision);
-    }
-
-    friend Symbolic<Number> exp(const Symbolic<Number>& num)
-    {
-        return Symbolic<Number>(num.precision);
-    }
-
-    friend Symbolic<Number> ln(const Symbolic<Number>& num)
-    {
-        return Symbolic<Number>(num.precision);
-    }
-
-    friend Symbolic<Number> sqrt(const Symbolic<Number>& num)
-    {
-        return Symbolic<Number>(num.precision);
-    }
-
-    friend Symbolic<Number> pow(const Symbolic<Number>& num1, const Symbolic<Number>&)
-    {
-        return Symbolic<Number>(num1.precision);
-    }
-
-    friend Symbolic<Number> log(const Symbolic<Number>& num1, const Symbolic<Number>&)
-    {
-        return Symbolic<Number>(num1.precision);
-    }
-
-    friend Symbolic<Number> root(const Symbolic<Number>& num1, const Symbolic<Number>&)
-    {
-        return Symbolic<Number>(num1.precision);
-    }
-
-public:
-    std::u32string ToString(int, Language = Language::English) const
-    {
-        return U"0";
-    }
-
-    std::string ToStdString(int, Language = Language::English) const
-    {
-        return "0";
-    }
-
-    std::string ToJson(int = -1, Language = Language::English) const
-    {
-        return std::string(R"({"type":45,"elements":[{"type":8,"elements":"0"}]})");
-    }
-
-    int GetPrecision() const
-    {
-        return precision;
-    }
-
-    bool IsZero() const
-    {
-        return false;
-    }
-
-    bool IsNumber() const
-    {
-        return true;
-    }
-
-private:
-    int precision = 0;
-};
-
-#endif // EMSCRIPTEN
 
 template<typename T>
 struct is_symbolic : std::false_type {};
