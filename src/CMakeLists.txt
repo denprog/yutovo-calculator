@@ -37,16 +37,38 @@ if(EMSCRIPTEN)
     )
 else()
     find_package(Boost 1.83.0 REQUIRED)
-    find_library(GIAC_LIBRARY NAMES giac PATHS ${INSTALL_PATH}/lib NO_DEFAULT_PATH)
     find_path(GIAC_INCLUDE_DIR NAMES giac/giac.h PATHS ${INSTALL_PATH}/include NO_DEFAULT_PATH)
-    if (NOT GIAC_LIBRARY OR NOT GIAC_INCLUDE_DIR)
-        message(FATAL_ERROR "giac library not found in ${INSTALL_PATH}. Run ./build_giac.sh first.")
+    if(NOT GIAC_INCLUDE_DIR)
+        message(FATAL_ERROR "giac headers not found in ${INSTALL_PATH}/include. Run ./build_giac.sh first.")
     endif()
-    message(STATUS "Found giac: ${GIAC_LIBRARY}")
+
+    # Release always uses libgiac.a. For Debug prefer libgiacd.a with a fallback
+    # to libgiac.a. On multi-config generators look up both variants; on
+    # single-config generators only look up the variant actually needed.
+    find_library(GIAC_LIBRARY_RELEASE NAMES giac PATHS ${INSTALL_PATH}/lib NO_DEFAULT_PATH)
+
+    if(CMAKE_BUILD_TYPE STREQUAL "Debug" OR DEFINED CMAKE_CONFIGURATION_TYPES)
+        find_library(GIAC_LIBRARY_DEBUG NAMES giacd giac PATHS ${INSTALL_PATH}/lib NO_DEFAULT_PATH)
+    else()
+        set(GIAC_LIBRARY_DEBUG ${GIAC_LIBRARY_RELEASE})
+    endif()
+
+    if(NOT GIAC_LIBRARY_RELEASE OR NOT GIAC_LIBRARY_DEBUG)
+        message(FATAL_ERROR "giac library not found in ${INSTALL_PATH}/lib. Run ./build_giac.sh first.")
+    endif()
+
+    message(STATUS "giac release: ${GIAC_LIBRARY_RELEASE}")
+    message(STATUS "giac debug:   ${GIAC_LIBRARY_DEBUG}")
+
     add_library(giac_imported STATIC IMPORTED)
     set_target_properties(giac_imported PROPERTIES
-        IMPORTED_LOCATION ${GIAC_LIBRARY}
+        IMPORTED_CONFIGURATIONS       "DEBUG;RELEASE"
         INTERFACE_INCLUDE_DIRECTORIES ${GIAC_INCLUDE_DIR}
+        IMPORTED_LOCATION_DEBUG       ${GIAC_LIBRARY_DEBUG}
+        IMPORTED_LOCATION_RELEASE     ${GIAC_LIBRARY_RELEASE}
+        IMPORTED_LOCATION_RELWITHDEBINFO ${GIAC_LIBRARY_RELEASE}
+        IMPORTED_LOCATION_MINSIZEREL  ${GIAC_LIBRARY_RELEASE}
+        IMPORTED_LOCATION             ${GIAC_LIBRARY_RELEASE}
     )
     if (CMAKE_BUILD_TYPE STREQUAL "Debug")
         if (NOT WIN32)
