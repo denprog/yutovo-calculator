@@ -15,7 +15,7 @@
 #include <chrono>
 #include <variant>
 #include <set>
-#include <symengine/symengine_exception.h>
+#include <vector>
 
 namespace yutovo_calculator
 {
@@ -437,32 +437,6 @@ struct Solver : public boost::static_visitor<Number>
             {
                 throw MathException(op.id, e.ex_id, op.pos, op.line);
             }
-            catch (const SymEngine::DivisionByZeroError&)
-            {
-                if constexpr (is_symbolic_v<Number>)
-                    return Number(precision, std::u32string(U"zoo"));
-                throw MathException(op.id, DivisionByZero, op.pos, op.line);
-            }
-            catch (const SymEngine::DomainError&)
-            {
-                if constexpr (is_symbolic_v<Number> && (std::is_same_v<Number, Symbolic<Real>> || std::is_same_v<Number, Symbolic<Complex>>))
-                    return Number(precision, std::u32string(U"nan"));
-                throw MathException(op.id, ArgumentIsOver, op.pos, op.line);
-            }
-            catch (const SymEngine::ParseError&)
-            {
-                throw MathException(op.id, SyntaxError, op.pos, op.line);
-            }
-            catch (const SymEngine::NotImplementedError&)
-            {
-                if constexpr (is_symbolic_v<Number> && (std::is_same_v<Number, Symbolic<Real>> || std::is_same_v<Number, Symbolic<Complex>>))
-                    return Number(precision, std::u32string(U"nan"));
-                throw MathException(op.id, NotImplemented, op.pos, op.line);
-            }
-            catch (const SymEngine::SerializationError&)
-            {
-                throw MathException(op.id, NotImplemented, op.pos, op.line);
-            }
             catch (const ParserException&)
             {
                 throw;
@@ -564,9 +538,9 @@ struct Solver : public boost::static_visitor<Number>
                 return builtin_id_val;
             if constexpr (std::is_same_v<Number, Symbolic<Complex>>)
             {
-                if (op.name == U"i" || op.name == U"I")
-                    return Number(precision, std::string("I"));
-                if (op.name == U"j" && im == U"j")
+                if (op.name == U"I" ||
+                    (op.name == U"i" && im == U"i") ||
+                    (op.name == U"j" && im == U"j"))
                     return Number(precision, std::string("I"));
             }
             return Number(precision, op.name);
@@ -616,9 +590,9 @@ struct Solver : public boost::static_visitor<Number>
                 return (*this)(op.left) * builtin_id_val;
             if constexpr (std::is_same_v<Number, Symbolic<Complex>>)
             {
-                if (op.identifier.name == U"i" || op.identifier.name == U"I")
-                    return (*this)(op.left) * Number(precision, std::string("I"));
-                if (op.identifier.name == U"j" && im == U"j")
+                if (op.identifier.name == U"I" ||
+                    (op.identifier.name == U"i" && im == U"i") ||
+                    (op.identifier.name == U"j" && im == U"j"))
                     return (*this)(op.left) * Number(precision, std::string("I"));
             }
             return (*this)(op.left) * Number(precision, op.identifier.name);
@@ -668,9 +642,9 @@ struct Solver : public boost::static_visitor<Number>
             }
             if constexpr (std::is_same_v<Number, Symbolic<Complex>>)
             {
-                if (op.identifier.name == U"i" || op.identifier.name == U"I")
-                    return (*this)(op.upper) / (*this)(op.lower) * Number(precision, std::string("I"));
-                if (op.identifier.name == U"j" && im == U"j")
+                if (op.identifier.name == U"I" ||
+                    (op.identifier.name == U"i" && im == U"i") ||
+                    (op.identifier.name == U"j" && im == U"j"))
                     return (*this)(op.upper) / (*this)(op.lower) * Number(precision, std::string("I"));
             }
             return (*this)(op.upper) / (*this)(op.lower) * Number(precision, op.identifier.name);
@@ -813,29 +787,9 @@ struct Solver : public boost::static_visitor<Number>
                     res = boost::apply_visitor(*this, op);
                 }
             }
-            catch (const SymEngine::DivisionByZeroError&)
+            catch (const MathException& e)
             {
-                throw MathException(id, DivisionByZero, -1, -1);
-            }
-            catch (const SymEngine::DomainError&)
-            {
-                if constexpr (std::is_same_v<Number, Symbolic<Real>> || std::is_same_v<Number, Symbolic<Complex>>)
-                    return Number(precision, std::u32string(U"nan"));
-                throw MathException(id, ArgumentIsOver, -1, -1);
-            }
-            catch (const SymEngine::ParseError&)
-            {
-                throw MathException(id, SyntaxError, -1, -1);
-            }
-            catch (const SymEngine::NotImplementedError&)
-            {
-                if constexpr (std::is_same_v<Number, Symbolic<Real>> || std::is_same_v<Number, Symbolic<Complex>>)
-                    return Number(precision, std::u32string(U"nan"));
-                throw MathException(id, NotImplemented, -1, -1);
-            }
-            catch (const SymEngine::SerializationError&)
-            {
-                throw MathException(id, SerializationError, -1, -1);
+                throw MathException(id, e.ex_id, -1, -1);
             }
             catch (const ParserException&)
             {

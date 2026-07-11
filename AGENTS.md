@@ -35,26 +35,25 @@ try {
 ## Current Work: Symbolic Integration
 
 ### yutovo-calculator
-- **Class `Symbolic`** (`src/symbolic.h/cpp`) wraps `SymEngine::Expression` via `std::unique_ptr`.
-- `Parser<Symbolic>`, `Solver<Symbolic>`, `Expression<Symbolic>` are specialized.
-- `^` is parsed in the generic grammar; power output uses `pow(base,exp)` via `ReplacePowerOperator`.
+- **Class `Symbolic`** (`src/symbolic.h/cpp`) wraps `giac::gen` via `std::unique_ptr`.
+- `Parser<Symbolic>`, `Solver<Symbolic>`, `Expression<Symbolic>` are specialized for `Symbolic<Real>`, `Symbolic<Rational>`, and `Symbolic<Complex>`.
+- `^` is parsed left-associatively in the generic grammar. Giac flattens `(x^y)^z` to `x^(y*z)`; the formatter reconstructs `pow(pow(x,y),z)` for left-associative chains and prints explicit right-associative chains like `x^(y^z)` as `pow(x,y**z)`.
 - `evalf` returns `Symbolic`; explicit `to_real()` / `to_complex()` perform casting.
-- `factor()` and `integrate()` throw `NotImplemented = 302` (not available in SymEngine 0.14.0).
-- `sqrt(x)` is implemented for all symbolic types via `root(x, 2)` (i.e. `pow(x, 1/2)`). Friend function added in `symbolic.h`; registered in `Parser<Symbolic<...>>` constructors in `parser.cpp`.
-- `cot(x)`, `sec(x)`, `csc(x)` are implemented for all symbolic types via SymEngine functions. Friend functions added in `symbolic.h`; registered in `Parser<Symbolic<...>>` constructors in `parser.cpp`.
-- Inverse hyperbolic functions (`asinh`, `acosh`, `atanh`, `acoth`, `asech`, `acsch`) and their `arc...`/`ars...` synonyms are registered for all symbolic parsers in `parser.cpp`; existing `arsinh`/`arcosh`/`artanh`/`arcoth`/`arsech`/`arcsch`/`arcosech` aliases are preserved.
-- `HAVE_SYMENGINE_MPFR` is commented out in `symengine_config.h`; `evalf` falls back to 53-bit double.
-- SymEngine headers are located at `../yutovo/deploy/include/symengine/`.
-- `fact(x)` (postfix `!`) is implemented for all symbolic types as a product `1*2*...*n` for non-negative integer arguments; returns `factorial(x)` for symbolic/non-integer arguments (no longer uses `SymEngine::gamma`). Friend function added in `symbolic.h`; `PostfixOperationNode` specializations added in `solver.cpp`; grammar updated in `expression.cpp` to allow `identifier!`.
-- `Symbolic<Number>::ToJson()` recursively traverses the SymEngine AST and emits JSON using yutovo-editor element type codes (7=CODE_ROW, 8=CODE_STRING, 10=SHAPE, 11=PLUS, 12=MINUS, 13=MULTIPLY, 14=DIVISION, 15=POWER, 45-47=SYMBOLIC_*_RESULT). This replaces the fragile string-parsing approach in `yutovo-editor::AddSymbolicElements`.
-- On Linux `yutovo-calculator` links the **system** MPFR/GMP libraries via `pkg_check_modules(mpfr ...)` / `pkg_check_modules(gmp ...)`. The Emscripten/wasm build still links the static archives `${INSTALL_PATH}/wasm/libmpfr.a` and `${INSTALL_PATH}/wasm/libgmp.a`.
-- Linux consumers of the installed `yutovo-calculator` target (e.g. `yutovo-solver`, `yutovo-editor`, `yutovo-desktop`) must also call `pkg_check_modules(mpfr REQUIRED IMPORTED_TARGET mpfr)` and `pkg_check_modules(gmp REQUIRED IMPORTED_TARGET gmp)` because they are recorded in the imported target's `INTERFACE_LINK_LIBRARIES`.
+- `factor()` and `integrate()` throw `NotImplemented = 302`.
+- `sqrt(x)` is implemented for all symbolic types via `root(x, 2)` (i.e. `pow(x, 1/2)`). `sqrt(-∞)` returns `nan` for Real/Complex and throws for Rational.
+- `cot(x)`, `sec(x)`, `csc(x)`, `coth(x)`, `sech(x)`, `csch(x)` are rendered as inert functions (`yut_cot`, etc.) so that poles map to `∞` instead of being simplified away.
+- Inverse hyperbolic functions (`asinh`, `acosh`, `atanh`, `acoth`, `asech`, `acsch`) and their `arc...`/`ars...` synonyms are registered for all symbolic parsers. Inert wrappers preserve names; singularities such as `acoth(1)` and `acsch(0)` evaluate to `∞` for Real/Complex and remain symbolic for Rational.
+- `fact(x)` (postfix `!`) is implemented for all symbolic types as a product `1*2*...*n` for non-negative integer arguments; returns `factorial(x)` for symbolic/non-integer arguments.
+- `Symbolic<Number>::ToJson()` builds an AST from the giac-printed string and emits JSON using yutovo-editor element type codes (7=CODE_ROW, 8=CODE_STRING, 10=SHAPE, 11=PLUS, 12=MINUS, 13=MULTIPLY, 14=DIVISION, 15=POWER, 16=SQUARE_ROOT, 17=NTH_ROOT, 45-47=SYMBOLIC_*_RESULT). Division operands are wrapped in a single `CODE_ROW`; scientific numbers are emitted as flat elements so they do not add extra nesting inside sums or products.
+- `subs` uses `giac::limit` to detect essential singularities of `exp`, `sin`, `cos`, `sinh`, `cosh` and returns `nan` for Real/Complex (throws for Rational).
+- On Linux `yutovo-calculator` links the **system** MPFR/GMP libraries and a static **giac** library found in `${INSTALL_PATH}/lib`. The Emscripten/wasm build links `${INSTALL_PATH}/wasm/libgiac.a`, `${INSTALL_PATH}/wasm/libmpfr.a`, `${INSTALL_PATH}/wasm/libgmp.a`, and `${INSTALL_PATH}/wasm/libgmpxx.a`, and compiles `src/symbolic.cpp` against the wasm build of giac; the former header-only stub has been removed.
+- Linux consumers of the installed `yutovo-calculator` target must also call `pkg_check_modules(mpfr REQUIRED IMPORTED_TARGET mpfr)` and `pkg_check_modules(gmp REQUIRED IMPORTED_TARGET gmp)` because they are recorded in the imported target's `INTERFACE_LINK_LIBRARIES`.
 
 ### yutovo-solver
 - `ResultType::SYMBOLIC` added in `types.h`.
 - `CalculatorSolver` has `symbolic_parser` and `SolveSymbolic()`.
 - `AUTO` mode tries `SYMBOLIC` last in `results_order[6]`.
-- On Linux `yutovo-solver` does **not** link GMP/MPFR directly; it inherits them transitively from `yutovo-calculator` / SymEngine.
+- On Linux `yutovo-solver` does **not** link GMP/MPFR directly; it inherits them transitively from `yutovo-calculator` / giac.
 
 ### yutovo-editor
 - `ElementType::SYMBOLIC_RESULT` added.
@@ -65,7 +64,7 @@ try {
 - `ResultTask::Execute` **must** handle `ElementType::SYMBOLIC_RESULT` to deliver the solver response to `SymbolicResult::PutResult`; missing this leaves the waiting symbol (`~`) forever.
 
 ### yutovo-desktop
-- `CMakeLists.txt` needs `find_package(SymEngine REQUIRED)` and `${SYMENGINE_LIBRARIES}` in `target_link_libraries` for Linux, because static libraries (`yutovo-calculator`, `yutovo-solver`) now depend on SymEngine.
+- `src/CMakeLists.txt` locates the static **giac** library with `find_library(GIAC_LIBRARY ...)` and creates an imported `giac_imported` target for Linux, because static libraries (`yutovo-calculator`, `yutovo-solver`) now depend on giac.
 - Same for `test/CMakeLists.txt`.
 - Added "Symbolic" tab in `ResultSettingsForm` (precision setting).
 - Added `Present as → Symbolic` in context menu (`DocumentWindow`).
@@ -162,6 +161,9 @@ cd yutovo-editor/build/debug && make -j4 yutovo-editor_tests
 ./test/yutovo-editor_tests
 
 cd yutovo-desktop/build/debug && make -j4 yutovo-desktop
+
+# Emscripten/wasm build (from yutovo-calculator)
+cd yutovo-calculator/build_web/debug && make -j4 yutovo-calculator
 ```
 Use `-j4` maximum for building on any platform.
 
@@ -174,8 +176,8 @@ Running the full `yutovo-editor_tests` suite takes approximately **25 minutes** 
 - `yutovo-editor/src/formulas/result.cpp` — `SymbolicResult::AddSymbolicElements` parses result string into formula elements
 - `yutovo-editor/test/solver_symbolic.cpp` — rewritten to use proper element insertion and exact HTML checks, including undo assertions; added `solver6` (fraction result), `solver7` (complex result), `solver8` (power result `1/x`), `solver9` (power result `x^-1`)
 - `yutovo-editor/test/solver_auto.cpp` — added 5 AUTO-mode symbolic fallback tests (`symbolic1..symbolic5`) using `ToText()` checks; added `symbolic6` (fraction) and `symbolic7` (complex)
-- `yutovo-desktop/src/CMakeLists.txt` — added `find_package(SymEngine)` and `${SYMENGINE_LIBRARIES}` in `target_link_libraries`
-- `yutovo-desktop/test/CMakeLists.txt` — added `find_package(SymEngine)` and `${SYMENGINE_LIBRARIES}` in `target_link_libraries`
+- `yutovo-desktop/src/CMakeLists.txt` — added `find_library(GIAC_LIBRARY ...)` and imported `giac_imported` target
+- `yutovo-desktop/test/CMakeLists.txt` — added `find_library(GIAC_LIBRARY ...)` and imported `giac_imported` target
 - `yutovo-desktop/src/result_settings_form.ui` / `.cpp` — added "Symbolic" tab with precision
 - `yutovo-desktop/src/document_window.cpp` / `.h` — `Present as → Symbolic` is now a submenu containing checkable items `Real`, `Rational`, `Complex`
 - `yutovo-desktop/src/command_map.cpp` — added `\eq_sym` command
@@ -190,4 +192,6 @@ Running the full `yutovo-editor_tests` suite takes approximately **25 minutes** 
 - `yutovo-editor/src/formulas/power.h` — added `GetBaseRow()` and `GetExponentRow()` public helpers
 
 ## Next Steps / Blockers
-- All new tests pass. Calculator: 501 tests, Editor: 16 symbolic tests (9 direct + 7 auto fallback).
+- All Linux calculator tests pass (1111 tests across Real, Complex, Integer, Rational, Array, etc.).
+- The three failing `SolverSymbolicTest` editor tests (`solver17`, `solver18`, `solver22`) have been fixed by adjusting calculator JSON output; no editor tests were modified.
+- The Emscripten/wasm symbolic stub is implemented; native behavior is unchanged.
