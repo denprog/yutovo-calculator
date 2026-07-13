@@ -8,11 +8,16 @@
 
 ## Agent Rules
 
+- **Never delete files without explicit user permission.** Do not remove source files, test files, core dumps, logs, build artifacts, or any other files unless the user explicitly asks for it. When in doubt, leave the file in place and ask.
+- **Never create separate namespaces (such as `namespace detail` or anonymous namespaces) without explicit user permission.** Helper functions should be placed in the common `yutovo_calculator` namespace, for example in `utils.h/utils.cpp` or `giac_utils.h/giac_utils.cpp`, or as `static` methods of the appropriate class.
 - **Never commit without explicit user permission.** Do not run `git commit`, `git push`, `git reset`, `git rebase`, or any other git mutations unless explicitly asked to do so. Ask for confirmation each time when git mutations are needed.
 - **Never delete existing tests.** When fixing regressions or refactoring, update test expectations to match the new correct behavior, but do not remove tests. If `git checkout` or similar commands are used to revert a file, verify that no user-added tests were lost.
 
 ### Code Style
 Always place braces on their own line for control structures:
+
+### Parenthesized expressions
+Keep the contents of parentheses (function argument lists, conditions, initializers, etc.) on a single line. Only wrap to a new line if the expression would exceed **150 columns**.
 ```cpp
 // CORRECT
 try
@@ -46,7 +51,8 @@ try {
 - `fact(x)` (postfix `!`) is implemented for all symbolic types as a product `1*2*...*n` for non-negative integer arguments; returns `factorial(x)` for symbolic/non-integer arguments.
 - `Symbolic<Number>::ToJson()` builds an AST from the giac-printed string and emits JSON using yutovo-editor element type codes (7=CODE_ROW, 8=CODE_STRING, 10=SHAPE, 11=PLUS, 12=MINUS, 13=MULTIPLY, 14=DIVISION, 15=POWER, 16=SQUARE_ROOT, 17=NTH_ROOT, 45-47=SYMBOLIC_*_RESULT). Division operands are wrapped in a single `CODE_ROW`; scientific numbers are emitted as flat elements so they do not add extra nesting inside sums or products.
 - `subs` uses `giac::limit` to detect essential singularities of `exp`, `sin`, `cos`, `sinh`, `cosh` and returns `nan` for Real/Complex (throws for Rational).
-- On Linux `yutovo-calculator` links the **system** MPFR/GMP libraries and a static **giac** library found in `${INSTALL_PATH}/lib`. The Emscripten/wasm build links `${INSTALL_PATH}/wasm/libgiac.a`, `${INSTALL_PATH}/wasm/libmpfr.a`, `${INSTALL_PATH}/wasm/libgmp.a`, and `${INSTALL_PATH}/wasm/libgmpxx.a`, and compiles `src/symbolic.cpp` against the wasm build of giac; the former header-only stub has been removed.
+- `RealNumberStr` evaluates rational strings such as `1333/1000` with MPFR so that `CombineLikeTerms` does not turn decimal reciprocals into bogus scientific notation (e.g., `1.333E+3`). `AddCoeffs` / `MultiplyCoeffs` fall back to `giac::gen` for decimal or scientific-notation coefficients.
+- On Linux `yutovo-calculator` links the **system** MPFR/GMP libraries and a static **giac** library found in `${INSTALL_PATH}/lib`. Debug builds must link `${INSTALL_PATH}/lib/libgiacd.a` and release builds `${INSTALL_PATH}/lib/libgiac.a`; mixing configurations causes an ABI mismatch and memory corruption inside giac (e.g., crashes in `giac::expand`). The Emscripten/wasm build links `${INSTALL_PATH}/wasm/libgiac.a`, `${INSTALL_PATH}/wasm/libmpfr.a`, `${INSTALL_PATH}/wasm/libgmp.a`, and `${INSTALL_PATH}/wasm/libgmpxx.a`, and compiles `src/symbolic.cpp` against the wasm build of giac; the former header-only stub has been removed.
 - Linux consumers of the installed `yutovo-calculator` target must also call `pkg_check_modules(mpfr REQUIRED IMPORTED_TARGET mpfr)` and `pkg_check_modules(gmp REQUIRED IMPORTED_TARGET gmp)` because they are recorded in the imported target's `INTERFACE_LINK_LIBRARIES`.
 
 ### yutovo-solver

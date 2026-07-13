@@ -55,13 +55,13 @@ else()
 
     add_library(giac_imported STATIC IMPORTED)
     set_target_properties(giac_imported PROPERTIES
-        IMPORTED_CONFIGURATIONS       "DEBUG;RELEASE"
+        IMPORTED_CONFIGURATIONS "DEBUG;RELEASE"
         INTERFACE_INCLUDE_DIRECTORIES ${GIAC_INCLUDE_DIR}
-        IMPORTED_LOCATION_DEBUG       ${GIAC_LIBRARY_DEBUG}
-        IMPORTED_LOCATION_RELEASE     ${GIAC_LIBRARY_RELEASE}
+        IMPORTED_LOCATION_DEBUG ${GIAC_LIBRARY_DEBUG}
+        IMPORTED_LOCATION_RELEASE ${GIAC_LIBRARY_RELEASE}
         IMPORTED_LOCATION_RELWITHDEBINFO ${GIAC_LIBRARY_RELEASE}
-        IMPORTED_LOCATION_MINSIZEREL  ${GIAC_LIBRARY_RELEASE}
-        IMPORTED_LOCATION             ${GIAC_LIBRARY_RELEASE}
+        IMPORTED_LOCATION_MINSIZEREL ${GIAC_LIBRARY_RELEASE}
+        IMPORTED_LOCATION ${GIAC_LIBRARY_RELEASE}
     )
     if (CMAKE_BUILD_TYPE STREQUAL "Debug")
         if (NOT WIN32)
@@ -107,11 +107,13 @@ set(CALCULATOR_SOURCES
     script.cpp
     solver.cpp
     utils.cpp
+    giac_utils.cpp
     unit.cpp
     export.cpp
 
     stdafx.h
     utils.h
+    giac_utils.h
     script.h
     solver.h
     unit.h
@@ -199,7 +201,7 @@ target_compile_definitions(${PROJECT_NAME} PUBLIC
     $<$<BOOL:${EMSCRIPTEN}>:EMCC2>
     $<$<BOOL:${EMSCRIPTEN}>:gammaf=tgammaf>
     $<$<NOT:$<BOOL:${EMSCRIPTEN}>>:SIZEOF_VOID_P=8>
-    $<$<NOT:$<BOOL:${EMSCRIPTEN}>>:HAVE_LIB_PTHREAD>
+    $<$<NOT:$<BOOL:${EMSCRIPTEN}>>:HAVE_LIBPTHREAD>
     $<$<NOT:$<BOOL:${EMSCRIPTEN}>>:HAVE_SYS_TIMES_H>
     $<$<NOT:$<BOOL:${EMSCRIPTEN}>>:HAVE_UNISTD_H>
     $<$<NOT:$<BOOL:${EMSCRIPTEN}>>:HAVE_SYS_TIME_H>
@@ -247,6 +249,7 @@ install(
         solver.h
         stdafx.h
         utils.h
+        giac_utils.h
         unit.h
         export.h
         graph.h

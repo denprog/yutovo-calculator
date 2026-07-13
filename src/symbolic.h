@@ -28,6 +28,8 @@
 
 #include "math_helper.h"
 #include "parser_exception.h"
+#include "utils.h"
+#include "giac_utils.h"
 
 namespace yutovo_calculator
 {
@@ -38,103 +40,6 @@ void CheckBreak(ParserContext* parser_context);
 template<typename Number> class Symbolic;
 class Rational;
 class Complex;
-
-namespace detail
-{
-    // Giac's parser/lexer uses thread-unsafe lazy static initialization and
-    // mutates shared tables during parsing. Serialize all parser entry points
-    // to avoid memory corruption when multiple threads call giac::gen(string).
-    inline std::mutex& GiacParserMutex()
-    {
-        static std::mutex m;
-        return m;
-    }
-
-    inline giac::gen ParseGen(const char* s, const giac::context* ctx)
-    {
-        std::lock_guard<std::mutex> lock(GiacParserMutex());
-        return giac::gen(s, ctx);
-    }
-
-    inline giac::gen ParseGen(const std::string& s, const giac::context* ctx)
-    {
-        std::lock_guard<std::mutex> lock(GiacParserMutex());
-        return giac::gen(s, ctx);
-    }
-
-    inline giac::context* GetContext(const giac::context* ctx)
-    {
-        return const_cast<giac::context*>(ctx);
-    }
-
-    bool HasAmbiguousPoleArgument(const giac::gen& expr, const giac::identificateur& var, const giac::gen& value, giac::context* ctx);
-
-    inline bool IsKnownConstant(const std::string& name)
-    {
-        static const std::set<std::string> known = {
-            "pi", "e", "oo", "inf", "+inf", "-inf", "nan", "undef"
-        };
-        return known.find(name) != known.end();
-    }
-
-    inline bool HasUnknownSymbol(const giac::gen& g)
-    {
-        switch (g.type)
-        {
-        case giac::_IDNT:
-            return !IsKnownConstant(g._IDNTptr->id_name);
-        case giac::_SYMB:
-            return HasUnknownSymbol(g._SYMBptr->feuille);
-        case giac::_CPLX:
-            if (!(g._CPLXptr[1] == 0))
-                return true;
-            return HasUnknownSymbol(g._CPLXptr[0]);
-        case giac::_FRAC:
-            return HasUnknownSymbol(g._FRACptr->num) || HasUnknownSymbol(g._FRACptr->den);
-        case giac::_VECT:
-        {
-            const giac::vecteur& v = *g._VECTptr;
-            for (const auto& x : v)
-            {
-                if (HasUnknownSymbol(x))
-                    return true;
-            }
-            return false;
-        }
-        default:
-            return false;
-        }
-    }
-
-    inline bool IsPower(const giac::gen& g, giac::gen& base, giac::gen& exp)
-    {
-        if (g.type == giac::_SYMB && g._SYMBptr->sommet == giac::at_pow)
-        {
-            const giac::gen& f = g._SYMBptr->feuille;
-            if (f.type == giac::_VECT && f._VECTptr->size() == 2)
-            {
-                base = (*f._VECTptr)[0];
-                exp = (*f._VECTptr)[1];
-                return true;
-            }
-        }
-        return false;
-    }
-
-    inline giac::gen SimplifyPowerDivision(const giac::gen& n, const giac::gen& d, giac::context* ctx)
-    {
-        giac::gen n_base, n_exp, d_base, d_exp;
-        bool n_is_pow = IsPower(n, n_base, n_exp);
-        bool d_is_pow = IsPower(d, d_base, d_exp);
-        if (n_is_pow && d_is_pow && n_base == d_base)
-            return giac::pow(n_base, n_exp - d_exp, ctx);
-        if (n_is_pow && !d_is_pow && n_base == d)
-            return giac::pow(n_base, n_exp - giac::gen(1), ctx);
-        if (!n_is_pow && d_is_pow && d_base == n)
-            return giac::pow(d_base, giac::gen(1) - d_exp, ctx);
-        return n / d;
-    }
-}
 
 template<class Number>
 class Symbolic
@@ -281,13 +186,13 @@ public:
     friend Symbolic<Number> operator/(const Symbolic<Number>& num1, const Symbolic<Number>& num2)
     {
         Symbolic<Number> res(num1.precision);
-        *res.expr = detail::SimplifyPowerDivision(*num1.expr, *num2.expr, &res.context);
+        *res.expr = SimplifyPowerDivision(*num1.expr, *num2.expr, &res.context);
         return res;
     }
 
     friend Symbolic<Number> operator^(const Symbolic<Number>& num1, const Symbolic<Number>& num2)
     {
-        if (giac::is_zero(*num2.expr, detail::GetContext(&num2.context)))
+        if (giac::is_zero(*num2.expr, GetContext(&num2.context)))
             return Symbolic<Number>(num1.precision, 1);
         Symbolic<Number> res(num1.precision);
         *res.expr = giac::pow(*num1.expr, *num2.expr, &res.context);
@@ -311,12 +216,12 @@ public:
 
     void operator/=(const Symbolic<Number>& num)
     {
-        *expr = detail::SimplifyPowerDivision(*expr, *num.expr, &context);
+        *expr = SimplifyPowerDivision(*expr, *num.expr, &context);
     }
 
     void operator^=(const Symbolic<Number>& num)
     {
-        if (giac::is_zero(*num.expr, detail::GetContext(&context)))
+        if (giac::is_zero(*num.expr, GetContext(&context)))
         {
             *expr = giac::gen(1);
             return;
@@ -327,8 +232,8 @@ public:
     friend bool operator==(const Symbolic<Number>& num1, const Symbolic<Number>& num2)
     {
         giac::gen diff = *num1.expr - *num2.expr;
-        giac::gen s = giac::simplify(diff, detail::GetContext(&num1.context));
-        return giac::is_zero(s, detail::GetContext(&num1.context));
+        giac::gen s = giac::simplify(diff, GetContext(&num1.context));
+        return giac::is_zero(s, GetContext(&num1.context));
     }
 
     friend bool operator==(const Symbolic<Number>& num1, const int num2)
@@ -469,14 +374,14 @@ public:
             try
             {
                 giac::gen g;
-                if (!detail::HasUnknownSymbol(*num.expr))
+                if (!HasUnknownSymbol(*num.expr))
                 {
-                    g = giac::_texpand(*num.expr, detail::GetContext(&num.context));
-                    g = giac::normal(g, detail::GetContext(&num.context));
+                    g = giac::_texpand(*num.expr, GetContext(&num.context));
+                    g = giac::normal(g, GetContext(&num.context));
                 }
                 else
                 {
-                    g = giac::factor(*num.expr, false, detail::GetContext(&num.context));
+                    g = giac::factor(*num.expr, false, GetContext(&num.context));
                 }
                 Symbolic<Number> res(num.precision);
                 *res.expr = g;
@@ -507,7 +412,7 @@ public:
         if (res_str == "undef")
         {
             if (var.expr->type == giac::_IDNT &&
-                detail::HasAmbiguousPoleArgument(*num.expr, *var.expr->_IDNTptr, *value.expr, &res.context))
+                HasAmbiguousPoleArgument(*num.expr, *var.expr->_IDNTptr, *value.expr, &res.context))
             {
                 if constexpr (std::is_same_v<Number, Rational>)
                     throw MathException(NotImplemented);
@@ -565,24 +470,24 @@ public:
     friend Symbolic<Number> cot(const Symbolic<Number>& num)
     {
         Symbolic<Number> res(num.precision);
-        std::string arg = num.expr->print(detail::GetContext(&num.context));
-        *res.expr = detail::ParseGen(std::string("yut_cot(") + arg + ")", &res.context);
+        std::string arg = num.expr->print(GetContext(&num.context));
+        *res.expr = ParseGen(std::string("yut_cot(") + arg + ")", &res.context);
         return res;
     }
 
     friend Symbolic<Number> sec(const Symbolic<Number>& num)
     {
         Symbolic<Number> res(num.precision);
-        std::string arg = num.expr->print(detail::GetContext(&num.context));
-        *res.expr = detail::ParseGen(std::string("yut_sec(") + arg + ")", &res.context);
+        std::string arg = num.expr->print(GetContext(&num.context));
+        *res.expr = ParseGen(std::string("yut_sec(") + arg + ")", &res.context);
         return res;
     }
 
     friend Symbolic<Number> csc(const Symbolic<Number>& num)
     {
         Symbolic<Number> res(num.precision);
-        std::string arg = num.expr->print(detail::GetContext(&num.context));
-        *res.expr = detail::ParseGen(std::string("yut_csc(") + arg + ")", &res.context);
+        std::string arg = num.expr->print(GetContext(&num.context));
+        *res.expr = ParseGen(std::string("yut_csc(") + arg + ")", &res.context);
         return res;
     }
 
@@ -609,7 +514,7 @@ public:
         }
         Symbolic<Number> res(num.precision);
         std::string s = "factorial(" + num.expr->print(&res.context) + ")";
-        *res.expr = detail::ParseGen(s, &res.context);
+        *res.expr = ParseGen(s, &res.context);
         return res;
     }
 
@@ -637,48 +542,48 @@ public:
     friend Symbolic<Number> coth(const Symbolic<Number>& num)
     {
         Symbolic<Number> res(num.precision);
-        std::string arg = num.expr->print(detail::GetContext(&num.context));
-        *res.expr = detail::ParseGen(std::string("yut_coth(") + arg + ")", &res.context);
+        std::string arg = num.expr->print(GetContext(&num.context));
+        *res.expr = ParseGen(std::string("yut_coth(") + arg + ")", &res.context);
         return res;
     }
 
     friend Symbolic<Number> sech(const Symbolic<Number>& num)
     {
         Symbolic<Number> res(num.precision);
-        std::string arg = num.expr->print(detail::GetContext(&num.context));
-        *res.expr = detail::ParseGen(std::string("yut_sech(") + arg + ")", &res.context);
+        std::string arg = num.expr->print(GetContext(&num.context));
+        *res.expr = ParseGen(std::string("yut_sech(") + arg + ")", &res.context);
         return res;
     }
 
     friend Symbolic<Number> csch(const Symbolic<Number>& num)
     {
         Symbolic<Number> res(num.precision);
-        std::string arg = num.expr->print(detail::GetContext(&num.context));
-        *res.expr = detail::ParseGen(std::string("yut_csch(") + arg + ")", &res.context);
+        std::string arg = num.expr->print(GetContext(&num.context));
+        *res.expr = ParseGen(std::string("yut_csch(") + arg + ")", &res.context);
         return res;
     }
 
     friend Symbolic<Number> asinh(const Symbolic<Number>& num)
     {
         Symbolic<Number> res(num.precision);
-        std::string arg = num.expr->print(detail::GetContext(&num.context));
-        *res.expr = detail::ParseGen(std::string("yut_asinh(") + arg + ")", &res.context);
+        std::string arg = num.expr->print(GetContext(&num.context));
+        *res.expr = ParseGen(std::string("yut_asinh(") + arg + ")", &res.context);
         return res;
     }
 
     friend Symbolic<Number> acosh(const Symbolic<Number>& num)
     {
         Symbolic<Number> res(num.precision);
-        std::string arg = num.expr->print(detail::GetContext(&num.context));
-        *res.expr = detail::ParseGen(std::string("yut_acosh(") + arg + ")", &res.context);
+        std::string arg = num.expr->print(GetContext(&num.context));
+        *res.expr = ParseGen(std::string("yut_acosh(") + arg + ")", &res.context);
         return res;
     }
 
     friend Symbolic<Number> atanh(const Symbolic<Number>& num)
     {
         Symbolic<Number> res(num.precision);
-        std::string arg = num.expr->print(detail::GetContext(&num.context));
-        *res.expr = detail::ParseGen(std::string("yut_atanh(") + arg + ")", &res.context);
+        std::string arg = num.expr->print(GetContext(&num.context));
+        *res.expr = ParseGen(std::string("yut_atanh(") + arg + ")", &res.context);
         return res;
     }
 
@@ -692,16 +597,16 @@ public:
                 return Symbolic<Number>(num.precision, std::u32string(U"-∞"));
         }
         Symbolic<Number> res(num.precision);
-        std::string arg = num.expr->print(detail::GetContext(&num.context));
-        *res.expr = detail::ParseGen(std::string("yut_acoth(") + arg + ")", &res.context);
+        std::string arg = num.expr->print(GetContext(&num.context));
+        *res.expr = ParseGen(std::string("yut_acoth(") + arg + ")", &res.context);
         return res;
     }
 
     friend Symbolic<Number> asech(const Symbolic<Number>& num)
     {
         Symbolic<Number> res(num.precision);
-        std::string arg = num.expr->print(detail::GetContext(&num.context));
-        *res.expr = detail::ParseGen(std::string("yut_asech(") + arg + ")", &res.context);
+        std::string arg = num.expr->print(GetContext(&num.context));
+        *res.expr = ParseGen(std::string("yut_asech(") + arg + ")", &res.context);
         return res;
     }
 
@@ -709,12 +614,12 @@ public:
     {
         if constexpr (!std::is_same_v<Number, Rational>)
         {
-            if (num.expr && giac::is_zero(*num.expr, detail::GetContext(&num.context)))
+            if (num.expr && giac::is_zero(*num.expr, GetContext(&num.context)))
                 return Symbolic<Number>(num.precision, std::u32string(U"∞"));
         }
         Symbolic<Number> res(num.precision);
-        std::string arg = num.expr->print(detail::GetContext(&num.context));
-        *res.expr = detail::ParseGen(std::string("yut_acsch(") + arg + ")", &res.context);
+        std::string arg = num.expr->print(GetContext(&num.context));
+        *res.expr = ParseGen(std::string("yut_acsch(") + arg + ")", &res.context);
         return res;
     }
 
@@ -727,7 +632,7 @@ public:
 
     friend Symbolic<Number> ln(const Symbolic<Number>& num)
     {
-        if (giac::is_zero(*num.expr, detail::GetContext(&num.context)))
+        if (giac::is_zero(*num.expr, GetContext(&num.context)))
             return Symbolic<Number>(num.precision, std::u32string(U"∞"));
         Symbolic<Number> res(num.precision);
         *res.expr = giac::log(*num.expr, &res.context);
@@ -749,7 +654,7 @@ public:
 
     friend Symbolic<Number> pow(const Symbolic<Number>& num1, const Symbolic<Number>& num2)
     {
-        if (giac::is_zero(*num2.expr, detail::GetContext(&num2.context)))
+        if (giac::is_zero(*num2.expr, GetContext(&num2.context)))
             return Symbolic<Number>(num1.precision, 1);
         Symbolic<Number> res(num1.precision);
         *res.expr = giac::pow(*num1.expr, *num2.expr, &res.context);
@@ -782,7 +687,7 @@ public:
 
     bool IsZero() const
     {
-        return giac::is_zero(*expr, detail::GetContext(&context));
+        return giac::is_zero(*expr, GetContext(&context));
     }
 
     bool IsNumber() const
@@ -798,14 +703,14 @@ public:
         std::string utf8 = yutovo_calculator::ToBasicString(s);
         // giac uses i for the imaginary unit; uppercase I is our canonical form
         if (utf8 == "I")
-            return detail::ParseGen("i", giac::context0);
+            return ParseGen("i", giac::context0);
         if (utf8 == "oo" || utf8 == "+oo")
             return giac::plus_inf;
         if (utf8 == "-oo")
             return giac::minus_inf;
         if (utf8 == "nan")
             return giac::undef;
-        return detail::ParseGen(utf8, giac::context0);
+        return ParseGen(utf8, giac::context0);
     }
 
     static std::string ReplacePowerOperator(std::string s)
@@ -1091,20 +996,13 @@ public:
 
     static int TermDegree(const std::string& term)
     {
-        static const std::set<std::string> known_funcs = {
-            "sin", "cos", "tan", "cot", "sec", "csc",
-            "sinh", "cosh", "tanh", "coth", "sech", "csch",
-            "asinh", "acosh", "atanh", "acoth", "asech", "acsch",
-            "arsinh", "arcosh", "artanh", "arcoth", "arsech", "arcsch",
-            "arcsinh", "arccosh", "arctanh", "arccoth", "arcsech", "arccsch", "arccosech",
-            "exp", "ln", "log", "sqrt", "root", "pow",
-            "gamma", "factorial", "min", "max", "diff", "subs", "expand", "simplify", "evalf"
-        };
-        static const std::set<std::string> known_consts = {
-            "pi", "i", "j", "e", "oo", "inf", "nan", "undef"
-        };
+        static const std::set<std::string> known_funcs = {"sin", "cos", "tan", "cot", "sec", "csc", "sinh", "cosh", "tanh", "coth", "sech", "csch",
+            "asinh", "acosh", "atanh", "acoth", "asech", "acsch", "arsinh", "arcosh", "artanh", "arcoth", "arsech", "arcsch",
+            "arcsinh", "arccosh", "arctanh", "arccoth", "arcsech", "arccsch", "arccosech", "exp", "ln", "log", "sqrt", "root", "pow",
+            "gamma", "factorial", "min", "max", "diff", "subs", "expand", "simplify", "evalf"};
+        static const std::set<std::string> known_consts = {"pi", "i", "j", "e", "oo", "inf", "nan", "undef"};
         int degree = 0;
-        // count explicit powers pow(var,exp)
+        //count explicit powers pow(var,exp)
         std::regex pow_re(R"(pow\(([a-zA-Z_][a-zA-Z0-9_]*),([0-9]+)\.?\))");
         std::sregex_iterator it(term.begin(), term.end(), pow_re);
         std::sregex_iterator end;
@@ -1113,7 +1011,7 @@ public:
             std::string exp_str = (*it)[2];
             degree += std::stoi(exp_str);
         }
-        // count remaining variable identifiers
+        //count remaining variable identifiers
         std::regex id_re(R"(\b([a-zA-Z_][a-zA-Z0-9_]*)\b)");
         it = std::sregex_iterator(term.begin(), term.end(), id_re);
         for (; it != end; ++it)
@@ -1123,7 +1021,7 @@ public:
                 continue;
             if (known_consts.find(id) != known_consts.end())
                 continue;
-            // check if already counted in pow(var,exp)
+            //check if already counted in pow(var,exp)
             std::regex already(R"(pow\()" + id + R"(,([0-9]+)\.?\))");
             if (std::regex_search(term, already))
                 continue;
@@ -1134,7 +1032,7 @@ public:
 
     static std::string SortExpressionTerms(std::string s)
     {
-        // split at top-level + or - (keep sign with term)
+        //split at top-level + or - (keep sign with term)
         std::vector<std::pair<std::string, int>> terms;
         std::string current;
         int depth = 0;
@@ -1166,14 +1064,16 @@ public:
 
     static std::string ReplaceUnitImaginary(std::string s)
     {
-        auto replace_sub = [](std::string& str, const std::string& from, const std::string& to) {
-            size_t start_pos = 0;
-            while ((start_pos = str.find(from, start_pos)) != std::string::npos)
+        auto replace_sub = 
+            [](std::string& str, const std::string& from, const std::string& to)
             {
-                str.replace(start_pos, from.length(), to);
-                start_pos += to.length();
-            }
-        };
+                size_t start_pos = 0;
+                while ((start_pos = str.find(from, start_pos)) != std::string::npos)
+                {
+                    str.replace(start_pos, from.length(), to);
+                    start_pos += to.length();
+                }
+            };
         replace_sub(s, "+1.*i", "+i");
         replace_sub(s, "-1.*i", "-i");
         replace_sub(s, "+1.*j", "+j");
@@ -1609,7 +1509,6 @@ private:
     std::unique_ptr<giac::gen> expr;
     bool explicit_negative_infinity = false;
 };
-
 
 template<typename T>
 struct is_symbolic : std::false_type {};
