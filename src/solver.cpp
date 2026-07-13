@@ -614,7 +614,7 @@ Integer Solver<Integer>::operator()(FunctionCallNode<Integer> const& op) const
             {
                 UnaryFunction u = std::get<UnaryFunction>(*func);
                 if (op.arguments.size() != 1)
-                    throw SyntaxException(op.id, WrongArgumentsCount, U"Wrong arguments count in '" + op.name.name + U"'", op.pos, op.name.name.length(), op.line);
+                    throw SyntaxException(op.id, WrongArgumentsCount, U"Wrong arguments count in '" + op.name.name + U"'", op.pos, CallSize(op), op.line);
                 
                 ExpressionNodesIter iter = op.arguments.begin();
                 Integer arg = (*this)(*iter);
@@ -628,7 +628,7 @@ Integer Solver<Integer>::operator()(FunctionCallNode<Integer> const& op) const
             {
                 BinaryFunction b = std::get<BinaryFunction>(*func);
                 if (op.arguments.size() != 2)
-                    throw SyntaxException(op.id, WrongArgumentsCount, U"Wrong arguments count in '" + op.name.name + U"'", op.pos, op.name.name.length(), op.line);
+                    throw SyntaxException(op.id, WrongArgumentsCount, U"Wrong arguments count in '" + op.name.name + U"'", op.pos, CallSize(op), op.line);
                 
                 ExpressionNodesIter iter = op.arguments.begin();
                 Integer arg1 = (*this)(*iter++);
@@ -693,7 +693,7 @@ Rational Solver<Rational>::operator()(FunctionCallNode<Rational> const& op) cons
             {
                 UnaryFunction u = std::get<UnaryFunction>(*func);
                 if (op.arguments.size() != 1)
-                    throw SyntaxException(op.id, WrongArgumentsCount, U"Wrong arguments count in '" + op.name.name + U"'", op.pos, op.name.name.length(), op.line);
+                    throw SyntaxException(op.id, WrongArgumentsCount, U"Wrong arguments count in '" + op.name.name + U"'", op.pos, CallSize(op), op.line);
                 
                 ExpressionNodesIter iter = op.arguments.begin();
                 Rational arg = (*this)(*iter);
@@ -707,7 +707,7 @@ Rational Solver<Rational>::operator()(FunctionCallNode<Rational> const& op) cons
             {
                 BinaryFunction b = std::get<BinaryFunction>(*func);
                 if (op.arguments.size() != 2)
-                    throw SyntaxException(op.id, WrongArgumentsCount, U"Wrong arguments count in '" + op.name.name + U"'", op.pos, op.name.name.length(), op.line);
+                    throw SyntaxException(op.id, WrongArgumentsCount, U"Wrong arguments count in '" + op.name.name + U"'", op.pos, CallSize(op), op.line);
                 
                 ExpressionNodesIter iter = op.arguments.begin();
                 Rational arg1 = (*this)(*iter++);
@@ -754,6 +754,10 @@ Integer Solver<Integer>::operator()(FunctionCallStringNode<Integer> const& op) c
         {
             StringFunction u = std::get<StringFunction>(*func);
             return (*u)(op.argument);
+        }
+        catch (const MathException& ex)
+        {
+            throw MathException(op.id, ex.ex_id, op.pos, op.size, op.line);
         }
         catch (const std::bad_variant_access&)
         {

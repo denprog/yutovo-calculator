@@ -89,6 +89,7 @@ struct ExpressionPosition
 	mutable LogicalId id;
 	int pos = -1; //position in a line
 	int line = -1; //line number
+	int size = 0; //source text size of the node (0 means unset)
 };
 
 //Identifier node

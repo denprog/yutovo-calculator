@@ -51,6 +51,8 @@ try {
 - `fact(x)` (postfix `!`) is implemented for all symbolic types as a product `1*2*...*n` for non-negative integer arguments; returns `factorial(x)` for symbolic/non-integer arguments.
 - `Symbolic<Number>::ToJson()` builds an AST from the giac-printed string and emits JSON using yutovo-editor element type codes (7=CODE_ROW, 8=CODE_STRING, 10=SHAPE, 11=PLUS, 12=MINUS, 13=MULTIPLY, 14=DIVISION, 15=POWER, 16=SQUARE_ROOT, 17=NTH_ROOT, 45-47=SYMBOLIC_*_RESULT). Division operands are wrapped in a single `CODE_ROW`; scientific numbers are emitted as flat elements so they do not add extra nesting inside sums or products.
 - `subs` uses `giac::limit` to detect essential singularities of `exp`, `sin`, `cos`, `sinh`, `cosh` and returns `nan` for Real/Complex (throws for Rational).
+- All giac-specific helpers live in `src/giac_utils.h` / `src/giac_utils.cpp` in the common `yutovo_calculator` namespace; `src/utils.h` / `src/utils.cpp` contain only general-purpose utilities.
+- `WrongArgumentsCount` exceptions report a `size` that covers the full function call up to and including the closing parenthesis. `ExpressionPosition::size` is populated by `Annotation` for function-call nodes, and `Solver::CallSize()` returns it (falling back to the identifier length when unset).
 - `RealNumberStr` evaluates rational strings such as `1333/1000` with MPFR so that `CombineLikeTerms` does not turn decimal reciprocals into bogus scientific notation (e.g., `1.333E+3`). `AddCoeffs` / `MultiplyCoeffs` fall back to `giac::gen` for decimal or scientific-notation coefficients.
 - On Linux `yutovo-calculator` links the **system** MPFR/GMP libraries and a static **giac** library found in `${INSTALL_PATH}/lib`. Debug builds must link `${INSTALL_PATH}/lib/libgiacd.a` and release builds `${INSTALL_PATH}/lib/libgiac.a`; mixing configurations causes an ABI mismatch and memory corruption inside giac (e.g., crashes in `giac::expand`). The Emscripten/wasm build links `${INSTALL_PATH}/wasm/libgiac.a`, `${INSTALL_PATH}/wasm/libmpfr.a`, `${INSTALL_PATH}/wasm/libgmp.a`, and `${INSTALL_PATH}/wasm/libgmpxx.a`, and compiles `src/symbolic.cpp` against the wasm build of giac; the former header-only stub has been removed.
 - Linux consumers of the installed `yutovo-calculator` target must also call `pkg_check_modules(mpfr REQUIRED IMPORTED_TARGET mpfr)` and `pkg_check_modules(gmp REQUIRED IMPORTED_TARGET gmp)` because they are recorded in the imported target's `INTERFACE_LINK_LIBRARIES`.
@@ -190,6 +192,14 @@ Running the full `yutovo-editor_tests` suite takes approximately **25 minutes** 
 - `yutovo-desktop/src/mainwindow.cpp` — added symbolic result in settings load/save
 - `yutovo-desktop/src/translations/*.ts` — added `Symbolic` translations
 
+- `yutovo-calculator/src/giac_utils.h` / `giac_utils.cpp` — new files holding giac-specific helpers (moved from `symbolic.h`/`symbolic.cpp`)
+- `yutovo-calculator/src/utils.h` / `utils.cpp` — restored to general-purpose utilities
+- `yutovo-calculator/src/ast.h` — added `ExpressionPosition::size`
+- `yutovo-calculator/src/annotation.h` — `Annotation` now computes `size` for function-call nodes by scanning from the identifier to the matching closing fence
+- `yutovo-calculator/src/solver.h` / `solver.cpp` — added `Solver::CallSize()`; all `WrongArgumentsCount` throws now use `CallSize(op)`
+- `yutovo-calculator/src/CMakeLists.txt` — builds and installs `giac_utils.h` / `giac_utils.cpp`
+- `yutovo-calculator/test/real.cpp` — updated `CalcTestReal.errors5` to expect `size == 6` for `sqrt();`
+- `yutovo-calculator/test/symbolic_real.cpp` — added `CalcTestSymbolicReal.simplify_wrong_args` regression test
 - `yutovo-calculator/test/symbolic.cpp` — added `variables_rational`, `variables_complex`, `user_functions_rational`, `user_functions_complex` tests
 - `yutovo-calculator/src/symbolic.cpp` — fixed `ReplacePowerOperator` to correctly handle parenthesized exponents (e.g. `x**(-1)` → `pow(x,-1)`)
 - `yutovo-calculator/src/parser.cpp` — registered `asinh`/`acosh`/`atanh`/`acoth`/`asech`/`acsch` and `arcsinh`/`arccosh`/`arctanh`/`arccoth`/`arcsech`/`arccsch`/`arccosech` synonyms for symbolic parsers
@@ -198,6 +208,7 @@ Running the full `yutovo-editor_tests` suite takes approximately **25 minutes** 
 - `yutovo-editor/src/formulas/power.h` — added `GetBaseRow()` and `GetExponentRow()` public helpers
 
 ## Next Steps / Blockers
-- All Linux calculator tests pass (1111 tests across Real, Complex, Integer, Rational, Array, etc.).
+- All Linux calculator tests pass (1116 tests across Real, Complex, Integer, Rational, Array, Symbolic, etc.).
+- `yutovo-solver` tests pass (40 tests).
 - The three failing `SolverSymbolicTest` editor tests (`solver17`, `solver18`, `solver22`) have been fixed by adjusting calculator JSON output; no editor tests were modified.
 - The Emscripten/wasm symbolic stub is implemented; native behavior is unchanged.

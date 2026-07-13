@@ -541,6 +541,21 @@ TEST_F(CalcTestSymbolicReal, simplify11)
     ASSERT_TRUE(!s.empty());
 }
 
+TEST_F(CalcTestSymbolicReal, simplify_wrong_args)
+{
+    try
+    {
+        parser.Parse(LogicalId{0, 0, 1}, U"simplify();", 10);
+    }
+    catch (SyntaxException& ex)
+    {
+        ASSERT_TRUE((ex.id == LogicalId{0, 0, 1}) && ex.ex_id == ParserExceptionCode::WrongArgumentsCount &&
+                    ex.pos == 0 && ex.size == 10) << ex.ex_id;
+        return;
+    }
+    ASSERT_FALSE(true);
+}
+
 TEST_F(CalcTestSymbolicReal, pi_symbol_output)
 {
     Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"123(ee)/(π);");

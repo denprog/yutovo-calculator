@@ -393,8 +393,7 @@ struct Solver : public boost::static_visitor<Number>
                     {
                         auto u = std::get<typename SolverSymbols<Number>::UnaryFunction>(*func);
                         if (op.arguments.size() != 1)
-                            throw SyntaxException(op.id, WrongArgumentsCount, U"Wrong arguments count in '" + op.name.name + U"'", op.pos, 
-                                op.name.name.length(), op.line);
+                            throw SyntaxException(op.id, WrongArgumentsCount, U"Wrong arguments count in '" + op.name.name + U"'", op.pos, CallSize(op), op.line);
                         ExpressionNodesIter iter = op.arguments.begin();
                         Number arg = (*this)(*iter);
                         return (*u)(arg);
@@ -406,8 +405,7 @@ struct Solver : public boost::static_visitor<Number>
                     {
                         auto b = std::get<typename SolverSymbols<Number>::BinaryFunction>(*func);
                         if (op.arguments.size() != 2)
-                            throw SyntaxException(op.id, WrongArgumentsCount, U"Wrong arguments count in '" + op.name.name + U"'", op.pos, 
-                                op.name.name.length(), op.line);
+                            throw SyntaxException(op.id, WrongArgumentsCount, U"Wrong arguments count in '" + op.name.name + U"'", op.pos, CallSize(op), op.line);
                         ExpressionNodesIter iter = op.arguments.begin();
                         Number arg1 = (*this)(*iter++);
                         Number arg2 = (*this)(*iter);
@@ -420,8 +418,8 @@ struct Solver : public boost::static_visitor<Number>
                     {
                         auto t = std::get<typename SolverSymbols<Number>::TernaryFunction>(*func);
                         if (op.arguments.size() != 3)
-                            throw SyntaxException(op.id, WrongArgumentsCount, U"Wrong arguments count in '" + op.name.name + U"'", op.pos, 
-                                op.name.name.length(), op.line);
+                            throw SyntaxException(op.id, WrongArgumentsCount, U"Wrong arguments count in '" + op.name.name + U"'", op.pos,
+                                CallSize(op), op.line);
                         ExpressionNodesIter iter = op.arguments.begin();
                         Number arg1 = (*this)(*iter++);
                         Number arg2 = (*this)(*iter++);
@@ -467,7 +465,7 @@ struct Solver : public boost::static_visitor<Number>
                 if (func)
                 {
                     Number var(precision, op.argument);
-                    throw SyntaxException(op.id, WrongArgumentsCount, U"Incorrect subs arguments", op.pos, op.name.name.length(), op.line);
+                    throw SyntaxException(op.id, WrongArgumentsCount, U"Incorrect subs arguments", op.pos, CallSize(op), op.line);
                 }
             }
             throw SyntaxException(op.id, UnknownIdentifier, U"Identifier '" + op.name.name + U"' not found", op.pos, op.name.name.length(), op.line);
@@ -1001,7 +999,7 @@ struct Solver : public boost::static_visitor<Number>
                 if (exported_id || IsLess(func.id, id))
                 {
                     if (func.arguments.size() != op.arguments.size())
-                        throw SyntaxException(op.id, WrongArgumentsCount, U"Wrong arguments count in '" + op.name.name + U"'", op.pos, op.line);
+                        throw SyntaxException(op.id, WrongArgumentsCount, U"Wrong arguments count in '" + op.name.name + U"'", op.pos, CallSize(op), op.line);
                     return &func;
                 }
             }
@@ -1889,7 +1887,7 @@ private:
                 {
                     TrigonometricFunction u = std::get<TrigonometricFunction>(*t_func);
                     if (op.arguments.size() != 1)
-                        throw SyntaxException(op.id, WrongArgumentsCount, U"Wrong arguments count in '" + op.name.name + U"'", op.pos, op.line);
+                        throw SyntaxException(op.id, WrongArgumentsCount, U"Wrong arguments count in '" + op.name.name + U"'", op.pos, CallSize(op), op.line);
                     
                     ExpressionNodesIter iter = op.arguments.begin();
                     Number arg = (*this)(*iter);
@@ -1910,7 +1908,7 @@ private:
                 {
                     UnaryFunction u = std::get<UnaryFunction>(*func);
                     if (op.arguments.size() != 1)
-                        throw SyntaxException(op.id, WrongArgumentsCount, U"Wrong arguments count in '" + op.name.name + U"'", op.pos, op.line);
+                        throw SyntaxException(op.id, WrongArgumentsCount, U"Wrong arguments count in '" + op.name.name + U"'", op.pos, CallSize(op), op.line);
                     
                     ExpressionNodesIter iter = op.arguments.begin();
                     Number arg = (*this)(*iter);
@@ -1924,7 +1922,7 @@ private:
                 {
                     ComplexUnaryFunction u = std::get<ComplexUnaryFunction>(*func);
                     if (op.arguments.size() != 1)
-                        throw SyntaxException(op.id, WrongArgumentsCount, U"Wrong arguments count in '" + op.name.name + U"'", op.pos, op.line);
+                        throw SyntaxException(op.id, WrongArgumentsCount, U"Wrong arguments count in '" + op.name.name + U"'", op.pos, CallSize(op), op.line);
                     
                     ExpressionNodesIter iter = op.arguments.begin();
                     Number arg = (*this)(*iter);
@@ -1940,7 +1938,7 @@ private:
                 {
                     BinaryFunction b = std::get<BinaryFunction>(*func);
                     if (op.arguments.size() != 2)
-                        throw SyntaxException(op.id, WrongArgumentsCount, U"Wrong arguments count in '" + op.name.name + U"'", op.pos, op.line);
+                        throw SyntaxException(op.id, WrongArgumentsCount, U"Wrong arguments count in '" + op.name.name + U"'", op.pos, CallSize(op), op.line);
                     
                     ExpressionNodesIter iter = op.arguments.begin();
                     Number arg1 = (*this)(*iter++);
@@ -1955,7 +1953,7 @@ private:
                 {
                     ComplexBinaryFunction b = std::get<ComplexBinaryFunction>(*func);
                     if (op.arguments.size() != 2)
-                        throw SyntaxException(op.id, WrongArgumentsCount, U"Wrong arguments count in '" + op.name.name + U"'", op.pos, op.line);
+                        throw SyntaxException(op.id, WrongArgumentsCount, U"Wrong arguments count in '" + op.name.name + U"'", op.pos, CallSize(op), op.line);
                     
                     ExpressionNodesIter iter = op.arguments.begin();
                     Number arg1 = (*this)(*iter++);
@@ -1990,7 +1988,7 @@ private:
             {
                 BinaryFunction b = std::get<BinaryFunction>(*func);
                 if (op.arguments.size() != 1)
-                    throw SyntaxException(op.id, WrongArgumentsCount, U"Wrong arguments count in '" + op.name.name + U"'", op.pos, op.line);
+                    throw SyntaxException(op.id, WrongArgumentsCount, U"Wrong arguments count in '" + op.name.name + U"'", op.pos, CallSize(op), op.line);
                 
                 ExpressionNodesIter iter = op.arguments.begin();
                 Number arg1 = (*this)(*iter++);
@@ -2004,6 +2002,14 @@ private:
 
         //there is no such a function
         throw SyntaxException(op.id, UnknownIdentifier, U"Identifier '" + op.name.name + U"' not found", op.pos, op.line);
+    }
+
+    template<typename Node>
+    int CallSize(const Node& op) const
+    {
+        if (op.size > 0)
+            return op.size;
+        return static_cast<int>(op.name.name.length());
     }
 
     friend struct Expression<Number>;

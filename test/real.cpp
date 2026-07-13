@@ -807,7 +807,7 @@ TEST_F(CalcTestReal, errors5)
     }
     catch (yutovo_calculator::SyntaxException& ex)
     {
-        ASSERT_TRUE((ex.id == LogicalId{0, 0, 1}) && ex.ex_id == ParserExceptionCode::WrongArgumentsCount && ex.pos == 0) << ex.ex_id;
+        ASSERT_TRUE((ex.id == LogicalId{0, 0, 1}) && ex.ex_id == ParserExceptionCode::WrongArgumentsCount && ex.pos == 0 && ex.size == 6) << ex.ex_id;
         return;
     }
     ASSERT_FALSE(true);

@@ -152,16 +152,67 @@ struct Annotation
 	void operator()(FunctionCallNode<Number>& op, std::u32string::iterator pos) const
 	{
 		UpdatePosition(pos, op);
+		auto it = pos;
+		it += static_cast<std::ptrdiff_t>(op.name.name.length());
+		while (it != last && *it == U' ')
+			++it;
+		if (it == last || *it != U'(')
+		{
+			op.size = static_cast<int>(op.name.name.length());
+			return;
+		}
+		int depth = 1;
+		++it;
+		for (; it != last; ++it)
+		{
+			char32_t ch = *it;
+			if (ch == U'(')
+				++depth;
+			else if (ch == U')')
+				--depth;
+			if (depth == 0)
+				break;
+		}
+		if (depth != 0)
+			op.size = static_cast<int>(op.name.name.length());
+		else
+			op.size = static_cast<int>(std::distance(pos, it)) + 1;
 	}
 
 	void operator()(FunctionCallStringNode<Number>& op, std::u32string::iterator pos) const
 	{
 		UpdatePosition(pos, op);
+		auto it = pos;
+		it += static_cast<std::ptrdiff_t>(op.name.name.length());
+		while (it != last && *it == U' ')
+			++it;
+		if (it == last || *it != U'[')
+		{
+			op.size = static_cast<int>(op.name.name.length());
+			return;
+		}
+		int depth = 1;
+		++it;
+		for (; it != last; ++it)
+		{
+			char32_t ch = *it;
+			if (ch == U'[')
+				++depth;
+			else if (ch == U']')
+				--depth;
+			if (depth == 0)
+				break;
+		}
+		if (depth != 0)
+			op.size = static_cast<int>(op.name.name.length());
+		else
+			op.size = static_cast<int>(std::distance(pos, it)) + 1;
 	}
 
 	void operator()(NoFencesFunctionCallNode<Number>& op, std::u32string::iterator pos) const
 	{
 		UpdatePosition(pos, op);
+		op.size = static_cast<int>(op.name.name.length());
 	}
 
 	void operator()(CompareNode<Number>& op, std::u32string::iterator pos) const
