@@ -584,7 +584,7 @@ struct Solver : public boost::static_visitor<Number>
                     throw MathException(IncorrectOperation);
                 }
 
-                return Number(ToUtfString(res.print(&ctx)));
+                return FromGiac<Number>(res, precision);
             }
             catch (const MathException& e)
             {

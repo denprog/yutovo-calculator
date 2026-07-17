@@ -9,6 +9,7 @@
 #define RATIONAL_H
 
 #include <string>
+#include <gmp.h>
 #include "math_helper.h"
 #include "integer.h"
 #include "unit.h"
@@ -28,6 +29,7 @@ public:
     Rational(const int precision, Unit& _unit);
     Rational(Unit& _unit);
     Rational(const std::u32string& num);
+    Rational(mpz_srcptr num, mpz_srcptr den);
     ~Rational();
     
 public:

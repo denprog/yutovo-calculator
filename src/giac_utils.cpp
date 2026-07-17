@@ -791,9 +791,45 @@ void SortTerms(GiacExpression& sum, const FormatContext& ctx)
     sum.args = std::move(sorted);
 }
 
+static std::string RationalStringFromGiac(const giac::gen& g, giac::context* ct, int precision)
+{
+    try
+    {
+        Rational r = FromGiac<Rational>(g, precision);
+        return ToBasicString(r.ToString());
+    }
+    catch (...)
+    {
+        return GiacToString(g, ct);
+    }
+}
+
+static std::string CoeffStringFromGiac(const giac::gen& g, const FormatContext& ctx)
+{
+    if (ctx.mode == FormatContext::Rational)
+    {
+        Rational r = FromGiac<Rational>(g, ctx.precision);
+        if (r.IsZero())
+            return "0";
+        return ToBasicString(r.ToString());
+    }
+
+    Real r = FromGiac<Real>(g, ctx.precision);
+    if (r.IsZero())
+        return "0";
+    if (r == 1)
+        return "1";
+    if (r == -1)
+        return "-1";
+    if (r.IsInfinity())
+        return r.GetSign() ? "-inf" : "inf";
+    return ToBasicString(r.ToString(ctx.exp, ctx.precision, false));
+}
+
 std::string AddCoeffs(const std::string& a, const std::string& b, const FormatContext& ctx)
 {
     giac::context ct;
+    giac::decimal_digits(std::max(1, ctx.precision + 1), &ct);
     giac::gen ag(a.c_str(), &ct);
     giac::gen bg(b.c_str(), &ct);
     giac::gen sum = ag + bg;
@@ -801,12 +837,13 @@ std::string AddCoeffs(const std::string& a, const std::string& b, const FormatCo
         sum = giac::normal(sum, &ct);
     else
         sum = giac::evalf(sum, 1, &ct);
-    return sum.print(&ct);
+    return CoeffStringFromGiac(sum, ctx);
 }
 
 std::string MultiplyCoeffs(const std::string& a, const std::string& b, const FormatContext& ctx)
 {
     giac::context ct;
+    giac::decimal_digits(std::max(1, ctx.precision + 1), &ct);
     giac::gen ag(a.c_str(), &ct);
     giac::gen bg(b.c_str(), &ct);
     giac::gen prod = ag * bg;
@@ -814,7 +851,7 @@ std::string MultiplyCoeffs(const std::string& a, const std::string& b, const For
         prod = giac::normal(prod, &ct);
     else
         prod = giac::evalf(prod, 1, &ct);
-    return prod.print(&ct);
+    return CoeffStringFromGiac(prod, ctx);
 }
 
 void CombineLikeTerms(GiacExpression& sum, const FormatContext& ctx)
@@ -1042,10 +1079,20 @@ std::string EvaluateGiacExpression(const std::string& expr, int precision)
         return "nan";
     if (g == giac::undef)
         return "nan";
-    std::string str = g.print(&ct);
-    if (str.find("undef") != std::string::npos || str.find("error") != std::string::npos || str.find("Error") != std::string::npos)
+    if (g.type == giac::_SYMB)
+    {
+        std::string str = g.print(&ct);
+        if (str.find("undef") != std::string::npos || str.find("error") != std::string::npos || str.find("Error") != std::string::npos)
+            return "nan";
+    }
+    Real r = FromGiac<Real>(g, precision);
+    if (r.IsNaN())
         return "nan";
-    return str;
+    if (r.IsZero())
+        return "0";
+    if (r.IsInfinity())
+        return r.GetSign() ? "-inf" : "inf";
+    return ToBasicString(r.ToString(precision, precision, false));
 }
 
 bool IsInertFunction(const std::string& name)
@@ -1094,12 +1141,12 @@ bool IsGiacExpressionZero(const std::string& expr, int precision)
     giac::gen f = giac::evalf(g, 60, &ct);
     if (f.type == giac::_CPLX)
         return false;
-    giac::gen ab = giac::abs(f, &ct);
-    ab = giac::evalf(ab, 3, &ct);
-    std::string as = ab.print(&ct);
     try
     {
-        double d = std::stod(as);
+        const Real r = FromGiac<Real>(f, precision);
+        if (r.IsNaN())
+            return false;
+        double d = mpfr_get_d(r.GetNumber(), MPFR_RNDN);
         return std::fabs(d) < 1e-6;
     }
     catch (...)
@@ -1208,7 +1255,7 @@ GiacExpression EvaluateArithmeticExpr(GiacExpression e, const FormatContext& ctx
         giac::decimal_digits(std::max(1, ctx.precision + 1), &ct);
         giac::gen g(expr.c_str(), &ct);
         g = giac::normal(g, &ct);
-        return ExprFromGiacResult(GiacToString(g, &ct));
+        return ExprFromGiacResult(RationalStringFromGiac(g, &ct, ctx.precision));
     }
     std::string expr = EmitString(e, ctx);
     std::string val = EvaluateGiacExpression(expr, ctx.precision);
@@ -1794,7 +1841,7 @@ GiacExpression Transform(GiacExpression e, const FormatContext& ctx)
                 giac::decimal_digits(std::max(1, ctx.precision + 1), &ct);
                 giac::gen g(expr.c_str(), &ct);
                 g = giac::normal(g, &ct);
-                return ExprFromGiacResult(GiacToString(g, &ct));
+                return ExprFromGiacResult(RationalStringFromGiac(g, &ct, ctx.precision));
             }
             std::string val = EvaluateGiacExpression(expr, ctx.precision);
             return ExprFromGiacResult(val);

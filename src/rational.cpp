@@ -96,6 +96,18 @@ Rational::Rational(const std::u32string& num)
 #endif
 }
 
+Rational::Rational(mpz_srcptr num, mpz_srcptr den)
+{
+    mpq_init(number);
+    mpq_set_num(number, num);
+    mpq_set_den(number, den);
+    mpq_canonicalize(number);
+
+#ifdef TRACE_OUTPUT
+    UpdateNumberStr();
+#endif
+}
+
 Rational::~Rational()
 {
     mpq_clear(number);

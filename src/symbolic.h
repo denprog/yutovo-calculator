@@ -409,11 +409,9 @@ public:
     {
         Symbolic<Number> res(num.precision);
         *res.expr = giac::subst(*num.expr, *var.expr, *value.expr, false, &res.context);
-        std::string res_str = res.expr->print(&res.context);
-        if (res_str == "undef")
+        if (*res.expr == giac::undef)
         {
-            if (var.expr->type == giac::_IDNT &&
-                HasAmbiguousPoleArgument(*num.expr, *var.expr->_IDNTptr, *value.expr, &res.context))
+            if (var.expr->type == giac::_IDNT && HasAmbiguousPoleArgument(*num.expr, *var.expr->_IDNTptr, *value.expr, &res.context))
             {
                 if constexpr (std::is_same_v<Number, Rational>)
                     throw MathException(NotImplemented);
@@ -421,20 +419,18 @@ public:
             }
             return Symbolic<Number>(num.precision, std::string("nan"));
         }
-        if (*res.expr == giac::minus_inf &&
-            num.expr->type == giac::_SYMB &&
-            num.expr->_SYMBptr->sommet == giac::at_ln &&
+        if (*res.expr == giac::minus_inf && num.expr->type == giac::_SYMB && num.expr->_SYMBptr->sommet == giac::at_ln &&
             giac::is_zero(giac::subst(num.expr->_SYMBptr->feuille, *var.expr, *value.expr, false, &res.context), &res.context))
         {
             return Symbolic<Number>(num.precision, std::u32string(U"∞"));
         }
         if constexpr (!std::is_same_v<Number, Rational>)
         {
-            if (res_str == "yut_acoth(1)" || res_str == "yut_acoth(1.)")
+            if (*res.expr == InertCall("acoth", giac::gen(1), &res.context) || *res.expr == InertCall("acoth", giac::gen(1.), &res.context))
                 return Symbolic<Number>(num.precision, std::u32string(U"∞"));
-            if (res_str == "yut_acoth(-1)" || res_str == "yut_acoth(-1.)")
+            if (*res.expr == InertCall("acoth", giac::gen(-1), &res.context) || *res.expr == InertCall("acoth", giac::gen(-1.), &res.context))
                 return Symbolic<Number>(num.precision, std::u32string(U"-∞"));
-            if (res_str == "yut_acsch(0)" || res_str == "yut_acsch(0.)")
+            if (*res.expr == InertCall("acsch", giac::gen(0), &res.context) || *res.expr == InertCall("acsch", giac::gen(0.), &res.context))
                 return Symbolic<Number>(num.precision, std::u32string(U"∞"));
         }
         return res;
@@ -495,24 +491,21 @@ public:
     friend Symbolic<Number> cot(const Symbolic<Number>& num)
     {
         Symbolic<Number> res(num.precision);
-        std::string arg = num.expr->print(GetContext(&num.context));
-        *res.expr = ParseGen(std::string("yut_cot(") + arg + ")", &res.context);
+        *res.expr = InertCall("cot", *num.expr, &res.context);
         return res;
     }
 
     friend Symbolic<Number> sec(const Symbolic<Number>& num)
     {
         Symbolic<Number> res(num.precision);
-        std::string arg = num.expr->print(GetContext(&num.context));
-        *res.expr = ParseGen(std::string("yut_sec(") + arg + ")", &res.context);
+        *res.expr = InertCall("sec", *num.expr, &res.context);
         return res;
     }
 
     friend Symbolic<Number> csc(const Symbolic<Number>& num)
     {
         Symbolic<Number> res(num.precision);
-        std::string arg = num.expr->print(GetContext(&num.context));
-        *res.expr = ParseGen(std::string("yut_csc(") + arg + ")", &res.context);
+        *res.expr = InertCall("csc", *num.expr, &res.context);
         return res;
     }
 
@@ -538,8 +531,7 @@ public:
             return res;
         }
         Symbolic<Number> res(num.precision);
-        std::string s = "factorial(" + num.expr->print(&res.context) + ")";
-        *res.expr = ParseGen(s, &res.context);
+        *res.expr = giac::symbolic(*giac::at_factorial, *num.expr);
         return res;
     }
 
@@ -567,48 +559,42 @@ public:
     friend Symbolic<Number> coth(const Symbolic<Number>& num)
     {
         Symbolic<Number> res(num.precision);
-        std::string arg = num.expr->print(GetContext(&num.context));
-        *res.expr = ParseGen(std::string("yut_coth(") + arg + ")", &res.context);
+        *res.expr = InertCall("coth", *num.expr, &res.context);
         return res;
     }
 
     friend Symbolic<Number> sech(const Symbolic<Number>& num)
     {
         Symbolic<Number> res(num.precision);
-        std::string arg = num.expr->print(GetContext(&num.context));
-        *res.expr = ParseGen(std::string("yut_sech(") + arg + ")", &res.context);
+        *res.expr = InertCall("sech", *num.expr, &res.context);
         return res;
     }
 
     friend Symbolic<Number> csch(const Symbolic<Number>& num)
     {
         Symbolic<Number> res(num.precision);
-        std::string arg = num.expr->print(GetContext(&num.context));
-        *res.expr = ParseGen(std::string("yut_csch(") + arg + ")", &res.context);
+        *res.expr = InertCall("csch", *num.expr, &res.context);
         return res;
     }
 
     friend Symbolic<Number> asinh(const Symbolic<Number>& num)
     {
         Symbolic<Number> res(num.precision);
-        std::string arg = num.expr->print(GetContext(&num.context));
-        *res.expr = ParseGen(std::string("yut_asinh(") + arg + ")", &res.context);
+        *res.expr = InertCall("asinh", *num.expr, &res.context);
         return res;
     }
 
     friend Symbolic<Number> acosh(const Symbolic<Number>& num)
     {
         Symbolic<Number> res(num.precision);
-        std::string arg = num.expr->print(GetContext(&num.context));
-        *res.expr = ParseGen(std::string("yut_acosh(") + arg + ")", &res.context);
+        *res.expr = InertCall("acosh", *num.expr, &res.context);
         return res;
     }
 
     friend Symbolic<Number> atanh(const Symbolic<Number>& num)
     {
         Symbolic<Number> res(num.precision);
-        std::string arg = num.expr->print(GetContext(&num.context));
-        *res.expr = ParseGen(std::string("yut_atanh(") + arg + ")", &res.context);
+        *res.expr = InertCall("atanh", *num.expr, &res.context);
         return res;
     }
 
@@ -622,16 +608,14 @@ public:
                 return Symbolic<Number>(num.precision, std::u32string(U"-∞"));
         }
         Symbolic<Number> res(num.precision);
-        std::string arg = num.expr->print(GetContext(&num.context));
-        *res.expr = ParseGen(std::string("yut_acoth(") + arg + ")", &res.context);
+        *res.expr = InertCall("acoth", *num.expr, &res.context);
         return res;
     }
 
     friend Symbolic<Number> asech(const Symbolic<Number>& num)
     {
         Symbolic<Number> res(num.precision);
-        std::string arg = num.expr->print(GetContext(&num.context));
-        *res.expr = ParseGen(std::string("yut_asech(") + arg + ")", &res.context);
+        *res.expr = InertCall("asech", *num.expr, &res.context);
         return res;
     }
 
@@ -643,8 +627,7 @@ public:
                 return Symbolic<Number>(num.precision, std::u32string(U"∞"));
         }
         Symbolic<Number> res(num.precision);
-        std::string arg = num.expr->print(GetContext(&num.context));
-        *res.expr = ParseGen(std::string("yut_acsch(") + arg + ")", &res.context);
+        *res.expr = InertCall("acsch", *num.expr, &res.context);
         return res;
     }
 

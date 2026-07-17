@@ -14,7 +14,7 @@
 - **Never delete existing tests.** When fixing regressions or refactoring, update test expectations to match the new correct behavior, but do not remove tests. If `git checkout` or similar commands are used to revert a file, verify that no user-added tests were lost.
 
 ### Code Style
-Always place braces on their own line for control structures:
+Always place braces on their own line for control structures.
 
 ### Parenthesized expressions
 Keep the contents of parentheses (function argument lists, conditions, initializers, etc.) on a single line when it fits. Only wrap to a new line if the expression would exceed **140 columns**.
@@ -66,8 +66,10 @@ try {
 - `Symbolic<Number>::ToJson()` builds an AST from the giac-printed string and emits JSON using yutovo-editor element type codes (7=CODE_ROW, 8=CODE_STRING, 10=SHAPE, 11=PLUS, 12=MINUS, 13=MULTIPLY, 14=DIVISION, 15=POWER, 16=SQUARE_ROOT, 17=NTH_ROOT, 45-47=SYMBOLIC_*_RESULT). Division operands are wrapped in a single `CODE_ROW`; scientific numbers are emitted as flat elements so they do not add extra nesting inside sums or products.
 - `subs` uses `giac::limit` to detect essential singularities of `exp`, `sin`, `cos`, `sinh`, `cosh` and returns `nan` for Real/Complex (throws for Rational).
 - All giac-specific helpers live in `src/giac_utils.h` / `src/giac_utils.cpp` in the common `yutovo_calculator` namespace; `src/utils.h` / `src/utils.cpp` contain only general-purpose utilities.
+- `GiacOutputGuard` (`src/giac_utils.h`) redirects `stdout`/`stderr` to `/dev/null` around giac calls to suppress spurious diagnostic output (e.g. numeric integration progress comments).
+- Numeric definite-integral results are converted from `giac::gen` to `Real`/`Complex`/`Rational`/`Array<Real>` via `FromGiac<>` in `src/giac_utils.h`, using direct MPFR/MPQ extraction plus decimal rounding for `Real`/`Complex` instead of string round-tripping.
 - `WrongArgumentsCount` exceptions report a `size` that covers the full function call up to and including the closing parenthesis. `ExpressionPosition::size` is populated by `Annotation` for function-call nodes, and `Solver::CallSize()` returns it (falling back to the identifier length when unset).
-- `RealNumberStr` evaluates rational strings such as `1333/1000` with MPFR so that `CombineLikeTerms` does not turn decimal reciprocals into bogus scientific notation (e.g., `1.333E+3`). `AddCoeffs` / `MultiplyCoeffs` fall back to `giac::gen` for decimal or scientific-notation coefficients.
+- `RealNumberStr` evaluates rational strings such as `1333/1000` with MPFR so that `CombineLikeTerms` does not turn decimal reciprocals into bogus scientific notation (e.g., `1.333E+3`). `AddCoeffs` / `MultiplyCoeffs`, `EvaluateGiacExpression`, `IsGiacExpressionZero`, and Rational-mode evaluation in `EvaluateArithmeticExpr` / inert-function handling now convert the resulting `giac::gen` to `Real`/`Rational` via `FromGiac<>` instead of calling `giac::gen::print` and parsing the string.
 - On Linux `yutovo-calculator` links the **system** MPFR/GMP libraries and a static **giac** library found in `${INSTALL_PATH}/lib`. Debug builds must link `${INSTALL_PATH}/lib/libgiacd.a` and release builds `${INSTALL_PATH}/lib/libgiac.a`; mixing configurations causes an ABI mismatch and memory corruption inside giac (e.g., crashes in `giac::expand`). The Emscripten/wasm build links `${INSTALL_PATH}/wasm/libgiac.a`, `${INSTALL_PATH}/wasm/libmpfr.a`, `${INSTALL_PATH}/wasm/libgmp.a`, and `${INSTALL_PATH}/wasm/libgmpxx.a`, and compiles `src/symbolic.cpp` against the wasm build of giac; the former header-only stub has been removed.
 - Linux consumers of the installed `yutovo-calculator` target must also call `pkg_check_modules(mpfr REQUIRED IMPORTED_TARGET mpfr)` and `pkg_check_modules(gmp REQUIRED IMPORTED_TARGET gmp)` because they are recorded in the imported target's `INTERFACE_LINK_LIBRARIES`.
 

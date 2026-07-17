@@ -296,6 +296,11 @@ public:
         return mpfr_get_prec(number);
     }
 
+    mpfr_srcptr GetNumber() const
+    {
+        return number;
+    }
+
     void SetBitPrecision(const int precision)
     {
         //mpfr_prec_round(number, std::max((int)mpfr_get_default_prec(), precision), DEFAULT_RND);
