@@ -214,6 +214,12 @@ TEST_F(CalcTestSymbolicRational, subs8)
     ASSERT_TRUE(res.ToStdString(10) == "1") << res.ToStdString(10);
 }
 
+TEST_F(CalcTestSymbolicRational, definite_integral3)
+{
+    Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"definite_integral(0,1,x*y,y);");
+    ASSERT_TRUE(res.ToStdString(0) == "(1/2)*x") << res.ToStdString(0);
+}
+
 TEST_F(CalcTestSymbolicRational, subscript1)
 {
     ASSERT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"x{2};"), SyntaxException);

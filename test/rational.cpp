@@ -866,4 +866,46 @@ TEST_F(CalcTestRational, min_max1)
     ASSERT_TRUE(res.ToStdString() == "-1/2") << res.ToStdString();
 }
 
+TEST_F(CalcTestRational, definite_integral1)
+{
+    auto res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"definite_integral(0,1,x,x);");
+    ASSERT_TRUE(res.ToStdString() == "1/2") << res.ToStdString();
+}
+
+TEST_F(CalcTestRational, definite_integral2)
+{
+    auto res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"definite_integral(0,1,x^2,x);");
+    ASSERT_TRUE(res.ToStdString() == "1/3") << res.ToStdString();
+}
+
+TEST_F(CalcTestRational, definite_integral3)
+{
+    auto res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"definite_integral(0,2,x^2,x);");
+    ASSERT_TRUE(res.ToStdString() == "8/3") << res.ToStdString();
+}
+
+TEST_F(CalcTestRational, definite_integral4)
+{
+    auto res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"definite_integral(0,1,x^3,x);");
+    ASSERT_TRUE(res.ToStdString() == "1/4") << res.ToStdString();
+}
+
+TEST_F(CalcTestRational, definite_integral5)
+{
+    auto res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"definite_integral(0,1,(x+1)^2,x);");
+    ASSERT_TRUE(res.ToStdString() == "7/3") << res.ToStdString();
+}
+
+TEST_F(CalcTestRational, definite_integral6)
+{
+    auto res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"definite_integral(0,10,x,x);");
+    ASSERT_TRUE(res.ToStdString() == "50") << res.ToStdString();
+}
+
+TEST_F(CalcTestRational, definite_integral7)
+{
+    auto res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"definite_integral(0,1,2*x^2+3*x+1,x);");
+    ASSERT_TRUE(res.ToStdString() == "19/6") << res.ToStdString();
+}
+
 }

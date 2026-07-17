@@ -12,10 +12,12 @@
 #include "script.h"
 #include "utils.h"
 #include "export.h"
+#include "giac_utils.h"
 #include <chrono>
 #include <variant>
 #include <set>
 #include <vector>
+#include <type_traits>
 
 namespace yutovo_calculator
 {
@@ -29,11 +31,15 @@ typedef Integer (*IntegerVariable)();
 
 typedef Real (*RealUnaryFunc)(const Real& num);
 typedef Real (*RealBinaryFunc)(const Real& num1, const Real& num2);
+typedef Real (*RealTrigonaryFunc)(const Real& num1, const Real& num2, const Real& num3);
+typedef Real (*RealQuaternaryFunc)(const Real& num1, const Real& num2, const Real& num3, const Real& num4);
 typedef Real (*RealTrigonometricFunc)(const Real& num);
 typedef Real (*RealPrecisionVariable)(const int precision);
 
 typedef Complex (*ComplexUnaryFunc)(const Complex& num, int& res_pos);
 typedef Complex (*ComplexBinaryFunc)(const Complex& num1, const Complex& num2, int& res_pos);
+typedef Complex (*ComplexTernaryFunc)(const Complex& num1, const Complex& num2, const Complex& num3, int& res_pos);
+typedef Complex (*ComplexQuaternaryFunc)(const Complex& num1, const Complex& num2, const Complex& num3, const Complex& num4);
 typedef Complex (*ComplexPrecisionVariable)(const int precision, AngleMeasure angle_measure);
 typedef Complex (*ComplexFunc)(const Complex& num);
 
@@ -43,20 +49,25 @@ typedef Rational (*RationalVariable)();
 
 typedef Array<Real> (*ArrayRealUnaryFunc)(const Array<Real>& num);
 typedef Array<Real> (*ArrayRealBinaryFunc)(const Array<Real>& num1, const Array<Real>& num2);
+typedef Array<Real> (*ArrayRealTernaryFunc)(const Array<Real>& num1, const Array<Real>& num2, const Array<Real>& num3);
+typedef Array<Real> (*ArrayRealQuaternaryFunc)(const Array<Real>& num1, const Array<Real>& num2, const Array<Real>& num3, const Array<Real>& num4);
 typedef Array<Real> (*ArrayRealTrigonometricFunc)(const Array<Real>& num);
 typedef Array<Real> (*ArrayRealPrecisionVariable)(const int precision);
 
 typedef Symbolic<Real> (*SymbolicUnaryFunc)(const Symbolic<Real>& num);
 typedef Symbolic<Real> (*SymbolicBinaryFunc)(const Symbolic<Real>& num1, const Symbolic<Real>& num2);
 typedef Symbolic<Real> (*SymbolicTernaryFunc)(const Symbolic<Real>& num1, const Symbolic<Real>& num2, const Symbolic<Real>& num3);
+typedef Symbolic<Real> (*SymbolicQuaternaryFunc)(const Symbolic<Real>& num1, const Symbolic<Real>& num2, const Symbolic<Real>& num3, const Symbolic<Real>& num4);
 
 typedef Symbolic<Rational> (*SymbolicRationalUnaryFunc)(const Symbolic<Rational>& num);
 typedef Symbolic<Rational> (*SymbolicRationalBinaryFunc)(const Symbolic<Rational>& num1, const Symbolic<Rational>& num2);
 typedef Symbolic<Rational> (*SymbolicRationalTernaryFunc)(const Symbolic<Rational>& num1, const Symbolic<Rational>& num2, const Symbolic<Rational>& num3);
+typedef Symbolic<Rational> (*SymbolicRationalQuaternaryFunc)(const Symbolic<Rational>& num1, const Symbolic<Rational>& num2, const Symbolic<Rational>& num3, const Symbolic<Rational>& num4);
 
 typedef Symbolic<Complex> (*SymbolicComplexUnaryFunc)(const Symbolic<Complex>& num);
 typedef Symbolic<Complex> (*SymbolicComplexBinaryFunc)(const Symbolic<Complex>& num1, const Symbolic<Complex>& num2);
 typedef Symbolic<Complex> (*SymbolicComplexTernaryFunc)(const Symbolic<Complex>& num1, const Symbolic<Complex>& num2, const Symbolic<Complex>& num3);
+typedef Symbolic<Complex> (*SymbolicComplexQuaternaryFunc)(const Symbolic<Complex>& num1, const Symbolic<Complex>& num2, const Symbolic<Complex>& num3, const Symbolic<Complex>& num4);
 
 typedef std::vector<std::u32string> Dependencies;
 
@@ -69,12 +80,13 @@ struct SolverSymbols
     typedef Number (*UnaryFunction)(const Number& num);
     typedef Number (*BinaryFunction)(const Number& num1, const Number& num2);
     typedef Number (*TernaryFunction)(const Number& num1, const Number& num2, const Number& num3);
+    typedef Number (*QuaternaryFunction)(const Number& num1, const Number& num2, const Number& num3, const Number& num4);
     typedef Number (*StringFunction)(const std::u32string& str);
     typedef Number (*TrigonometricFunction)(const Number& num);
     typedef Number (*ComplexUnaryFunction)(const Number& num, int& res_pos);
     typedef Number (*ComplexBinaryFunction)(const Number& num1, const Number& num2, int& res_pos);
 
-    typedef std::variant<UnaryFunction, BinaryFunction, TernaryFunction, StringFunction, ComplexUnaryFunction, ComplexBinaryFunction> BuiltinFunction;
+    typedef std::variant<UnaryFunction, BinaryFunction, TernaryFunction, QuaternaryFunction, StringFunction, ComplexUnaryFunction, ComplexBinaryFunction> BuiltinFunction;
     typedef std::variant<TrigonometricFunction, ComplexUnaryFunction> BuiltinTrigonometricFunction;
     
     //build-in variables' typedefs
@@ -111,6 +123,7 @@ struct Solver : public boost::static_visitor<Number>
     typedef typename SolverSymbols<Number>::UnaryFunction UnaryFunction;
     typedef typename SolverSymbols<Number>::BinaryFunction BinaryFunction;
     typedef typename SolverSymbols<Number>::TernaryFunction TernaryFunction;
+    typedef typename SolverSymbols<Number>::QuaternaryFunction QuaternaryFunction;
     typedef typename SolverSymbols<Number>::StringFunction StringFunction;
     typedef typename SolverSymbols<Number>::TrigonometricFunction TrigonometricFunction;
     typedef typename SolverSymbols<Number>::BuiltinFunction BuiltinFunction;
@@ -429,6 +442,22 @@ struct Solver : public boost::static_visitor<Number>
                     catch (const std::bad_variant_access&)
                     {
                     }
+                    try
+                    {
+                        auto q = std::get<typename SolverSymbols<Number>::QuaternaryFunction>(*func);
+                        if (op.arguments.size() != 4)
+                            throw SyntaxException(op.id, WrongArgumentsCount, U"Wrong arguments count in '" + op.name.name + U"'", op.pos,
+                                CallSize(op), op.line);
+                        ExpressionNodesIter iter = op.arguments.begin();
+                        Number arg1 = (*this)(*iter++);
+                        Number arg2 = (*this)(*iter++);
+                        Number arg3 = (*this)(*iter++);
+                        Number arg4 = (*this)(*iter);
+                        return (*q)(arg1, arg2, arg3, arg4);
+                    }
+                    catch (const std::bad_variant_access&)
+                    {
+                    }
                 }
             }
             catch (const MathException& e)
@@ -469,6 +498,102 @@ struct Solver : public boost::static_visitor<Number>
                 }
             }
             throw SyntaxException(op.id, UnknownIdentifier, U"Identifier '" + op.name.name + U"' not found", op.pos, op.name.name.length(), op.line);
+        }
+        else
+        {
+            throw MathException(op.id, IncorrectOperation, op.pos, 1, op.line);
+        }
+    }
+
+    Number operator()(DefiniteIntegralNode<Number> const& op) const
+    {
+        if constexpr (std::is_same_v<Number, Real> || std::is_same_v<Number, Complex> ||
+            std::is_same_v<Number, Rational> || std::is_same_v<Number, Array<Real>>)
+        {
+            try
+            {
+                Number lower = (*this)(op.lower);
+                Number upper = (*this)(op.upper);
+
+                if constexpr (std::is_same_v<Number, Array<Real>>)
+                {
+                    if (lower.Size() != 1 || upper.Size() != 1)
+                        throw MathException(op.id, IncorrectOperation, op.pos, op.line);
+                }
+
+                GiacMpfrStateGuard mpfr_guard;
+                GiacOutputGuard output_guard;
+
+                giac::context ctx;
+                if constexpr (!std::is_same_v<Number, Rational>)
+                    giac::decimal_digits(std::max(1, precision + 1), &ctx);
+
+                auto limit_string = [](const Number& value) -> std::u32string {
+                    if constexpr (std::is_same_v<Number, Array<Real>>)
+                    {
+                        if (value[0].IsInfinity())
+                            return value[0].GetSign() ? U"-inf" : U"+inf";
+                        return value[0].ToString();
+                    }
+                    else if constexpr (std::is_same_v<Number, Real>)
+                    {
+                        if (value.IsInfinity())
+                            return value.GetSign() ? U"-inf" : U"+inf";
+                        return value.ToString();
+                    }
+                    else if constexpr (std::is_same_v<Number, Complex>)
+                    {
+                        if (value.IsInfinity())
+                            return value.GetRe().GetSign() ? U"-inf" : U"+inf";
+                        return value.ToString();
+                    }
+                    else
+                    {
+                        return value.ToString();
+                    }
+                };
+
+                std::u32string lower_str = limit_string(lower);
+                std::u32string upper_str = limit_string(upper);
+
+                giac::gen lower_gen = ParseGen(ToBasicString(lower_str), &ctx);
+                giac::gen upper_gen = ParseGen(ToBasicString(upper_str), &ctx);
+                giac::gen expr_gen = ParseGen(ToBasicString(op.expression), &ctx);
+                giac::gen var_gen = ParseGen(ToBasicString(op.variable), &ctx);
+
+                if (var_gen.type != giac::_IDNT)
+                    throw MathException(IncorrectOperation);
+
+                giac::vecteur args;
+                args.push_back(expr_gen);
+                args.push_back(var_gen);
+                args.push_back(lower_gen);
+                args.push_back(upper_gen);
+
+                giac::gen res;
+                try
+                {
+                    res = giac::_integrate(args, &ctx);
+                    if constexpr (std::is_same_v<Number, Rational>)
+                        res = giac::normal(res, &ctx);
+                    else
+                        res = giac::evalf(res, 1, &ctx);
+                }
+                catch (...)
+                {
+                    throw MathException(IncorrectOperation);
+                }
+
+                return Number(ToUtfString(res.print(&ctx)));
+            }
+            catch (const MathException& e)
+            {
+                throw MathException(op.id, e.ex_id, op.pos, op.line);
+            }
+            catch (...)
+            {
+                throw;
+            }
         }
         else
         {
@@ -1082,6 +1207,11 @@ struct Solver : public boost::static_visitor<Number>
     }
 
     void AddBuiltinFunction(const char32_t* name, TernaryFunction& func)
+    {
+        symbols->buildin_functions[name] = func;
+    }
+
+    void AddBuiltinFunction(const char32_t* name, QuaternaryFunction& func)
     {
         symbols->buildin_functions[name] = func;
     }
@@ -1959,6 +2089,39 @@ private:
                     Number arg1 = (*this)(*iter++);
                     Number arg2 = (*this)(*iter);
                     return (*b)(arg1, arg2, res_pos);
+                }
+                catch (const std::bad_variant_access&)
+                {
+                }
+
+                try
+                {
+                    TernaryFunction t = std::get<TernaryFunction>(*func);
+                    if (op.arguments.size() != 3)
+                        throw SyntaxException(op.id, WrongArgumentsCount, U"Wrong arguments count in '" + op.name.name + U"'", op.pos, CallSize(op), op.line);
+                    
+                    ExpressionNodesIter iter = op.arguments.begin();
+                    Number arg1 = (*this)(*iter++);
+                    Number arg2 = (*this)(*iter++);
+                    Number arg3 = (*this)(*iter);
+                    return (*t)(arg1, arg2, arg3);
+                }
+                catch (const std::bad_variant_access&)
+                {
+                }
+
+                try
+                {
+                    QuaternaryFunction q = std::get<QuaternaryFunction>(*func);
+                    if (op.arguments.size() != 4)
+                        throw SyntaxException(op.id, WrongArgumentsCount, U"Wrong arguments count in '" + op.name.name + U"'", op.pos, CallSize(op), op.line);
+                    
+                    ExpressionNodesIter iter = op.arguments.begin();
+                    Number arg1 = (*this)(*iter++);
+                    Number arg2 = (*this)(*iter++);
+                    Number arg3 = (*this)(*iter++);
+                    Number arg4 = (*this)(*iter);
+                    return (*q)(arg1, arg2, arg3, arg4);
                 }
                 catch (const std::bad_variant_access&)
                 {

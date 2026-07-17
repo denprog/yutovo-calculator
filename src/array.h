@@ -165,6 +165,11 @@ public:
         return *this;
     }
 
+    const Number& operator[](size_t index) const
+    {
+        return numbers[index];
+    }
+
     Array<Number> operator+()
     {
         if (numbers.size() != 1)

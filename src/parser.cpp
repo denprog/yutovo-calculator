@@ -29,6 +29,16 @@ Complex pow(const Complex& num1, const Complex& num2, int& res_pos);
 
 Rational pow(const Rational& num1, const Rational& num2);
 
+static Real infinity(const int precision)
+{
+    return Real(precision, "inf");
+}
+
+static Complex infinity(const int precision, const AngleMeasure /*angle_measure*/)
+{
+    return Complex(precision, "inf");
+}
+
 Rational abs(const Rational &num);
 
 Rational min(const Rational& num1, const Rational& num2);
@@ -192,12 +202,32 @@ Array<Real> size(const Array<Real> &num);
 Array<Real> min(const Array<Real>& num);
 Array<Real> max(const Array<Real>& num);
 
+Real definite_integral_real(const Real& a, const Real& b, const Real& c, const Real& d);
+Complex definite_integral_complex(const Complex& a, const Complex& b, const Complex& c, const Complex& d);
+Array<Real> definite_integral_array(const Array<Real>& a, const Array<Real>& b, const Array<Real>& c, const Array<Real>& d);
+
+Real definite_integral_real(const Real& a, const Real& b, const Real& c, const Real& d)
+{
+    throw MathException(IncorrectOperation);
+}
+
+Complex definite_integral_complex(const Complex& a, const Complex& b, const Complex& c, const Complex& d)
+{
+    throw MathException(IncorrectOperation);
+}
+
+Array<Real> definite_integral_array(const Array<Real>& a, const Array<Real>& b, const Array<Real>& c, const Array<Real>& d)
+{
+    throw MathException(IncorrectOperation);
+}
+
 Symbolic<Real> evalf(const Symbolic<Real>& num);
 Symbolic<Real> evalf(const Symbolic<Real>& num, const Symbolic<Real>& prec);
 Symbolic<Real> expand(const Symbolic<Real>& num);
 Symbolic<Real> simplify(const Symbolic<Real>& num);
 Symbolic<Real> diff(const Symbolic<Real>& num, const Symbolic<Real>& var);
 Symbolic<Real> subs(const Symbolic<Real>& num, const Symbolic<Real>& var, const Symbolic<Real>& value);
+Symbolic<Real> definite_integral(const Symbolic<Real>& a, const Symbolic<Real>& b, const Symbolic<Real>& expr, const Symbolic<Real>& var);
 Symbolic<Real> pow(const Symbolic<Real>& num1, const Symbolic<Real>& num2);
 Symbolic<Real> log(const Symbolic<Real>& num1, const Symbolic<Real>& num2);
 Symbolic<Real> root(const Symbolic<Real>& num1, const Symbolic<Real>& num2);
@@ -234,6 +264,7 @@ Symbolic<Rational> expand(const Symbolic<Rational>& num);
 Symbolic<Rational> simplify(const Symbolic<Rational>& num);
 Symbolic<Rational> diff(const Symbolic<Rational>& num, const Symbolic<Rational>& var);
 Symbolic<Rational> subs(const Symbolic<Rational>& num, const Symbolic<Rational>& var, const Symbolic<Rational>& value);
+Symbolic<Rational> definite_integral(const Symbolic<Rational>& a, const Symbolic<Rational>& b, const Symbolic<Rational>& expr, const Symbolic<Rational>& var);
 Symbolic<Rational> pow(const Symbolic<Rational>& num1, const Symbolic<Rational>& num2);
 Symbolic<Rational> log(const Symbolic<Rational>& num1, const Symbolic<Rational>& num2);
 Symbolic<Rational> root(const Symbolic<Rational>& num1, const Symbolic<Rational>& num2);
@@ -267,6 +298,7 @@ Symbolic<Complex> expand(const Symbolic<Complex>& num);
 Symbolic<Complex> simplify(const Symbolic<Complex>& num);
 Symbolic<Complex> diff(const Symbolic<Complex>& num, const Symbolic<Complex>& var);
 Symbolic<Complex> subs(const Symbolic<Complex>& num, const Symbolic<Complex>& var, const Symbolic<Complex>& value);
+Symbolic<Complex> definite_integral(const Symbolic<Complex>& a, const Symbolic<Complex>& b, const Symbolic<Complex>& expr, const Symbolic<Complex>& var);
 Symbolic<Complex> pow(const Symbolic<Complex>& num1, const Symbolic<Complex>& num2);
 Symbolic<Complex> log(const Symbolic<Complex>& num1, const Symbolic<Complex>& num2);
 Symbolic<Complex> root(const Symbolic<Complex>& num1, const Symbolic<Complex>& num2);
@@ -339,6 +371,8 @@ Parser<yutovo_calculator::Real>::Parser(const int precision, const Language _lan
     solver.AddBuiltinVariable(std::u32string(1, 0x03C0).c_str(), var); //π
     var = &exp;
     solver.AddBuiltinVariable(U"e", var);
+    var = &infinity;
+    solver.AddBuiltinVariable(std::u32string(1, 0x221E).c_str(), var); //∞
     
     RealUnaryFunc unary_func;
     unary_func = &exp;
@@ -454,6 +488,10 @@ Parser<yutovo_calculator::Real>::Parser(const int precision, const Language _lan
     binary_func = &max;
     solver.AddBuiltinFunction(U"max", binary_func);
 
+    RealQuaternaryFunc quaternary_func = &definite_integral_real;
+    solver.AddBuiltinFunction(U"definite_integral", quaternary_func);
+    solver.AddBuiltinFunction(U"integral", quaternary_func);
+
     InitUnits();
     InitPhisicalConstants();
 }
@@ -493,6 +531,8 @@ Parser<yutovo_calculator::Complex>::Parser(const int precision, const Language _
     solver.AddBuiltinVariable(U"pi", var);
     var = &exp_complex;
     solver.AddBuiltinVariable(U"e", var);
+    var = &infinity;
+    solver.AddBuiltinVariable(std::u32string(1, 0x221E).c_str(), var); //∞
     
     ComplexUnaryFunc unary_func;
     unary_func = &exp;
@@ -586,6 +626,10 @@ Parser<yutovo_calculator::Complex>::Parser(const int precision, const Language _
     solver.AddBuiltinFunction(U"min", binary_func);
     binary_func = &max;
     solver.AddBuiltinFunction(U"max", binary_func);
+
+    ComplexQuaternaryFunc quaternary_func = &definite_integral_complex;
+    solver.AddBuiltinFunction(U"definite_integral", quaternary_func);
+    solver.AddBuiltinFunction(U"integral", quaternary_func);
 
     switch (language)
     {
@@ -729,6 +773,10 @@ Parser<yutovo_calculator::Array<yutovo_calculator::Real>>::Parser(const int prec
     binary_func = &root;
     solver.AddBuiltinFunction(U"root", binary_func);
 
+    ArrayRealQuaternaryFunc quaternary_func = &definite_integral_array;
+    solver.AddBuiltinFunction(U"definite_integral", quaternary_func);
+    solver.AddBuiltinFunction(U"integral", quaternary_func);
+
     InitUnits();
     InitPhisicalConstants();
 }
@@ -823,6 +871,10 @@ Parser<yutovo_calculator::Symbolic<yutovo_calculator::Real>>::Parser(const int p
     SymbolicTernaryFunc ternary_func;
     ternary_func = &subs;
     solver.AddBuiltinFunction(U"subs", ternary_func);
+
+    SymbolicQuaternaryFunc quaternary_func;
+    quaternary_func = &definite_integral;
+    solver.AddBuiltinFunction(U"definite_integral", quaternary_func);
 
     solver.AddBuiltinIdentifier(U"inf", Symbolic<Real>(precision, "+infinity"));
     solver.AddBuiltinIdentifier(U"infinity", Symbolic<Real>(precision, "+infinity"));
@@ -994,6 +1046,10 @@ Parser<yutovo_calculator::Symbolic<yutovo_calculator::Rational>>::Parser(const i
     ternary_func = &subs;
     solver.AddBuiltinFunction(U"subs", ternary_func);
 
+    SymbolicRationalQuaternaryFunc quaternary_func;
+    quaternary_func = &definite_integral;
+    solver.AddBuiltinFunction(U"definite_integral", quaternary_func);
+
     solver.AddBuiltinIdentifier(U"inf", Symbolic<Rational>(precision, "+infinity"));
     solver.AddBuiltinIdentifier(U"infinity", Symbolic<Rational>(precision, "+infinity"));
     solver.AddBuiltinIdentifier(std::u32string(1, 0x221E).c_str(), Symbolic<Rational>(precision, "+infinity"));
@@ -1116,6 +1172,10 @@ Parser<yutovo_calculator::Symbolic<yutovo_calculator::Complex>>::Parser(const in
     SymbolicComplexTernaryFunc ternary_func;
     ternary_func = &subs;
     solver.AddBuiltinFunction(U"subs", ternary_func);
+
+    SymbolicComplexQuaternaryFunc quaternary_func;
+    quaternary_func = &definite_integral;
+    solver.AddBuiltinFunction(U"definite_integral", quaternary_func);
 
     solver.AddBuiltinIdentifier(U"inf", Symbolic<Complex>(precision, "+infinity"));
     solver.AddBuiltinIdentifier(U"infinity", Symbolic<Complex>(precision, "+infinity"));

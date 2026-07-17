@@ -316,4 +316,16 @@ TEST_F(CalcTestArrayReal, min_max1)
     ASSERT_TRUE(res.ToStdString(3, 3) == "[-1.5E+0]") << res.ToStdString(3, 3);
 }
 
+TEST_F(CalcTestArrayReal, definite_integral1)
+{
+    auto res = parser.Parse(LogicalId{0, 0, 1}, U"definite_integral(0,1,x,x);", 10);
+    ASSERT_TRUE(res.ToStdString(10, 10) == "[0.5E+0]") << res.ToStdString(10, 10);
+}
+
+TEST_F(CalcTestArrayReal, definite_integral2)
+{
+    auto res = parser.Parse(LogicalId{0, 0, 1}, U"integral(-1,4,sin(x),x);", 10);
+    ASSERT_TRUE(res.ToStdString(10, 10) == "[1.1939459267E+0]") << res.ToStdString(10, 10);
+}
+
 }

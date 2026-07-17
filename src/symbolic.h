@@ -19,6 +19,7 @@
 #include <cmath>
 #include <mutex>
 #include <giac/giac.h>
+#include <giac/intg.h>
 #include <giac/lin.h>
 #include <giac/series.h>
 
@@ -435,6 +436,30 @@ public:
                 return Symbolic<Number>(num.precision, std::u32string(U"-∞"));
             if (res_str == "yut_acsch(0)" || res_str == "yut_acsch(0.)")
                 return Symbolic<Number>(num.precision, std::u32string(U"∞"));
+        }
+        return res;
+    }
+
+    friend Symbolic<Number> definite_integral(const Symbolic<Number>& a, const Symbolic<Number>& b,
+        const Symbolic<Number>& expr, const Symbolic<Number>& var)
+    {
+        if (var.expr->type != giac::_IDNT)
+            throw ParserException({}, ParserExceptionCode::IncorrectOperation);
+
+        GiacMpfrStateGuard mpfr_guard;
+        Symbolic<Number> res(expr.precision);
+        giac::vecteur args;
+        args.push_back(*expr.expr);
+        args.push_back(*var.expr);
+        args.push_back(*a.expr);
+        args.push_back(*b.expr);
+        try
+        {
+            *res.expr = giac::_integrate(args, &res.context);
+        }
+        catch (...)
+        {
+            throw MathException(IncorrectOperation);
         }
         return res;
     }

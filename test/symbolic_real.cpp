@@ -678,6 +678,24 @@ TEST_F(CalcTestSymbolicReal, subs7)
     ASSERT_TRUE(res.ToStdString(10) == "1.") << res.ToStdString(10);
 }
 
+TEST_F(CalcTestSymbolicReal, definite_integral1)
+{
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"definite_integral(0,1,x*y,y);", 10);
+    ASSERT_TRUE(res.ToStdString(10) == "0.5*x") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicReal, definite_integral_nonsymbol)
+{
+    EXPECT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"definite_integral(0,1,x,1);"), yutovo_calculator::ParserException);
+    EXPECT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"definite_integral(0,1,x,x+y);"), yutovo_calculator::ParserException);
+}
+
+TEST_F(CalcTestSymbolicReal, definite_integral_inf_divergent)
+{
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"definite_integral(1,∞,1/x,x);", 10);
+    ASSERT_TRUE(res.ToStdString(10) == "∞") << res.ToStdString(10);
+}
+
 TEST_F(CalcTestSymbolicReal, subscript1)
 {
     ASSERT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"x{2};"), SyntaxException);
@@ -685,31 +703,31 @@ TEST_F(CalcTestSymbolicReal, subscript1)
 
 TEST_F(CalcTestSymbolicReal, subscript2)
 {
-    // Text subscript
+    //text subscript
     ASSERT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"x{us};"), SyntaxException);
 }
 
 TEST_F(CalcTestSymbolicReal, subscript3)
 {
-    // Multi-character subscript
+    //multi-character subscript
     ASSERT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"x{ab};"), SyntaxException);
 }
 
 TEST_F(CalcTestSymbolicReal, subscript4)
 {
-    // Expression with multiple variables, one subscripted
+    //expression with multiple variables, one subscripted
     ASSERT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"x{2}+y;"), SyntaxException);
 }
 
 TEST_F(CalcTestSymbolicReal, subscript5)
 {
-    // Subscript in implicit multiplication
+    //subscript in implicit multiplication
     ASSERT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"2x{2};"), SyntaxException);
 }
 
 TEST_F(CalcTestSymbolicReal, subscript6)
 {
-    // Subscript as function argument
+    //subscript as function argument
     ASSERT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"sin(x{2});"), SyntaxException);
 }
 

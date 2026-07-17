@@ -1090,4 +1090,52 @@ TEST_F(CalcTestComplex, min_max1)
     ASSERT_TRUE(res.ToStdString(3, 3) == "3.E+0+i*4.E+0") << res.ToStdString(3, 3);
 }
 
+TEST_F(CalcTestComplex, definite_integral1)
+{
+    Complex res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"definite_integral(0,1,x,x);", 10);
+    ASSERT_TRUE(res.ToStdString(10, 10) == "0.5E+0") << res.ToStdString(10, 10);
+}
+
+TEST_F(CalcTestComplex, definite_integral2)
+{
+    Complex res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"integral(-1,4,sin(x),x);", 10);
+    ASSERT_TRUE(res.ToStdString(10, 10) == "1.1939459267E+0") << res.ToStdString(10, 10);
+}
+
+TEST_F(CalcTestComplex, definite_integral3)
+{
+    Complex res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"definite_integral(0,pi,sin(x),x);", 10);
+    ASSERT_TRUE(res.ToStdString(10, 10) == "2.E+0") << res.ToStdString(10, 10);
+}
+
+TEST_F(CalcTestComplex, definite_integral4)
+{
+    Complex res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"definite_integral(0,2,x^2,x);", 10);
+    ASSERT_TRUE(res.ToStdString(10, 10) == "2.6666666667E+0") << res.ToStdString(10, 10);
+}
+
+TEST_F(CalcTestComplex, definite_integral5)
+{
+    Complex res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"definite_integral(0,1,x^3,x);", 10);
+    ASSERT_TRUE(res.ToStdString(10, 10) == "0.25E+0") << res.ToStdString(10, 10);
+}
+
+TEST_F(CalcTestComplex, definite_integral6)
+{
+    Complex res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"definite_integral(0,pi,cos(x),x);", 10);
+    ASSERT_TRUE(res.ToStdString(10, 10) == "1.5022025553E-16") << res.ToStdString(10, 10);
+}
+
+TEST_F(CalcTestComplex, definite_integral7)
+{
+    Complex res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"definite_integral(0,10,x^2,x);", 10);
+    ASSERT_TRUE(res.ToStdString(10, 10) == "333.33333333E+0") << res.ToStdString(10, 10);
+}
+
+TEST_F(CalcTestComplex, definite_integral8)
+{
+    Complex res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"definite_integral(0,1,exp(x),x);", 10);
+    ASSERT_TRUE(res.ToStdString(10, 10) == "1.7182818285E+0") << res.ToStdString(10, 10);
+}
+
 }

@@ -717,6 +717,39 @@ Rational Solver<Rational>::operator()(FunctionCallNode<Rational> const& op) cons
             catch (const std::bad_variant_access&)
             {
             }
+
+            try
+            {
+                TernaryFunction t = std::get<TernaryFunction>(*func);
+                if (op.arguments.size() != 3)
+                    throw SyntaxException(op.id, WrongArgumentsCount, U"Wrong arguments count in '" + op.name.name + U"'", op.pos, CallSize(op), op.line);
+                
+                ExpressionNodesIter iter = op.arguments.begin();
+                Rational arg1 = (*this)(*iter++);
+                Rational arg2 = (*this)(*iter++);
+                Rational arg3 = (*this)(*iter);
+                return (*t)(arg1, arg2, arg3);
+            }
+            catch (const std::bad_variant_access&)
+            {
+            }
+
+            try
+            {
+                QuaternaryFunction q = std::get<QuaternaryFunction>(*func);
+                if (op.arguments.size() != 4)
+                    throw SyntaxException(op.id, WrongArgumentsCount, U"Wrong arguments count in '" + op.name.name + U"'", op.pos, CallSize(op), op.line);
+                
+                ExpressionNodesIter iter = op.arguments.begin();
+                Rational arg1 = (*this)(*iter++);
+                Rational arg2 = (*this)(*iter++);
+                Rational arg3 = (*this)(*iter++);
+                Rational arg4 = (*this)(*iter);
+                return (*q)(arg1, arg2, arg3, arg4);
+            }
+            catch (const std::bad_variant_access&)
+            {
+            }
         }
     }
     catch (const MathException& e)

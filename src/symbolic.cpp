@@ -73,6 +73,7 @@ std::string Symbolic<Real>::ToStdString(int exp, Language language) const
     if (!expr)
         return {};
 
+    GiacMpfrStateGuard mpfr_guard;
     giac::decimal_digits(std::max(1, precision + 10), &context);
     giac::gen e = giac::eval(*expr, 1, &context);
     if (e.is_integer())
@@ -120,6 +121,8 @@ std::string Symbolic<Rational>::ToStdString(int exp, Language language) const
 {
     if (!expr)
         return {};
+
+    GiacMpfrStateGuard mpfr_guard;
     giac::decimal_digits(std::max(1, precision + 10), &context);
     giac::gen e = giac::eval(*expr, 1, &context);
     if (e.is_integer())
@@ -141,6 +144,8 @@ std::string Symbolic<Complex>::ToStdString(int exp, Language language) const
 {
     if (!expr)
         return {};
+
+    GiacMpfrStateGuard mpfr_guard;
     giac::decimal_digits(std::max(1, precision + 10), &context);
     giac::gen e = giac::eval(*expr, 1, &context);
     if (!e.is_integer() && e.type != giac::_REAL && e.type != giac::_DOUBLE_ &&
@@ -174,6 +179,8 @@ std::string Symbolic<Real>::ToJson(int exp, Language language) const
 {
     if (!expr)
         return {};
+
+    GiacMpfrStateGuard mpfr_guard;
     giac::decimal_digits(std::max(1, precision + 10), &context);
     giac::gen e = giac::eval(*expr, 1, &context);
     std::string s = e.print(&context);
@@ -187,6 +194,8 @@ std::string Symbolic<Rational>::ToJson(int exp, Language language) const
 {
     if (!expr)
         return {};
+
+    GiacMpfrStateGuard mpfr_guard;
     giac::decimal_digits(std::max(1, precision + 10), &context);
     giac::gen e = giac::eval(*expr, 1, &context);
     std::string s = e.print(&context);
@@ -200,6 +209,8 @@ std::string Symbolic<Complex>::ToJson(int exp, Language language) const
 {
     if (!expr)
         return {};
+
+    GiacMpfrStateGuard mpfr_guard;
     giac::decimal_digits(std::max(1, precision + 10), &context);
     giac::gen e = giac::eval(*expr, 1, &context);
     std::string s = e.print(&context);

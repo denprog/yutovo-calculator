@@ -1612,6 +1612,11 @@ void Real::LowerPrecision(int prec)
 
 std::u32string Real::ToString() const
 {
+    if (IsInfinity())
+        return GetSign() ? U"-∞" : U"∞";
+    if (IsZero())
+        return U"0.";
+
     std::ostringstream s;
     mp_exp_t exp;
 
@@ -1659,6 +1664,8 @@ void Real::ToString(int exp, int accuracy, bool& mantissa_sign, std::u32string& 
     char buf[20];
 
     mantissa_sign = GetSign();
+    if (IsZero())
+        mantissa_sign = false;
     exponent_sign = false;
 
     assert(accuracy >= 1);
@@ -1805,6 +1812,13 @@ std::u32string Real::ToString(int exp, int accuracy, bool with_unit) const
 {
     if (IsNaN())
         return U"NAN";
+    if (IsInfinity())
+    {
+        std::u32string res = GetSign() ? U"-∞" : U"∞";
+        if (with_unit)
+            res += unit.ToString();
+        return res;
+    }
     bool mantissa_sign;
     std::u32string mantissa;
     bool exponent_sign;

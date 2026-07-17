@@ -32,6 +32,7 @@ struct Annotation
 		boost::recursive_wrapper<ImplicitPostFunctionMulNode<Number>>, 
 		boost::recursive_wrapper<FunctionCallNode<Number>>, 
 		boost::recursive_wrapper<FunctionCallStringNode<Number>>, 
+		boost::recursive_wrapper<DefiniteIntegralNode<Number>>, 
 		boost::recursive_wrapper<NoFencesFunctionCallNode<Number>>, 
 		boost::recursive_wrapper<CompareNode<Number>>, 
 		boost::recursive_wrapper<LoopNode<Number>>, 
@@ -209,6 +210,35 @@ struct Annotation
 			op.size = static_cast<int>(std::distance(pos, it)) + 1;
 	}
 
+	void operator()(DefiniteIntegralNode<Number>& op, std::u32string::iterator pos) const
+	{
+		UpdatePosition(pos, op);
+		auto it = pos;
+		while (it != last && *it != U'(')
+			++it;
+		if (it == last)
+		{
+			op.size = static_cast<int>(op.expression.length()) + static_cast<int>(op.variable.length()) + 3;
+			return;
+		}
+		int depth = 1;
+		++it;
+		for (; it != last; ++it)
+		{
+			char32_t ch = *it;
+			if (ch == U'(')
+				++depth;
+			else if (ch == U')')
+				--depth;
+			if (depth == 0)
+				break;
+		}
+		if (depth != 0)
+			op.size = static_cast<int>(std::distance(pos, it));
+		else
+			op.size = static_cast<int>(std::distance(pos, it)) + 1;
+	}
+
 	void operator()(NoFencesFunctionCallNode<Number>& op, std::u32string::iterator pos) const
 	{
 		UpdatePosition(pos, op);
@@ -328,6 +358,11 @@ struct Annotation
 		}
 
 		void operator()(FunctionCallStringNode<Num> const& op) const
+		{
+			annotation->UpdatePosition(iter, op);
+		}
+
+		void operator()(DefiniteIntegralNode<Num> const& op) const
 		{
 			annotation->UpdatePosition(iter, op);
 		}

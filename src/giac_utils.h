@@ -23,6 +23,8 @@
 #include <iomanip>
 #include <algorithm>
 #include <mutex>
+#include <unistd.h>
+#include <fcntl.h>
 #include <giac/giac.h>
 #include <giac/lin.h>
 #include <giac/series.h>
@@ -318,9 +320,81 @@ private:
     }
 };
 
+//Saves/restores MPFR default precision and rounding mode around giac calls. giac mutates these globals (e.g. via _integrate), 
+//which breaks MPFR calculations.
+class GiacMpfrStateGuard
+{
+public:
+    GiacMpfrStateGuard() :
+        prec(mpfr_get_default_prec()),
+        rounding_mode(mpfr_get_default_rounding_mode())
+    {
+    }
+
+    ~GiacMpfrStateGuard()
+    {
+        mpfr_set_default_prec(prec);
+        mpfr_set_default_rounding_mode(rounding_mode);
+    }
+
+private:
+    mpfr_prec_t prec;
+    mpfr_rnd_t rounding_mode;
+};
+
+//Temporarily redirects stdout and stderr to /dev/null around giac calls, suppressing
+//spurious diagnostic output (e.g. numeric integration progress comments).
+class GiacOutputGuard
+{
+public:
+    GiacOutputGuard() :
+        stdout_copy(-1),
+        stderr_copy(-1),
+        active(false)
+    {
+        std::cout.flush();
+        std::cerr.flush();
+        stdout_copy = dup(STDOUT_FILENO);
+        stderr_copy = dup(STDERR_FILENO);
+        if (stdout_copy < 0 || stderr_copy < 0)
+            return;
+        int devnull = open("/dev/null", O_WRONLY);
+        if (devnull < 0)
+            return;
+        dup2(devnull, STDOUT_FILENO);
+        dup2(devnull, STDERR_FILENO);
+        close(devnull);
+        active = true;
+    }
+
+    ~GiacOutputGuard()
+    {
+        if (!active)
+            return;
+        std::cout.flush();
+        std::cerr.flush();
+        if (stdout_copy >= 0)
+        {
+            dup2(stdout_copy, STDOUT_FILENO);
+            close(stdout_copy);
+        }
+        if (stderr_copy >= 0)
+        {
+            dup2(stderr_copy, STDERR_FILENO);
+            close(stderr_copy);
+        }
+    }
+
+private:
+    int stdout_copy;
+    int stderr_copy;
+    bool active;
+};
+
 giac::gen ParseGen(const char* str, const giac::context* ctx);
 giac::gen ParseGen(const std::string& str, const giac::context* ctx);
 giac::context* GetContext(const giac::context* ctx);
+
 bool HasAmbiguousPoleArgument(const giac::gen& expr, const giac::identificateur& var, const giac::gen& value, giac::context* ctx);
 bool IsInfiniteLimit(const giac::gen& lim, giac::context* ctx);
 bool HasUnknownSymbol(const giac::gen& g);

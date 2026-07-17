@@ -2480,4 +2480,112 @@ TEST_F(CalcTestReal, min_max1)
     ASSERT_TRUE(res.ToStdString(3, 3) == "-1.2E+0") << res.ToStdString(3, 3);
 }
 
+TEST_F(CalcTestReal, definite_integral1)
+{
+    auto res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"definite_integral(0,1,x,x);", 10);
+    ASSERT_TRUE(res.ToStdString(10, 10) == "0.5E+0") << res.ToStdString(10, 10);
+}
+
+TEST_F(CalcTestReal, definite_integral2)
+{
+    auto res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"definite_integral(-1,4,sin(x),x);", 10);
+    ASSERT_TRUE(res.ToStdString(10, 10) == "1.1939459267E+0") << res.ToStdString(10, 10);
+}
+
+TEST_F(CalcTestReal, definite_integral_alias)
+{
+    auto res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"integral(0,1,x,x);", 10);
+    ASSERT_TRUE(res.ToStdString(10, 10) == "0.5E+0") << res.ToStdString(10, 10);
+}
+
+TEST_F(CalcTestReal, definite_integral3)
+{
+    auto res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"definite_integral(0,pi,sin(x),x);", 10);
+    ASSERT_TRUE(res.ToStdString(10, 10) == "2.E+0") << res.ToStdString(10, 10);
+}
+
+TEST_F(CalcTestReal, definite_integral4)
+{
+    auto res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"definite_integral(1,2,1/x,x);", 10);
+    ASSERT_TRUE(res.ToStdString(10, 10) == "0.6931471806E+0") << res.ToStdString(10, 10);
+}
+
+TEST_F(CalcTestReal, definite_integral5)
+{
+    auto res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"definite_integral(0,100,x,x);", 10);
+    ASSERT_TRUE(res.ToStdString(10, 10) == "5000.E+0") << res.ToStdString(10, 10);
+}
+
+TEST_F(CalcTestReal, definite_integral6)
+{
+    auto res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"definite_integral(2,2,x^3,x);", 10);
+    ASSERT_TRUE(res.ToStdString(10, 10) == "0.E+0") << res.ToStdString(10, 10);
+}
+
+TEST_F(CalcTestReal, definite_integral7)
+{
+    auto res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"definite_integral(0,3,2*x^2+3*x+1,x);", 10);
+    ASSERT_TRUE(res.ToStdString(10, 10) == "34.5E+0") << res.ToStdString(10, 10);
+}
+
+TEST_F(CalcTestReal, definite_integral8)
+{
+    auto res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"definite_integral(0,pi/2,cos(x),x);", 10);
+    ASSERT_TRUE(res.ToStdString(10, 10) == "1.E+0") << res.ToStdString(10, 10);
+}
+
+TEST_F(CalcTestReal, definite_integral9)
+{
+    auto res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"definite_integral(0,1,exp(x),x);", 10);
+    ASSERT_TRUE(res.ToStdString(10, 10) == "1.7182818285E+0") << res.ToStdString(10, 10);
+}
+
+TEST_F(CalcTestReal, definite_integral10)
+{
+    auto res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"definite_integral(1,exp(1),ln(x),x);", 10);
+    ASSERT_TRUE(res.ToStdString(10, 10) == "1.E+0") << res.ToStdString(10, 10);
+}
+
+TEST_F(CalcTestReal, definite_integral11)
+{
+    auto res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"definite_integral(0,10,x^4,x);", 10);
+    ASSERT_TRUE(res.ToStdString(10, 10) == "20000.E+0") << res.ToStdString(10, 10);
+}
+
+TEST_F(CalcTestReal, definite_integral12)
+{
+    auto res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"definite_integral(0,1,x^2*sin(x),x);", 10);
+    ASSERT_TRUE(res.ToStdString(10, 10) == "0.2232442755E+0") << res.ToStdString(10, 10);
+}
+
+TEST_F(CalcTestReal, definite_integral_inf1)
+{
+    auto res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"definite_integral(0,∞,exp(-x),x);", 10);
+    ASSERT_TRUE(res.ToStdString(10, 10) == "1.E+0") << res.ToStdString(10, 10);
+}
+
+TEST_F(CalcTestReal, definite_integral_inf2)
+{
+    auto res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"definite_integral(0,∞,1/(1+x^2),x);", 10);
+    ASSERT_TRUE(res.ToStdString(10, 10) == "1.5707963268E+0") << res.ToStdString(10, 10);
+}
+
+TEST_F(CalcTestReal, definite_integral_inf3)
+{
+    auto res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"definite_integral(0,∞,1/(x+1)^2,x);", 10);
+    ASSERT_TRUE(res.ToStdString(10, 10) == "1.E+0") << res.ToStdString(10, 10);
+}
+
+TEST_F(CalcTestReal, definite_integral_inf4)
+{
+    auto res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"definite_integral(1,∞,1/x^2,x);", 10);
+    ASSERT_TRUE(res.ToStdString(10, 10) == "1.E+0") << res.ToStdString(10, 10);
+}
+
+TEST_F(CalcTestReal, definite_integral_inf5)
+{
+    auto res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"definite_integral(0,∞,x*exp(-x),x);", 10);
+    ASSERT_TRUE(res.ToStdString(10, 10) == "1.E+0") << res.ToStdString(10, 10);
+}
+
 }
