@@ -63,6 +63,7 @@ try {
 - `cot(x)`, `sec(x)`, `csc(x)`, `coth(x)`, `sech(x)`, `csch(x)` are rendered as inert functions (`yut_cot`, etc.) so that poles map to `∞` instead of being simplified away.
 - Inverse hyperbolic functions (`asinh`, `acosh`, `atanh`, `acoth`, `asech`, `acsch`) and their `arc...`/`ars...` synonyms are registered for all symbolic parsers. Inert wrappers preserve names; singularities such as `acoth(1)` and `acsch(0)` evaluate to `∞` for Real/Complex and remain symbolic for Rational.
 - `fact(x)` (postfix `!`) is implemented for all symbolic types as a product `1*2*...*n` for non-negative integer arguments; returns `factorial(x)` for symbolic/non-integer arguments.
+- Inert trigonometric/hyperbolic wrappers (`cot`, `sec`, `csc`, `coth`, `sech`, `csch`, `asinh`, `acosh`, `atanh`, `acoth`, `asech`, `acsch`) and `factorial(x)` are built directly via `InertCall()` / `giac::symbolic(*giac::at_factorial, ...)` in `src/symbolic.h`, without converting the argument back to a string. `subs` compares singularities (`acoth(1)`, `acsch(0)`) using the same direct construction instead of printed strings.
 - `Symbolic<Number>::ToJson()` builds an AST from the giac-printed string and emits JSON using yutovo-editor element type codes (7=CODE_ROW, 8=CODE_STRING, 10=SHAPE, 11=PLUS, 12=MINUS, 13=MULTIPLY, 14=DIVISION, 15=POWER, 16=SQUARE_ROOT, 17=NTH_ROOT, 45-47=SYMBOLIC_*_RESULT). Division operands are wrapped in a single `CODE_ROW`; scientific numbers are emitted as flat elements so they do not add extra nesting inside sums or products.
 - `subs` uses `giac::limit` to detect essential singularities of `exp`, `sin`, `cos`, `sinh`, `cosh` and returns `nan` for Real/Complex (throws for Rational).
 - All giac-specific helpers live in `src/giac_utils.h` / `src/giac_utils.cpp` in the common `yutovo_calculator` namespace; `src/utils.h` / `src/utils.cpp` contain only general-purpose utilities.
@@ -86,6 +87,7 @@ try {
 - `SymbolicSolverTask` sends JSON with `result_type=7` (`SYMBOLIC`) and `symbolic_precision`.
 - `Equation::UpdateResult` **must** handle `ResultType::SYMBOLIC` by creating `SymbolicResult`; missing this causes tests to hang because no solver task is ever dispatched.
 - `ResultTask::Execute` **must** handle `ElementType::SYMBOLIC_RESULT` to deliver the solver response to `SymbolicResult::PutResult`; missing this leaves the waiting symbol (`~`) forever.
+- The `yutovo-editor` target defines `HAVE_LIBMPFR` PUBLIC in `src/CMakeLists.txt` so that giac headers use the same `real_object` layout (MPFR-based) as the linked giac library.
 
 ### yutovo-desktop
 - `src/CMakeLists.txt` locates the static **giac** library with `find_library(GIAC_LIBRARY ...)` and creates an imported `giac_imported` target for Linux, because static libraries (`yutovo-calculator`, `yutovo-solver`) now depend on giac.

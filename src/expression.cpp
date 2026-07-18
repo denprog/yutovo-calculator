@@ -174,9 +174,9 @@ Expression<Real>::Expression(LogicalId id, std::u32string& expr, Solver<Real>* _
 
     multiply = char_(U'*') > unary | char_(U'/') > unary | char_(U'%') >> unary;
     
-    unary = definite_integral | loop | compare | implicit_function_mul | implicit_post_function_mul | postfix_operation | implicit_div_mul | implicit_string_mul | 
-        implicit_fraction_mul | mixed_division | implicit_mul | number | function_call | no_fences_function_call | identifier | 
-        unary_operation | '(' > expression > ')';
+    unary = definite_integral | loop | compare | implicit_function_mul | implicit_post_function_mul | postfix_operation | 
+        implicit_div_mul | implicit_string_mul | implicit_fraction_mul | mixed_division | implicit_mul | number | function_call | 
+        no_fences_function_call | identifier | unary_operation | '(' > expression > ')';
     
     number = exp_number | digits_number;
     
@@ -207,16 +207,20 @@ Expression<Real>::Expression(LogicalId id, std::u32string& expr, Solver<Real>* _
     implicit_mul = real_number >> '(' >> expression > ')';
 
     //0x00B0 = U'°', 39 = U'\'', 0x20BD = U'₽', 0x00A2 = U'¢', 0x0024 = U'$', 0x20AC = U'€', 0x00A5 = U'¥', 0x20B9 = U'₹'
-    name = (raw[lexeme[(alpha | char_(U'∞') | char_(0x00B0) | char_(39) | char_(U'_') | char_(0x20BD) | char_(0x0024) | char_(0x00A2) | char_(0x20AC) | char_(0x00A5) |
-        char_(0x20B9)) >> *(alnum | char_(39) | char_(U'_') | char_(0x0024))]]);
+    name = (raw[lexeme[(alpha | char_(U'∞') | char_(0x00B0) | char_(39) | char_(U'_') | char_(0x20BD) | char_(0x0024) | char_(0x00A2) | 
+        char_(0x20AC) | char_(0x00A5) | char_(0x20B9)) >> *(alnum | char_(39) | char_(U'_') | char_(0x0024))]]);
 
     unary_operation = (char_(U'+') > unary) | (char_(U'-') > unary);
 
     postfix_operation = (identifier >> char_('!')) | ((number | '(' > expression > ')') >> char_('!'));
 
-    symbolic_arg = raw[+(unicode::char_ - unicode::char_(U','))];
+    symbolic_body = +((char_(U'(') >> *symbolic_body >> char_(U')')) | (unicode::char_ - unicode::char_(U'(') - unicode::char_(U')')));
 
-    definite_integral = (boost::spirit::qi::lit("definite_integral") | boost::spirit::qi::lit("integral")) >> '(' > expression > ',' > expression > ',' > symbolic_arg > ',' > name > ')';
+    symbolic_arg = raw[+( (char_(U'(') >> *symbolic_body >> char_(U')')) |
+        (unicode::char_ - unicode::char_(U',') - unicode::char_(U'(') - unicode::char_(U')')))];
+
+    definite_integral = (boost::spirit::qi::lit("definite_integral") | boost::spirit::qi::lit("integral")) >> 
+        '(' > expression > ',' > expression > ',' > symbolic_arg > ',' > name > ')';
 
     function_call = identifier >> '(' >> -(expression % ',') > ')';
     
@@ -331,12 +335,18 @@ Expression<yutovo_calculator::Rational>::Expression(LogicalId id, std::u32string
 
     multiply = (char_('*') > unary) | (char_('/') > unary) | (char_('%') > unary);
 
-    symbolic_arg = raw[+(char_ - char_(','))];
+    symbolic_body = +( (char_(U'(') >> *symbolic_body >> char_(U')')) |
+        (unicode::char_ - unicode::char_(U'(') - unicode::char_(U')')) );
 
-    definite_integral = (boost::spirit::qi::lit("definite_integral") | boost::spirit::qi::lit("integral")) >> '(' > expression > ',' > expression > ',' > symbolic_arg > ',' > name > ')';
+    symbolic_arg = raw[ +( (char_(U'(') >> *symbolic_body >> char_(U')')) |
+        (unicode::char_ - unicode::char_(U',') - unicode::char_(U'(') - unicode::char_(U')')) ) ];
+
+    definite_integral = (boost::spirit::qi::lit("definite_integral") | boost::spirit::qi::lit("integral")) >> 
+        '(' > expression > ',' > expression > ',' > symbolic_arg > ',' > name > ')';
     
-    unary = definite_integral | loop | array | compare | implicit_function_mul | implicit_post_function_mul | implicit_div_mul | implicit_string_mul | implicit_fraction_mul | 
-        mixed_division | implicit_mul | number | function_call | identifier | no_fences_function_call | unary_operation | '(' > expression > ')';
+    unary = definite_integral | loop | array | compare | implicit_function_mul | implicit_post_function_mul | implicit_div_mul | 
+        implicit_string_mul | implicit_fraction_mul | mixed_division | implicit_mul | number | function_call | identifier | 
+        no_fences_function_call | unary_operation | '(' > expression > ')';
     
     number = digits_number;
 
@@ -361,8 +371,8 @@ Expression<yutovo_calculator::Rational>::Expression(LogicalId id, std::u32string
     identifier = name >> -('{' > (digits_number | name) > '}');
     
     //0x00B0 = U'°', 39 = U'\'', 0x20BD = U'₽', 0x00A2 = U'¢', 0x0024 = U'$', 0x00A2 = U'€', 0x00A5 = U'¥', 0x20B9 = U'₹'
-    name = (raw[lexeme[(alpha | char_(U'∞') | char_(0x00B0) | char_(39) | char_(U'_') | char_(0x20BD) | char_(0x0024) | char_(0x00A2) | char_(0x20AC) | char_(0x00A5) |
-        char_(0x20B9)) >> *(alnum | char_(39) | char_(U'_') | char_(0x0024))]]);
+    name = (raw[lexeme[(alpha | char_(U'∞') | char_(0x00B0) | char_(39) | char_(U'_') | char_(0x20BD) | char_(0x0024) | char_(0x00A2) | 
+        char_(0x20AC) | char_(0x00A5) | char_(0x20B9)) >> *(alnum | char_(39) | char_(U'_') | char_(0x0024))]]);
 
     unary_operation = (char_('+') > unary) | (char_('-') > unary);
     
@@ -450,9 +460,9 @@ Expression<Complex>::Expression(LogicalId id, std::u32string& expr, Solver<Compl
 
     multiply = char_('*') > unary | char_('/') > unary | char_('%') > unary;
     
-    unary = definite_integral | loop | array | compare | implicit_function_mul | implicit_post_function_mul | postfix_operation | implicit_div_mul | implicit_string_mul | 
-        implicit_fraction_mul | mixed_division | implicit_mul | number | function_call | no_fences_function_call | identifier | 
-        unary_operation | '(' > expression > ')';
+    unary = definite_integral | loop | array | compare | implicit_function_mul | implicit_post_function_mul | postfix_operation | 
+        implicit_div_mul | implicit_string_mul | implicit_fraction_mul | mixed_division | implicit_mul | number | function_call | 
+        no_fences_function_call | identifier | unary_operation | '(' > expression > ')';
     
     number = exp_number | digits_number;
     
@@ -488,7 +498,11 @@ Expression<Complex>::Expression(LogicalId id, std::u32string& expr, Solver<Compl
 
     postfix_operation = ((number | '(' > expression > ')') >> char_('!'));
     
-    symbolic_arg = raw[+(char_ - char_(','))];
+    symbolic_body = +( (char_(U'(') >> *symbolic_body >> char_(U')')) |
+        (unicode::char_ - unicode::char_(U'(') - unicode::char_(U')')) );
+
+    symbolic_arg = raw[ +( (char_(U'(') >> *symbolic_body >> char_(U')')) |
+        (unicode::char_ - unicode::char_(U',') - unicode::char_(U'(') - unicode::char_(U')')) ) ];
 
     definite_integral = (lit("definite_integral") | lit("integral")) >> '(' > expression > ',' > expression > ',' > symbolic_arg > ',' > name > ')';
 
@@ -593,9 +607,9 @@ Expression<Array<Real>>::Expression(LogicalId id, std::u32string& expr, Solver<A
 
     multiply = char_('*') > unary | char_('/') > unary | char_('%') >> unary;
     
-    unary = definite_integral | loop | array | compare | implicit_function_mul | implicit_post_function_mul | postfix_operation | implicit_div_mul | implicit_string_mul | 
-        implicit_fraction_mul | mixed_division | implicit_mul | number | function_call | no_fences_function_call | identifier | 
-        unary_operation | '(' > expression > ')';
+    unary = definite_integral | loop | array | compare | implicit_function_mul | implicit_post_function_mul | postfix_operation | 
+        implicit_div_mul | implicit_string_mul | implicit_fraction_mul | mixed_division | implicit_mul | number | function_call | 
+        no_fences_function_call | identifier | unary_operation | '(' > expression > ')';
     
     number = exp_number | digits_number;
     
@@ -635,7 +649,11 @@ Expression<Array<Real>>::Expression(LogicalId id, std::u32string& expr, Solver<A
 
     postfix_operation = (identifier >> char_('!')) | ((number | '(' > expression > ')') >> char_('!'));
     
-    symbolic_arg = raw[+(char_ - char_(','))];
+    symbolic_body = +( (char_(U'(') >> *symbolic_body >> char_(U')')) |
+        (unicode::char_ - unicode::char_(U'(') - unicode::char_(U')')) );
+
+    symbolic_arg = raw[ +( (char_(U'(') >> *symbolic_body >> char_(U')')) |
+        (unicode::char_ - unicode::char_(U',') - unicode::char_(U'(') - unicode::char_(U')')) ) ];
 
     definite_integral = (lit("definite_integral") | lit("integral")) >> '(' > expression > ',' > expression > ',' > symbolic_arg > ',' > name > ')';
 

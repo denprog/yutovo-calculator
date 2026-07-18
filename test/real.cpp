@@ -2588,4 +2588,10 @@ TEST_F(CalcTestReal, definite_integral_inf5)
     ASSERT_TRUE(res.ToStdString(10, 10) == "1.E+0") << res.ToStdString(10, 10);
 }
 
+TEST_F(CalcTestReal, definite_integral_wide_interval)
+{
+    auto res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"definite_integral(-3,33,pow(x,2)*sin(x),x);", 10);
+    ASSERT_TRUE(res.ToStdString(10, 10) == "72.649339474E+0") << res.ToStdString(10, 10);
+}
+
 }

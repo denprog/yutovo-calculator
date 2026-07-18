@@ -574,6 +574,8 @@ struct Solver : public boost::static_visitor<Number>
                 try
                 {
                     res = giac::_integrate(args, &ctx);
+                    if (res.type == giac::_SYMB || res == giac::undef)
+                        res = giac::_romberg(args, &ctx);
                     if constexpr (std::is_same_v<Number, Rational>)
                         res = giac::normal(res, &ctx);
                     else

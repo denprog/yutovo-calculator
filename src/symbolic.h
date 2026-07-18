@@ -443,6 +443,7 @@ public:
             throw ParserException({}, ParserExceptionCode::IncorrectOperation);
 
         GiacMpfrStateGuard mpfr_guard;
+        GiacOutputGuard output_guard;
         Symbolic<Number> res(expr.precision);
         giac::vecteur args;
         args.push_back(*expr.expr);

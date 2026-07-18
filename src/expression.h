@@ -70,7 +70,8 @@ struct Expression : qi::grammar<std::u32string::iterator, ExpressionNode<Number>
 	qi::rule<std::u32string::iterator, ArrayNode<Number>(), unicode::space_type> array;
 	qi::rule<std::u32string::iterator, std::u32string(), unicode::space_type> dec_number, hex_number, digits_number, exp_number, integer_number_str;
 	qi::rule<std::u32string::iterator, std::u32string(), unicode::space_type> name;
-	qi::rule<std::u32string::iterator, std::u32string(), unicode::space_type> symbolic_arg;
+	qi::rule<std::u32string::iterator, std::u32string(), boost::spirit::unused_type> symbolic_arg;
+	qi::rule<std::u32string::iterator, std::u32string(), boost::spirit::unused_type> symbolic_body;
 
 	qi::rule<std::u32string::iterator, NumberNode<Number>(), unicode::space_type> number, real_number, integer_number;
 	qi::rule<std::u32string::iterator, VariableNode<Number>(), unicode::space_type> variable;
