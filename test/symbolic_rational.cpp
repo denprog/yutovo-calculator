@@ -141,6 +141,24 @@ TEST_F(CalcTestSymbolicRational, diff1)
     ASSERT_TRUE(res.ToStdString(0) == "2*x") << res.ToStdString(0);
 }
 
+TEST_F(CalcTestSymbolicRational, indefinite_integral1)
+{
+    Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"indefinite_integral(x^2, x);");
+    ASSERT_TRUE(res.ToStdString(0) == "(1/3)*pow(x,3)") << res.ToStdString(0);
+}
+
+TEST_F(CalcTestSymbolicRational, indefinite_integral2)
+{
+    Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"indefinite_integral(x*y, y);");
+    ASSERT_TRUE(res.ToStdString(0) == "(1/2)*x*pow(y,2)") << res.ToStdString(0);
+}
+
+TEST_F(CalcTestSymbolicRational, indefinite_integral_nonsymbol)
+{
+    EXPECT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"indefinite_integral(x, 1);"), yutovo_calculator::ParserException);
+    EXPECT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"indefinite_integral(x, x+1);"), yutovo_calculator::ParserException);
+}
+
 TEST_F(CalcTestSymbolicRational, expand1)
 {
     Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"expand((x+1)^2);");

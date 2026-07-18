@@ -6,6 +6,9 @@
 - `yutovo-editor/` — Document editor with MathML rendering and solver integration
 - `yutovo-desktop/` — Desktop GUI application using `yutovo-editor` and `yutovo-solver`
 
+## External Dependencies
+- `../third-party/giac-2.0.0/` — Giac source code (used for symbolic integration and CAS operations)
+
 ## Agent Rules
 
 - **Never delete files without explicit user permission.** Do not remove source files, test files, core dumps, logs, build artifacts, or any other files unless the user explicitly asks for it. When in doubt, leave the file in place and ask.
@@ -58,7 +61,7 @@ try {
 - `Parser<Symbolic>`, `Solver<Symbolic>`, `Expression<Symbolic>` are specialized for `Symbolic<Real>`, `Symbolic<Rational>`, and `Symbolic<Complex>`.
 - `^` is parsed left-associatively in the generic grammar. Giac flattens `(x^y)^z` to `x^(y*z)`; the formatter reconstructs `pow(pow(x,y),z)` for left-associative chains and prints explicit right-associative chains like `x^(y^z)` as `pow(x,y**z)`.
 - `evalf` returns `Symbolic`; explicit `to_real()` / `to_complex()` perform casting.
-- `factor()` and `integrate()` throw `NotImplemented = 302`.
+- `indefinite_integral(expr, var)` computes the symbolic antiderivative using `giac::_integrate`; the integration variable must be an identifier.
 - `sqrt(x)` is implemented for all symbolic types via `root(x, 2)` (i.e. `pow(x, 1/2)`). `sqrt(-∞)` returns `nan` for Real/Complex and throws for Rational.
 - `cot(x)`, `sec(x)`, `csc(x)`, `coth(x)`, `sech(x)`, `csch(x)` are rendered as inert functions (`yut_cot`, etc.) so that poles map to `∞` instead of being simplified away.
 - Inverse hyperbolic functions (`asinh`, `acosh`, `atanh`, `acoth`, `asech`, `acsch`) and their `arc...`/`ars...` synonyms are registered for all symbolic parsers. Inert wrappers preserve names; singularities such as `acoth(1)` and `acsch(0)` evaluate to `∞` for Real/Complex and remain symbolic for Rational.

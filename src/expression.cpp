@@ -219,7 +219,7 @@ Expression<Real>::Expression(LogicalId id, std::u32string& expr, Solver<Real>* _
     symbolic_arg = raw[+( (char_(U'(') >> *symbolic_body >> char_(U')')) |
         (unicode::char_ - unicode::char_(U',') - unicode::char_(U'(') - unicode::char_(U')')))];
 
-    definite_integral = (boost::spirit::qi::lit("definite_integral") | boost::spirit::qi::lit("integral")) >> 
+    definite_integral = boost::spirit::qi::lit("definite_integral") >>
         '(' > expression > ',' > expression > ',' > symbolic_arg > ',' > name > ')';
 
     function_call = identifier >> '(' >> -(expression % ',') > ')';
@@ -341,7 +341,7 @@ Expression<yutovo_calculator::Rational>::Expression(LogicalId id, std::u32string
     symbolic_arg = raw[ +( (char_(U'(') >> *symbolic_body >> char_(U')')) |
         (unicode::char_ - unicode::char_(U',') - unicode::char_(U'(') - unicode::char_(U')')) ) ];
 
-    definite_integral = (boost::spirit::qi::lit("definite_integral") | boost::spirit::qi::lit("integral")) >> 
+    definite_integral = boost::spirit::qi::lit("definite_integral") >>
         '(' > expression > ',' > expression > ',' > symbolic_arg > ',' > name > ')';
     
     unary = definite_integral | loop | array | compare | implicit_function_mul | implicit_post_function_mul | implicit_div_mul | 
@@ -504,7 +504,7 @@ Expression<Complex>::Expression(LogicalId id, std::u32string& expr, Solver<Compl
     symbolic_arg = raw[ +( (char_(U'(') >> *symbolic_body >> char_(U')')) |
         (unicode::char_ - unicode::char_(U',') - unicode::char_(U'(') - unicode::char_(U')')) ) ];
 
-    definite_integral = (lit("definite_integral") | lit("integral")) >> '(' > expression > ',' > expression > ',' > symbolic_arg > ',' > name > ')';
+    definite_integral = lit("definite_integral") >> '(' > expression > ',' > expression > ',' > symbolic_arg > ',' > name > ')';
 
     function_call = identifier >> '(' >> -(expression % ',') > ')';
     
@@ -649,13 +649,13 @@ Expression<Array<Real>>::Expression(LogicalId id, std::u32string& expr, Solver<A
 
     postfix_operation = (identifier >> char_('!')) | ((number | '(' > expression > ')') >> char_('!'));
     
-    symbolic_body = +( (char_(U'(') >> *symbolic_body >> char_(U')')) |
-        (unicode::char_ - unicode::char_(U'(') - unicode::char_(U')')) );
+    symbolic_body = +((char_(U'(') >> *symbolic_body >> char_(U')')) |
+        (unicode::char_ - unicode::char_(U'(') - unicode::char_(U')')));
 
-    symbolic_arg = raw[ +( (char_(U'(') >> *symbolic_body >> char_(U')')) |
-        (unicode::char_ - unicode::char_(U',') - unicode::char_(U'(') - unicode::char_(U')')) ) ];
+    symbolic_arg = raw[+( (char_(U'(') >> *symbolic_body >> char_(U')')) |
+        (unicode::char_ - unicode::char_(U',') - unicode::char_(U'(') - unicode::char_(U')')))];
 
-    definite_integral = (lit("definite_integral") | lit("integral")) >> '(' > expression > ',' > expression > ',' > symbolic_arg > ',' > name > ')';
+    definite_integral = lit("definite_integral") >> '(' > expression > ',' > expression > ',' > symbolic_arg > ',' > name > ')';
 
     function_call = identifier >> '(' >> -(expression % ',') > ')';
     

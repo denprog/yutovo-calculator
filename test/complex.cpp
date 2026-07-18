@@ -1098,7 +1098,7 @@ TEST_F(CalcTestComplex, definite_integral1)
 
 TEST_F(CalcTestComplex, definite_integral2)
 {
-    Complex res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"integral(-1,4,sin(x),x);", 10);
+    Complex res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"definite_integral(-1,4,sin(x),x);", 10);
     ASSERT_TRUE(res.ToStdString(10, 10) == "1.1939459267E+0") << res.ToStdString(10, 10);
 }
 

@@ -405,6 +405,28 @@ public:
         return res;
     }
 
+    friend Symbolic<Number> indefinite_integral(const Symbolic<Number>& expr, const Symbolic<Number>& var)
+    {
+        if (var.expr->type != giac::_IDNT)
+            throw ParserException({}, ParserExceptionCode::IncorrectOperation);
+
+        GiacMpfrStateGuard mpfr_guard;
+        GiacOutputGuard output_guard;
+        Symbolic<Number> res(expr.precision);
+        giac::vecteur args;
+        args.push_back(*expr.expr);
+        args.push_back(*var.expr);
+        try
+        {
+            *res.expr = giac::_integrate(args, &res.context);
+        }
+        catch (...)
+        {
+            throw MathException(IncorrectOperation);
+        }
+        return res;
+    }
+
     friend Symbolic<Number> subs(const Symbolic<Number>& num, const Symbolic<Number>& var, const Symbolic<Number>& value)
     {
         Symbolic<Number> res(num.precision);
@@ -1008,7 +1030,7 @@ public:
         static const std::set<std::string> known_funcs = {"sin", "cos", "tan", "cot", "sec", "csc", "sinh", "cosh", "tanh", "coth", "sech", "csch",
             "asinh", "acosh", "atanh", "acoth", "asech", "acsch", "arsinh", "arcosh", "artanh", "arcoth", "arsech", "arcsch",
             "arcsinh", "arccosh", "arctanh", "arccoth", "arcsech", "arccsch", "arccosech", "exp", "ln", "log", "sqrt", "root", "pow",
-            "gamma", "factorial", "min", "max", "diff", "subs", "expand", "simplify", "evalf"};
+            "gamma", "factorial", "min", "max", "diff", "indefinite_integral", "definite_integral", "subs", "expand", "simplify", "evalf"};
         static const std::set<std::string> known_consts = {"pi", "i", "j", "e", "oo", "inf", "nan", "undef"};
         int degree = 0;
         //count explicit powers pow(var,exp)

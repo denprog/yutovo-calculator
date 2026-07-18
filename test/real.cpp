@@ -2494,7 +2494,7 @@ TEST_F(CalcTestReal, definite_integral2)
 
 TEST_F(CalcTestReal, definite_integral_alias)
 {
-    auto res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"integral(0,1,x,x);", 10);
+    auto res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"definite_integral(0,1,x,x);", 10);
     ASSERT_TRUE(res.ToStdString(10, 10) == "0.5E+0") << res.ToStdString(10, 10);
 }
 
