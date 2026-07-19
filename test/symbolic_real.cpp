@@ -6,6 +6,11 @@
  */
 
 #include <gtest/gtest.h>
+#include <condition_variable>
+#include <iomanip>
+#include <mutex>
+#include <sstream>
+#include <thread>
 #include "mock.h"
 
 namespace yutovo_calc_test
@@ -1849,6 +1854,136 @@ TEST_F(CalcTestSymbolicReal, min_max2)
 
     res = parser.Parse(LogicalId{0, 0, 4}, U"max(a,b);");
     ASSERT_TRUE(res.ToStdString(10) == "5.") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicReal, threads_variables)
+{
+    constexpr int threads_count = 50;
+    constexpr int iterations = 20;
+
+    auto format_number =
+        [](double v)
+        {
+            std::ostringstream s;
+            s << std::setprecision(10) << std::fixed << v;
+            std::string str = s.str();
+            if (str.find('.') != std::string::npos)
+            {
+                str.erase(str.find_last_not_of('0') + 1);
+                if (str.back() == '.')
+                    str.pop_back();
+            }
+            return str;
+        };
+
+    std::vector<std::string> expected1(threads_count);
+    std::vector<std::string> expected2(threads_count);
+    for (int i = 0; i < threads_count; ++i)
+    {
+        double a = 2.3 + i;
+        double b = 3.4 + i;
+        double c = 6.7 + i;
+        double d = 0.5 + i;
+        double e = 1.5 + i;
+        double f = 2.5 + i;
+        expected1[i] = format_number(a + b * c + d + e * f) + "+sin(pow(x,2.))";
+
+        double g = 0.25 + i;
+        double h = 1.25 + i;
+        double j = 2.25 + i;
+        expected2[i] = format_number(g + h * j) + "+cos(pow(y,2.))";
+    }
+
+    std::vector<std::vector<std::string>> actual1(iterations, std::vector<std::string>(threads_count));
+    std::vector<std::vector<std::string>> actual2(iterations, std::vector<std::string>(threads_count));
+    std::vector<std::thread> threads;
+    threads.reserve(threads_count);
+
+    std::mutex m;
+    std::condition_variable cv_start;
+    std::condition_variable cv_done;
+    int current_iter = -1;
+    int done_count = 0;
+
+    for (int i = 0; i < threads_count; ++i)
+    {
+        threads.emplace_back(
+            [&, i]()
+            {
+                Parser<Symbolic<Real>> p(3, Language::English);
+                int iter = -1;
+                while (true)
+                {
+                    std::unique_lock<std::mutex> lock(m);
+                    cv_start.wait(lock,
+                        [&]()
+                        {
+                            return current_iter != iter;
+                        });
+                    iter = current_iter;
+                    if (iter >= iterations)
+                        break;
+                    lock.unlock();
+
+                    p.Parse(LogicalId{0, 0, 1}, U"a=" + ToUtfString(std::to_string(2.3 + i)) + U";", 3);
+                    p.Parse(LogicalId{0, 0, 2}, U"b=" + ToUtfString(std::to_string(3.4 + i)) + U";", 3);
+                    p.Parse(LogicalId{0, 0, 3}, U"c=" + ToUtfString(std::to_string(6.7 + i)) + U";", 3);
+                    p.Parse(LogicalId{0, 0, 4}, U"d=" + ToUtfString(std::to_string(0.5 + i)) + U";", 3);
+                    p.Parse(LogicalId{0, 0, 5}, U"e=" + ToUtfString(std::to_string(1.5 + i)) + U";", 3);
+                    p.Parse(LogicalId{0, 0, 6}, U"f=" + ToUtfString(std::to_string(2.5 + i)) + U";", 3);
+                    Symbolic<Real> res1 = p.Parse(LogicalId{0, 0, 7}, U"a+b*c+d+e*f+sin(pow(x,2));", 10);
+                    actual1[iter][i] = res1.ToStdString(10);
+
+                    p.Parse(LogicalId{0, 0, 8}, U"g=" + ToUtfString(std::to_string(0.25 + i)) + U";", 3);
+                    p.Parse(LogicalId{0, 0, 9}, U"h=" + ToUtfString(std::to_string(1.25 + i)) + U";", 3);
+                    p.Parse(LogicalId{0, 0, 10}, U"j=" + ToUtfString(std::to_string(2.25 + i)) + U";", 3);
+                    Symbolic<Real> res2 = p.Parse(LogicalId{0, 0, 11}, U"g+h*j+cos(pow(y,2));", 10);
+                    actual2[iter][i] = res2.ToStdString(10);
+
+                    lock.lock();
+                    ++done_count;
+                    if (done_count == threads_count)
+                        cv_done.notify_one();
+                }
+            });
+    }
+
+    for (int iter = 0; iter < iterations; ++iter)
+    {
+        {
+            std::lock_guard<std::mutex> lock(m);
+            current_iter = iter;
+            done_count = 0;
+        }
+        cv_start.notify_all();
+
+        std::unique_lock<std::mutex> lock(m);
+        cv_done.wait(lock,
+            [&]()
+            {
+                return done_count == threads_count;
+            });
+        lock.unlock();
+
+        for (int i = 0; i < threads_count; ++i)
+        {
+            ASSERT_TRUE(!expected1[i].empty());
+            ASSERT_TRUE(actual1[iter][i] == expected1[i]) << "iter=" << iter << " i=" << i << " actual=" << actual1[iter][i] << " expected=" << expected1[i];
+            ASSERT_TRUE(!expected2[i].empty());
+            ASSERT_TRUE(actual2[iter][i] == expected2[i]) << "iter=" << iter << " i=" << i << " actual=" << actual2[iter][i] << " expected=" << expected2[i];
+        }
+        actual1[iter].clear();
+        actual2[iter].clear();
+    }
+
+    {
+        std::lock_guard<std::mutex> lock(m);
+        current_iter = iterations;
+    }
+    cv_start.notify_all();
+
+    for (auto& t : threads)
+        t.join();
 }
 
 }

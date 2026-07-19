@@ -8,6 +8,11 @@
 #include <gtest/gtest.h>
 #include "mock.h"
 #include <chrono>
+#include <condition_variable>
+#include <iomanip>
+#include <mutex>
+#include <sstream>
+#include <thread>
 #include "parser_exception.h"
 #include "export.h"
 
@@ -2592,6 +2597,123 @@ TEST_F(CalcTestReal, definite_integral_wide_interval)
 {
     auto res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"definite_integral(-3,33,pow(x,2)*sin(x),x);", 10);
     ASSERT_TRUE(res.ToStdString(10, 10) == "72.649339474E+0") << res.ToStdString(10, 10);
+}
+
+TEST_F(CalcTestReal, threads_integrals)
+{
+    constexpr int threads_count = 50;
+    constexpr int iterations = 20;
+
+    Parser<Real> expected_parser(3, Language::English);
+    std::vector<std::string> expected1(threads_count);
+    std::vector<std::string> expected2(threads_count);
+    std::vector<std::string> expected3(threads_count);
+    std::vector<std::string> expected4(threads_count);
+    for (int i = 0; i < threads_count; ++i)
+    {
+        std::u32string coeff = ToUtfString(std::to_string(i));
+        expected1[i] = expected_parser.Parse(LogicalId{0, 0, 0, 0, 1}, coeff + U"/2;", 10).ToStdString(10, 10);
+        expected2[i] = expected_parser.Parse(LogicalId{0, 0, 0, 0, 1}, coeff + U"/4;", 10).ToStdString(10, 10);
+        expected3[i] = expected_parser.Parse(LogicalId{0, 0, 0, 0, 1}, coeff + U"/8;", 10).ToStdString(10, 10);
+        expected4[i] = expected_parser.Parse(LogicalId{0, 0, 0, 0, 1}, coeff + U"/16;", 10).ToStdString(10, 10);
+    }
+
+    std::vector<std::vector<std::string>> actual1(iterations, std::vector<std::string>(threads_count));
+    std::vector<std::vector<std::string>> actual2(iterations, std::vector<std::string>(threads_count));
+    std::vector<std::vector<std::string>> actual3(iterations, std::vector<std::string>(threads_count));
+    std::vector<std::vector<std::string>> actual4(iterations, std::vector<std::string>(threads_count));
+    std::vector<std::thread> threads;
+    threads.reserve(threads_count);
+
+    std::mutex m;
+    std::condition_variable cv_start;
+    std::condition_variable cv_done;
+    int current_iter = -1;
+    int done_count = 0;
+
+    for (int i = 0; i < threads_count; ++i)
+    {
+        threads.emplace_back(
+            [&, i]()
+            {
+                Parser<Real> p(3, Language::English);
+                std::u32string coeff = ToUtfString(std::to_string(i));
+                int iter = -1;
+                while (true)
+                {
+                    std::unique_lock<std::mutex> lock(m);
+                    cv_start.wait(lock,
+                        [&]()
+                        {
+                            return current_iter != iter;
+                        });
+                    iter = current_iter;
+                    if (iter >= iterations)
+                        break;
+                    lock.unlock();
+
+                    auto res1 = p.Parse(LogicalId{0, 0, 1}, U"definite_integral(0,1," + coeff + U"*x,x);", 10);
+                    actual1[iter][i] = res1.ToStdString(10, 10);
+
+                    auto res2 = p.Parse(LogicalId{0, 0, 2}, U"definite_integral(0,1," + coeff + U"*x^3,x);", 10);
+                    actual2[iter][i] = res2.ToStdString(10, 10);
+
+                    auto res3 = p.Parse(LogicalId{0, 0, 3}, U"definite_integral(0,1," + coeff + U"*x^7,x);", 10);
+                    actual3[iter][i] = res3.ToStdString(10, 10);
+
+                    auto res4 = p.Parse(LogicalId{0, 0, 4}, U"definite_integral(0,1," + coeff + U"*x^15,x);", 10);
+                    actual4[iter][i] = res4.ToStdString(10, 10);
+
+                    lock.lock();
+                    ++done_count;
+                    if (done_count == threads_count)
+                        cv_done.notify_one();
+                }
+            });
+    }
+
+    for (int iter = 0; iter < iterations; ++iter)
+    {
+        {
+            std::lock_guard<std::mutex> lock(m);
+            current_iter = iter;
+            done_count = 0;
+        }
+        cv_start.notify_all();
+
+        std::unique_lock<std::mutex> lock(m);
+        cv_done.wait(lock,
+            [&]()
+            {
+                return done_count == threads_count;
+            });
+        lock.unlock();
+
+        for (int i = 0; i < threads_count; ++i)
+        {
+            ASSERT_TRUE(!expected1[i].empty());
+            ASSERT_TRUE(actual1[iter][i] == expected1[i]) << "iter=" << iter << " i=" << i << " actual=" << actual1[iter][i] << " expected=" << expected1[i];
+            ASSERT_TRUE(!expected2[i].empty());
+            ASSERT_TRUE(actual2[iter][i] == expected2[i]) << "iter=" << iter << " i=" << i << " actual=" << actual2[iter][i] << " expected=" << expected2[i];
+            ASSERT_TRUE(!expected3[i].empty());
+            ASSERT_TRUE(actual3[iter][i] == expected3[i]) << "iter=" << iter << " i=" << i << " actual=" << actual3[iter][i] << " expected=" << expected3[i];
+            ASSERT_TRUE(!expected4[i].empty());
+            ASSERT_TRUE(actual4[iter][i] == expected4[i]) << "iter=" << iter << " i=" << i << " actual=" << actual4[iter][i] << " expected=" << expected4[i];
+        }
+        actual1[iter].clear();
+        actual2[iter].clear();
+        actual3[iter].clear();
+        actual4[iter].clear();
+    }
+
+    {
+        std::lock_guard<std::mutex> lock(m);
+        current_iter = iterations;
+    }
+    cv_start.notify_all();
+
+    for (auto& t : threads)
+        t.join();
 }
 
 }

@@ -12,33 +12,107 @@
 #include "rational.h"
 #include "complex.h"
 #include "export.h"
+#include <giac/input_lexer.h>
+#include <mutex>
 
 namespace yutovo_calculator
 {
 
-//Giac's parser/lexer uses thread-unsafe lazy static initialization and mutates shared tables during parsing. Serialize all parser entry points
-//to avoid memory corruption when multiple threads call giac::gen(string).
-std::mutex& GiacParserMutex()
+thread_local giac::context* current_giac_context = nullptr;
+std::mutex giac_parsing_mutex;
+std::mutex giac_evaluation_mutex;
+std::once_flag freeze_static_ids_once;
+
+class GiacSymbolsLock
 {
-    static std::mutex m;
-    return m;
+public:
+    GiacSymbolsLock()
+    {
+        giac::lock_syms_mutex();
+    }
+
+    ~GiacSymbolsLock()
+    {
+        giac::unlock_syms_mutex();
+    }
+};
+
+bool IsClonableSingleLetterIdentifier(const char* name)
+{
+    if (!name || !name[0] || name[1])
+        return false;
+    char c = name[0];
+    if (c < 'a' || c > 'z')
+        return false;
+    //keep giac's single-letter constants as shared global objects
+    if (c == 'e' || c == 'i')
+        return false;
+    return true;
 }
 
 giac::gen ParseGen(const char* str, const giac::context* ctx)
 {
-    std::lock_guard<std::mutex> lock(GiacParserMutex());
-    return giac::gen(str, ctx);
+    std::lock_guard<std::mutex> lock(giac_parsing_mutex);
+    std::call_once(freeze_static_ids_once, FreezeStaticGiacIdentifiers);
+    return CloneSingleLetterIdentifiers(giac::gen(str, ctx));
 }
 
 giac::gen ParseGen(const std::string& str, const giac::context* ctx)
 {
-    std::lock_guard<std::mutex> lock(GiacParserMutex());
-    return giac::gen(str, ctx);
+    return ParseGen(str.c_str(), ctx);
 }
 
-giac::context* GetContext(const giac::context* ctx)
+giac::gen CloneSingleLetterIdentifiers(const giac::gen& g)
 {
-    return const_cast<giac::context*>(ctx);
+    if (g.type == giac::_IDNT)
+    {
+        const char* name = g._IDNTptr->id_name;
+        if (IsClonableSingleLetterIdentifier(name))
+        {
+            giac::identificateur id(name);
+            return giac::gen(id);
+        }
+        return g;
+    }
+    if (g.type == giac::_SYMB)
+    {
+        giac::gen new_feuille = CloneSingleLetterIdentifiers(g._SYMBptr->feuille);
+        return giac::symbolic(g._SYMBptr->sommet, new_feuille);
+    }
+    if (g.type == giac::_VECT)
+    {
+        const giac::vecteur& v = *g._VECTptr;
+        giac::vecteur res;
+        res.reserve(v.size());
+        for (const auto& x : v)
+            res.push_back(CloneSingleLetterIdentifiers(x));
+        return giac::gen(res, g.subtype);
+    }
+    if (g.type == giac::_FRAC)
+    {
+        giac::gen num = CloneSingleLetterIdentifiers(g._FRACptr->num);
+        giac::gen den = CloneSingleLetterIdentifiers(g._FRACptr->den);
+        return giac::gen(giac::fraction(num, den));
+    }
+    return g;
+}
+
+void FreezeStaticGiacIdentifiers()
+{
+    GiacSymbolsLock lock;
+    //ensure the global single-letter identifiers are registered in syms() before freezing
+    for (char c = 'a'; c <= 'z'; ++c)
+    {
+        std::string name(1, c);
+        giac::gen(name, giac::context0);
+    }
+    giac::sym_string_tab& table = giac::syms();
+    for (auto& entry : table)
+    {
+        giac::gen& g = entry.second;
+        if (g.type == giac::_IDNT)
+            g.ref_count() = -1;
+    }
 }
 
 bool IsKnownConstant(const std::string& name)
@@ -97,12 +171,12 @@ giac::gen SimplifyPowerDivision(const giac::gen& n, const giac::gen& d, giac::co
     bool n_is_pow = IsPower(n, n_base, n_exp);
     bool d_is_pow = IsPower(d, d_base, d_exp);
     if (n_is_pow && d_is_pow && n_base == d_base)
-        return giac::pow(n_base, n_exp - d_exp, ctx);
+        return giac::pow(n_base, giac::operator_minus(n_exp, d_exp, ctx), ctx);
     if (n_is_pow && !d_is_pow && n_base == d)
-        return giac::pow(n_base, n_exp - giac::gen(1), ctx);
+        return giac::pow(n_base, giac::operator_minus(n_exp, giac::gen(1), ctx), ctx);
     if (!n_is_pow && d_is_pow && d_base == n)
-        return giac::pow(d_base, giac::gen(1) - d_exp, ctx);
-    return n / d;
+        return giac::pow(d_base, giac::operator_minus(giac::gen(1), d_exp, ctx), ctx);
+    return giac::rdiv(n, d, ctx);
 }
 
 std::string GiacToString(const giac::gen& g, giac::context* ctx)
@@ -832,7 +906,7 @@ std::string AddCoeffs(const std::string& a, const std::string& b, const FormatCo
     giac::decimal_digits(std::max(1, ctx.precision + 1), &ct);
     giac::gen ag(a.c_str(), &ct);
     giac::gen bg(b.c_str(), &ct);
-    giac::gen sum = ag + bg;
+    giac::gen sum = giac::operator_plus(ag, bg, &ct);
     if (ctx.mode == FormatContext::Rational)
         sum = giac::normal(sum, &ct);
     else
@@ -846,7 +920,7 @@ std::string MultiplyCoeffs(const std::string& a, const std::string& b, const For
     giac::decimal_digits(std::max(1, ctx.precision + 1), &ct);
     giac::gen ag(a.c_str(), &ct);
     giac::gen bg(b.c_str(), &ct);
-    giac::gen prod = ag * bg;
+    giac::gen prod = giac::operator_times(ag, bg, &ct);
     if (ctx.mode == FormatContext::Rational)
         prod = giac::normal(prod, &ct);
     else

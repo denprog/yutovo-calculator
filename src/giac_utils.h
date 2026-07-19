@@ -38,6 +38,18 @@
 namespace yutovo_calculator
 {
 
+//Thread-local pointer to the current parser's giac context.
+//When set, all Symbolic operations in this thread use this context instead of their own.
+extern thread_local giac::context* current_giac_context;
+
+//Global mutex protecting giac string parsing. Giac shares mutable state (e.g. single-letter identifier objects) between threads during parsing.
+//After parsing identifiers are cloned so that subsequent operations are thread-local.
+extern std::mutex giac_parsing_mutex;
+
+//Global mutex protecting giac integration/evaluation. Giac is not thread-safe for concurrent calls to _integrate, _romberg, evalf and similar operations
+//even when each thread uses its own giac::context.
+extern std::mutex giac_evaluation_mutex;
+
 struct FormatContext
 {
     enum Mode
@@ -562,7 +574,16 @@ inline giac::gen InertCall(const char* name, const giac::gen& arg, giac::context
 
 giac::gen ParseGen(const char* str, const giac::context* ctx);
 giac::gen ParseGen(const std::string& str, const giac::context* ctx);
-giac::context* GetContext(const giac::context* ctx);
+
+//Return a deep copy of g where each single-letter variable identifier (a..d, f..h, j..z) is replaced by a freshly allocated identificateur.
+//This avoids sharing giac's global one-letter identifier objects between threads.
+giac::gen CloneSingleLetterIdentifiers(const giac::gen& g);
+
+//Freeze ref_count of all identifiers currently in giac's global syms() table to -1.
+//This makes the global single-letter identifiers (x, y, z, ...) and any other already
+//registered identifiers effectively immutable for reference-counting purposes, so they
+//can be copied/destroyed concurrently without racing on ref_count.
+void FreezeStaticGiacIdentifiers();
 
 bool HasAmbiguousPoleArgument(const giac::gen& expr, const giac::identificateur& var, const giac::gen& value, giac::context* ctx);
 bool IsInfiniteLimit(const giac::gen& lim, giac::context* ctx);

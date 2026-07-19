@@ -14,10 +14,14 @@
 - **Never delete files without explicit user permission.** Do not remove source files, test files, core dumps, logs, build artifacts, or any other files unless the user explicitly asks for it. When in doubt, leave the file in place and ask.
 - **Never create separate namespaces (such as `namespace detail` or anonymous namespaces) without explicit user permission.** Helper functions should be placed in the common `yutovo_calculator` namespace, for example in `utils.h/utils.cpp` or `giac_utils.h/giac_utils.cpp`, or as `static` methods of the appropriate class.
 - **Never commit without explicit user permission.** Do not run `git commit`, `git push`, `git reset`, `git rebase`, or any other git mutations unless explicitly asked to do so. Ask for confirmation each time when git mutations are needed.
+- **Never create branches or delete stashes without explicit user permission.** Do not run `git branch`, `git checkout -b`, `git stash branch`, `git stash drop`, `git stash pop`, `git stash clear`, or similar commands that create branches or remove stashes unless the user explicitly asked for it.
 - **Never delete existing tests.** When fixing regressions or refactoring, update test expectations to match the new correct behavior, but do not remove tests. If `git checkout` or similar commands are used to revert a file, verify that no user-added tests were lost.
 
 ### Code Style
 Always place braces on their own line for control structures.
+
+### Naming
+Avoid abbreviations in identifiers; use full words. For example, prefer `Context` over `Ctx`, `Symbols` over `Syms`, etc.
 
 ### Parenthesized expressions
 Keep the contents of parentheses (function argument lists, conditions, initializers, etc.) on a single line when it fits. Only wrap to a new line if the expression would exceed **140 columns**.
@@ -76,6 +80,10 @@ try {
 - `RealNumberStr` evaluates rational strings such as `1333/1000` with MPFR so that `CombineLikeTerms` does not turn decimal reciprocals into bogus scientific notation (e.g., `1.333E+3`). `AddCoeffs` / `MultiplyCoeffs`, `EvaluateGiacExpression`, `IsGiacExpressionZero`, and Rational-mode evaluation in `EvaluateArithmeticExpr` / inert-function handling now convert the resulting `giac::gen` to `Real`/`Rational` via `FromGiac<>` instead of calling `giac::gen::print` and parsing the string.
 - On Linux `yutovo-calculator` links the **system** MPFR/GMP libraries and a static **giac** library found in `${INSTALL_PATH}/lib`. Debug builds must link `${INSTALL_PATH}/lib/libgiacd.a` and release builds `${INSTALL_PATH}/lib/libgiac.a`; mixing configurations causes an ABI mismatch and memory corruption inside giac (e.g., crashes in `giac::expand`). The Emscripten/wasm build links `${INSTALL_PATH}/wasm/libgiac.a`, `${INSTALL_PATH}/wasm/libmpfr.a`, `${INSTALL_PATH}/wasm/libgmp.a`, and `${INSTALL_PATH}/wasm/libgmpxx.a`, and compiles `src/symbolic.cpp` against the wasm build of giac; the former header-only stub has been removed.
 - Linux consumers of the installed `yutovo-calculator` target must also call `pkg_check_modules(mpfr REQUIRED IMPORTED_TARGET mpfr)` and `pkg_check_modules(gmp REQUIRED IMPORTED_TARGET gmp)` because they are recorded in the imported target's `INTERFACE_LINK_LIBRARIES`.
+- Each `Parser<Symbolic<...>>` creates a private `giac::context` and publishes it via the thread-local `current_giac_context` pointer in `src/giac_utils.h`. All `Symbolic` operations in that thread use this context through `Symbolic::Context()` instead of their own per-object `context`, giving each parser its own independent giac symbol table without a process-wide parser mutex.
+- Because giac shares mutable one-letter identifier objects (`x__IDNT_e`, `y__IDNT_e`, ...) during string parsing, `ParseGen()` in `src/giac_utils.cpp` takes a global `giac_parsing_mutex` and returns a copy of the parsed expression where every clonable single-letter variable (`a`..`z` except the constants `e` and `i`) is replaced by a freshly allocated `giac::identificateur`. After parsing, parallel threads operate on private identifier copies and do not race on giac's global identifier reference counts.
+- Non-symbolic computations that call giac (for example `definite_integral` evaluation for `Real`, `Complex`, `Rational` and `Array<Real>` in `src/solver.h`) take a separate global `giac_evaluation_mutex`. Giac is not thread-safe for concurrent calls to `_integrate`, `_romberg`, `evalf` and similar operations even with separate `giac::context` objects, so these calls are serialized.
+- `GiacParserMutex` and the `std::mutex` include in `giac_utils.h`/`symbolic.h` have been removed; the only remaining mutexes in the calculator source are `giac_parsing_mutex`, `giac_evaluation_mutex` and unrelated `export_mutex` locks in `src/export.cpp`.
 
 ### yutovo-solver
 - `ResultType::SYMBOLIC` added in `types.h`.
@@ -217,19 +225,22 @@ Running the full `yutovo-editor_tests` suite takes approximately **25 minutes** 
 - `yutovo-calculator/src/utils.h` / `utils.cpp` — restored to general-purpose utilities
 - `yutovo-calculator/src/ast.h` — added `ExpressionPosition::size`
 - `yutovo-calculator/src/annotation.h` — `Annotation` now computes `size` for function-call nodes by scanning from the identifier to the matching closing fence
-- `yutovo-calculator/src/solver.h` / `solver.cpp` — added `Solver::CallSize()`; all `WrongArgumentsCount` throws now use `CallSize(op)`
+- `yutovo-calculator/src/solver.h` / `solver.cpp` — added `Solver::CallSize()`; all `WrongArgumentsCount` throws now use `CallSize(op)`; `DefiniteIntegralNode` evaluation takes `giac_evaluation_mutex` because giac integration/evalf is not thread-safe
 - `yutovo-calculator/src/CMakeLists.txt` — builds and installs `giac_utils.h` / `giac_utils.cpp`
-- `yutovo-calculator/test/real.cpp` — updated `CalcTestReal.errors5` to expect `size == 6` for `sqrt();`
-- `yutovo-calculator/test/symbolic_real.cpp` — added `CalcTestSymbolicReal.simplify_wrong_args` regression test
+- `yutovo-calculator/test/real.cpp` — updated `CalcTestReal.errors5` to expect `size == 6` for `sqrt();`; added `CalcTestReal.threads_integrals` (50 threads × 20 iterations computing 4 definite integrals each)
+- `yutovo-calculator/test/symbolic_real.cpp` — added `CalcTestSymbolicReal.simplify_wrong_args` regression test and `CalcTestSymbolicReal.threads_variables` (50 threads × 20 iterations with independent parsers); actual result vectors are cleared after each iteration
 - `yutovo-calculator/test/symbolic.cpp` — added `variables_rational`, `variables_complex`, `user_functions_rational`, `user_functions_complex` tests
 - `yutovo-calculator/src/symbolic.cpp` — fixed `ReplacePowerOperator` to correctly handle parenthesized exponents (e.g. `x**(-1)` → `pow(x,-1)`)
-- `yutovo-calculator/src/parser.cpp` — registered `asinh`/`acosh`/`atanh`/`acoth`/`asech`/`acsch` and `arcsinh`/`arccosh`/`arctanh`/`arccoth`/`arcsech`/`arccsch`/`arccosech` synonyms for symbolic parsers
+- `yutovo-calculator/src/parser.cpp` — registered `asinh`/`acosh`/`atanh`/`acoth`/`asech`/`acsch` and `arcsinh`/`arccosh`/`arctanh`/`arccoth`/`arcsech`/`arccsch`/`arccosech` synonyms for symbolic parsers; constructors now create a per-parser `giac::context` and set `current_giac_context`
+- `yutovo-calculator/src/parser.h` — added `giac_context` member, destructor clears `current_giac_context`, `Parse()` re-publishes the context for the calling thread
+- `yutovo-calculator/src/giac_utils.h` / `giac_utils.cpp` — removed `GiacParserMutex`; added `thread_local giac::context* current_giac_context`; added `giac_parsing_mutex`, `giac_evaluation_mutex`, `FreezeStaticGiacIdentifiers()` and `CloneSingleLetterIdentifiers()`; arithmetic helpers (`SimplifyPowerDivision`, `AddCoeffs`, `MultiplyCoeffs`) now use context-aware `giac::operator_plus`/`operator_minus`/`operator_times`/`rdiv`
+- `yutovo-calculator/src/symbolic.h` / `symbolic.cpp` — renamed `Ctx()` to `Context()`; replaced `&context` with `Context()`, replaced binary `+`/`-`/`*`/`/` operators with context-aware giac equivalents
 - `yutovo-calculator/test/symbolic_real.cpp`, `symbolic_rational.cpp`, `symbolic_complex.cpp` — added `hyperbolic_inverse_synonyms` tests
 - `yutovo-editor/src/formulas/result.cpp` — `SymbolicResult::AddSymbolicElements` now parses `pow(base,exp)` into `Power` formula elements
 - `yutovo-editor/src/formulas/power.h` — added `GetBaseRow()` and `GetExponentRow()` public helpers
 
 ## Next Steps / Blockers
-- All Linux calculator tests pass (1116 tests across Real, Complex, Integer, Rational, Array, Symbolic, etc.).
+- All Linux calculator tests pass (1168 tests across Real, Complex, Integer, Rational, Array, Symbolic, etc.).
 - `yutovo-solver` tests pass (40 tests).
 - The three failing `SolverSymbolicTest` editor tests (`solver17`, `solver18`, `solver22`) have been fixed by adjusting calculator JSON output; no editor tests were modified.
 - The Emscripten/wasm symbolic stub is implemented; native behavior is unchanged.

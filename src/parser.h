@@ -33,7 +33,16 @@ template<typename Number>
 struct Parser
 {
     Parser(const int precision, const Language _language);
-    
+
+    ~Parser()
+    {
+        if constexpr (is_symbolic_v<Number>)
+        {
+            if (giac_context && current_giac_context == giac_context.get())
+                current_giac_context = nullptr;
+        }
+    }
+
     Number Parse(LogicalId id, std::u32string expression, Dependencies* dependencies, AngleMeasure default_angle_measure, AngleMeasure result_angle_measure, 
         Notation default_notation, const int precision = -1, ParserContext* _context = nullptr)
     {
@@ -50,6 +59,13 @@ struct Parser
         solver.ClearCastUnits();
         solver.SetDefaultNotation(default_notation);
         solver.SetParserContext(_context);
+
+        if constexpr (is_symbolic_v<Number>)
+        {
+            if (!giac_context)
+                giac_context = std::make_unique<giac::context>();
+            current_giac_context = giac_context.get();
+        }
 
         Script<Number> script(id, expression, &solver);
         ScriptNode<Number> script_node;
@@ -438,6 +454,8 @@ private:
     }
 
     Solver<Number> solver;
+
+    std::unique_ptr<giac::context> giac_context;
 
     Language language = Language::English;
     Language last_language = Language::None;

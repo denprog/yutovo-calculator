@@ -789,6 +789,9 @@ Parser<yutovo_calculator::Symbolic<yutovo_calculator::Real>>::Parser(const int p
 {
     InitThreadTime();
 
+    giac_context = std::make_unique<giac::context>();
+    current_giac_context = giac_context.get();
+
     SymbolicUnaryFunc unary_func;
     unary_func = &evalf;
     solver.AddBuiltinFunction(U"evalf", unary_func);
@@ -967,6 +970,9 @@ Parser<yutovo_calculator::Symbolic<yutovo_calculator::Rational>>::Parser(const i
 {
     InitThreadTime();
 
+    giac_context = std::make_unique<giac::context>();
+    current_giac_context = giac_context.get();
+
     SymbolicRationalUnaryFunc unary_func;
     unary_func = &expand;
     solver.AddBuiltinFunction(U"expand", unary_func);
@@ -1093,6 +1099,9 @@ Parser<yutovo_calculator::Symbolic<yutovo_calculator::Complex>>::Parser(const in
     last_language(_language)
 {
     InitThreadTime();
+
+    giac_context = std::make_unique<giac::context>();
+    current_giac_context = giac_context.get();
 
     SymbolicComplexUnaryFunc unary_func;
     unary_func = &evalf;

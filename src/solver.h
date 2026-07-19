@@ -510,6 +510,7 @@ struct Solver : public boost::static_visitor<Number>
         if constexpr (std::is_same_v<Number, Real> || std::is_same_v<Number, Complex> ||
             std::is_same_v<Number, Rational> || std::is_same_v<Number, Array<Real>>)
         {
+            std::lock_guard<std::mutex> lock(giac_evaluation_mutex);
             try
             {
                 Number lower = (*this)(op.lower);

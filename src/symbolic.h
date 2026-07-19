@@ -17,7 +17,6 @@
 #include <climits>
 #include <set>
 #include <cmath>
-#include <mutex>
 #include <giac/giac.h>
 #include <giac/intg.h>
 #include <giac/lin.h>
@@ -56,14 +55,14 @@ public:
         precision(_precision),
         expr(std::make_unique<giac::gen>(0))
     {
-        giac::decimal_digits(std::max(1, _precision + 1), &context);
+        giac::decimal_digits(std::max(1, _precision + 1), Context());
     }
 
     explicit Symbolic(int _precision, int num) :
         precision(_precision),
         expr(std::make_unique<giac::gen>(num))
     {
-        giac::decimal_digits(std::max(1, _precision + 1), &context);
+        giac::decimal_digits(std::max(1, _precision + 1), Context());
     }
 
     static bool IsNegativeInfinityNumber(const Real& num);
@@ -72,14 +71,14 @@ public:
         precision(_precision),
         expr(std::make_unique<giac::gen>(static_cast<double>(num)))
     {
-        giac::decimal_digits(std::max(1, _precision + 1), &context);
+        giac::decimal_digits(std::max(1, _precision + 1), Context());
     }
 
     explicit Symbolic(int _precision, const Number& num) :
         precision(_precision),
         expr(std::make_unique<giac::gen>(ToExpression(num)))
     {
-        giac::decimal_digits(std::max(1, _precision + 1), &context);
+        giac::decimal_digits(std::max(1, _precision + 1), Context());
         if constexpr (std::is_same_v<Number, Real>)
         {
             if (IsNegativeInfinityNumber(num))
@@ -91,14 +90,14 @@ public:
         precision(_precision),
         expr(std::make_unique<giac::gen>(ToBasicString(num)))
     {
-        giac::decimal_digits(std::max(1, _precision + 1), &context);
+        giac::decimal_digits(std::max(1, _precision + 1), Context());
     }
 
     explicit Symbolic(int _precision, const std::string& num) :
         precision(_precision),
         expr(std::make_unique<giac::gen>(ToBasicString(ToUtfString(num))))
     {
-        giac::decimal_digits(std::max(1, _precision + 1), &context);
+        giac::decimal_digits(std::max(1, _precision + 1), Context());
     }
 
     Symbolic(const Symbolic& source) :
@@ -166,75 +165,75 @@ public:
     friend Symbolic<Number> operator+(const Symbolic<Number>& num1, const Symbolic<Number>& num2)
     {
         Symbolic<Number> res(num1.precision);
-        *res.expr = *num1.expr + *num2.expr;
+        *res.expr = giac::operator_plus(*num1.expr, *num2.expr, num1.Context());
         return res;
     }
 
     friend Symbolic<Number> operator-(const Symbolic<Number>& num1, const Symbolic<Number>& num2)
     {
         Symbolic<Number> res(num1.precision);
-        *res.expr = *num1.expr - *num2.expr;
+        *res.expr = giac::operator_minus(*num1.expr, *num2.expr, num1.Context());
         return res;
     }
 
     friend Symbolic<Number> operator*(const Symbolic<Number>& num1, const Symbolic<Number>& num2)
     {
         Symbolic<Number> res(num1.precision);
-        *res.expr = *num1.expr * *num2.expr;
+        *res.expr = giac::operator_times(*num1.expr, *num2.expr, num1.Context());
         return res;
     }
 
     friend Symbolic<Number> operator/(const Symbolic<Number>& num1, const Symbolic<Number>& num2)
     {
         Symbolic<Number> res(num1.precision);
-        *res.expr = SimplifyPowerDivision(*num1.expr, *num2.expr, &res.context);
+        *res.expr = SimplifyPowerDivision(*num1.expr, *num2.expr, res.Context());
         return res;
     }
 
     friend Symbolic<Number> operator^(const Symbolic<Number>& num1, const Symbolic<Number>& num2)
     {
-        if (giac::is_zero(*num2.expr, GetContext(&num2.context)))
+        if (giac::is_zero(*num2.expr, num2.Context()))
             return Symbolic<Number>(num1.precision, 1);
         Symbolic<Number> res(num1.precision);
-        *res.expr = giac::pow(*num1.expr, *num2.expr, &res.context);
+        *res.expr = giac::pow(*num1.expr, *num2.expr, res.Context());
         return res;
     }
 
     void operator+=(const Symbolic<Number>& num)
     {
-        *expr = *expr + *num.expr;
+        *expr = giac::operator_plus(*expr, *num.expr, Context());
     }
 
     void operator-=(const Symbolic<Number>& num)
     {
-        *expr = *expr - *num.expr;
+        *expr = giac::operator_minus(*expr, *num.expr, Context());
     }
 
     void operator*=(const Symbolic<Number>& num)
     {
-        *expr = *expr * *num.expr;
+        *expr = giac::operator_times(*expr, *num.expr, Context());
     }
 
     void operator/=(const Symbolic<Number>& num)
     {
-        *expr = SimplifyPowerDivision(*expr, *num.expr, &context);
+        *expr = SimplifyPowerDivision(*expr, *num.expr, Context());
     }
 
     void operator^=(const Symbolic<Number>& num)
     {
-        if (giac::is_zero(*num.expr, GetContext(&context)))
+        if (giac::is_zero(*num.expr, Context()))
         {
             *expr = giac::gen(1);
             return;
         }
-        *expr = giac::pow(*expr, *num.expr, &context);
+        *expr = giac::pow(*expr, *num.expr, Context());
     }
 
     friend bool operator==(const Symbolic<Number>& num1, const Symbolic<Number>& num2)
     {
-        giac::gen diff = *num1.expr - *num2.expr;
-        giac::gen s = giac::simplify(diff, GetContext(&num1.context));
-        return giac::is_zero(s, GetContext(&num1.context));
+        giac::gen diff = giac::operator_minus(*num1.expr, *num2.expr, num1.Context());
+        giac::gen s = giac::simplify(diff, num1.Context());
+        return giac::is_zero(s, num1.Context());
     }
 
     friend bool operator==(const Symbolic<Number>& num1, const int num2)
@@ -326,15 +325,15 @@ public:
     friend Symbolic<Number> evalf(const Symbolic<Number>& num)
     {
         Symbolic<Number> res(num.precision);
-        giac::decimal_digits(std::max(1, num.precision + 10), &res.context);
-        giac::gen g = giac::evalf(*num.expr, 1, &res.context);
+        giac::decimal_digits(std::max(1, num.precision + 10), res.Context());
+        giac::gen g = giac::evalf(*num.expr, 1, res.Context());
         if (g.type == giac::_REAL || g.type == giac::_DOUBLE_ || g.type == giac::_CPLX)
         {
             static const giac::gen threshold(1.7976931348623157e308);
-            giac::gen abs_g = giac::abs(g, &res.context);
-            if (giac::is_greater(abs_g, threshold, &res.context))
+            giac::gen abs_g = giac::abs(g, res.Context());
+            if (giac::is_greater(abs_g, threshold, res.Context()))
             {
-                if (giac::is_positive(-g, &res.context))
+                if (giac::is_positive(-g, res.Context()))
                     g = giac::minus_inf;
                 else
                     g = giac::plus_inf;
@@ -356,15 +355,15 @@ public:
             p = num.precision;
         }
         Symbolic<Number> res(p);
-        giac::decimal_digits(std::max(1, p + 1), &res.context);
-        *res.expr = giac::evalf(*num.expr, 1, &res.context);
+        giac::decimal_digits(std::max(1, p + 1), res.Context());
+        *res.expr = giac::evalf(*num.expr, 1, res.Context());
         return res;
     }
 
     friend Symbolic<Number> expand(const Symbolic<Number>& num)
     {
         Symbolic<Number> res(num.precision);
-        *res.expr = giac::expand(*num.expr, &res.context);
+        *res.expr = giac::expand(*num.expr, res.Context());
         return res;
     }
 
@@ -377,12 +376,12 @@ public:
                 giac::gen g;
                 if (!HasUnknownSymbol(*num.expr))
                 {
-                    g = giac::_texpand(*num.expr, GetContext(&num.context));
-                    g = giac::normal(g, GetContext(&num.context));
+                    g = giac::_texpand(*num.expr, num.Context());
+                    g = giac::normal(g, num.Context());
                 }
                 else
                 {
-                    g = giac::factor(*num.expr, false, GetContext(&num.context));
+                    g = giac::factor(*num.expr, false, num.Context());
                 }
                 Symbolic<Number> res(num.precision);
                 *res.expr = g;
@@ -401,7 +400,7 @@ public:
         if (var.expr->type != giac::_IDNT)
             throw ParserException({}, ParserExceptionCode::IncorrectOperation);
         Symbolic<Number> res(num.precision);
-        *res.expr = giac::derive(*num.expr, *var.expr, &res.context);
+        *res.expr = giac::derive(*num.expr, *var.expr, res.Context());
         return res;
     }
 
@@ -418,7 +417,7 @@ public:
         args.push_back(*var.expr);
         try
         {
-            *res.expr = giac::_integrate(args, &res.context);
+            *res.expr = giac::_integrate(args, res.Context());
         }
         catch (...)
         {
@@ -430,10 +429,10 @@ public:
     friend Symbolic<Number> subs(const Symbolic<Number>& num, const Symbolic<Number>& var, const Symbolic<Number>& value)
     {
         Symbolic<Number> res(num.precision);
-        *res.expr = giac::subst(*num.expr, *var.expr, *value.expr, false, &res.context);
+        *res.expr = giac::subst(*num.expr, *var.expr, *value.expr, false, res.Context());
         if (*res.expr == giac::undef)
         {
-            if (var.expr->type == giac::_IDNT && HasAmbiguousPoleArgument(*num.expr, *var.expr->_IDNTptr, *value.expr, &res.context))
+            if (var.expr->type == giac::_IDNT && HasAmbiguousPoleArgument(*num.expr, *var.expr->_IDNTptr, *value.expr, res.Context()))
             {
                 if constexpr (std::is_same_v<Number, Rational>)
                     throw MathException(NotImplemented);
@@ -442,17 +441,17 @@ public:
             return Symbolic<Number>(num.precision, std::string("nan"));
         }
         if (*res.expr == giac::minus_inf && num.expr->type == giac::_SYMB && num.expr->_SYMBptr->sommet == giac::at_ln &&
-            giac::is_zero(giac::subst(num.expr->_SYMBptr->feuille, *var.expr, *value.expr, false, &res.context), &res.context))
+            giac::is_zero(giac::subst(num.expr->_SYMBptr->feuille, *var.expr, *value.expr, false, res.Context()), res.Context()))
         {
             return Symbolic<Number>(num.precision, std::u32string(U"∞"));
         }
         if constexpr (!std::is_same_v<Number, Rational>)
         {
-            if (*res.expr == InertCall("acoth", giac::gen(1), &res.context) || *res.expr == InertCall("acoth", giac::gen(1.), &res.context))
+            if (*res.expr == InertCall("acoth", giac::gen(1), res.Context()) || *res.expr == InertCall("acoth", giac::gen(1.), res.Context()))
                 return Symbolic<Number>(num.precision, std::u32string(U"∞"));
-            if (*res.expr == InertCall("acoth", giac::gen(-1), &res.context) || *res.expr == InertCall("acoth", giac::gen(-1.), &res.context))
+            if (*res.expr == InertCall("acoth", giac::gen(-1), res.Context()) || *res.expr == InertCall("acoth", giac::gen(-1.), res.Context()))
                 return Symbolic<Number>(num.precision, std::u32string(U"-∞"));
-            if (*res.expr == InertCall("acsch", giac::gen(0), &res.context) || *res.expr == InertCall("acsch", giac::gen(0.), &res.context))
+            if (*res.expr == InertCall("acsch", giac::gen(0), res.Context()) || *res.expr == InertCall("acsch", giac::gen(0.), res.Context()))
                 return Symbolic<Number>(num.precision, std::u32string(U"∞"));
         }
         return res;
@@ -474,7 +473,7 @@ public:
         args.push_back(*b.expr);
         try
         {
-            *res.expr = giac::_integrate(args, &res.context);
+            *res.expr = giac::_integrate(args, res.Context());
         }
         catch (...)
         {
@@ -486,56 +485,56 @@ public:
     friend Symbolic<Number> min(const Symbolic<Number>& num1, const Symbolic<Number>& num2)
     {
         Symbolic<Number> res(num1.precision);
-        *res.expr = giac::min(*num1.expr, *num2.expr, &res.context);
+        *res.expr = giac::min(*num1.expr, *num2.expr, res.Context());
         return res;
     }
 
     friend Symbolic<Number> max(const Symbolic<Number>& num1, const Symbolic<Number>& num2)
     {
         Symbolic<Number> res(num1.precision);
-        *res.expr = giac::max(*num1.expr, *num2.expr, &res.context);
+        *res.expr = giac::max(*num1.expr, *num2.expr, res.Context());
         return res;
     }
 
     friend Symbolic<Number> sin(const Symbolic<Number>& num)
     {
         Symbolic<Number> res(num.precision);
-        *res.expr = giac::sin(*num.expr, &res.context);
+        *res.expr = giac::sin(*num.expr, res.Context());
         return res;
     }
 
     friend Symbolic<Number> cos(const Symbolic<Number>& num)
     {
         Symbolic<Number> res(num.precision);
-        *res.expr = giac::cos(*num.expr, &res.context);
+        *res.expr = giac::cos(*num.expr, res.Context());
         return res;
     }
 
     friend Symbolic<Number> cot(const Symbolic<Number>& num)
     {
         Symbolic<Number> res(num.precision);
-        *res.expr = InertCall("cot", *num.expr, &res.context);
+        *res.expr = InertCall("cot", *num.expr, res.Context());
         return res;
     }
 
     friend Symbolic<Number> sec(const Symbolic<Number>& num)
     {
         Symbolic<Number> res(num.precision);
-        *res.expr = InertCall("sec", *num.expr, &res.context);
+        *res.expr = InertCall("sec", *num.expr, res.Context());
         return res;
     }
 
     friend Symbolic<Number> csc(const Symbolic<Number>& num)
     {
         Symbolic<Number> res(num.precision);
-        *res.expr = InertCall("csc", *num.expr, &res.context);
+        *res.expr = InertCall("csc", *num.expr, res.Context());
         return res;
     }
 
     friend Symbolic<Number> gamma(const Symbolic<Number>& num)
     {
         Symbolic<Number> res(num.precision);
-        *res.expr = giac::Gamma(*num.expr, &res.context);
+        *res.expr = giac::Gamma(*num.expr, res.Context());
         return res;
     }
 
@@ -561,63 +560,63 @@ public:
     friend Symbolic<Number> sinh(const Symbolic<Number>& num)
     {
         Symbolic<Number> res(num.precision);
-        *res.expr = giac::sinh(*num.expr, &res.context);
+        *res.expr = giac::sinh(*num.expr, res.Context());
         return res;
     }
 
     friend Symbolic<Number> cosh(const Symbolic<Number>& num)
     {
         Symbolic<Number> res(num.precision);
-        *res.expr = giac::cosh(*num.expr, &res.context);
+        *res.expr = giac::cosh(*num.expr, res.Context());
         return res;
     }
 
     friend Symbolic<Number> tanh(const Symbolic<Number>& num)
     {
         Symbolic<Number> res(num.precision);
-        *res.expr = giac::tanh(*num.expr, &res.context);
+        *res.expr = giac::tanh(*num.expr, res.Context());
         return res;
     }
 
     friend Symbolic<Number> coth(const Symbolic<Number>& num)
     {
         Symbolic<Number> res(num.precision);
-        *res.expr = InertCall("coth", *num.expr, &res.context);
+        *res.expr = InertCall("coth", *num.expr, res.Context());
         return res;
     }
 
     friend Symbolic<Number> sech(const Symbolic<Number>& num)
     {
         Symbolic<Number> res(num.precision);
-        *res.expr = InertCall("sech", *num.expr, &res.context);
+        *res.expr = InertCall("sech", *num.expr, res.Context());
         return res;
     }
 
     friend Symbolic<Number> csch(const Symbolic<Number>& num)
     {
         Symbolic<Number> res(num.precision);
-        *res.expr = InertCall("csch", *num.expr, &res.context);
+        *res.expr = InertCall("csch", *num.expr, res.Context());
         return res;
     }
 
     friend Symbolic<Number> asinh(const Symbolic<Number>& num)
     {
         Symbolic<Number> res(num.precision);
-        *res.expr = InertCall("asinh", *num.expr, &res.context);
+        *res.expr = InertCall("asinh", *num.expr, res.Context());
         return res;
     }
 
     friend Symbolic<Number> acosh(const Symbolic<Number>& num)
     {
         Symbolic<Number> res(num.precision);
-        *res.expr = InertCall("acosh", *num.expr, &res.context);
+        *res.expr = InertCall("acosh", *num.expr, res.Context());
         return res;
     }
 
     friend Symbolic<Number> atanh(const Symbolic<Number>& num)
     {
         Symbolic<Number> res(num.precision);
-        *res.expr = InertCall("atanh", *num.expr, &res.context);
+        *res.expr = InertCall("atanh", *num.expr, res.Context());
         return res;
     }
 
@@ -631,14 +630,14 @@ public:
                 return Symbolic<Number>(num.precision, std::u32string(U"-∞"));
         }
         Symbolic<Number> res(num.precision);
-        *res.expr = InertCall("acoth", *num.expr, &res.context);
+        *res.expr = InertCall("acoth", *num.expr, res.Context());
         return res;
     }
 
     friend Symbolic<Number> asech(const Symbolic<Number>& num)
     {
         Symbolic<Number> res(num.precision);
-        *res.expr = InertCall("asech", *num.expr, &res.context);
+        *res.expr = InertCall("asech", *num.expr, res.Context());
         return res;
     }
 
@@ -646,27 +645,27 @@ public:
     {
         if constexpr (!std::is_same_v<Number, Rational>)
         {
-            if (num.expr && giac::is_zero(*num.expr, GetContext(&num.context)))
+            if (num.expr && giac::is_zero(*num.expr, num.Context()))
                 return Symbolic<Number>(num.precision, std::u32string(U"∞"));
         }
         Symbolic<Number> res(num.precision);
-        *res.expr = InertCall("acsch", *num.expr, &res.context);
+        *res.expr = InertCall("acsch", *num.expr, res.Context());
         return res;
     }
 
     friend Symbolic<Number> exp(const Symbolic<Number>& num)
     {
         Symbolic<Number> res(num.precision);
-        *res.expr = giac::exp(*num.expr, &res.context);
+        *res.expr = giac::exp(*num.expr, res.Context());
         return res;
     }
 
     friend Symbolic<Number> ln(const Symbolic<Number>& num)
     {
-        if (giac::is_zero(*num.expr, GetContext(&num.context)))
+        if (giac::is_zero(*num.expr, num.Context()))
             return Symbolic<Number>(num.precision, std::u32string(U"∞"));
         Symbolic<Number> res(num.precision);
-        *res.expr = giac::log(*num.expr, &res.context);
+        *res.expr = giac::log(*num.expr, res.Context());
         return res;
     }
 
@@ -679,30 +678,30 @@ public:
             return Symbolic<Number>(num.precision, std::string("nan"));
         }
         Symbolic<Number> res(num.precision);
-        *res.expr = giac::sqrt(*num.expr, &res.context);
+        *res.expr = giac::sqrt(*num.expr, res.Context());
         return res;
     }
 
     friend Symbolic<Number> pow(const Symbolic<Number>& num1, const Symbolic<Number>& num2)
     {
-        if (giac::is_zero(*num2.expr, GetContext(&num2.context)))
+        if (giac::is_zero(*num2.expr, num2.Context()))
             return Symbolic<Number>(num1.precision, 1);
         Symbolic<Number> res(num1.precision);
-        *res.expr = giac::pow(*num1.expr, *num2.expr, &res.context);
+        *res.expr = giac::pow(*num1.expr, *num2.expr, res.Context());
         return res;
     }
 
     friend Symbolic<Number> log(const Symbolic<Number>& num1, const Symbolic<Number>& num2)
     {
         Symbolic<Number> res(num1.precision);
-        *res.expr = giac::log(*num2.expr, &res.context) / giac::log(*num1.expr, &res.context);
+        *res.expr = giac::rdiv(giac::log(*num2.expr, res.Context()), giac::log(*num1.expr, res.Context()), res.Context());
         return res;
     }
 
     friend Symbolic<Number> root(const Symbolic<Number>& num1, const Symbolic<Number>& num2)
     {
         Symbolic<Number> res(num1.precision);
-        *res.expr = giac::pow(*num1.expr, giac::gen(1) / *num2.expr, &res.context);
+        *res.expr = giac::pow(*num1.expr, giac::rdiv(giac::gen(1), *num2.expr, res.Context()), res.Context());
         return res;
     }
 
@@ -718,7 +717,7 @@ public:
 
     bool IsZero() const
     {
-        return giac::is_zero(*expr, GetContext(&context));
+        return giac::is_zero(*expr, Context());
     }
 
     bool IsNumber() const
@@ -732,16 +731,17 @@ public:
     static giac::gen ToBasicString(const std::u32string& s)
     {
         std::string utf8 = yutovo_calculator::ToBasicString(s);
+        const giac::context* c = current_giac_context ? current_giac_context : giac::context0;
         // giac uses i for the imaginary unit; uppercase I is our canonical form
         if (utf8 == "I")
-            return ParseGen("i", giac::context0);
+            return ParseGen("i", c);
         if (utf8 == "oo" || utf8 == "+oo")
             return giac::plus_inf;
         if (utf8 == "-oo")
             return giac::minus_inf;
         if (utf8 == "nan")
             return giac::undef;
-        return ParseGen(utf8, giac::context0);
+        return ParseGen(utf8, c);
     }
 
     static std::string ReplacePowerOperator(std::string s)
@@ -1532,6 +1532,11 @@ public:
         std::string result(buf);
         mpfr_free_str(buf);
         return result;
+    }
+
+    giac::context* Context() const
+    {
+        return current_giac_context ? current_giac_context : &context;
     }
 
 private:
