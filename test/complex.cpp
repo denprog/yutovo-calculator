@@ -1138,4 +1138,23 @@ TEST_F(CalcTestComplex, definite_integral8)
     ASSERT_TRUE(res.ToStdString(10, 10) == "1.7182818285E+0") << res.ToStdString(10, 10);
 }
 
+TEST_F(CalcTestComplex, derivative_at_point1)
+{
+    Complex res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"diff(x*x, x, 3);");
+    ASSERT_TRUE(res == parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"6;")) << res.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestComplex, derivative_at_point2)
+{
+    Complex res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"diff(sin(x), x, 0);");
+    ASSERT_TRUE(res == parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"1;")) << res.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestComplex, derivative_at_point3)
+{
+    parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"f(x)=x*x;");
+    Complex res = parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"diff(f(x), x, 2);");
+    ASSERT_TRUE(res.ToStdString(3, 3) == parser.Parse(LogicalId{0, 0, 0, 0, 3}, U"4;").ToStdString(3, 3)) << res.ToStdString(3, 3);
+}
+
 }

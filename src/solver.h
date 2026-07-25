@@ -13,6 +13,7 @@
 #include "utils.h"
 #include "export.h"
 #include "giac_utils.h"
+#include "expression.h"
 #include <chrono>
 #include <variant>
 #include <set>
@@ -602,6 +603,153 @@ struct Solver : public boost::static_visitor<Number>
         {
             throw MathException(op.id, IncorrectOperation, op.pos, 1, op.line);
         }
+    }
+
+    Number operator()(DerivativeAtPointNode<Number> const& op) const
+    {
+        if constexpr (is_symbolic_v<Number>)
+        {
+            try
+            {
+                Number value = (*this)(op.value);
+                const ExpressionNode<Number>& function_expr = boost::get<ExpressionNode<Number>>(op.function);
+                Number function = (*this)(function_expr);
+                Number var(precision, op.variable);
+                Number derivative = diff(function, var);
+                return subs(derivative, var, value);
+            }
+            catch (const MathException& e)
+            {
+                throw MathException(op.id, e.ex_id, op.pos, op.line);
+            }
+            catch (const ParserException&)
+            {
+                throw MathException(op.id, ParserExceptionCode::IncorrectOperation, op.pos, op.line);
+            }
+            catch (const std::bad_variant_access&)
+            {
+                throw MathException(op.id, ParserExceptionCode::IncorrectOperation, op.pos, op.line);
+            }
+            catch (...)
+            {
+                if constexpr (std::is_same_v<Number, Symbolic<Real>> || std::is_same_v<Number, Symbolic<Complex>>)
+                    return Number(precision, std::u32string(U"nan"));
+                throw MathException(op.id, ParserExceptionCode::IncorrectOperation, op.pos, op.line);
+            }
+        }
+        else if constexpr (std::is_same_v<Number, Real> || std::is_same_v<Number, Complex> || std::is_same_v<Number, Rational>)
+        {
+            try
+            {
+                Number value = (*this)(op.value);
+                const std::u32string& expression_str = boost::get<std::u32string>(op.function);
+                try
+                {
+                    return EvaluateDerivativeAtPoint(expression_str, op.variable, value);
+                }
+                catch (...)
+                {
+                    return NumericalDerivativeAtPoint(expression_str, op.variable, value);
+                }
+            }
+            catch (const MathException& e)
+            {
+                throw MathException(op.id, e.ex_id, op.pos, op.line);
+            }
+            catch (const ParserException&)
+            {
+                throw;
+            }
+            catch (const std::bad_variant_access&)
+            {
+                throw MathException(op.id, ParserExceptionCode::IncorrectOperation, op.pos, op.line);
+            }
+            catch (...)
+            {
+                throw MathException(op.id, ParserExceptionCode::IncorrectOperation, op.pos, op.line);
+            }
+        }
+        else
+        {
+            throw MathException(op.id, ParserExceptionCode::IncorrectOperation, op.pos, 1, op.line);
+        }
+    }
+
+    Number StepForNumericalDerivative(const Number& value) const
+    {
+        if constexpr (std::is_same_v<Number, Real>)
+            return Number(precision, "1e-7");
+        else if constexpr (std::is_same_v<Number, Complex>)
+            return Number(Real(precision, "1e-7"), Real(precision, "0"));
+        else
+            return Number(U"1/1000000");
+    }
+
+    Number EvaluateWithTempVariable(const std::u32string& expression_str, const std::u32string& variable, const Number& value) const
+    {
+        Solver<Number> sub_solver(precision, default_angle_measure, result_angle_measure, default_notation, im, Number(), symbols);
+        sub_solver.parser_context = parser_context;
+        sub_solver.id = id;
+        sub_solver.exported_id = exported_id;
+        sub_solver.res_pos = res_pos;
+        sub_solver.cast_units = cast_units;
+        sub_solver.max_cast_unit_size = max_cast_unit_size;
+        sub_solver.cur_subscript = cur_subscript;
+        sub_solver.dependencies = dependencies;
+        Number value_copy = value;
+        sub_solver.PushTempVariable(variable, value_copy);
+        Number res;
+        try
+        {
+            std::u32string expr = expression_str;
+            Expression<Number> expression(id, expr, &sub_solver);
+            ExpressionNode<Number> node;
+            std::u32string::iterator iter = expr.begin();
+            std::u32string::iterator end = expr.end();
+            unicode::space_type space;
+            if (!phrase_parse(iter, end, expression, space, node))
+                throw MathException(IncorrectOperation);
+            res = sub_solver(node);
+        }
+        catch (...)
+        {
+            sub_solver.PopTempVariables(1);
+            throw;
+        }
+        sub_solver.PopTempVariables(1);
+        return res;
+    }
+
+    Number NumericalDerivativeAtPoint(const std::u32string& expression_str, const std::u32string& variable, const Number& value) const
+    {
+        Number h = StepForNumericalDerivative(value);
+        Number plus = value + h;
+        Number minus = value - h;
+        Number f_plus = EvaluateWithTempVariable(expression_str, variable, plus);
+        Number f_minus = EvaluateWithTempVariable(expression_str, variable, minus);
+        return (f_plus - f_minus) / (h + h);
+    }
+
+    Number EvaluateDerivativeAtPoint(const std::u32string& expression_str, const std::u32string& variable, const Number& value) const
+    {
+        std::lock_guard<std::mutex> lock(giac_evaluation_mutex);
+        GiacMpfrStateGuard mpfr_guard;
+        GiacOutputGuard output_guard;
+        giac::context ctx;
+        if constexpr (!std::is_same_v<Number, Rational>)
+            giac::decimal_digits(std::max(1, precision + 1), &ctx);
+        giac::gen expr_gen = ParseGen(ToBasicString(expression_str), &ctx);
+        giac::gen var_gen = ParseGen(ToBasicString(variable), &ctx);
+        if (var_gen.type != giac::_IDNT)
+            throw MathException(IncorrectOperation);
+        giac::gen value_gen = ParseGen(ToBasicString(value.ToString()), &ctx);
+        giac::gen derivative = giac::derive(expr_gen, var_gen, &ctx);
+        giac::gen res = giac::subst(derivative, var_gen, value_gen, false, &ctx);
+        if constexpr (std::is_same_v<Number, Rational>)
+            res = giac::normal(res, &ctx);
+        else
+            res = giac::evalf(res, 1, &ctx);
+        return FromGiac<Number>(res, precision);
     }
 
     Number operator()(FunctionParamNode<Number> const& expr) const

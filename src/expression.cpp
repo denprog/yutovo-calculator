@@ -161,6 +161,7 @@ Expression<Real>::Expression(LogicalId id, std::u32string& expr, Solver<Real>* _
     using boost::spirit::qi::on_error;
     using boost::spirit::qi::fail;
     using boost::spirit::qi::lit;
+    using boost::spirit::qi::hold;
     using boost::phoenix::function;
     using namespace boost::phoenix::arg_names;
     qi::_1_type _1;
@@ -174,7 +175,7 @@ Expression<Real>::Expression(LogicalId id, std::u32string& expr, Solver<Real>* _
 
     multiply = char_(U'*') > unary | char_(U'/') > unary | char_(U'%') >> unary;
     
-    unary = definite_integral | loop | compare | implicit_function_mul | implicit_post_function_mul | postfix_operation | 
+    unary = hold[derivative_at_point] | definite_integral | loop | compare | implicit_function_mul | implicit_post_function_mul | postfix_operation | 
         implicit_div_mul | implicit_string_mul | implicit_fraction_mul | mixed_division | implicit_mul | number | function_call | 
         no_fences_function_call | identifier | unary_operation | '(' > expression > ')';
     
@@ -222,6 +223,8 @@ Expression<Real>::Expression(LogicalId id, std::u32string& expr, Solver<Real>* _
     definite_integral = boost::spirit::qi::lit("definite_integral") >>
         '(' > expression > ',' > expression > ',' > symbolic_arg > ',' > name > ')';
 
+    derivative_at_point = lit("diff") >> '(' >> symbolic_arg >> ',' >> name >> ',' >> expression >> ')';
+
     function_call = identifier >> '(' >> -(expression % ',') > ')';
     
     no_fences_function_call = (identifier >> ':' >> *(expression >> omit[',']) >> function_param);
@@ -252,6 +255,9 @@ Expression<Real>::Expression(LogicalId id, std::u32string& expr, Solver<Real>* _
         boost::phoenix::function<Annotation<yutovo_calculator::Real>>(Annotation<yutovo_calculator::Real>(expr.begin(), expr.end(), id, 
         &solver->parser_context))(qi::_val, _1));
     on_success(definite_integral, 
+        boost::phoenix::function<Annotation<yutovo_calculator::Real>>(Annotation<yutovo_calculator::Real>(expr.begin(), expr.end(), id, 
+        &solver->parser_context))(qi::_val, _1));
+    on_success(derivative_at_point, 
         boost::phoenix::function<Annotation<yutovo_calculator::Real>>(Annotation<yutovo_calculator::Real>(expr.begin(), expr.end(), id, 
         &solver->parser_context))(qi::_val, _1));
     on_success(no_fences_function_call, 
@@ -289,13 +295,16 @@ Expression<Real>::Expression(LogicalId id, std::u32string& expr, Solver<Real>* _
         boost::phoenix::function<ErrorHandler<SyntaxException>>(ErrorHandler<SyntaxException>(id, expr.begin(), expr.end(), SyntaxError))(_3));
     
     // BOOST_SPIRIT_DEBUG_NODE(expression);
+    // BOOST_SPIRIT_DEBUG_NODE(power);
+    // BOOST_SPIRIT_DEBUG_NODE(unary);
+    // BOOST_SPIRIT_DEBUG_NODE(derivative_at_point);
+    // BOOST_SPIRIT_DEBUG_NODE(number);
     // BOOST_SPIRIT_DEBUG_NODE(multiply);
     // BOOST_SPIRIT_DEBUG_NODE(addition);
     // BOOST_SPIRIT_DEBUG_NODE(unary_operation);
     // BOOST_SPIRIT_DEBUG_NODE(postfix_operation);
     // BOOST_SPIRIT_DEBUG_NODE(multiplication);
     // BOOST_SPIRIT_DEBUG_NODE(mixed_division);
-    // BOOST_SPIRIT_DEBUG_NODE(number);
     // BOOST_SPIRIT_DEBUG_NODE(implicit_string_mul);
     // BOOST_SPIRIT_DEBUG_NODE(function_call);
     // BOOST_SPIRIT_DEBUG_NODE(function_param);
@@ -322,6 +331,8 @@ Expression<yutovo_calculator::Rational>::Expression(LogicalId id, std::u32string
     using boost::spirit::qi::omit;
     using boost::spirit::qi::on_error;
     using boost::spirit::qi::fail;
+    using boost::spirit::qi::lit;
+    using boost::spirit::qi::hold;
     using boost::phoenix::function;
     using namespace boost::phoenix::arg_names;
     qi::_1_type _1;
@@ -343,8 +354,10 @@ Expression<yutovo_calculator::Rational>::Expression(LogicalId id, std::u32string
 
     definite_integral = boost::spirit::qi::lit("definite_integral") >>
         '(' > expression > ',' > expression > ',' > symbolic_arg > ',' > name > ')';
+
+    derivative_at_point = lit("diff") >> '(' >> symbolic_arg >> ',' >> name >> ',' >> expression >> ')';
     
-    unary = definite_integral | loop | array | compare | implicit_function_mul | implicit_post_function_mul | implicit_div_mul | 
+    unary = hold[derivative_at_point] | definite_integral | loop | array | compare | implicit_function_mul | implicit_post_function_mul | implicit_div_mul | 
         implicit_string_mul | implicit_fraction_mul | mixed_division | implicit_mul | number | function_call | identifier | 
         no_fences_function_call | unary_operation | '(' > expression > ')';
     
@@ -418,6 +431,9 @@ Expression<yutovo_calculator::Rational>::Expression(LogicalId id, std::u32string
     on_success(definite_integral,
         boost::phoenix::function<Annotation<yutovo_calculator::Rational>>(Annotation<yutovo_calculator::Rational>(expr.begin(), expr.end(), id,
         &solver->parser_context))(qi::_val, _1));
+    on_success(derivative_at_point,
+        boost::phoenix::function<Annotation<yutovo_calculator::Rational>>(Annotation<yutovo_calculator::Rational>(expr.begin(), expr.end(), id,
+        &solver->parser_context))(qi::_val, _1));
 
     //work out the exceptions
     on_error<fail>(expression, 
@@ -447,6 +463,7 @@ Expression<Complex>::Expression(LogicalId id, std::u32string& expr, Solver<Compl
     using boost::spirit::qi::on_error;
     using boost::spirit::qi::fail;
     using boost::spirit::qi::lit;
+    using boost::spirit::qi::hold;
     using boost::phoenix::function;
     using namespace boost::phoenix::arg_names;
     qi::_1_type _1;
@@ -460,7 +477,7 @@ Expression<Complex>::Expression(LogicalId id, std::u32string& expr, Solver<Compl
 
     multiply = char_('*') > unary | char_('/') > unary | char_('%') > unary;
     
-    unary = definite_integral | loop | array | compare | implicit_function_mul | implicit_post_function_mul | postfix_operation | 
+    unary = hold[derivative_at_point] | definite_integral | loop | array | compare | implicit_function_mul | implicit_post_function_mul | postfix_operation | 
         implicit_div_mul | implicit_string_mul | implicit_fraction_mul | mixed_division | implicit_mul | number | function_call | 
         no_fences_function_call | identifier | unary_operation | '(' > expression > ')';
     
@@ -506,6 +523,8 @@ Expression<Complex>::Expression(LogicalId id, std::u32string& expr, Solver<Compl
 
     definite_integral = lit("definite_integral") >> '(' > expression > ',' > expression > ',' > symbolic_arg > ',' > name > ')';
 
+    derivative_at_point = lit("diff") >> '(' >> symbolic_arg >> ',' >> name >> ',' >> expression >> ')';
+
     function_call = identifier >> '(' >> -(expression % ',') > ')';
     
     no_fences_function_call = (identifier >> ':' >> *(expression >> omit[',']) >> function_param);
@@ -538,6 +557,9 @@ Expression<Complex>::Expression(LogicalId id, std::u32string& expr, Solver<Compl
         boost::phoenix::function<Annotation<yutovo_calculator::Complex>>(Annotation<yutovo_calculator::Complex>(expr.begin(), expr.end(), id, 
         &solver->parser_context))(qi::_val, _1));
     on_success(definite_integral, 
+        boost::phoenix::function<Annotation<yutovo_calculator::Complex>>(Annotation<yutovo_calculator::Complex>(expr.begin(), expr.end(), id, 
+        &solver->parser_context))(qi::_val, _1));
+    on_success(derivative_at_point, 
         boost::phoenix::function<Annotation<yutovo_calculator::Complex>>(Annotation<yutovo_calculator::Complex>(expr.begin(), expr.end(), id, 
         &solver->parser_context))(qi::_val, _1));
     on_success(no_fences_function_call, 
@@ -594,6 +616,7 @@ Expression<Array<Real>>::Expression(LogicalId id, std::u32string& expr, Solver<A
     using boost::spirit::qi::on_error;
     using boost::spirit::qi::fail;
     using boost::spirit::qi::lit;
+    using boost::spirit::qi::hold;
     using boost::phoenix::function;
     using namespace boost::phoenix::arg_names;
     qi::_1_type _1;
@@ -755,6 +778,8 @@ Expression<Symbolic<Real>>::Expression(LogicalId id, std::u32string& expr, Solve
     using unicode::alpha;
     using boost::spirit::qi::omit;
     using boost::spirit::qi::no_case;
+    using boost::spirit::qi::lit;
+    using boost::spirit::qi::hold;
     using boost::spirit::qi::on_error;
     using boost::spirit::qi::fail;
     using boost::phoenix::function;
@@ -773,7 +798,7 @@ Expression<Symbolic<Real>>::Expression(LogicalId id, std::u32string& expr, Solve
     power = unary >> *(char_(U'^') > unary);
 
     unary = loop | array | compare | implicit_function_mul | implicit_post_function_mul | postfix_operation | implicit_div_mul | implicit_string_mul |
-        implicit_fraction_mul | mixed_division | implicit_mul | number | function_call | no_fences_function_call | identifier |
+        implicit_fraction_mul | mixed_division | implicit_mul | number | hold[derivative_at_point] | function_call | no_fences_function_call | identifier |
         unary_operation | '(' > expression > ')';
 
     number = exp_number | digits_number;
@@ -812,6 +837,8 @@ Expression<Symbolic<Real>>::Expression(LogicalId id, std::u32string& expr, Solve
 
     function_call = identifier >> '(' >> -(expression % ',') > ')';
 
+    derivative_at_point = lit("diff") >> '(' >> expression >> ',' >> name >> ',' >> expression >> ')';
+
     no_fences_function_call = (identifier >> ':' >> *(expression >> omit[',']) >> function_param);
 
     function_param = number | identifier | '(' > expression > ')';
@@ -842,6 +869,9 @@ Expression<Symbolic<Real>>::Expression(LogicalId id, std::u32string& expr, Solve
         boost::phoenix::function<Annotation<yutovo_calculator::Symbolic<Real>>>(Annotation<yutovo_calculator::Symbolic<Real>>(expr.begin(), expr.end(), id,
         &solver->parser_context))(qi::_val, _1));
     on_success(function_call,
+        boost::phoenix::function<Annotation<yutovo_calculator::Symbolic<Real>>>(Annotation<yutovo_calculator::Symbolic<Real>>(expr.begin(), expr.end(), id,
+        &solver->parser_context))(qi::_val, _1));
+    on_success(derivative_at_point,
         boost::phoenix::function<Annotation<yutovo_calculator::Symbolic<Real>>>(Annotation<yutovo_calculator::Symbolic<Real>>(expr.begin(), expr.end(), id,
         &solver->parser_context))(qi::_val, _1));
     on_success(no_fences_function_call,
@@ -950,6 +980,8 @@ Expression<Symbolic<Rational>>::Expression(LogicalId id, std::u32string& expr, S
     using unicode::alpha;
     using boost::spirit::qi::omit;
     using boost::spirit::qi::no_case;
+    using boost::spirit::qi::lit;
+    using boost::spirit::qi::hold;
     using boost::spirit::qi::on_error;
     using boost::spirit::qi::fail;
     using boost::phoenix::function;
@@ -968,7 +1000,7 @@ Expression<Symbolic<Rational>>::Expression(LogicalId id, std::u32string& expr, S
     power = unary >> *(char_(U'^') > unary);
 
     unary = loop | array | compare | implicit_function_mul | implicit_post_function_mul | postfix_operation | implicit_div_mul | implicit_string_mul |
-        implicit_fraction_mul | mixed_division | implicit_mul | number | function_call | no_fences_function_call | identifier |
+        implicit_fraction_mul | mixed_division | implicit_mul | number | hold[derivative_at_point] | function_call | no_fences_function_call | identifier |
         unary_operation | '(' > expression > ')';
 
     number = exp_number | digits_number;
@@ -1007,6 +1039,8 @@ Expression<Symbolic<Rational>>::Expression(LogicalId id, std::u32string& expr, S
 
     function_call = identifier >> '(' >> -(expression % ',') > ')';
 
+    derivative_at_point = lit("diff") >> '(' >> expression >> ',' >> name >> ',' >> expression >> ')';
+
     no_fences_function_call = (identifier >> ':' >> *(expression >> omit[',']) >> function_param);
 
     function_param = number | identifier | '(' > expression > ')';
@@ -1037,6 +1071,9 @@ Expression<Symbolic<Rational>>::Expression(LogicalId id, std::u32string& expr, S
         boost::phoenix::function<Annotation<yutovo_calculator::Symbolic<Rational>>>(Annotation<yutovo_calculator::Symbolic<Rational>>(expr.begin(), expr.end(), id,
         &solver->parser_context))(qi::_val, _1));
     on_success(function_call,
+        boost::phoenix::function<Annotation<yutovo_calculator::Symbolic<Rational>>>(Annotation<yutovo_calculator::Symbolic<Rational>>(expr.begin(), expr.end(), id,
+        &solver->parser_context))(qi::_val, _1));
+    on_success(derivative_at_point,
         boost::phoenix::function<Annotation<yutovo_calculator::Symbolic<Rational>>>(Annotation<yutovo_calculator::Symbolic<Rational>>(expr.begin(), expr.end(), id,
         &solver->parser_context))(qi::_val, _1));
     on_success(no_fences_function_call,
@@ -1100,6 +1137,8 @@ Expression<Symbolic<Complex>>::Expression(LogicalId id, std::u32string& expr, So
     using unicode::alpha;
     using boost::spirit::qi::omit;
     using boost::spirit::qi::no_case;
+    using boost::spirit::qi::lit;
+    using boost::spirit::qi::hold;
     using boost::spirit::qi::on_error;
     using boost::spirit::qi::fail;
     using boost::phoenix::function;
@@ -1118,7 +1157,7 @@ Expression<Symbolic<Complex>>::Expression(LogicalId id, std::u32string& expr, So
     power = unary >> *(char_(U'^') > unary);
 
     unary = loop | array | compare | implicit_function_mul | implicit_post_function_mul | postfix_operation | implicit_div_mul | implicit_string_mul |
-        implicit_fraction_mul | mixed_division | implicit_mul | number | function_call | no_fences_function_call | identifier |
+        implicit_fraction_mul | mixed_division | implicit_mul | number | hold[derivative_at_point] | function_call | no_fences_function_call | identifier |
         unary_operation | '(' > expression > ')';
 
     number = exp_number | digits_number;
@@ -1157,6 +1196,8 @@ Expression<Symbolic<Complex>>::Expression(LogicalId id, std::u32string& expr, So
 
     function_call = identifier >> '(' >> -(expression % ',') > ')';
 
+    derivative_at_point = lit("diff") >> '(' >> expression >> ',' >> name >> ',' >> expression >> ')';
+
     no_fences_function_call = (identifier >> ':' >> *(expression >> omit[',']) >> function_param);
 
     function_param = number | identifier | '(' > expression > ')';
@@ -1187,6 +1228,9 @@ Expression<Symbolic<Complex>>::Expression(LogicalId id, std::u32string& expr, So
         boost::phoenix::function<Annotation<yutovo_calculator::Symbolic<Complex>>>(Annotation<yutovo_calculator::Symbolic<Complex>>(expr.begin(), expr.end(), id,
         &solver->parser_context))(qi::_val, _1));
     on_success(function_call,
+        boost::phoenix::function<Annotation<yutovo_calculator::Symbolic<Complex>>>(Annotation<yutovo_calculator::Symbolic<Complex>>(expr.begin(), expr.end(), id,
+        &solver->parser_context))(qi::_val, _1));
+    on_success(derivative_at_point,
         boost::phoenix::function<Annotation<yutovo_calculator::Symbolic<Complex>>>(Annotation<yutovo_calculator::Symbolic<Complex>>(expr.begin(), expr.end(), id,
         &solver->parser_context))(qi::_val, _1));
     on_success(no_fences_function_call,

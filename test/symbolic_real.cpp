@@ -1334,6 +1334,76 @@ TEST_F(CalcTestSymbolicReal, diff_nonsymbol)
     EXPECT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"diff(x, sin(x));"), yutovo_calculator::ParserException);
 }
 
+TEST_F(CalcTestSymbolicReal, derivative_at_point1)
+{
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"diff(x^2, x, 3);");
+    ASSERT_TRUE(res.ToString(10) == U"6.") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicReal, derivative_at_point2)
+{
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"diff(sin(x), x, 0);");
+    ASSERT_TRUE(res.ToString(10) == U"1.") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicReal, derivative_at_point3)
+{
+    parser.Parse(LogicalId{0, 0, 1}, U"f(x)=x^2;");
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 2}, U"diff(f(x), x, 3);");
+    ASSERT_TRUE(res.ToString(10) == U"6.") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicReal, derivative_at_point4)
+{
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"diff(x^2, y, 3);");
+    ASSERT_TRUE(res.ToString(10) == U"0.") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicReal, derivative_at_point5)
+{
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"diff(x^2, x, 3)+1;");
+    ASSERT_TRUE(res.ToString(10) == U"7.") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicReal, derivative_at_point_error1)
+{
+    EXPECT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"diff(x, x+1, 1);"), yutovo_calculator::ParserException);
+}
+
+TEST_F(CalcTestSymbolicReal, derivative_at_point_error2)
+{
+    EXPECT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"diff(x, 5, 1);"), yutovo_calculator::ParserException);
+}
+
+TEST_F(CalcTestSymbolicReal, derivative_at_point6)
+{
+    parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"f(x,y)=x*y;");
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"diff(f(x,y), x, 3);");
+    ASSERT_TRUE(res.ToString(10) == U"y") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicReal, derivative_at_point7)
+{
+    parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"f(x,y)=x*y;");
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"diff(f(x,y), y, 3);");
+    ASSERT_TRUE(res.ToString(10) == U"x") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicReal, derivative_at_point8)
+{
+    parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"f(x,y)=pow(x,y);");
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"diff(f(x,y), y, 3);");
+    ASSERT_TRUE(res.ToString(10) == U"log(x)*pow(x,3.)") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicReal, derivative_at_point9)
+{
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"diff(1/x, x, 0);");
+    ASSERT_TRUE(res.ToJson(10) ==
+        R"r({"type":45,"elements":[{"type":7,"elements":[{"type":8,"elements":"∞"}]}]})r")
+        << res.ToJson(10);
+}
+
 TEST_F(CalcTestSymbolicReal, frac_power_mult)
 {
     Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"x^(1/2)*x^(1/3);");

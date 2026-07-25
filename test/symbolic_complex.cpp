@@ -1734,4 +1734,39 @@ TEST_F(CalcTestSymbolicComplex, e_times_x)
         ) << json;
 }
 
+TEST_F(CalcTestSymbolicComplex, derivative_at_point1)
+{
+    Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"diff(x^2, x, 3);");
+    ASSERT_TRUE(res.ToStdString(10) == "6") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicComplex, derivative_at_point2)
+{
+    parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"f(x)=x^2;");
+    Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"diff(f(x), x, 3);");
+    ASSERT_TRUE(res.ToStdString(10) == "6") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicComplex, derivative_at_point3)
+{
+    parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"f(x,y)=x*y;");
+    Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"diff(f(x,y), x, 3);");
+    ASSERT_TRUE(res.ToString(10) == U"y") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicComplex, derivative_at_point4)
+{
+    parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"f(x,y)=x*y;");
+    Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"diff(f(x,y), y, 3);");
+    ASSERT_TRUE(res.ToString(10) == U"x") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicComplex, derivative_at_point5)
+{
+    Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"diff(1/x, x, 0);");
+    ASSERT_TRUE(res.ToJson(10) ==
+        R"r({"type":47,"elements":[{"type":7,"elements":[{"type":8,"elements":"∞"}]}]})r")
+        << res.ToJson(10);
+}
+
 }

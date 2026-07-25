@@ -20,6 +20,42 @@
 ### Code Style
 Always place braces on their own line for control structures.
 
+For constructors, place the colon of the initializer list on the same line as the constructor signature. Put each initializer/base on its own line with a normal 4-space indent, and place the opening brace on its own line:
+```cpp
+// CORRECT
+ExpressionNode(const DefiniteIntegralNode<Number>& node)
+    : first(node)
+{
+}
+
+// WRONG
+ExpressionNode(const DefiniteIntegralNode<Number>& node) : first(node) {}
+```
+
+If a function has a definition, separate it from surrounding code with blank lines before and after:
+```cpp
+// CORRECT
+ExpressionNode(const DefiniteIntegralNode<Number>& node)
+    : first(node)
+{
+}
+
+ExpressionNode(const DerivativeAtPointNode<Number>& node)
+    : first(node)
+{
+}
+
+// WRONG
+ExpressionNode(const DefiniteIntegralNode<Number>& node)
+    : first(node)
+{
+}
+ExpressionNode(const DerivativeAtPointNode<Number>& node)
+    : first(node)
+{
+}
+```
+
 ### Naming
 Avoid abbreviations in identifiers; use full words. For example, prefer `Context` over `Ctx`, `Symbols` over `Syms`, etc.
 

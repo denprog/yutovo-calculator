@@ -17,6 +17,14 @@
 #include <climits>
 #include <set>
 #include <cmath>
+#if !defined(_WIN32) && !defined(HAVE_ALLOCA_H)
+#define HAVE_ALLOCA_H
+#endif
+
+#ifdef alloca
+#undef alloca
+#endif
+
 #include <giac/giac.h>
 #include <giac/intg.h>
 #include <giac/lin.h>

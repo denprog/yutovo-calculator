@@ -25,6 +25,11 @@
 #include <mutex>
 #include <unistd.h>
 #include <fcntl.h>
+
+#ifdef alloca
+#undef alloca
+#endif
+
 #include <giac/giac.h>
 #include <giac/lin.h>
 #include <giac/series.h>
