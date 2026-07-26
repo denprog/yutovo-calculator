@@ -15,6 +15,7 @@
 #include "giac_utils.h"
 #include "expression.h"
 #include <chrono>
+#include <functional>
 #include <variant>
 #include <set>
 #include <vector>
@@ -585,6 +586,8 @@ struct Solver : public boost::static_visitor<Number>
                 }
                 catch (...)
                 {
+                    if constexpr (std::is_same_v<Number, Real> || std::is_same_v<Number, Complex>)
+                        return NumericalDefiniteIntegral(op.expression, op.variable, lower, upper);
                     throw MathException(IncorrectOperation);
                 }
 
@@ -728,6 +731,112 @@ struct Solver : public boost::static_visitor<Number>
         Number f_plus = EvaluateWithTempVariable(expression_str, variable, plus);
         Number f_minus = EvaluateWithTempVariable(expression_str, variable, minus);
         return (f_plus - f_minus) / (h + h);
+    }
+
+    Number NumericalDefiniteIntegral(const std::u32string& expression_str, const std::u32string& variable,
+        const Number& lower, const Number& upper) const
+    {
+        if constexpr (!std::is_same_v<Number, Real> && !std::is_same_v<Number, Complex>)
+            throw MathException(IncorrectOperation);
+
+        if (lower.IsInfinity() || upper.IsInfinity())
+            throw MathException(IncorrectOperation);
+
+        Solver<Number> sub_solver(precision, default_angle_measure, result_angle_measure, default_notation, im, Number(), symbols);
+        sub_solver.parser_context = parser_context;
+        sub_solver.id = id;
+        sub_solver.exported_id = exported_id;
+        sub_solver.res_pos = res_pos;
+        sub_solver.cast_units = cast_units;
+        sub_solver.max_cast_unit_size = max_cast_unit_size;
+        sub_solver.cur_subscript = cur_subscript;
+        sub_solver.dependencies = dependencies;
+
+        std::u32string expr = expression_str;
+        Expression<Number> expression(sub_solver.id, expr, &sub_solver);
+        ExpressionNode<Number> node;
+        std::u32string::iterator iter = expr.begin();
+        std::u32string::iterator end = expr.end();
+        unicode::space_type space;
+        if (!phrase_parse(iter, end, expression, space, node))
+            throw MathException(IncorrectOperation);
+
+        auto evaluate_at = 
+            [&](const Number& value) -> Number
+            {
+                Number value_copy = value;
+                sub_solver.PushTempVariable(variable, value_copy);
+                Number res;
+                try
+                {
+                    res = sub_solver(node);
+                }
+                catch (...)
+                {
+                    sub_solver.PopTempVariables(1);
+                    throw;
+                }
+                sub_solver.PopTempVariables(1);
+                return res;
+            };
+
+        auto make_number = 
+            [&](const Real& re) -> Number
+            {
+                return Number(re);
+            };
+
+        auto magnitude = 
+            [&](const Number& value) -> Real
+            {
+                if constexpr (std::is_same_v<Number, Complex>)
+                    return abs(value).GetRe();
+                else
+                    return abs(value);
+            };
+
+        Number a = lower;
+        Number b = upper;
+        Number two = make_number(Real(precision, 2));
+        Number six = make_number(Real(precision, 6));
+        Number fifteen = make_number(Real(precision, 15));
+
+        Number c = (a + b) / two;
+        Number fa = evaluate_at(a);
+        Number fb = evaluate_at(b);
+        Number fc = evaluate_at(c);
+
+        auto simpson = 
+            [&](const Number& left, const Number& right, const Number& f_left, const Number& f_mid, const Number& f_right) -> Number
+            {
+                return (right - left) / six * (f_left + f_right + f_mid * two + f_mid * two);
+            };
+
+        Number S = simpson(a, b, fa, fc, fb);
+        std::string tol_str = std::string("1e-") + std::to_string(precision + 2);
+        Number eps = make_number(Real(precision, tol_str.c_str()));
+
+        std::function<Number(const Number&, const Number&, const Number&, const Number&,
+            const Number&, const Number&, const Number&, int)> adaptive =
+            [&](const Number& left, const Number& right, const Number& tol, const Number& estimate, const Number& f_left, 
+                const Number& f_right, const Number& f_mid, int depth) -> Number
+            {
+                Number mid = (left + right) / two;
+                Number left_mid = (left + mid) / two;
+                Number right_mid = (mid + right) / two;
+                Number f_left_mid = evaluate_at(left_mid);
+                Number f_right_mid = evaluate_at(right_mid);
+                Number left_estimate = simpson(left, mid, f_left, f_left_mid, f_mid);
+                Number right_estimate = simpson(mid, right, f_mid, f_right_mid, f_right);
+                Number total_estimate = left_estimate + right_estimate;
+                if (depth <= 0 || magnitude(total_estimate - estimate) <= magnitude(tol * fifteen))
+                    return total_estimate + (total_estimate - estimate) / fifteen;
+                Number half_tol = tol / two;
+                return adaptive(left, mid, half_tol, left_estimate, f_left, f_mid, f_left_mid, depth - 1) + 
+                    adaptive(mid, right, half_tol, right_estimate, f_mid, f_right, f_right_mid, depth - 1);
+            };
+
+        return adaptive(a, b, eps, S, fa, fb, fc, 20);
     }
 
     Number EvaluateDerivativeAtPoint(const std::u32string& expression_str, const std::u32string& variable, const Number& value) const

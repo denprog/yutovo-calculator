@@ -2772,4 +2772,11 @@ TEST_F(CalcTestReal, derivative_at_point8)
     ASSERT_TRUE(res.ToStdString(3, 3) == parser.Parse(LogicalId{0, 0, 0, 0, 3}, U"1;").ToStdString(3, 3)) << res.ToStdString(3, 3);
 }
 
+TEST_F(CalcTestReal, definite_integral_user_function)
+{
+    parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"iff(t)=5*pow(e,-2t);");
+    Real res = parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"definite_integral(0,1,iff(t),t);", 10);
+    ASSERT_TRUE(res.ToStdString(10, 10) == "2.1616617919E+0") << res.ToStdString(10, 10);
+}
+
 }

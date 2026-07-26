@@ -2062,4 +2062,17 @@ TEST_F(CalcTestSymbolicReal, threads_variables)
         t.join();
 }
 
+TEST_F(CalcTestSymbolicReal, definite_integral_user_function)
+{
+    parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"iff(t)=5*pow(e,-2t);");
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"definite_integral(0,1,iff(t),t);", 10);
+    ASSERT_TRUE(res.ToStdString(10) == "2.1616617919") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicReal, definite_integral_constant_with_e)
+{
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"definite_integral(0,1,5*pow(e,-2t),t);", 10);
+    ASSERT_TRUE(res.ToStdString(10) == "2.1616617919") << res.ToStdString(10);
+}
+
 }

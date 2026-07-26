@@ -483,6 +483,11 @@ public:
         {
             *res.expr = giac::_integrate(args, res.Context());
             *res.expr = giac::simplify(*res.expr, res.Context());
+            if constexpr (std::is_same_v<Number, Real> || std::is_same_v<Number, Complex>)
+            {
+                if (res.IsNumber())
+                    *res.expr = giac::evalf(*res.expr, 1, res.Context());
+            }
         }
         catch (...)
         {

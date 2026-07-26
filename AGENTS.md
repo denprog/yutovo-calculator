@@ -94,6 +94,33 @@ try {
 }
 ```
 
+### Lambdas
+Place the capture clause on a new line, indented by 4 spaces. Parameters, the `->` return type, and the opening brace follow the normal rules: parameters and return type stay on the same line as the capture clause, and the opening brace goes on its own line.
+```cpp
+// CORRECT
+auto callback =
+    [](int value) -> bool
+    {
+        return value > 0;
+    };
+
+auto reference =
+    [&]() -> void
+    {
+        DoWork();
+    };
+
+// WRONG
+auto callback = [](int value) -> bool {
+    return value > 0;
+};
+
+auto callback =
+    [](int value) -> bool {
+    return value > 0;
+};
+```
+
 ## Current Work: Symbolic Integration
 
 ### yutovo-calculator
@@ -102,6 +129,8 @@ try {
 - `^` is parsed left-associatively in the generic grammar. Giac flattens `(x^y)^z` to `x^(y*z)`; the formatter reconstructs `pow(pow(x,y),z)` for left-associative chains and prints explicit right-associative chains like `x^(y^z)` as `pow(x,y**z)`.
 - `evalf` returns `Symbolic`; explicit `to_real()` / `to_complex()` perform casting.
 - `indefinite_integral(expr, var)` computes the symbolic antiderivative using `giac::_integrate`; the integration variable must be an identifier.
+- `definite_integral(a, b, expr, var)` computes the exact antiderivative with `giac::_integrate`, simplifies it with `giac::simplify`, and, for `Symbolic<Real>`/`Symbolic<Complex>`, evaluates the result numerically when it is a constant (so numeric bounds produce a decimal number instead of an exact expression containing constants such as `e`).
+- Numeric `definite_integral` for `Real`/`Complex` first tries giac integration; if giac fails (for example because the integrand calls a user-defined function), it falls back to adaptive Simpson quadrature implemented in `Solver::NumericalDefiniteIntegral`.
 - `sqrt(x)` is implemented for all symbolic types via `root(x, 2)` (i.e. `pow(x, 1/2)`). `sqrt(-∞)` returns `nan` for Real/Complex and throws for Rational.
 - `cot(x)`, `sec(x)`, `csc(x)`, `coth(x)`, `sech(x)`, `csch(x)` are rendered as inert functions (`yut_cot`, etc.) so that poles map to `∞` instead of being simplified away.
 - Inverse hyperbolic functions (`asinh`, `acosh`, `atanh`, `acoth`, `asech`, `acsch`) and their `arc...`/`ars...` synonyms are registered for all symbolic parsers. Inert wrappers preserve names; singularities such as `acoth(1)` and `acsch(0)` evaluate to `∞` for Real/Complex and remain symbolic for Rational.
@@ -238,7 +267,7 @@ cd yutovo-desktop/build/debug && make -j4 yutovo-desktop
 # Emscripten/wasm build (from yutovo-calculator)
 cd yutovo-calculator/build_web/debug && make -j4 yutovo-calculator
 ```
-Use `-j4` maximum for building on any platform.
+Use `-j16` maximum for building on any platform.
 
 ### Test runtime
 Running the full `yutovo-editor_tests` suite takes approximately **25 minutes** (symbolic tests are particularly slow due to WebSocket solver round-trips).
@@ -261,22 +290,22 @@ Running the full `yutovo-editor_tests` suite takes approximately **25 minutes** 
 - `yutovo-calculator/src/utils.h` / `utils.cpp` — restored to general-purpose utilities
 - `yutovo-calculator/src/ast.h` — added `ExpressionPosition::size`
 - `yutovo-calculator/src/annotation.h` — `Annotation` now computes `size` for function-call nodes by scanning from the identifier to the matching closing fence
-- `yutovo-calculator/src/solver.h` / `solver.cpp` — added `Solver::CallSize()`; all `WrongArgumentsCount` throws now use `CallSize(op)`; `DefiniteIntegralNode` evaluation takes `giac_evaluation_mutex` because giac integration/evalf is not thread-safe
+- `yutovo-calculator/src/solver.h` / `solver.cpp` — added `Solver::CallSize()`; all `WrongArgumentsCount` throws now use `CallSize(op)`; `DefiniteIntegralNode` evaluation takes `giac_evaluation_mutex` because giac integration/evalf is not thread-safe; added `Solver::NumericalDefiniteIntegral` adaptive-Simpson fallback for `Real`/`Complex` when giac integration fails (e.g. integrands calling user-defined functions)
 - `yutovo-calculator/src/CMakeLists.txt` — builds and installs `giac_utils.h` / `giac_utils.cpp`
-- `yutovo-calculator/test/real.cpp` — updated `CalcTestReal.errors5` to expect `size == 6` for `sqrt();`; added `CalcTestReal.threads_integrals` (50 threads × 20 iterations computing 4 definite integrals each)
-- `yutovo-calculator/test/symbolic_real.cpp` — added `CalcTestSymbolicReal.simplify_wrong_args` regression test and `CalcTestSymbolicReal.threads_variables` (50 threads × 20 iterations with independent parsers); actual result vectors are cleared after each iteration
+- `yutovo-calculator/test/real.cpp` — updated `CalcTestReal.errors5` to expect `size == 6` for `sqrt();`; added `CalcTestReal.threads_integrals` (50 threads × 20 iterations computing 4 definite integrals each); added `CalcTestReal.definite_integral_user_function` for numeric integration of a user-defined function
+- `yutovo-calculator/test/symbolic_real.cpp` — added `CalcTestSymbolicReal.simplify_wrong_args` regression test and `CalcTestSymbolicReal.threads_variables` (50 threads × 20 iterations with independent parsers); actual result vectors are cleared after each iteration; added `definite_integral_user_function` and `definite_integral_constant_with_e` tests
 - `yutovo-calculator/test/symbolic.cpp` — added `variables_rational`, `variables_complex`, `user_functions_rational`, `user_functions_complex` tests
 - `yutovo-calculator/src/symbolic.cpp` — fixed `ReplacePowerOperator` to correctly handle parenthesized exponents (e.g. `x**(-1)` → `pow(x,-1)`)
 - `yutovo-calculator/src/parser.cpp` — registered `asinh`/`acosh`/`atanh`/`acoth`/`asech`/`acsch` and `arcsinh`/`arccosh`/`arctanh`/`arccoth`/`arcsech`/`arccsch`/`arccosech` synonyms for symbolic parsers; constructors now create a per-parser `giac::context` and set `current_giac_context`
 - `yutovo-calculator/src/parser.h` — added `giac_context` member, destructor clears `current_giac_context`, `Parse()` re-publishes the context for the calling thread
 - `yutovo-calculator/src/giac_utils.h` / `giac_utils.cpp` — removed `GiacParserMutex`; added `thread_local giac::context* current_giac_context`; added `giac_parsing_mutex`, `giac_evaluation_mutex`, `FreezeStaticGiacIdentifiers()` and `CloneSingleLetterIdentifiers()`; arithmetic helpers (`SimplifyPowerDivision`, `AddCoeffs`, `MultiplyCoeffs`) now use context-aware `giac::operator_plus`/`operator_minus`/`operator_times`/`rdiv`
-- `yutovo-calculator/src/symbolic.h` / `symbolic.cpp` — renamed `Ctx()` to `Context()`; replaced `&context` with `Context()`, replaced binary `+`/`-`/`*`/`/` operators with context-aware giac equivalents
+- `yutovo-calculator/src/symbolic.h` / `symbolic.cpp` — renamed `Ctx()` to `Context()`; replaced `&context` with `Context()`, replaced binary `+`/`-`/`*`/`/` operators with context-aware giac equivalents; symbolic `definite_integral` now simplifies with `giac::simplify` and evaluates constant `Symbolic<Real>`/`Symbolic<Complex>` results numerically
 - `yutovo-calculator/test/symbolic_real.cpp`, `symbolic_rational.cpp`, `symbolic_complex.cpp` — added `hyperbolic_inverse_synonyms` tests
 - `yutovo-editor/src/formulas/result.cpp` — `SymbolicResult::AddSymbolicElements` now parses `pow(base,exp)` into `Power` formula elements
 - `yutovo-editor/src/formulas/power.h` — added `GetBaseRow()` and `GetExponentRow()` public helpers
 
 ## Next Steps / Blockers
-- All Linux calculator tests pass (1168 tests across Real, Complex, Integer, Rational, Array, Symbolic, etc.).
+- All Linux calculator debug tests pass (1211 tests across Real, Complex, Integer, Rational, Array, Symbolic, etc.).
 - `yutovo-solver` tests pass (40 tests).
 - The three failing `SolverSymbolicTest` editor tests (`solver17`, `solver18`, `solver22`) have been fixed by adjusting calculator JSON output; no editor tests were modified.
 - The Emscripten/wasm symbolic stub is implemented; native behavior is unchanged.
