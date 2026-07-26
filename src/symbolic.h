@@ -482,6 +482,7 @@ public:
         try
         {
             *res.expr = giac::_integrate(args, res.Context());
+            *res.expr = giac::simplify(*res.expr, res.Context());
         }
         catch (...)
         {

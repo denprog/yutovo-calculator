@@ -240,6 +240,12 @@ TEST_F(CalcTestSymbolicComplex, indefinite_integral_nonsymbol)
     EXPECT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"indefinite_integral(x, x+1);"), yutovo_calculator::ParserException);
 }
 
+TEST_F(CalcTestSymbolicComplex, definite_integral1)
+{
+    Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"definite_integral(2,34,3y,x);");
+    ASSERT_TRUE(res.ToStdString(10) == "96.*y") << res.ToStdString(10);
+}
+
 TEST_F(CalcTestSymbolicComplex, expand1)
 {
     Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"expand((x+1)^2);");

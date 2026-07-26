@@ -660,6 +660,12 @@ TEST_F(CalcTestSymbolicReal, indefinite_integral_nonsymbol)
     EXPECT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"indefinite_integral(x, x+1);"), yutovo_calculator::ParserException);
 }
 
+TEST_F(CalcTestSymbolicReal, definite_integral_simplify1)
+{
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"definite_integral(2,34,3y,x);");
+    ASSERT_TRUE(res.ToStdString(10) == "96.*y") << res.ToStdString(10);
+}
+
 TEST_F(CalcTestSymbolicReal, subs1)
 {
     Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"subs(pow(x, 2), x, 5);");
