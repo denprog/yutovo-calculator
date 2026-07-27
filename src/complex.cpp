@@ -507,6 +507,9 @@ Complex exp(const Complex& num, int& res_pos)
     res.re = exponent * cos(_num.im);
     res.im = exponent * sin(_num.im);
 
+    if (res.re.IsInfinity() || res.re.IsNaN() || res.im.IsInfinity() || res.im.IsNaN())
+        throw MathException(Overflow);
+
     res.SetBitPrecision(num.GetBitPrecision());
 
     return res;

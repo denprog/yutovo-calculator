@@ -474,14 +474,12 @@ public:
         GiacMpfrStateGuard mpfr_guard;
         GiacOutputGuard output_guard;
         Symbolic<Number> res(expr.precision);
-        giac::vecteur args;
-        args.push_back(*expr.expr);
-        args.push_back(*var.expr);
-        args.push_back(*a.expr);
-        args.push_back(*b.expr);
         try
         {
-            *res.expr = giac::_integrate(args, res.Context());
+            Symbolic<Number> antiderivative = indefinite_integral(expr, var);
+            Symbolic<Number> upper_value = subs(antiderivative, var, b);
+            Symbolic<Number> lower_value = subs(antiderivative, var, a);
+            res = upper_value - lower_value;
             *res.expr = giac::simplify(*res.expr, res.Context());
             if constexpr (std::is_same_v<Number, Real> || std::is_same_v<Number, Complex>)
             {
@@ -562,7 +560,7 @@ public:
             for (long i = 2; i <= n; ++i)
             {
                 CheckBreak(parser_context);
-                *res.expr = *res.expr * giac::gen(static_cast<int>(i));
+                *res.expr = giac::operator_times(*res.expr, giac::gen(static_cast<int>(i)), res.Context());
             }
             return res;
         }

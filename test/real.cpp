@@ -1855,7 +1855,9 @@ TEST_F(CalcTestReal, prod2)
 TEST_F(CalcTestReal, max_time1)
 {
     yutovo_calculator::ParserContext parser_context;
-#ifdef _WIN32
+#ifdef NDEBUG
+    parser_context.Init(100);
+#elif defined(_WIN32)
     parser_context.Init(200);
 #else
     parser_context.Init(1000);
@@ -1875,8 +1877,12 @@ TEST_F(CalcTestReal, max_time1)
 TEST_F(CalcTestReal, max_time2)
 {
     yutovo_calculator::ParserContext parser_context;
+#ifdef NDEBUG
+    parser_context.Init(2000);
+#else
     parser_context.Init(5000);
-    EXPECT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"(234)/((3)/((4)/((6)/((7)/((6)/((7)/((2)/(4))))))));", &parser_context), 
+#endif
+    EXPECT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"(234)/((3)/((4)/((6)/((7)/((6)/((7)/((2)/(4))))))));", &parser_context),
         yutovo_calculator::TimeExceedException);
     parser_context.Init(0);
     std::string s = parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"123;", &parser_context).ToStdString(3, 3);

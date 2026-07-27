@@ -573,6 +573,12 @@ struct Solver : public boost::static_visitor<Number>
                 args.push_back(lower_gen);
                 args.push_back(upper_gen);
 
+                if constexpr (std::is_same_v<Number, Real> || std::is_same_v<Number, Complex>)
+                {
+                    if (HasUserFunctionCall(op.expression))
+                        return NumericalDefiniteIntegral(op.expression, op.variable, lower, upper);
+                }
+
                 giac::gen res;
                 try
                 {
@@ -733,6 +739,34 @@ struct Solver : public boost::static_visitor<Number>
         return (f_plus - f_minus) / (h + h);
     }
 
+    bool HasUserFunctionCall(const std::u32string& expression_str) const
+    {
+        auto is_identifier_char =
+            [](char32_t c) -> bool
+            {
+                return (c >= U'a' && c <= U'z') || (c >= U'A' && c <= U'Z') || (c >= U'0' && c <= U'9') || c == U'_';
+            };
+
+        for (const auto& func : symbols->functions)
+        {
+            const std::u32string& name = func.name.name;
+            size_t pos = 0;
+            while ((pos = expression_str.find(name, pos)) != std::u32string::npos)
+            {
+                size_t name_end = pos + name.size();
+                bool prev_ok = (pos == 0) || !is_identifier_char(expression_str[pos - 1]);
+                size_t after = name_end;
+                while (after < expression_str.size() && expression_str[after] == U' ')
+                    ++after;
+                bool is_call = (after < expression_str.size()) && (expression_str[after] == U'(');
+                if (prev_ok && is_call)
+                    return true;
+                ++pos;
+            }
+        }
+        return false;
+    }
+
     Number NumericalDefiniteIntegral(const std::u32string& expression_str, const std::u32string& variable,
         const Number& lower, const Number& upper) const
     {
@@ -761,7 +795,7 @@ struct Solver : public boost::static_visitor<Number>
         if (!phrase_parse(iter, end, expression, space, node))
             throw MathException(IncorrectOperation);
 
-        auto evaluate_at = 
+        auto evaluate_at =
             [&](const Number& value) -> Number
             {
                 Number value_copy = value;
@@ -780,13 +814,13 @@ struct Solver : public boost::static_visitor<Number>
                 return res;
             };
 
-        auto make_number = 
+        auto make_number =
             [&](const Real& re) -> Number
             {
                 return Number(re);
             };
 
-        auto magnitude = 
+        auto magnitude =
             [&](const Number& value) -> Real
             {
                 if constexpr (std::is_same_v<Number, Complex>)
@@ -806,7 +840,7 @@ struct Solver : public boost::static_visitor<Number>
         Number fb = evaluate_at(b);
         Number fc = evaluate_at(c);
 
-        auto simpson = 
+        auto simpson =
             [&](const Number& left, const Number& right, const Number& f_left, const Number& f_mid, const Number& f_right) -> Number
             {
                 return (right - left) / six * (f_left + f_right + f_mid * two + f_mid * two);
@@ -818,7 +852,7 @@ struct Solver : public boost::static_visitor<Number>
 
         std::function<Number(const Number&, const Number&, const Number&, const Number&,
             const Number&, const Number&, const Number&, int)> adaptive =
-            [&](const Number& left, const Number& right, const Number& tol, const Number& estimate, const Number& f_left, 
+            [&](const Number& left, const Number& right, const Number& tol, const Number& estimate, const Number& f_left,
                 const Number& f_right, const Number& f_mid, int depth) -> Number
             {
                 Number mid = (left + right) / two;
@@ -2471,6 +2505,9 @@ template<> Integer Solver<Integer>::operator()(PostfixOperationNode<Integer> con
 template<> Real Solver<Real>::operator()(PostfixOperationNode<Real> const& op) const;
 template<> Rational Solver<Rational>::operator()(PostfixOperationNode<Rational> const& op) const;
 template<> Complex Solver<Complex>::operator()(PostfixOperationNode<Complex> const& op) const;
+template<> Symbolic<Real> Solver<Symbolic<Real>>::operator()(PostfixOperationNode<Symbolic<Real>> const& op) const;
+template<> Symbolic<Rational> Solver<Symbolic<Rational>>::operator()(PostfixOperationNode<Symbolic<Rational>> const& op) const;
+template<> Symbolic<Complex> Solver<Symbolic<Complex>>::operator()(PostfixOperationNode<Symbolic<Complex>> const& op) const;
 template<> Integer Solver<Integer>::operator()(FunctionCallNode<Integer> const& op) const;
 template<> Real Solver<Real>::operator()(FunctionCallNode<Real> const& op) const;
 template<> Rational Solver<Rational>::operator()(FunctionCallNode<Rational> const& op) const;

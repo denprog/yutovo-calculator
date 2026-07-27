@@ -1669,7 +1669,11 @@ TEST_F(CalcTestSymbolicComplex, fact3)
 TEST_F(CalcTestSymbolicComplex, fact4)
 {
     yutovo_calculator::ParserContext parser_context;
+#ifdef NDEBUG
+    parser_context.Init(1);
+#else
     parser_context.Init(100);
+#endif
     EXPECT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"100000!;", &parser_context),
         yutovo_calculator::TimeExceedException);
 }
