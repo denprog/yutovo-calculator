@@ -2079,4 +2079,78 @@ TEST_F(CalcTestSymbolicReal, definite_integral_constant_with_e)
     ASSERT_TRUE(res.ToStdString(10) == "2.1616617919") << res.ToStdString(10);
 }
 
+TEST_F(CalcTestSymbolicReal, all_symbolic_functions)
+{
+    struct Expect
+    {
+        const char* name;
+        const char* alias;
+        const char* numeric_expr;
+        const char* numeric_result;
+        const char* sym_result;
+        const char* diff_result;
+    };
+    const Expect funcs[] = 
+        {
+            //direct numeric, alias, symbolic form, derivative
+            {"sin", nullptr, "sin(0)", "0.", "sin(x)", "cos(x)"},
+            {"cos", nullptr, "cos(0)", "1.", "cos(x)", "-sin(x)"},
+            {"tg", "tan", "tg(0)", "0.", "tan(x)", "1.+tanpow(x,2.)"},
+            {"cot", "ctg", "subs(cot(x),x,0)", "∞", "cot(x)", "diff(cot(x),x)"},
+            {"sec", nullptr, "subs(sec(x),x,0)", "1.", "sec(x)", "diff(sec(x),x)"},
+            {"csc", "cosec", "subs(csc(x),x,1)", "1.1883951058", "csc(x)", "diff(csc(x),x)"},
+            {"arcsin", nullptr, "arcsin(0)", "0.", "asin(x)", "pow(sqrt(1.-pow(x,2.)),-1.)"},
+            {"arccos", nullptr, "arccos(1)", "0.", "acos(x)", "-(pow(sqrt(1.-pow(x,2.)),-1.))"},
+            {"arctg", "arctan", "arctg(0)", "0.", "atan(x)", "pow(1.+pow(x,2.),-1.)"},
+            {"arcctg", "arccot", "subs(arcctg(x),x,1)", "0.7853981634", "atan(pow(x,-1.))", "-(pow(pow(x,2.),-1.))/(pow(pow(x,-1.),2.)+1.)"},
+            {"arcsec", nullptr, "arcsec(1)", "0.", "acos(pow(x,-1.))", "(pow(pow(x,2.),-1.)/sqrt(-1.+pow(x,2.))/abs(x))*pow(x,2.)"},
+            {"arccsc", "arccosec", "arccsc(1)", "1.5707963268", "asin(pow(x,-1.))", "(-(pow(pow(x,2.),-1.))/sqrt(-1.+pow(x,2.))/abs(x))*pow(x,2.)"},
+            {"sinh", "sh", "sinh(0)", "0.", "sinh(x)", "cosh(x)"},
+            {"cosh", "ch", "cosh(0)", "1.", "cosh(x)", "sinh(x)"},
+            {"tanh", "th", "tanh(0)", "0.", "tanh(x)", "1.-tanhpow(x,2.)"},
+            {"coth", "cth", "subs(coth(x),x,1)", "1.3130352855", "coth(x)", "diff(coth(x),x)"},
+            {"sech", "sch", "sech(0)", "1.", "sech(x)", "diff(sech(x),x)"},
+            {"csch", "cosech", "subs(csch(x),x,1)", "0.8509181282", "csch(x)", "diff(csch(x),x)"},
+            {"asinh", "arsinh", "asinh(0)", "0.", "asinh(x)", "diff(asinh(x),x)"},
+            {"acosh", "arcosh", "acosh(1)", "0.", "acosh(x)", "diff(acosh(x),x)"},
+            {"atanh", "artanh", "atanh(0)", "0.", "atanh(x)", "diff(atanh(x),x)"},
+            {"acoth", "arcoth", "subs(acoth(x),x,2)", "0.5493061443", "acoth(x)", "diff(acoth(x),x)"},
+            {"asech", "arsech", "asech(1)", "0.", "asech(x)", "diff(asech(x),x)"},
+            {"acsch", "arcsch", "acsch(1)", "0.881373587", "acsch(x)", "diff(acsch(x),x)"},
+        };
+
+    for (const auto& f : funcs)
+    {
+        SCOPED_TRACE(f.name);
+        std::u32string name = std::u32string(f.name, f.name + strlen(f.name));
+
+        //numeric variant
+        {
+            Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1},
+                std::u32string(f.numeric_expr, f.numeric_expr + strlen(f.numeric_expr)) + U";", 10);
+            ASSERT_TRUE(res.ToStdString(10) == f.numeric_result) << res.ToStdString(10);
+        }
+
+        //symbolic variant
+        {
+            Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, name + U"(x);", 10);
+            ASSERT_TRUE(res.ToStdString(10) == f.sym_result) << res.ToStdString(10);
+        }
+
+        //derivative variant
+        {
+            Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"diff(" + name + U"(x),x);", 10);
+            ASSERT_TRUE(res.ToStdString(10) == f.diff_result) << res.ToStdString(10);
+        }
+
+        //alias variant
+        if (f.alias)
+        {
+            std::u32string alias = std::u32string(f.alias, f.alias + strlen(f.alias));
+            Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, alias + U"(x);", 10);
+            ASSERT_TRUE(res.ToStdString(10) == f.sym_result) << res.ToStdString(10);
+        }
+    }
+}
+
 }

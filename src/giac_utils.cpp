@@ -813,10 +813,10 @@ int FunctionSortRank(const std::string& text)
     //canonical function ordering used by SymEngine for same-degree terms
     static const std::vector<std::string> order = 
         {
-            "sin", "cos", "tan", "cot", "sec", "csc",
-            "sinh", "cosh", "tanh", "coth", "sech", "csch",
-            "asin", "acos", "atan", "acot", "asec", "acsc",
-            "asinh", "acosh", "atanh", "acoth", "asech", "acsch"
+            "sin", "cos", "tan", "tg", "cot", "ctg", "sec", "csc", "cosec",
+            "sinh", "sh", "cosh", "ch", "tanh", "th", "coth", "cth", "sech", "sch", "csch", "cosech",
+            "asin", "acos", "atan", "arctg", "arctan", "acot", "arcctg", "arccot", "asec", "arcsec", "acsc", "arccsc", "arccosec",
+            "asinh", "arsinh", "arcsinh", "acosh", "arcosh", "arccosh", "atanh", "artanh", "arctanh", "acoth", "arcoth", "arccoth", "asech", "arsech", "arcsech", "acsch", "arcsch", "arcosech"
         };
     std::string name = text;
     size_t paren = name.find('(');
@@ -1178,7 +1178,7 @@ bool IsInertFunction(const std::string& name)
 std::string InertFunctionExpr(const std::string& name, const std::string& arg)
 {
     if (name == "cot")
-        return "1/tan(" + arg + ")";
+        return "1/tg(" + arg + ")";
     if (name == "sec")
         return "1/cos(" + arg + ")";
     if (name == "csc")

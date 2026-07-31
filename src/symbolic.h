@@ -522,6 +522,13 @@ public:
         return res;
     }
 
+    friend Symbolic<Number> tg(const Symbolic<Number>& num)
+    {
+        Symbolic<Number> res(num.precision);
+        *res.expr = giac::tan(*num.expr, res.Context());
+        return res;
+    }
+
     friend Symbolic<Number> cot(const Symbolic<Number>& num)
     {
         Symbolic<Number> res(num.precision);
@@ -540,6 +547,48 @@ public:
     {
         Symbolic<Number> res(num.precision);
         *res.expr = InertCall("csc", *num.expr, res.Context());
+        return res;
+    }
+
+    friend Symbolic<Number> arcsin(const Symbolic<Number>& num)
+    {
+        Symbolic<Number> res(num.precision);
+        *res.expr = giac::asin(*num.expr, res.Context());
+        return res;
+    }
+
+    friend Symbolic<Number> arccos(const Symbolic<Number>& num)
+    {
+        Symbolic<Number> res(num.precision);
+        *res.expr = giac::acos(*num.expr, res.Context());
+        return res;
+    }
+
+    friend Symbolic<Number> arctg(const Symbolic<Number>& num)
+    {
+        Symbolic<Number> res(num.precision);
+        *res.expr = giac::atan(*num.expr, res.Context());
+        return res;
+    }
+
+    friend Symbolic<Number> arcctg(const Symbolic<Number>& num)
+    {
+        Symbolic<Number> res(num.precision);
+        *res.expr = giac::atan(giac::inv(*num.expr, res.Context()), res.Context());
+        return res;
+    }
+
+    friend Symbolic<Number> arcsec(const Symbolic<Number>& num)
+    {
+        Symbolic<Number> res(num.precision);
+        *res.expr = giac::acos(giac::inv(*num.expr, res.Context()), res.Context());
+        return res;
+    }
+
+    friend Symbolic<Number> arccsc(const Symbolic<Number>& num)
+    {
+        Symbolic<Number> res(num.precision);
+        *res.expr = giac::asin(giac::inv(*num.expr, res.Context()), res.Context());
         return res;
     }
 
@@ -1039,9 +1088,9 @@ public:
 
     static int TermDegree(const std::string& term)
     {
-        static const std::set<std::string> known_funcs = {"sin", "cos", "tan", "cot", "sec", "csc", "sinh", "cosh", "tanh", "coth", "sech", "csch",
+        static const std::set<std::string> known_funcs = {"sin", "cos", "tan", "tg", "cot", "ctg", "sec", "csc", "cosec", "sinh", "sh", "cosh", "ch", "tanh", "th", "coth", "cth", "sech", "sch", "csch", "cosech",
             "asinh", "acosh", "atanh", "acoth", "asech", "acsch", "arsinh", "arcosh", "artanh", "arcoth", "arsech", "arcsch",
-            "arcsinh", "arccosh", "arctanh", "arccoth", "arcsech", "arccsch", "arccosech", "exp", "ln", "log", "sqrt", "root", "pow",
+            "arcsinh", "arccosh", "arctanh", "arccoth", "arcsech", "arccsch", "arccosech", "arctg", "arcctg", "exp", "ln", "log", "sqrt", "root", "pow",
             "gamma", "factorial", "min", "max", "diff", "indefinite_integral", "definite_integral", "subs", "expand", "simplify", "evalf"};
         static const std::set<std::string> known_consts = {"pi", "i", "j", "e", "oo", "inf", "nan", "undef"};
         int degree = 0;
