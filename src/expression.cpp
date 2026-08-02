@@ -223,7 +223,7 @@ Expression<Real>::Expression(LogicalId id, std::u32string& expr, Solver<Real>* _
     definite_integral = boost::spirit::qi::lit("definite_integral") >>
         '(' > expression > ',' > expression > ',' > symbolic_arg > ',' > name > ')';
 
-    derivative_at_point = lit("diff") >> '(' >> symbolic_arg >> ',' >> name >> ',' >> expression >> ')';
+    derivative_at_point = lit("derivative") >> '(' >> symbolic_arg >> ',' >> name >> ',' >> expression >> ')';
 
     function_call = identifier >> '(' >> -(expression % ',') > ')';
     
@@ -355,7 +355,7 @@ Expression<yutovo_calculator::Rational>::Expression(LogicalId id, std::u32string
     definite_integral = boost::spirit::qi::lit("definite_integral") >>
         '(' > expression > ',' > expression > ',' > symbolic_arg > ',' > name > ')';
 
-    derivative_at_point = lit("diff") >> '(' >> symbolic_arg >> ',' >> name >> ',' >> expression >> ')';
+    derivative_at_point = lit("derivative") >> '(' >> symbolic_arg >> ',' >> name >> ',' >> expression >> ')';
     
     unary = hold[derivative_at_point] | definite_integral | loop | array | compare | implicit_function_mul | implicit_post_function_mul | implicit_div_mul | 
         implicit_string_mul | implicit_fraction_mul | mixed_division | implicit_mul | number | function_call | identifier | 
@@ -523,7 +523,7 @@ Expression<Complex>::Expression(LogicalId id, std::u32string& expr, Solver<Compl
 
     definite_integral = lit("definite_integral") >> '(' > expression > ',' > expression > ',' > symbolic_arg > ',' > name > ')';
 
-    derivative_at_point = lit("diff") >> '(' >> symbolic_arg >> ',' >> name >> ',' >> expression >> ')';
+    derivative_at_point = lit("derivative") >> '(' >> symbolic_arg >> ',' >> name >> ',' >> expression >> ')';
 
     function_call = identifier >> '(' >> -(expression % ',') > ')';
     
@@ -837,7 +837,7 @@ Expression<Symbolic<Real>>::Expression(LogicalId id, std::u32string& expr, Solve
 
     function_call = identifier >> '(' >> -(expression % ',') > ')';
 
-    derivative_at_point = lit("diff") >> '(' >> expression >> ',' >> name >> ',' >> expression >> ')';
+    derivative_at_point = lit("derivative") >> '(' >> expression >> ',' >> name >> ',' >> expression >> ')';
 
     no_fences_function_call = (identifier >> ':' >> *(expression >> omit[',']) >> function_param);
 
@@ -1039,7 +1039,7 @@ Expression<Symbolic<Rational>>::Expression(LogicalId id, std::u32string& expr, S
 
     function_call = identifier >> '(' >> -(expression % ',') > ')';
 
-    derivative_at_point = lit("diff") >> '(' >> expression >> ',' >> name >> ',' >> expression >> ')';
+    derivative_at_point = lit("derivative") >> '(' >> expression >> ',' >> name >> ',' >> expression >> ')';
 
     no_fences_function_call = (identifier >> ':' >> *(expression >> omit[',']) >> function_param);
 
@@ -1196,7 +1196,7 @@ Expression<Symbolic<Complex>>::Expression(LogicalId id, std::u32string& expr, So
 
     function_call = identifier >> '(' >> -(expression % ',') > ')';
 
-    derivative_at_point = lit("diff") >> '(' >> expression >> ',' >> name >> ',' >> expression >> ')';
+    derivative_at_point = lit("derivative") >> '(' >> expression >> ',' >> name >> ',' >> expression >> ')';
 
     no_fences_function_call = (identifier >> ':' >> *(expression >> omit[',']) >> function_param);
 

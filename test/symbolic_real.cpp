@@ -485,7 +485,7 @@ TEST_F(CalcTestSymbolicReal, simplify2)
 TEST_F(CalcTestSymbolicReal, simplify3)
 {
     Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"simplify(sin(x)^2+cos(x)^2);");
-    ASSERT_TRUE(res.ToStdString(10) == "sinpow(x,2.)+cospow(x,2.)") << res.ToStdString(10);
+    ASSERT_TRUE(res.ToStdString(10) == "pow(cos(x),2.)+pow(sin(x),2.)") << res.ToStdString(10);
     ASSERT_TRUE(res.ToJson(10) ==
         R"r({"type":45,"elements":[{"type":7,"elements":[{"type":15,"elements":[{"type":7,"elements":[{"type":8,"elements":"cos"},{"type":19,"symbol":"("},{"type":8,"elements":"x"},{"type":20,"symbol":")"}]},{"type":10,"elements":[]},{"type":7,"elements":[{"type":8,"elements":"2"}]}]},{"type":11,"symbol":"+"},{"type":15,"elements":[{"type":7,"elements":[{"type":8,"elements":"sin"},{"type":19,"symbol":"("},{"type":8,"elements":"x"},{"type":20,"symbol":")"}]},{"type":10,"elements":[]},{"type":7,"elements":[{"type":8,"elements":"2"}]}]}]}]})r" ) << res.ToJson(10);
 }
@@ -610,29 +610,29 @@ TEST_F(CalcTestSymbolicReal, nested_power1)
         R"json({"type":45,"elements":[{"type":15,"elements":[{"type":7,"elements":[{"type":19,"symbol":"("},{"type":15,"elements":[{"type":7,"elements":[{"type":19,"symbol":"("},{"type":7,"elements":[{"type":8,"elements":"x"},{"type":11,"symbol":"+"},{"type":8,"elements":"y"}]},{"type":20,"symbol":")"}]},{"type":10,"elements":[]},{"type":7,"elements":[{"type":8,"elements":"2"}]}]},{"type":20,"symbol":")"}]},{"type":10,"elements":[]},{"type":7,"elements":[{"type":8,"elements":"z"}]}]}]})json" ) << json;
 }
 
-TEST_F(CalcTestSymbolicReal, diff1)
+TEST_F(CalcTestSymbolicReal, derivative1)
 {
-    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"diff(pow(x, 2), x);");
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"derivative(pow(x, 2), x);");
     ASSERT_TRUE(res.ToString(10) == U"2.*x") << res.ToStdString(10);
 }
 
-TEST_F(CalcTestSymbolicReal, diff2)
+TEST_F(CalcTestSymbolicReal, derivative2)
 {
     parser.Parse(LogicalId{0, 0, 1}, U"f(x)=x+x;");
-    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 2}, U"diff(f(x), x);");
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 2}, U"derivative(f(x), x);");
     ASSERT_TRUE(res.ToString(10) == U"2.") << res.ToStdString(10);
 }
 
-TEST_F(CalcTestSymbolicReal, diff3)
+TEST_F(CalcTestSymbolicReal, derivative3)
 {
     parser.Parse(LogicalId{0, 0, 1}, U"f(x)=pow(x,2);");
-    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 2}, U"diff(f(x), x);");
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 2}, U"derivative(f(x), x);");
     ASSERT_TRUE(res.ToString(10) == U"2.*x") << res.ToStdString(10);
 }
 
-TEST_F(CalcTestSymbolicReal, diff4)
+TEST_F(CalcTestSymbolicReal, derivative4)
 {
-    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"diff(sin(x), x);");
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"derivative(sin(x), x);");
     ASSERT_TRUE(res.ToString(10) == U"cos(x)") << res.ToStdString(10);
 }
 
@@ -1261,9 +1261,9 @@ TEST_F(CalcTestSymbolicReal, pow_operator1)
         ) << json;
 }
 
-TEST_F(CalcTestSymbolicReal, diff_complex1)
+TEST_F(CalcTestSymbolicReal, derivative_complex1)
 {
-    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"diff(x^3+2*x^2-5*x+1, x);");
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"derivative(x^3+2*x^2-5*x+1, x);");
     ASSERT_TRUE(res.ToString(10) == U"-5.+4.*x+3.*pow(x,2.)") << res.ToStdString(10);
     std::string json = res.ToJson(10);
     ASSERT_TRUE(json ==
@@ -1317,94 +1317,94 @@ TEST_F(CalcTestSymbolicReal, division_nested1)
         R"r({"type":45,"elements":[{"type":14,"elements":[{"type":7,"elements":[{"type":8,"elements":"1"},{"type":11,"symbol":"+"},{"type":8,"elements":"x"}]},{"type":10,"elements":[]},{"type":7,"elements":[{"type":12,"symbol":"-"},{"type":8,"elements":"1"},{"type":11,"symbol":"+"},{"type":8,"elements":"x"}]}]}]})r" ) << res.ToJson(10);
 }
 
-TEST_F(CalcTestSymbolicReal, diff_power5)
+TEST_F(CalcTestSymbolicReal, derivative_power5)
 {
-    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"diff(x^5,x);");
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"derivative(x^5,x);");
     ASSERT_TRUE(res.ToStdString(10) == "5.*pow(x,4.)") << res.ToStdString(10);
     ASSERT_TRUE(res.ToJson(10) ==
         R"r({"type":45,"elements":[{"type":7,"elements":[{"type":8,"elements":"5"},{"type":13,"symbol":"·"},{"type":15,"elements":[{"type":7,"elements":[{"type":8,"elements":"x"}]},{"type":10,"elements":[]},{"type":7,"elements":[{"type":8,"elements":"4"}]}]}]}]})r" ) << res.ToJson(10);
 }
 
-TEST_F(CalcTestSymbolicReal, diff_cos)
+TEST_F(CalcTestSymbolicReal, derivative_cos)
 {
-    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"diff(cos(x),x);");
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"derivative(cos(x),x);");
     ASSERT_TRUE(res.ToStdString(10) == "-sin(x)") << res.ToStdString(10);
     ASSERT_TRUE(res.ToJson(10) ==
         R"r({"type":45,"elements":[{"type":7,"elements":[{"type":12,"symbol":"-"},{"type":7,"elements":[{"type":8,"elements":"sin"},{"type":19,"symbol":"("},{"type":8,"elements":"x"},{"type":20,"symbol":")"}]}]}]})r" ) << res.ToJson(10);
 }
 
-TEST_F(CalcTestSymbolicReal, diff_nonsymbol)
+TEST_F(CalcTestSymbolicReal, derivative_nonsymbol)
 {
-    EXPECT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"diff(x, x+1);"), yutovo_calculator::ParserException);
-    EXPECT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"diff(x, 5);"), yutovo_calculator::ParserException);
-    EXPECT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"diff(x, sin(x));"), yutovo_calculator::ParserException);
+    EXPECT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"derivative(x, x+1);"), yutovo_calculator::ParserException);
+    EXPECT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"derivative(x, 5);"), yutovo_calculator::ParserException);
+    EXPECT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"derivative(x, sin(x));"), yutovo_calculator::ParserException);
 }
 
 TEST_F(CalcTestSymbolicReal, derivative_at_point1)
 {
-    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"diff(x^2, x, 3);");
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"derivative(x^2, x, 3);");
     ASSERT_TRUE(res.ToString(10) == U"6.") << res.ToStdString(10);
 }
 
 TEST_F(CalcTestSymbolicReal, derivative_at_point2)
 {
-    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"diff(sin(x), x, 0);");
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"derivative(sin(x), x, 0);");
     ASSERT_TRUE(res.ToString(10) == U"1.") << res.ToStdString(10);
 }
 
 TEST_F(CalcTestSymbolicReal, derivative_at_point3)
 {
     parser.Parse(LogicalId{0, 0, 1}, U"f(x)=x^2;");
-    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 2}, U"diff(f(x), x, 3);");
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 2}, U"derivative(f(x), x, 3);");
     ASSERT_TRUE(res.ToString(10) == U"6.") << res.ToStdString(10);
 }
 
 TEST_F(CalcTestSymbolicReal, derivative_at_point4)
 {
-    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"diff(x^2, y, 3);");
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"derivative(x^2, y, 3);");
     ASSERT_TRUE(res.ToString(10) == U"0.") << res.ToStdString(10);
 }
 
 TEST_F(CalcTestSymbolicReal, derivative_at_point5)
 {
-    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"diff(x^2, x, 3)+1;");
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"derivative(x^2, x, 3)+1;");
     ASSERT_TRUE(res.ToString(10) == U"7.") << res.ToStdString(10);
 }
 
 TEST_F(CalcTestSymbolicReal, derivative_at_point_error1)
 {
-    EXPECT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"diff(x, x+1, 1);"), yutovo_calculator::ParserException);
+    EXPECT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"derivative(x, x+1, 1);"), yutovo_calculator::ParserException);
 }
 
 TEST_F(CalcTestSymbolicReal, derivative_at_point_error2)
 {
-    EXPECT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"diff(x, 5, 1);"), yutovo_calculator::ParserException);
+    EXPECT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"derivative(x, 5, 1);"), yutovo_calculator::ParserException);
 }
 
 TEST_F(CalcTestSymbolicReal, derivative_at_point6)
 {
     parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"f(x,y)=x*y;");
-    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"diff(f(x,y), x, 3);");
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"derivative(f(x,y), x, 3);");
     ASSERT_TRUE(res.ToString(10) == U"y") << res.ToStdString(10);
 }
 
 TEST_F(CalcTestSymbolicReal, derivative_at_point7)
 {
     parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"f(x,y)=x*y;");
-    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"diff(f(x,y), y, 3);");
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"derivative(f(x,y), y, 3);");
     ASSERT_TRUE(res.ToString(10) == U"x") << res.ToStdString(10);
 }
 
 TEST_F(CalcTestSymbolicReal, derivative_at_point8)
 {
     parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"f(x,y)=pow(x,y);");
-    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"diff(f(x,y), y, 3);");
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"derivative(f(x,y), y, 3);");
     ASSERT_TRUE(res.ToString(10) == U"log(x)*pow(x,3.)") << res.ToStdString(10);
 }
 
 TEST_F(CalcTestSymbolicReal, derivative_at_point9)
 {
-    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"diff(1/x, x, 0);");
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"derivative(1/x, x, 0);");
     ASSERT_TRUE(res.ToJson(10) ==
         R"r({"type":45,"elements":[{"type":7,"elements":[{"type":8,"elements":"∞"}]}]})r")
         << res.ToJson(10);
@@ -2088,14 +2088,14 @@ TEST_F(CalcTestSymbolicReal, all_symbolic_functions)
         const char* numeric_expr;
         const char* numeric_result;
         const char* sym_result;
-        const char* diff_result;
+        const char* derivative_result;
     };
     const Expect funcs[] = 
         {
             //direct numeric, alias, symbolic form, derivative
             {"sin", nullptr, "sin(0)", "0.", "sin(x)", "cos(x)"},
             {"cos", nullptr, "cos(0)", "1.", "cos(x)", "-sin(x)"},
-            {"tg", "tan", "tg(0)", "0.", "tan(x)", "1.+tanpow(x,2.)"},
+            {"tg", "tan", "tg(0)", "0.", "tan(x)", "1.+pow(tan(x),2.)"},
             {"cot", "ctg", "subs(cot(x),x,0)", "∞", "cot(x)", "diff(cot(x),x)"},
             {"sec", nullptr, "subs(sec(x),x,0)", "1.", "sec(x)", "diff(sec(x),x)"},
             {"csc", "cosec", "subs(csc(x),x,1)", "1.1883951058", "csc(x)", "diff(csc(x),x)"},
@@ -2107,7 +2107,7 @@ TEST_F(CalcTestSymbolicReal, all_symbolic_functions)
             {"arccsc", "arccosec", "arccsc(1)", "1.5707963268", "asin(pow(x,-1.))", "(-(pow(pow(x,2.),-1.))/sqrt(-1.+pow(x,2.))/abs(x))*pow(x,2.)"},
             {"sinh", "sh", "sinh(0)", "0.", "sinh(x)", "cosh(x)"},
             {"cosh", "ch", "cosh(0)", "1.", "cosh(x)", "sinh(x)"},
-            {"tanh", "th", "tanh(0)", "0.", "tanh(x)", "1.-tanhpow(x,2.)"},
+            {"tanh", "th", "tanh(0)", "0.", "tanh(x)", "1.-pow(tanh(x),2.)"},
             {"coth", "cth", "subs(coth(x),x,1)", "1.3130352855", "coth(x)", "diff(coth(x),x)"},
             {"sech", "sch", "sech(0)", "1.", "sech(x)", "diff(sech(x),x)"},
             {"csch", "cosech", "subs(csch(x),x,1)", "0.8509181282", "csch(x)", "diff(csch(x),x)"},
@@ -2139,8 +2139,8 @@ TEST_F(CalcTestSymbolicReal, all_symbolic_functions)
 
         //derivative variant
         {
-            Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"diff(" + name + U"(x),x);", 10);
-            ASSERT_TRUE(res.ToStdString(10) == f.diff_result) << res.ToStdString(10);
+            Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"derivative(" + name + U"(x),x);", 10);
+            ASSERT_TRUE(res.ToStdString(10) == f.derivative_result) << res.ToStdString(10);
         }
 
         //alias variant

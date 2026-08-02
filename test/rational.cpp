@@ -910,20 +910,20 @@ TEST_F(CalcTestRational, definite_integral7)
 
 TEST_F(CalcTestRational, derivative_at_point1)
 {
-    Rational res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"diff(x*x, x, 3);");
+    Rational res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"derivative(x*x, x, 3);");
     ASSERT_TRUE(res == parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"6;")) << res.ToStdString();
 }
 
 TEST_F(CalcTestRational, derivative_at_point2)
 {
-    Rational res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"diff(x^3, x, 2);");
+    Rational res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"derivative(x^3, x, 2);");
     ASSERT_TRUE(res == parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"12;")) << res.ToStdString();
 }
 
 TEST_F(CalcTestRational, derivative_at_point3)
 {
     parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"f(x)=x*x;");
-    Rational res = parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"diff(f(x), x, 2);");
+    Rational res = parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"derivative(f(x), x, 2);");
     ASSERT_TRUE(res == parser.Parse(LogicalId{0, 0, 0, 0, 3}, U"4;")) << res.ToStdString();
 }
 

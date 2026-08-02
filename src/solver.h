@@ -624,8 +624,7 @@ struct Solver : public boost::static_visitor<Number>
                 const ExpressionNode<Number>& function_expr = boost::get<ExpressionNode<Number>>(op.function);
                 Number function = (*this)(function_expr);
                 Number var(precision, op.variable);
-                Number derivative = diff(function, var);
-                return subs(derivative, var, value);
+                return subs(derivative(function, var), var, value);
             }
             catch (const MathException& e)
             {

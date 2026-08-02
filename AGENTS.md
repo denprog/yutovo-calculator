@@ -194,7 +194,7 @@ Use dedicated insert methods for operators:
 - `InsertOpenRoundBracket(true)` / `InsertCloseRoundBracket(true)`
 - `InsertComma(true)`
 
-Functions without dedicated inserts (e.g. `sin`, `diff`, `expand`, `subs`) are entered as strings followed by brackets.
+Functions without dedicated inserts (e.g. `sin`, `derivative`, `expand`, `subs`) are entered as strings followed by brackets.
 
 ### Power behavior
 `InsertPower(true)` after a string moves that string into the base and places the caret in the exponent.

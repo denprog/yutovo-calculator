@@ -239,8 +239,8 @@ public:
 
     friend bool operator==(const Symbolic<Number>& num1, const Symbolic<Number>& num2)
     {
-        giac::gen diff = giac::operator_minus(*num1.expr, *num2.expr, num1.Context());
-        giac::gen s = giac::simplify(diff, num1.Context());
+        giac::gen derivative = giac::operator_minus(*num1.expr, *num2.expr, num1.Context());
+        giac::gen s = giac::simplify(derivative, num1.Context());
         return giac::is_zero(s, num1.Context());
     }
 
@@ -403,7 +403,7 @@ public:
         return res;
     }
 
-    friend Symbolic<Number> diff(const Symbolic<Number>& num, const Symbolic<Number>& var)
+    friend Symbolic<Number> derivative(const Symbolic<Number>& num, const Symbolic<Number>& var)
     {
         if (var.expr->type != giac::_IDNT)
             throw ParserException({}, ParserExceptionCode::IncorrectOperation);
@@ -1091,7 +1091,7 @@ public:
         static const std::set<std::string> known_funcs = {"sin", "cos", "tan", "tg", "cot", "ctg", "sec", "csc", "cosec", "sinh", "sh", "cosh", "ch", "tanh", "th", "coth", "cth", "sech", "sch", "csch", "cosech",
             "asinh", "acosh", "atanh", "acoth", "asech", "acsch", "arsinh", "arcosh", "artanh", "arcoth", "arsech", "arcsch",
             "arcsinh", "arccosh", "arctanh", "arccoth", "arcsech", "arccsch", "arccosech", "arctg", "arcctg", "exp", "ln", "log", "sqrt", "root", "pow",
-            "gamma", "factorial", "min", "max", "diff", "indefinite_integral", "definite_integral", "subs", "expand", "simplify", "evalf"};
+            "gamma", "factorial", "min", "max", "derivative", "indefinite_integral", "definite_integral", "subs", "expand", "simplify", "evalf"};
         static const std::set<std::string> known_consts = {"pi", "i", "j", "e", "oo", "inf", "nan", "undef"};
         int degree = 0;
         //count explicit powers pow(var,exp)

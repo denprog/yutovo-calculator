@@ -688,11 +688,6 @@ std::string EmitString(const GiacExpression& e, const FormatContext& ctx)
         std::string exp_str = EmitString(e.args[1], ctx);
         if (e.args[1].kind == GiacExpression::Number && IsOne(e.args[1].value))
             return EmitString(e.args[0], ctx);
-        if (e.args[0].kind == GiacExpression::Func)
-        {
-            std::string name = MapFuncName(e.args[0].value);
-            return name + "pow(" + EmitFuncArgs(e.args[0], ctx) + "," + exp_str + ")";
-        }
         //preserve explicit right-associative chains as pow(base,exp1**exp2)
         if (e.args[1].kind == GiacExpression::Power)
         {

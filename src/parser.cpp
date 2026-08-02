@@ -225,7 +225,7 @@ Symbolic<Real> evalf(const Symbolic<Real>& num);
 Symbolic<Real> evalf(const Symbolic<Real>& num, const Symbolic<Real>& prec);
 Symbolic<Real> expand(const Symbolic<Real>& num);
 Symbolic<Real> simplify(const Symbolic<Real>& num);
-Symbolic<Real> diff(const Symbolic<Real>& num, const Symbolic<Real>& var);
+Symbolic<Real> derivative(const Symbolic<Real>& num, const Symbolic<Real>& var);
 Symbolic<Real> subs(const Symbolic<Real>& num, const Symbolic<Real>& var, const Symbolic<Real>& value);
 Symbolic<Real> definite_integral(const Symbolic<Real>& a, const Symbolic<Real>& b, const Symbolic<Real>& expr, const Symbolic<Real>& var);
 Symbolic<Real> indefinite_integral(const Symbolic<Real>& expr, const Symbolic<Real>& var);
@@ -270,7 +270,7 @@ Symbolic<Rational> evalf(const Symbolic<Rational>& num);
 Symbolic<Rational> evalf(const Symbolic<Rational>& num, const Symbolic<Rational>& prec);
 Symbolic<Rational> expand(const Symbolic<Rational>& num);
 Symbolic<Rational> simplify(const Symbolic<Rational>& num);
-Symbolic<Rational> diff(const Symbolic<Rational>& num, const Symbolic<Rational>& var);
+Symbolic<Rational> derivative(const Symbolic<Rational>& num, const Symbolic<Rational>& var);
 Symbolic<Rational> subs(const Symbolic<Rational>& num, const Symbolic<Rational>& var, const Symbolic<Rational>& value);
 Symbolic<Rational> definite_integral(const Symbolic<Rational>& a, const Symbolic<Rational>& b, const Symbolic<Rational>& expr, const Symbolic<Rational>& var);
 Symbolic<Rational> indefinite_integral(const Symbolic<Rational>& expr, const Symbolic<Rational>& var);
@@ -312,7 +312,7 @@ Symbolic<Complex> evalf(const Symbolic<Complex>& num);
 Symbolic<Complex> evalf(const Symbolic<Complex>& num, const Symbolic<Complex>& prec);
 Symbolic<Complex> expand(const Symbolic<Complex>& num);
 Symbolic<Complex> simplify(const Symbolic<Complex>& num);
-Symbolic<Complex> diff(const Symbolic<Complex>& num, const Symbolic<Complex>& var);
+Symbolic<Complex> derivative(const Symbolic<Complex>& num, const Symbolic<Complex>& var);
 Symbolic<Complex> subs(const Symbolic<Complex>& num, const Symbolic<Complex>& var, const Symbolic<Complex>& value);
 Symbolic<Complex> definite_integral(const Symbolic<Complex>& a, const Symbolic<Complex>& b, const Symbolic<Complex>& expr, const Symbolic<Complex>& var);
 Symbolic<Complex> indefinite_integral(const Symbolic<Complex>& expr, const Symbolic<Complex>& var);
@@ -905,8 +905,8 @@ Parser<yutovo_calculator::Symbolic<yutovo_calculator::Real>>::Parser(const int p
     solver.AddBuiltinFunction(U"arccosech", unary_func);
 
     SymbolicBinaryFunc binary_func;
-    binary_func = &diff;
-    solver.AddBuiltinFunction(U"diff", binary_func);
+    binary_func = &derivative;
+    solver.AddBuiltinFunction(U"derivative", binary_func);
     binary_func = &indefinite_integral;
     solver.AddBuiltinFunction(U"indefinite_integral", binary_func);
     binary_func = &pow;
@@ -1110,8 +1110,8 @@ Parser<yutovo_calculator::Symbolic<yutovo_calculator::Rational>>::Parser(const i
     solver.AddBuiltinFunction(U"arccosech", unary_func);
 
     SymbolicRationalBinaryFunc binary_func;
-    binary_func = &diff;
-    solver.AddBuiltinFunction(U"diff", binary_func);
+    binary_func = &derivative;
+    solver.AddBuiltinFunction(U"derivative", binary_func);
     binary_func = &indefinite_integral;
     solver.AddBuiltinFunction(U"indefinite_integral", binary_func);
     binary_func = &pow;
@@ -1268,8 +1268,8 @@ Parser<yutovo_calculator::Symbolic<yutovo_calculator::Complex>>::Parser(const in
     solver.AddBuiltinFunction(U"arccosech", unary_func);
 
     SymbolicComplexBinaryFunc binary_func;
-    binary_func = &diff;
-    solver.AddBuiltinFunction(U"diff", binary_func);
+    binary_func = &derivative;
+    solver.AddBuiltinFunction(U"derivative", binary_func);
     binary_func = &indefinite_integral;
     solver.AddBuiltinFunction(U"indefinite_integral", binary_func);
     binary_func = &pow;
