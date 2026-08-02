@@ -1410,6 +1410,13 @@ TEST_F(CalcTestSymbolicReal, derivative_at_point9)
         << res.ToJson(10);
 }
 
+TEST_F(CalcTestSymbolicReal, derivative_mixed_second_order)
+{
+    parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"func(x,y)=pow(x,2)*pow(y,2);");
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"derivative(derivative(func(x,y),y),x);");
+    ASSERT_TRUE(res.ToStdString(10) == "4.*x*y") << res.ToStdString(10);
+}
+
 TEST_F(CalcTestSymbolicReal, frac_power_mult)
 {
     Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"x^(1/2)*x^(1/3);");

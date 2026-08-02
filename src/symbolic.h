@@ -409,6 +409,7 @@ public:
             throw ParserException({}, ParserExceptionCode::IncorrectOperation);
         Symbolic<Number> res(num.precision);
         *res.expr = giac::derive(*num.expr, *var.expr, res.Context());
+        *res.expr = giac::eval(*res.expr, 1, res.Context());
         return res;
     }
 

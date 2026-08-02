@@ -304,8 +304,13 @@ Running the full `yutovo-editor_tests` suite takes approximately **25 minutes** 
 - `yutovo-editor/src/formulas/result.cpp` — `SymbolicResult::AddSymbolicElements` now parses `pow(base,exp)` into `Power` formula elements
 - `yutovo-editor/src/formulas/power.h` — added `GetBaseRow()` and `GetExponentRow()` public helpers
 
+- `yutovo-calculator/src/giac_utils.cpp` — removed `funcpow(args,exp)` shorthand in `EmitString`; powers of functions now render as `pow(func(args),exp)`
+- `yutovo-calculator/src/symbolic.h` — `derivative(...)` now applies a single-level `giac::eval` so numeric coefficients like `2*2` collapse to `4`
+- `yutovo-calculator/test/symbolic_real.cpp` — updated `all_symbolic_functions` expectations and added `derivative_mixed_second_order` test
+- `yutovo-calculator/test/symbolic_rational.cpp` / `symbolic_complex.cpp` — updated `trig_power1` expectations
+
 ## Next Steps / Blockers
-- All Linux calculator debug tests pass (1211 tests across Real, Complex, Integer, Rational, Array, Symbolic, etc.).
+- All Linux calculator debug tests pass (1213 tests across Real, Complex, Integer, Rational, Array, Symbolic, etc.).
 - `yutovo-solver` tests pass (40 tests).
 - The three failing `SolverSymbolicTest` editor tests (`solver17`, `solver18`, `solver22`) have been fixed by adjusting calculator JSON output; no editor tests were modified.
 - The Emscripten/wasm symbolic stub is implemented; native behavior is unchanged.
