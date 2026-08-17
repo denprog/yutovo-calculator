@@ -48,7 +48,7 @@ struct Expression : qi::grammar<std::u32string::iterator, ExpressionNode<Number>
 		boost::recursive_wrapper<ExpressionNode<Number>>>
 		Operand;
 	
-	qi::rule<std::u32string::iterator, ExpressionNode<Number>(), unicode::space_type> expression, term, addition, multiplication, power;
+	qi::rule<std::u32string::iterator, ExpressionNode<Number>(), unicode::space_type> expression, term, addition, multiplication;
 	qi::rule<std::u32string::iterator, Operand(), unicode::space_type> unary;
 	qi::rule<std::u32string::iterator, OperationNode<Number>(), unicode::space_type> multiply;
 	qi::rule<std::u32string::iterator, UnaryOperationNode<Number>(), unicode::space_type> unary_operation;
@@ -64,6 +64,7 @@ struct Expression : qi::grammar<std::u32string::iterator, ExpressionNode<Number>
 	qi::rule<std::u32string::iterator, FunctionCallNode<Number>(), unicode::space_type> function_call;
 	qi::rule<std::u32string::iterator, FunctionCallStringNode<Number>(), unicode::space_type> function_call_string;
 	qi::rule<std::u32string::iterator, DefiniteIntegralNode<Number>(), unicode::space_type> definite_integral;
+	qi::rule<std::u32string::iterator, DerivativeVariableNode<Number>(), unicode::space_type> derivative_variable;
 	qi::rule<std::u32string::iterator, DerivativeAtPointNode<Number>(), unicode::space_type> derivative_at_point;
 	qi::rule<std::u32string::iterator, NoFencesFunctionCallNode<Number>(), unicode::space_type> no_fences_function_call;
 	qi::rule<std::u32string::iterator, FunctionParamNode<Number>(), unicode::space_type> function_param;

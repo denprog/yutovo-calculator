@@ -360,8 +360,6 @@ Integer Solver<Integer>::operator()(OperationNode<Integer> const& op) const
             return left_value | right;
         case U'⊕':
             return left_value ^ right;
-        case U'^':
-            return pow(left_value, right);
         }
     }
     catch (MathException e)
@@ -400,7 +398,7 @@ Real Solver<Real>::operator()(OperationNode<Real> const& op) const
     {
         throw MathException(e.id, e.ex_id, op.pos, op.line);
     }
-    
+
     throw SyntaxException(op.id, SyntaxError, op.pos, op.line);
 }
 
@@ -432,7 +430,7 @@ Rational Solver<Rational>::operator()(OperationNode<Rational> const& op) const
     {
         throw MathException(e.id, e.ex_id, op.pos, op.line);
     }
-    
+
     throw SyntaxException(op.id, SyntaxError, op.pos, op.line);
 }
 
@@ -464,7 +462,7 @@ Complex Solver<Complex>::operator()(OperationNode<Complex> const& op) const
     {
         throw MathException(e.id, e.ex_id, op.pos, op.line);
     }
-    
+
     throw SyntaxException(op.id, SyntaxError, op.pos, op.line);
 }
 

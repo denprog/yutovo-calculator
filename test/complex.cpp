@@ -1110,13 +1110,13 @@ TEST_F(CalcTestComplex, definite_integral3)
 
 TEST_F(CalcTestComplex, definite_integral4)
 {
-    Complex res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"definite_integral(0,2,x^2,x);", 10);
+    Complex res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"definite_integral(0,2,pow(x,2),x);", 10);
     ASSERT_TRUE(res.ToStdString(10, 10) == "2.6666666667E+0") << res.ToStdString(10, 10);
 }
 
 TEST_F(CalcTestComplex, definite_integral5)
 {
-    Complex res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"definite_integral(0,1,x^3,x);", 10);
+    Complex res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"definite_integral(0,1,pow(x,3),x);", 10);
     ASSERT_TRUE(res.ToStdString(10, 10) == "0.25E+0") << res.ToStdString(10, 10);
 }
 
@@ -1128,7 +1128,7 @@ TEST_F(CalcTestComplex, definite_integral6)
 
 TEST_F(CalcTestComplex, definite_integral7)
 {
-    Complex res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"definite_integral(0,10,x^2,x);", 10);
+    Complex res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"definite_integral(0,10,pow(x,2),x);", 10);
     ASSERT_TRUE(res.ToStdString(10, 10) == "333.33333333E+0") << res.ToStdString(10, 10);
 }
 
@@ -1140,21 +1140,40 @@ TEST_F(CalcTestComplex, definite_integral8)
 
 TEST_F(CalcTestComplex, derivative_at_point1)
 {
-    Complex res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"derivative(x*x, x, 3);");
+    Complex res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"derivative(x*x, [x=3]);");
     ASSERT_TRUE(res == parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"6;")) << res.ToStdString(3, 3);
 }
 
 TEST_F(CalcTestComplex, derivative_at_point2)
 {
-    Complex res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"derivative(sin(x), x, 0);");
+    Complex res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"derivative(sin(x), [x=0]);");
     ASSERT_TRUE(res == parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"1;")) << res.ToStdString(3, 3);
 }
 
 TEST_F(CalcTestComplex, derivative_at_point3)
 {
     parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"f(x)=x*x;");
-    Complex res = parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"derivative(f(x), x, 2);");
+    Complex res = parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"derivative(f(x), [x=2]);");
     ASSERT_TRUE(res.ToStdString(3, 3) == parser.Parse(LogicalId{0, 0, 0, 0, 3}, U"4;").ToStdString(3, 3)) << res.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestComplex, derivative_at_point_multi1)
+{
+    Complex res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"derivative(x*y, [x=2, y=3]);");
+    ASSERT_TRUE(res.ToStdString(3, 3) == parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"3;").ToStdString(3, 3)) << res.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestComplex, derivative_at_point_multi2)
+{
+    Complex res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"derivative(x*y, [y=3, x=2]);");
+    ASSERT_TRUE(res.ToStdString(3, 3) == parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"2;").ToStdString(3, 3)) << res.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestComplex, derivative_at_point_multi3)
+{
+    parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"f(x,y)=pow(x,2)*y;");
+    Complex res = parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"derivative(f(x,y), [x=2, y=3]);");
+    ASSERT_TRUE(res.ToStdString(3, 3) == parser.Parse(LogicalId{0, 0, 0, 0, 3}, U"12;").ToStdString(3, 3)) << res.ToStdString(3, 3);
 }
 
 }

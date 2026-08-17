@@ -874,25 +874,25 @@ TEST_F(CalcTestRational, definite_integral1)
 
 TEST_F(CalcTestRational, definite_integral2)
 {
-    auto res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"definite_integral(0,1,x^2,x);");
+    auto res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"definite_integral(0,1,pow(x,2),x);");
     ASSERT_TRUE(res.ToStdString() == "1/3") << res.ToStdString();
 }
 
 TEST_F(CalcTestRational, definite_integral3)
 {
-    auto res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"definite_integral(0,2,x^2,x);");
+    auto res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"definite_integral(0,2,pow(x,2),x);");
     ASSERT_TRUE(res.ToStdString() == "8/3") << res.ToStdString();
 }
 
 TEST_F(CalcTestRational, definite_integral4)
 {
-    auto res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"definite_integral(0,1,x^3,x);");
+    auto res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"definite_integral(0,1,pow(x,3),x);");
     ASSERT_TRUE(res.ToStdString() == "1/4") << res.ToStdString();
 }
 
 TEST_F(CalcTestRational, definite_integral5)
 {
-    auto res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"definite_integral(0,1,(x+1)^2,x);");
+    auto res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"definite_integral(0,1,pow((x+1),2),x);");
     ASSERT_TRUE(res.ToStdString() == "7/3") << res.ToStdString();
 }
 
@@ -904,27 +904,46 @@ TEST_F(CalcTestRational, definite_integral6)
 
 TEST_F(CalcTestRational, definite_integral7)
 {
-    auto res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"definite_integral(0,1,2*x^2+3*x+1,x);");
+    auto res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"definite_integral(0,1,2*pow(x,2)+3*x+1,x);");
     ASSERT_TRUE(res.ToStdString() == "19/6") << res.ToStdString();
 }
 
 TEST_F(CalcTestRational, derivative_at_point1)
 {
-    Rational res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"derivative(x*x, x, 3);");
+    Rational res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"derivative(x*x, [x=3]);");
     ASSERT_TRUE(res == parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"6;")) << res.ToStdString();
 }
 
 TEST_F(CalcTestRational, derivative_at_point2)
 {
-    Rational res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"derivative(x^3, x, 2);");
+    Rational res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"derivative(pow(x,3), [x=2]);");
     ASSERT_TRUE(res == parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"12;")) << res.ToStdString();
 }
 
 TEST_F(CalcTestRational, derivative_at_point3)
 {
     parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"f(x)=x*x;");
-    Rational res = parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"derivative(f(x), x, 2);");
+    Rational res = parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"derivative(f(x), [x=2]);");
     ASSERT_TRUE(res == parser.Parse(LogicalId{0, 0, 0, 0, 3}, U"4;")) << res.ToStdString();
+}
+
+TEST_F(CalcTestRational, derivative_at_point_multi1)
+{
+    Rational res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"derivative(x*y, [x=2, y=3]);");
+    ASSERT_TRUE(res == parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"3;")) << res.ToStdString();
+}
+
+TEST_F(CalcTestRational, derivative_at_point_multi2)
+{
+    Rational res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"derivative(x*y, [y=3, x=2]);");
+    ASSERT_TRUE(res == parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"2;")) << res.ToStdString();
+}
+
+TEST_F(CalcTestRational, derivative_at_point_multi3)
+{
+    parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"f(x,y)=pow(x,2)*y;");
+    Rational res = parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"derivative(f(x,y), [x=2, y=3]);");
+    ASSERT_TRUE(res == parser.Parse(LogicalId{0, 0, 0, 0, 3}, U"12;")) << res.ToStdString();
 }
 
 }

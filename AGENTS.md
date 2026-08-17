@@ -11,6 +11,8 @@
 
 ## Agent Rules
 
+### Mandatory tooling
+- **Always use repowise — this rule is mandatory.** For every codebase question, exploration, or before modifying files, you must use repowise tools (`get_answer`, `get_context`, `get_risk`, `search_codebase`, etc.) first. Do not use raw `grep`, `Read`, or `Glob` as the primary way to understand code, find symbols, or assess risk. It is acceptable to use raw tools only to read a file path or line range that repowise has already identified.
 - **Never delete files without explicit user permission.** Do not remove source files, test files, core dumps, logs, build artifacts, or any other files unless the user explicitly asks for it. When in doubt, leave the file in place and ask.
 - **Never create separate namespaces (such as `namespace detail` or anonymous namespaces) without explicit user permission.** Helper functions should be placed in the common `yutovo_calculator` namespace, for example in `utils.h/utils.cpp` or `giac_utils.h/giac_utils.cpp`, or as `static` methods of the appropriate class.
 - **Never commit without explicit user permission.** Do not run `git commit`, `git push`, `git reset`, `git rebase`, or any other git mutations unless explicitly asked to do so. Ask for confirmation each time when git mutations are needed.
@@ -309,8 +311,22 @@ Running the full `yutovo-editor_tests` suite takes approximately **25 minutes** 
 - `yutovo-calculator/test/symbolic_real.cpp` — updated `all_symbolic_functions` expectations and added `derivative_mixed_second_order` test
 - `yutovo-calculator/test/symbolic_rational.cpp` / `symbolic_complex.cpp` — updated `trig_power1` expectations
 
+## Current Work: Multi-variable derivative at point
+
+### yutovo-calculator
+- `DerivativeAtPointNode<Number>` now stores a `std::list<DerivativeVariableNode<Number>>` instead of a single variable/value pair.
+- Syntax changed from `derivative(expr, var, value)` to `derivative(expr, [var=value, ...])`. The first variable in the list is the differentiation variable; the remaining variables are substituted into the expression before evaluating the derivative at the point.
+- `derivative_at_point` grammar rule uses `symbolic_arg` for the function/expression argument and a list of `derivative_variable = name >> '=' > expression` inside `[ ... ]`.
+- `derivative_at_point` is placed first in the `unary` alternative list and wrapped with `qi::hold[]` so that a failed match backtracks cleanly instead of falling through to `array` or `function_call`.
+- `Solver::operator()(DerivativeAtPointNode<Number>)` for symbolic types parses the function string into an `ExpressionNode`, computes the symbolic derivative with respect to the first variable, and substitutes all variable values.
+- For non-symbolic `Real`, `Complex`, and `Rational`, `EvaluateDerivativeAtPoint` uses giac `derive`/`subst` for exact results; `NumericalDerivativeAtPoint` evaluates the partial derivative numerically by substituting all non-differentiated variables before taking the finite-difference step.
+- The values of derivative-at-point variables are evaluated from the parsed `ExpressionNode` AST (just like `LoopNode` variables) and passed to giac directly via `NumberToGiac` in `src/giac_utils.h`/`giac_utils.cpp`; they are no longer stringified and re-parsed with `ParseGen`.
+- The `^` power operator is now supported in the `Real`, `Complex`, and `Rational` expression grammars (previously it was only available for `Integer` and symbolic types). It binds tighter than `*`/`/`/`%` and produces an `OperationNode` with op `'^'`, which `Solver` evaluates via the existing `pow` functions.
+- Tests added/updated in `test/real.cpp`, `test/rational.cpp`, `test/complex.cpp`, `test/symbolic_real.cpp`, `test/symbolic_rational.cpp`, `test/symbolic_complex.cpp`.
+
 ## Next Steps / Blockers
-- All Linux calculator debug tests pass (1213 tests across Real, Complex, Integer, Rational, Array, Symbolic, etc.).
+- All Linux calculator debug tests pass (1232 tests across Real, Complex, Integer, Rational, Array, Symbolic, etc.).
 - `yutovo-solver` tests pass (40 tests).
 - The three failing `SolverSymbolicTest` editor tests (`solver17`, `solver18`, `solver22`) have been fixed by adjusting calculator JSON output; no editor tests were modified.
 - The Emscripten/wasm symbolic stub is implemented; native behavior is unchanged.
+- No remaining blockers for the multi-variable derivative-at-point feature.

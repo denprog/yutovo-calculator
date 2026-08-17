@@ -153,7 +153,7 @@ TEST_F(CalcTestInteger, logical4)
 
 TEST_F(CalcTestInteger, power1)
 {
-    Integer res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"2^3;");
+    Integer res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"pow(2,3);");
     ASSERT_TRUE(res.ToString(10) == U"8") << res.ToStdString(10);
 }
 

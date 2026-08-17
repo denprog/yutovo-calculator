@@ -65,6 +65,8 @@ struct FunctionCallStringNode;
 template<typename Number>
 struct DefiniteIntegralNode;
 template<typename Number>
+struct DerivativeVariableNode;
+template<typename Number>
 struct DerivativeAtPointNode;
 template<typename Number>
 struct NoFencesFunctionCallNode;
@@ -340,12 +342,18 @@ struct DefiniteIntegralNode : ExpressionPosition
 };
 
 template<typename Number>
+struct DerivativeVariableNode : ExpressionPosition
+{
+    std::u32string name;
+    ExpressionNode<Number> value;
+};
+
+template<typename Number>
 struct DerivativeAtPointNode : ExpressionPosition
 {
     using FunctionType = boost::variant<std::u32string, ExpressionNode<Number>>;
     FunctionType function;
-    std::u32string variable;
-    ExpressionNode<Number> value;
+    std::list<DerivativeVariableNode<Number>> variables;
 };
 
 template<typename Number>
@@ -704,10 +712,13 @@ BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::DefiniteIntegralNode<yutovo_calcula
     (std::u32string, expression)
     (std::u32string, variable))
 
+BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::DerivativeVariableNode<yutovo_calculator::Real>, 
+    (std::u32string, name)
+    (yutovo_calculator::ExpressionNode<yutovo_calculator::Real>, value))
+
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::DerivativeAtPointNode<yutovo_calculator::Real>, 
     (yutovo_calculator::DerivativeAtPointNode<yutovo_calculator::Real>::FunctionType, function)
-    (std::u32string, variable)
-    (yutovo_calculator::ExpressionNode<yutovo_calculator::Real>, value))
+    (std::list<yutovo_calculator::DerivativeVariableNode<yutovo_calculator::Real>>, variables))
 
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::NoFencesFunctionCallNode<yutovo_calculator::Real>, 
     (yutovo_calculator::IdentifierNode<yutovo_calculator::Real>, name)
@@ -843,10 +854,13 @@ BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::DefiniteIntegralNode<yutovo_calcula
     (std::u32string, expression)
     (std::u32string, variable))
 
+BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::DerivativeVariableNode<yutovo_calculator::Rational>, 
+    (std::u32string, name)
+    (yutovo_calculator::ExpressionNode<yutovo_calculator::Rational>, value))
+
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::DerivativeAtPointNode<yutovo_calculator::Rational>, 
     (yutovo_calculator::DerivativeAtPointNode<yutovo_calculator::Rational>::FunctionType, function)
-    (std::u32string, variable)
-    (yutovo_calculator::ExpressionNode<yutovo_calculator::Rational>, value))
+    (std::list<yutovo_calculator::DerivativeVariableNode<yutovo_calculator::Rational>>, variables))
 
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::NoFencesFunctionCallNode<yutovo_calculator::Rational>, 
     (yutovo_calculator::IdentifierNode<yutovo_calculator::Rational>, name)
@@ -982,10 +996,13 @@ BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::DefiniteIntegralNode<yutovo_calcula
     (std::u32string, expression)
     (std::u32string, variable))
 
+BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::DerivativeVariableNode<yutovo_calculator::Complex>, 
+    (std::u32string, name)
+    (yutovo_calculator::ExpressionNode<yutovo_calculator::Complex>, value))
+
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::DerivativeAtPointNode<yutovo_calculator::Complex>, 
     (yutovo_calculator::DerivativeAtPointNode<yutovo_calculator::Complex>::FunctionType, function)
-    (std::u32string, variable)
-    (yutovo_calculator::ExpressionNode<yutovo_calculator::Complex>, value))
+    (std::list<yutovo_calculator::DerivativeVariableNode<yutovo_calculator::Complex>>, variables))
 
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::NoFencesFunctionCallNode<yutovo_calculator::Complex>, 
     (yutovo_calculator::IdentifierNode<yutovo_calculator::Complex>, name)
@@ -1115,10 +1132,13 @@ BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::FunctionCallStringNode<yutovo_calcu
     (yutovo_calculator::IdentifierNode<yutovo_calculator::Symbolic<Real>>, name)
     (std::u32string, argument))
 
+BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::DerivativeVariableNode<yutovo_calculator::Symbolic<Real>>, 
+    (std::u32string, name)
+    (yutovo_calculator::ExpressionNode<yutovo_calculator::Symbolic<Real>>, value))
+
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::DerivativeAtPointNode<yutovo_calculator::Symbolic<Real>>, 
     (yutovo_calculator::DerivativeAtPointNode<yutovo_calculator::Symbolic<Real>>::FunctionType, function)
-    (std::u32string, variable)
-    (yutovo_calculator::ExpressionNode<yutovo_calculator::Symbolic<Real>>, value))
+    (std::list<yutovo_calculator::DerivativeVariableNode<yutovo_calculator::Symbolic<Real>>>, variables))
 
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::NoFencesFunctionCallNode<yutovo_calculator::Symbolic<Real>>, 
     (yutovo_calculator::IdentifierNode<yutovo_calculator::Symbolic<Real>>, name)
@@ -1246,10 +1266,13 @@ BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::FunctionCallStringNode<yutovo_calcu
     (yutovo_calculator::IdentifierNode<yutovo_calculator::Symbolic<Rational>>, name)
     (std::u32string, argument))
 
+BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::DerivativeVariableNode<yutovo_calculator::Symbolic<Rational>>, 
+    (std::u32string, name)
+    (yutovo_calculator::ExpressionNode<yutovo_calculator::Symbolic<Rational>>, value))
+
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::DerivativeAtPointNode<yutovo_calculator::Symbolic<Rational>>, 
     (yutovo_calculator::DerivativeAtPointNode<yutovo_calculator::Symbolic<Rational>>::FunctionType, function)
-    (std::u32string, variable)
-    (yutovo_calculator::ExpressionNode<yutovo_calculator::Symbolic<Rational>>, value))
+    (std::list<yutovo_calculator::DerivativeVariableNode<yutovo_calculator::Symbolic<Rational>>>, variables))
 
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::NoFencesFunctionCallNode<yutovo_calculator::Symbolic<Rational>>, 
     (yutovo_calculator::IdentifierNode<yutovo_calculator::Symbolic<Rational>>, name)
@@ -1377,10 +1400,13 @@ BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::FunctionCallStringNode<yutovo_calcu
     (yutovo_calculator::IdentifierNode<yutovo_calculator::Symbolic<Complex>>, name)
     (std::u32string, argument))
 
+BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::DerivativeVariableNode<yutovo_calculator::Symbolic<Complex>>, 
+    (std::u32string, name)
+    (yutovo_calculator::ExpressionNode<yutovo_calculator::Symbolic<Complex>>, value))
+
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::DerivativeAtPointNode<yutovo_calculator::Symbolic<Complex>>, 
     (yutovo_calculator::DerivativeAtPointNode<yutovo_calculator::Symbolic<Complex>>::FunctionType, function)
-    (std::u32string, variable)
-    (yutovo_calculator::ExpressionNode<yutovo_calculator::Symbolic<Complex>>, value))
+    (std::list<yutovo_calculator::DerivativeVariableNode<yutovo_calculator::Symbolic<Complex>>>, variables))
 
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::NoFencesFunctionCallNode<yutovo_calculator::Symbolic<Complex>>, 
     (yutovo_calculator::IdentifierNode<yutovo_calculator::Symbolic<Complex>>, name)

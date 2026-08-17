@@ -2529,13 +2529,13 @@ TEST_F(CalcTestReal, definite_integral5)
 
 TEST_F(CalcTestReal, definite_integral6)
 {
-    auto res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"definite_integral(2,2,x^3,x);", 10);
+    auto res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"definite_integral(2,2,pow(x,3),x);", 10);
     ASSERT_TRUE(res.ToStdString(10, 10) == "0.E+0") << res.ToStdString(10, 10);
 }
 
 TEST_F(CalcTestReal, definite_integral7)
 {
-    auto res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"definite_integral(0,3,2*x^2+3*x+1,x);", 10);
+    auto res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"definite_integral(0,3,2*pow(x,2)+3*x+1,x);", 10);
     ASSERT_TRUE(res.ToStdString(10, 10) == "34.5E+0") << res.ToStdString(10, 10);
 }
 
@@ -2559,13 +2559,13 @@ TEST_F(CalcTestReal, definite_integral10)
 
 TEST_F(CalcTestReal, definite_integral11)
 {
-    auto res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"definite_integral(0,10,x^4,x);", 10);
+    auto res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"definite_integral(0,10,pow(x,4),x);", 10);
     ASSERT_TRUE(res.ToStdString(10, 10) == "20000.E+0") << res.ToStdString(10, 10);
 }
 
 TEST_F(CalcTestReal, definite_integral12)
 {
-    auto res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"definite_integral(0,1,x^2*sin(x),x);", 10);
+    auto res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"definite_integral(0,1,pow(x,2)*sin(x),x);", 10);
     ASSERT_TRUE(res.ToStdString(10, 10) == "0.2232442755E+0") << res.ToStdString(10, 10);
 }
 
@@ -2577,19 +2577,19 @@ TEST_F(CalcTestReal, definite_integral_inf1)
 
 TEST_F(CalcTestReal, definite_integral_inf2)
 {
-    auto res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"definite_integral(0,∞,1/(1+x^2),x);", 10);
+    auto res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"definite_integral(0,∞,1/(1+pow(x,2)),x);", 10);
     ASSERT_TRUE(res.ToStdString(10, 10) == "1.5707963268E+0") << res.ToStdString(10, 10);
 }
 
 TEST_F(CalcTestReal, definite_integral_inf3)
 {
-    auto res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"definite_integral(0,∞,1/(x+1)^2,x);", 10);
+    auto res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"definite_integral(0,∞,1/pow((x+1),2),x);", 10);
     ASSERT_TRUE(res.ToStdString(10, 10) == "1.E+0") << res.ToStdString(10, 10);
 }
 
 TEST_F(CalcTestReal, definite_integral_inf4)
 {
-    auto res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"definite_integral(1,∞,1/x^2,x);", 10);
+    auto res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"definite_integral(1,∞,1/pow(x,2),x);", 10);
     ASSERT_TRUE(res.ToStdString(10, 10) == "1.E+0") << res.ToStdString(10, 10);
 }
 
@@ -2661,13 +2661,13 @@ TEST_F(CalcTestReal, threads_integrals)
                     auto res1 = p.Parse(LogicalId{0, 0, 1}, U"definite_integral(0,1," + coeff + U"*x,x);", 10);
                     actual1[iter][i] = res1.ToStdString(10, 10);
 
-                    auto res2 = p.Parse(LogicalId{0, 0, 2}, U"definite_integral(0,1," + coeff + U"*x^3,x);", 10);
+                    auto res2 = p.Parse(LogicalId{0, 0, 2}, U"definite_integral(0,1," + coeff + U"*pow(x,3),x);", 10);
                     actual2[iter][i] = res2.ToStdString(10, 10);
 
-                    auto res3 = p.Parse(LogicalId{0, 0, 3}, U"definite_integral(0,1," + coeff + U"*x^7,x);", 10);
+                    auto res3 = p.Parse(LogicalId{0, 0, 3}, U"definite_integral(0,1," + coeff + U"*pow(x,7),x);", 10);
                     actual3[iter][i] = res3.ToStdString(10, 10);
 
-                    auto res4 = p.Parse(LogicalId{0, 0, 4}, U"definite_integral(0,1," + coeff + U"*x^15,x);", 10);
+                    auto res4 = p.Parse(LogicalId{0, 0, 4}, U"definite_integral(0,1," + coeff + U"*pow(x,15),x);", 10);
                     actual4[iter][i] = res4.ToStdString(10, 10);
 
                     lock.lock();
@@ -2724,58 +2724,77 @@ TEST_F(CalcTestReal, threads_integrals)
 
 TEST_F(CalcTestReal, derivative_at_point1)
 {
-    Real res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"derivative(x^2, x, 3);");
+    Real res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"derivative(pow(x,2), [x=3]);");
     ASSERT_TRUE(res == parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"6;")) << res.ToStdString(3, 3);
 }
 
 TEST_F(CalcTestReal, derivative_at_point2)
 {
-    Real res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"derivative(x^3, x, 2);");
+    Real res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"derivative(pow(x,3), [x=2]);");
     ASSERT_TRUE(res == parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"12;")) << res.ToStdString(3, 3);
 }
 
 TEST_F(CalcTestReal, derivative_at_point3)
 {
-    Real res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"derivative(sin(x), x, 0);");
+    Real res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"derivative(sin(x), [x=0]);");
     ASSERT_TRUE(res == parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"1;")) << res.ToStdString(3, 3);
 }
 
 TEST_F(CalcTestReal, derivative_at_point4)
 {
-    Real res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"derivative(x^2, y, 3);");
+    Real res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"derivative(pow(x,2), [y=3]);");
     ASSERT_TRUE(res == parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"0;")) << res.ToStdString(3, 3);
 }
 
 TEST_F(CalcTestReal, derivative_at_point5)
 {
     parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"f(x)=2*x;");
-    Real res = parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"derivative(f(x), x, 2);");
+    Real res = parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"derivative(f(x), [x=2]);");
     ASSERT_TRUE(res.ToStdString(3, 3) == parser.Parse(LogicalId{0, 0, 0, 0, 3}, U"2;").ToStdString(3, 3)) << res.ToStdString(3, 3);
 }
 
 TEST_F(CalcTestReal, derivative_at_point6)
 {
-    Real res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"derivative(x^2, x, 3)+1;");
+    Real res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"derivative(pow(x,2), [x=3])+1;");
     ASSERT_TRUE(res == parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"7;")) << res.ToStdString(3, 3);
 }
 
 TEST_F(CalcTestReal, derivative_at_point_error1)
 {
-    EXPECT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"derivative(x^2, 1, 3);"), yutovo_calculator::SyntaxException);
+    EXPECT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"derivative(pow(x,2), [1=3]);"), yutovo_calculator::SyntaxException);
 }
 
 TEST_F(CalcTestReal, derivative_at_point7)
 {
     parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"f(x,y)=x*y;");
-    Real res = parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"derivative(f(x,5), x, 2);");
+    Real res = parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"derivative(f(x,5), [x=2]);");
     ASSERT_TRUE(res.ToStdString(3, 3) == parser.Parse(LogicalId{0, 0, 0, 0, 3}, U"5;").ToStdString(3, 3)) << res.ToStdString(3, 3);
 }
 
 TEST_F(CalcTestReal, derivative_at_point8)
 {
     parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"f(x,y)=x+y;");
-    Real res = parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"derivative(f(4,y), y, 3);");
+    Real res = parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"derivative(f(4,y), [y=3]);");
     ASSERT_TRUE(res.ToStdString(3, 3) == parser.Parse(LogicalId{0, 0, 0, 0, 3}, U"1;").ToStdString(3, 3)) << res.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestReal, derivative_at_point_multi1)
+{
+    Real res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"derivative(x*y, [x=2, y=3]);");
+    ASSERT_TRUE(res.ToStdString(3, 3) == parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"3;").ToStdString(3, 3)) << res.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestReal, derivative_at_point_multi2)
+{
+    Real res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"derivative(x*y, [y=3, x=2]);");
+    ASSERT_TRUE(res.ToStdString(3, 3) == parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"2;").ToStdString(3, 3)) << res.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestReal, derivative_at_point_multi3)
+{
+    parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"f(x,y)=pow(x,2)*y;");
+    Real res = parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"derivative(f(x,y), [x=2, y=3]);");
+    ASSERT_TRUE(res.ToStdString(3, 3) == parser.Parse(LogicalId{0, 0, 0, 0, 3}, U"12;").ToStdString(3, 3)) << res.ToStdString(3, 3);
 }
 
 TEST_F(CalcTestReal, definite_integral_user_function)

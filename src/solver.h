@@ -332,8 +332,6 @@ struct Solver : public boost::static_visitor<Number>
                 return left_value * right;
             case U'/':
                 return left_value / right;
-            case U'^':
-                return left_value ^ right;
             case U'%':
             case U'&':
             case U'|':
@@ -620,11 +618,30 @@ struct Solver : public boost::static_visitor<Number>
         {
             try
             {
-                Number value = (*this)(op.value);
-                const ExpressionNode<Number>& function_expr = boost::get<ExpressionNode<Number>>(op.function);
+                if (op.variables.empty())
+                    throw ParserException({}, ParserExceptionCode::IncorrectOperation);
+
+                const std::u32string& expression_str = boost::get<std::u32string>(op.function);
+                std::u32string expr = expression_str;
+                Expression<Number> expression(op.id, expr, const_cast<Solver<Number>*>(this));
+                ExpressionNode<Number> function_expr;
+                std::u32string::iterator iter = expr.begin();
+                std::u32string::iterator end = expr.end();
+                unicode::space_type space;
+                if (!phrase_parse(iter, end, expression, space, function_expr))
+                    throw MathException(IncorrectOperation);
                 Number function = (*this)(function_expr);
-                Number var(precision, op.variable);
-                return subs(derivative(function, var), var, value);
+
+                auto var_iter = op.variables.begin();
+                Number var(precision, var_iter->name);
+                Number result = derivative(function, var);
+                for (const auto& variable : op.variables)
+                {
+                    Number value = (*this)(variable.value);
+                    Number variable_symbol(precision, variable.name);
+                    result = subs(result, variable_symbol, value);
+                }
+                return result;
             }
             catch (const MathException& e)
             {
@@ -649,15 +666,16 @@ struct Solver : public boost::static_visitor<Number>
         {
             try
             {
-                Number value = (*this)(op.value);
+                if (op.variables.empty())
+                    throw ParserException({}, ParserExceptionCode::IncorrectOperation);
                 const std::u32string& expression_str = boost::get<std::u32string>(op.function);
                 try
                 {
-                    return EvaluateDerivativeAtPoint(expression_str, op.variable, value);
+                    return EvaluateDerivativeAtPoint(expression_str, op.variables);
                 }
                 catch (...)
                 {
-                    return NumericalDerivativeAtPoint(expression_str, op.variable, value);
+                    return NumericalDerivativeAtPoint(expression_str, op.variables);
                 }
             }
             catch (const MathException& e)
@@ -735,6 +753,76 @@ struct Solver : public boost::static_visitor<Number>
         Number minus = value - h;
         Number f_plus = EvaluateWithTempVariable(expression_str, variable, plus);
         Number f_minus = EvaluateWithTempVariable(expression_str, variable, minus);
+        return (f_plus - f_minus) / (h + h);
+    }
+
+    Number EvaluateWithTempVariables(const std::u32string& expression_str, const std::list<std::pair<std::u32string, Number>>& variable_values) const
+    {
+        Solver<Number> sub_solver(precision, default_angle_measure, result_angle_measure, default_notation, im, Number(), symbols);
+        sub_solver.parser_context = parser_context;
+        sub_solver.id = id;
+        sub_solver.exported_id = exported_id;
+        sub_solver.res_pos = res_pos;
+        sub_solver.cast_units = cast_units;
+        sub_solver.max_cast_unit_size = max_cast_unit_size;
+        sub_solver.cur_subscript = cur_subscript;
+        sub_solver.dependencies = dependencies;
+
+        for (const auto& variable_value : variable_values)
+        {
+            Number value_copy = variable_value.second;
+            sub_solver.PushTempVariable(variable_value.first, value_copy);
+        }
+
+        Number res;
+        try
+        {
+            std::u32string expr = expression_str;
+            Expression<Number> expression(id, expr, &sub_solver);
+            ExpressionNode<Number> node;
+            std::u32string::iterator iter = expr.begin();
+            std::u32string::iterator end = expr.end();
+            unicode::space_type space;
+            if (!phrase_parse(iter, end, expression, space, node))
+                throw MathException(IncorrectOperation);
+            res = sub_solver(node);
+        }
+        catch (...)
+        {
+            sub_solver.PopTempVariables(variable_values.size());
+            throw;
+        }
+        sub_solver.PopTempVariables(variable_values.size());
+        return res;
+    }
+
+    Number NumericalDerivativeAtPoint(const std::u32string& expression_str, const std::list<DerivativeVariableNode<Number>>& variables) const
+    {
+        auto var_iter = variables.begin();
+        std::u32string first_variable = var_iter->name;
+        Number first_value = (*this)(var_iter->value);
+
+        std::list<std::pair<std::u32string, Number>> other_variables;
+        ++var_iter;
+        for (; var_iter != variables.end(); ++var_iter)
+        {
+            Number value = (*this)(var_iter->value);
+            other_variables.emplace_back(var_iter->name, value);
+        }
+
+        auto evaluate_at =
+            [&](const Number& value) -> Number
+            {
+                std::list<std::pair<std::u32string, Number>> variable_values = other_variables;
+                variable_values.emplace_front(first_variable, value);
+                return EvaluateWithTempVariables(expression_str, variable_values);
+            };
+
+        Number h = StepForNumericalDerivative(first_value);
+        Number plus = first_value + h;
+        Number minus = first_value - h;
+        Number f_plus = evaluate_at(plus);
+        Number f_minus = evaluate_at(minus);
         return (f_plus - f_minus) / (h + h);
     }
 
@@ -881,12 +969,47 @@ struct Solver : public boost::static_visitor<Number>
         if constexpr (!std::is_same_v<Number, Rational>)
             giac::decimal_digits(std::max(1, precision + 1), &ctx);
         giac::gen expr_gen = ParseGen(ToBasicString(expression_str), &ctx);
-        giac::gen var_gen = ParseGen(ToBasicString(variable), &ctx);
-        if (var_gen.type != giac::_IDNT)
-            throw MathException(IncorrectOperation);
-        giac::gen value_gen = ParseGen(ToBasicString(value.ToString()), &ctx);
+        giac::identificateur var_id(ToBasicString(variable));
+        giac::gen var_gen(var_id);
+        giac::gen value_gen = NumberToGiac(value);
         giac::gen derivative = giac::derive(expr_gen, var_gen, &ctx);
         giac::gen res = giac::subst(derivative, var_gen, value_gen, false, &ctx);
+        if constexpr (std::is_same_v<Number, Rational>)
+            res = giac::normal(res, &ctx);
+        else
+            res = giac::evalf(res, 1, &ctx);
+        return FromGiac<Number>(res, precision);
+    }
+
+    Number EvaluateDerivativeAtPoint(const std::u32string& expression_str, const std::list<DerivativeVariableNode<Number>>& variables) const
+    {
+        std::lock_guard<std::mutex> lock(giac_evaluation_mutex);
+        GiacMpfrStateGuard mpfr_guard;
+        GiacOutputGuard output_guard;
+        giac::context ctx;
+        if constexpr (!std::is_same_v<Number, Rational>)
+            giac::decimal_digits(std::max(1, precision + 1), &ctx);
+        giac::gen expr_gen = ParseGen(ToBasicString(expression_str), &ctx);
+
+        auto var_iter = variables.begin();
+        giac::identificateur first_var_id(ToBasicString(var_iter->name));
+        giac::gen first_var_gen(first_var_id);
+        Number first_value = (*this)(var_iter->value);
+        giac::gen first_value_gen = NumberToGiac(first_value);
+
+        giac::gen res = giac::derive(expr_gen, first_var_gen, &ctx);
+        res = giac::subst(res, first_var_gen, first_value_gen, false, &ctx);
+
+        ++var_iter;
+        for (; var_iter != variables.end(); ++var_iter)
+        {
+            giac::identificateur var_id(ToBasicString(var_iter->name));
+            giac::gen var_gen(var_id);
+            Number value = (*this)(var_iter->value);
+            giac::gen value_gen = NumberToGiac(value);
+            res = giac::subst(res, var_gen, value_gen, false, &ctx);
+        }
+
         if constexpr (std::is_same_v<Number, Rational>)
             res = giac::normal(res, &ctx);
         else

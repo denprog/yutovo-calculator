@@ -110,19 +110,19 @@ TEST_F(CalcTestSymbolicRational, mixed_arithmetic1)
 
 TEST_F(CalcTestSymbolicRational, mixed_arithmetic2)
 {
-    Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"2*x^2 + 3*x - 5;");
+    Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"2*pow(x,2) + 3*x - 5;");
     ASSERT_TRUE(res.ToStdString(0) == "-5+3*x+2*pow(x,2)") << res.ToStdString(0);
 }
 
 TEST_F(CalcTestSymbolicRational, power1)
 {
-    Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"x^2;");
+    Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"pow(x,2);");
     ASSERT_TRUE(res.ToStdString(0) == "pow(x,2)") << res.ToStdString(0);
 }
 
 TEST_F(CalcTestSymbolicRational, power2)
 {
-    Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"x^10;");
+    Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"pow(x,10);");
     ASSERT_TRUE(res.ToStdString(0) == "pow(x,10)") << res.ToStdString(0);
 }
 
@@ -137,13 +137,13 @@ TEST_F(CalcTestSymbolicRational, power3)
 
 TEST_F(CalcTestSymbolicRational, diff1)
 {
-    Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"derivative(x^2, x);");
+    Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"derivative(pow(x,2), x);");
     ASSERT_TRUE(res.ToStdString(0) == "2*x") << res.ToStdString(0);
 }
 
 TEST_F(CalcTestSymbolicRational, indefinite_integral1)
 {
-    Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"indefinite_integral(x^2, x);");
+    Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"indefinite_integral(pow(x,2), x);");
     ASSERT_TRUE(res.ToStdString(0) == "(1/3)*pow(x,3)") << res.ToStdString(0);
 }
 
@@ -167,19 +167,19 @@ TEST_F(CalcTestSymbolicRational, definite_integral1)
 
 TEST_F(CalcTestSymbolicRational, expand1)
 {
-    Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"expand((x+1)^2);");
+    Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"expand(pow((x+1),2));");
     ASSERT_TRUE(res.ToStdString(0) == "1+2*x+pow(x,2)") << res.ToStdString(0);
 }
 
 TEST_F(CalcTestSymbolicRational, subs1)
 {
-    Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"subs(x^2, x, 5);");
+    Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"subs(pow(x,2), x, 5);");
     ASSERT_TRUE(res.ToStdString(0) == "25") << res.ToStdString(0);
 }
 
 TEST_F(CalcTestSymbolicRational, subs2)
 {
-    Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"subs(yy^3, yy, 5);");
+    Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"subs(pow(yy,3), yy, 5);");
     ASSERT_TRUE(res.ToStdString(0) == "125") << res.ToStdString(0);
 }
 
@@ -193,7 +193,7 @@ TEST_F(CalcTestSymbolicRational, subs3)
 
 TEST_F(CalcTestSymbolicRational, subs4)
 {
-    Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"subs(x^2+pow(y,2), x, 3);");
+    Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"subs(pow(x,2)+pow(y,2), x, 3);");
     ASSERT_TRUE(res.ToStdString(0) == "9+pow(y,2)") << res.ToStdString(0);
     std::string json = res.ToJson(10);
     ASSERT_TRUE(json ==
@@ -430,7 +430,7 @@ TEST_F(CalcTestSymbolicRational, diff2)
 
 TEST_F(CalcTestSymbolicRational, diff3)
 {
-    Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"derivative(x^2, x);");
+    Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"derivative(pow(x,2), x);");
     ASSERT_TRUE(res.ToStdString(0) == "2*x") << res.ToStdString(0);
 }
 
@@ -766,7 +766,7 @@ TEST_F(CalcTestSymbolicRational, log3)
 
 TEST_F(CalcTestSymbolicRational, diff_tojson)
 {
-    Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"derivative(x^3+2*x^2-5*x+1, x);");
+    Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"derivative(pow(x,3)+2*pow(x,2)-5*x+1, x);");
     std::string s = res.ToStdString(0);
     ASSERT_TRUE(s == "-5+4*x+3*pow(x,2)") << s;
     std::string json = res.ToJson(10);
@@ -796,7 +796,7 @@ TEST_F(CalcTestSymbolicRational, diff_tojson)
 
 TEST_F(CalcTestSymbolicRational, expand3)
 {
-    Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"expand((x+1)^3);");
+    Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"expand(pow((x+1),3));");
     ASSERT_TRUE(res.ToStdString(0) == "1+3*x+3*pow(x,2)+pow(x,3)") << res.ToStdString(0);
     ASSERT_TRUE(res.ToJson(10) ==
         R"({"type":46,"elements":[{"type":7,"elements":[{"type":8,"elements":"1"},{"type":11,"symbol":"+"},{"type":8,"elements":"3"},{"type":13,"symbol":"·"},{"type":8,"elements":"x"},{"type":11,"symbol":"+"},{"type":8,"elements":"3"},{"type":13,"symbol":"·"},{"type":15,"elements":[{"type":7,"elements":[{"type":8,"elements":"x"}]},{"type":10,"elements":[]},{"type":7,"elements":[{"type":8,"elements":"2"}]}]},{"type":11,"symbol":"+"},{"type":15,"elements":[{"type":7,"elements":[{"type":8,"elements":"x"}]},{"type":10,"elements":[]},{"type":7,"elements":[{"type":8,"elements":"3"}]}]}]}]})" ) << res.ToJson(10);
@@ -804,7 +804,7 @@ TEST_F(CalcTestSymbolicRational, expand3)
 
 TEST_F(CalcTestSymbolicRational, trig_power1)
 {
-    Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"simplify(sin(x)^2+cos(x)^2);");
+    Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"simplify(pow(sin(x),2)+pow(cos(x),2));");
     ASSERT_TRUE(res.ToStdString(0) == "pow(cos(x),2)+pow(sin(x),2)") << res.ToStdString(0);
     ASSERT_TRUE(res.ToJson(10) ==
         R"r({"type":46,"elements":[{"type":7,"elements":[{"type":15,"elements":[{"type":7,"elements":[{"type":8,"elements":"cos"},{"type":19,"symbol":"("},{"type":8,"elements":"x"},{"type":20,"symbol":")"}]},{"type":10,"elements":[]},{"type":7,"elements":[{"type":8,"elements":"2"}]}]},{"type":11,"symbol":"+"},{"type":15,"elements":[{"type":7,"elements":[{"type":8,"elements":"sin"},{"type":19,"symbol":"("},{"type":8,"elements":"x"},{"type":20,"symbol":")"}]},{"type":10,"elements":[]},{"type":7,"elements":[{"type":8,"elements":"2"}]}]}]}]})r" ) << res.ToJson(10);
@@ -829,7 +829,7 @@ TEST_F(CalcTestSymbolicRational, division_nested1)
 
 TEST_F(CalcTestSymbolicRational, diff_power5)
 {
-    Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"derivative(x^5,x);");
+    Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"derivative(pow(x,5),x);");
     ASSERT_TRUE(res.ToStdString(0) == "5*pow(x,4)") << res.ToStdString(0);
     ASSERT_TRUE(res.ToJson(10) ==
         R"({"type":46,"elements":[{"type":7,"elements":[{"type":8,"elements":"5"},{"type":13,"symbol":"·"},{"type":15,"elements":[{"type":7,"elements":[{"type":8,"elements":"x"}]},{"type":10,"elements":[]},{"type":7,"elements":[{"type":8,"elements":"4"}]}]}]}]})" ) << res.ToJson(10);
@@ -852,7 +852,7 @@ TEST_F(CalcTestSymbolicRational, diff_nonsymbol)
 
 TEST_F(CalcTestSymbolicRational, frac_power_mult)
 {
-    Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"x^(1/2)*x^(1/3);");
+    Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"pow(x,(1/2))*pow(x,(1/3));");
     ASSERT_TRUE(res.ToStdString(0) == "pow(x,5/6)") << res.ToStdString(0);
     ASSERT_TRUE(res.ToJson(10) ==
         R"({"type":46,"elements":[{"type":15,"elements":[{"type":7,"elements":[{"type":8,"elements":"x"}]},{"type":10,"elements":[]},{"type":14,"elements":[{"type":7,"elements":[{"type":8,"elements":"5"}]},{"type":10,"elements":[]},{"type":7,"elements":[{"type":8,"elements":"6"}]}]}]}]})" ) << res.ToJson(10);
@@ -1038,7 +1038,7 @@ TEST_F(CalcTestSymbolicRational, inf9)
 
 TEST_F(CalcTestSymbolicRational, inf10)
 {
-    Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"subs((x^2-1)/(x-1),x,1);");
+    Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"subs((pow(x,2)-1)/(x-1),x,1);");
     ASSERT_TRUE(res.ToStdString(10) == "nan") << res.ToStdString(10);
 }
 
@@ -1566,43 +1566,62 @@ TEST_F(CalcTestSymbolicRational, min_max2)
 
 TEST_F(CalcTestSymbolicRational, derivative_at_point1)
 {
-    Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"derivative(x^2, x, 3);");
-    ASSERT_TRUE(res.ToStdString(10) == "6") << res.ToStdString(10);
+    Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"derivative(x, [x=3]);");
+    ASSERT_TRUE(res.ToStdString(10) == "1") << res.ToStdString(10);
 }
 
 TEST_F(CalcTestSymbolicRational, derivative_at_point2)
 {
-    parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"f(x)=x^2;");
-    Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"derivative(f(x), x, 3);");
+    parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"f(x)=pow(x,2);");
+    Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"derivative(f(x), [x=3]);");
     ASSERT_TRUE(res.ToStdString(10) == "6") << res.ToStdString(10);
 }
 
 TEST_F(CalcTestSymbolicRational, derivative_at_point3)
 {
-    Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"derivative(x^2, y, 3);");
+    Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"derivative(pow(x,2), [y=3]);");
     ASSERT_TRUE(res.ToStdString(10) == "0") << res.ToStdString(10);
 }
 
 TEST_F(CalcTestSymbolicRational, derivative_at_point4)
 {
     parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"f(x,y)=x*y;");
-    Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"derivative(f(x,y), x, 3);");
+    Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"derivative(f(x,y), [x=3]);");
     ASSERT_TRUE(res.ToString(10) == U"y") << res.ToStdString(10);
 }
 
 TEST_F(CalcTestSymbolicRational, derivative_at_point5)
 {
     parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"f(x,y)=x*y;");
-    Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"derivative(f(x,y), y, 3);");
+    Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"derivative(f(x,y), [y=3]);");
     ASSERT_TRUE(res.ToString(10) == U"x") << res.ToStdString(10);
 }
 
 TEST_F(CalcTestSymbolicRational, derivative_at_point6)
 {
-    Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"derivative(1/x, x, 0);");
+    Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"derivative(1/x, [x=0]);");
     ASSERT_TRUE(res.ToJson(10) ==
         R"r({"type":46,"elements":[{"type":7,"elements":[{"type":8,"elements":"∞"}]}]})r")
         << res.ToJson(10);
+}
+
+TEST_F(CalcTestSymbolicRational, derivative_at_point_multi1)
+{
+    Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"derivative(x*y, [x=2, y=3]);");
+    ASSERT_TRUE(res.ToStdString(10) == "3") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicRational, derivative_at_point_multi2)
+{
+    Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"derivative(x*y, [y=3, x=2]);");
+    ASSERT_TRUE(res.ToStdString(10) == "2") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicRational, derivative_at_point_multi3)
+{
+    parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"f(x,y)=pow(x,2)*y;");
+    Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"derivative(f(x,y), [x=2, y=3]);");
+    ASSERT_TRUE(res.ToStdString(10) == "12") << res.ToStdString(10);
 }
 
 }

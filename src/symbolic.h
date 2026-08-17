@@ -198,15 +198,6 @@ public:
         return res;
     }
 
-    friend Symbolic<Number> operator^(const Symbolic<Number>& num1, const Symbolic<Number>& num2)
-    {
-        if (giac::is_zero(*num2.expr, num2.Context()))
-            return Symbolic<Number>(num1.precision, 1);
-        Symbolic<Number> res(num1.precision);
-        *res.expr = giac::pow(*num1.expr, *num2.expr, res.Context());
-        return res;
-    }
-
     void operator+=(const Symbolic<Number>& num)
     {
         *expr = giac::operator_plus(*expr, *num.expr, Context());
@@ -225,16 +216,6 @@ public:
     void operator/=(const Symbolic<Number>& num)
     {
         *expr = SimplifyPowerDivision(*expr, *num.expr, Context());
-    }
-
-    void operator^=(const Symbolic<Number>& num)
-    {
-        if (giac::is_zero(*num.expr, Context()))
-        {
-            *expr = giac::gen(1);
-            return;
-        }
-        *expr = giac::pow(*expr, *num.expr, Context());
     }
 
     friend bool operator==(const Symbolic<Number>& num1, const Symbolic<Number>& num2)

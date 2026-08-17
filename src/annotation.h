@@ -248,7 +248,10 @@ struct Annotation
 			++it;
 		if (it == last)
 		{
-			op.size = static_cast<int>(op.variable.length()) + 1;
+			int fallback_size = 1;
+			if (!op.variables.empty())
+				fallback_size = static_cast<int>(op.variables.front().name.length()) + 1;
+			op.size = fallback_size;
 			return;
 		}
 		int depth = 1;

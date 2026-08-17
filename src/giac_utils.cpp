@@ -62,6 +62,40 @@ giac::gen ParseGen(const std::string& str, const giac::context* ctx)
     return ParseGen(str.c_str(), ctx);
 }
 
+giac::gen NumberToGiac(const Real& value)
+{
+    mpfr_t r;
+    mpfr_init2(r, mpfr_get_prec(value.GetNumber()));
+    mpfr_set(r, value.GetNumber(), MPFR_RNDN);
+    giac::gen result = giac::gen(giac::real_object(r));
+    mpfr_clear(r);
+    return result;
+}
+
+giac::gen NumberToGiac(const Rational& value)
+{
+    mpq_t q;
+    mpq_init(q);
+    mpq_set(q, value.GetNumber());
+    mpz_t num_z, den_z;
+    mpz_init_set(num_z, mpq_numref(q));
+    mpz_init_set(den_z, mpq_denref(q));
+    mpq_clear(q);
+    giac::gen num = giac::gen(num_z);
+    giac::gen den = giac::gen(den_z);
+    mpz_clear(num_z);
+    mpz_clear(den_z);
+    return giac::gen(giac::fraction(num, den));
+}
+
+giac::gen NumberToGiac(const Complex& value)
+{
+    giac::gen re = NumberToGiac(value.GetRe());
+    giac::gen im = NumberToGiac(value.GetIm());
+    return giac::gen(re, im);
+}
+
+
 giac::gen CloneSingleLetterIdentifiers(const giac::gen& g)
 {
     if (g.type == giac::_IDNT)

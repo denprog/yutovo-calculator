@@ -132,6 +132,11 @@ public:
 
     std::string ToStdString() const;
 
+    mpq_srcptr GetNumber() const
+    {
+        return number;
+    }
+
     void ToProper(Integer& integer, Integer& numerator, Integer& denomerator) const;
 
     void SetUnit(const Unit& _unit);

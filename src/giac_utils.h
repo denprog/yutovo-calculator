@@ -580,6 +580,11 @@ inline giac::gen InertCall(const char* name, const giac::gen& arg, giac::context
 giac::gen ParseGen(const char* str, const giac::context* ctx);
 giac::gen ParseGen(const std::string& str, const giac::context* ctx);
 
+//Convert a numeric value to a giac::gen without string round-tripping.
+giac::gen NumberToGiac(const Real& value);
+giac::gen NumberToGiac(const Rational& value);
+giac::gen NumberToGiac(const Complex& value);
+
 //Return a deep copy of g where each single-letter variable identifier (a..d, f..h, j..z) is replaced by a freshly allocated identificateur.
 //This avoids sharing giac's global one-letter identifier objects between threads.
 giac::gen CloneSingleLetterIdentifiers(const giac::gen& g);
