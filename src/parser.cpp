@@ -907,6 +907,7 @@ Parser<yutovo_calculator::Symbolic<yutovo_calculator::Real>>::Parser(const int p
     SymbolicBinaryFunc binary_func;
     binary_func = &derivative;
     solver.AddBuiltinFunction(U"derivative", binary_func);
+    solver.AddBuiltinFunction(U"diff", binary_func);
     binary_func = &indefinite_integral;
     solver.AddBuiltinFunction(U"indefinite_integral", binary_func);
     binary_func = &pow;
@@ -1112,6 +1113,7 @@ Parser<yutovo_calculator::Symbolic<yutovo_calculator::Rational>>::Parser(const i
     SymbolicRationalBinaryFunc binary_func;
     binary_func = &derivative;
     solver.AddBuiltinFunction(U"derivative", binary_func);
+    solver.AddBuiltinFunction(U"diff", binary_func);
     binary_func = &indefinite_integral;
     solver.AddBuiltinFunction(U"indefinite_integral", binary_func);
     binary_func = &pow;
@@ -1270,6 +1272,7 @@ Parser<yutovo_calculator::Symbolic<yutovo_calculator::Complex>>::Parser(const in
     SymbolicComplexBinaryFunc binary_func;
     binary_func = &derivative;
     solver.AddBuiltinFunction(U"derivative", binary_func);
+    solver.AddBuiltinFunction(U"diff", binary_func);
     binary_func = &indefinite_integral;
     solver.AddBuiltinFunction(U"indefinite_integral", binary_func);
     binary_func = &pow;

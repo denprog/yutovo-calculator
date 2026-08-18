@@ -616,6 +616,12 @@ TEST_F(CalcTestSymbolicReal, derivative1)
     ASSERT_TRUE(res.ToString(10) == U"2.*x") << res.ToStdString(10);
 }
 
+TEST_F(CalcTestSymbolicReal, derivative_diff_synonym)
+{
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"diff(pow(x, 2), x);");
+    ASSERT_TRUE(res.ToString(10) == U"2.*x") << res.ToStdString(10);
+}
+
 TEST_F(CalcTestSymbolicReal, derivative2)
 {
     parser.Parse(LogicalId{0, 0, 1}, U"f(x)=x+x;");
