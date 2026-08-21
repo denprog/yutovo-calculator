@@ -246,6 +246,33 @@ TEST_F(CalcTestSymbolicComplex, definite_integral1)
     ASSERT_TRUE(res.ToStdString(10) == "96.*y") << res.ToStdString(10);
 }
 
+TEST_F(CalcTestSymbolicComplex, definite_integral_j_russian)
+{
+    parser.SetLocale(Language::Russian);
+    Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"definite_integral(0,\u03C0,pow(e,j*z),z);", 10);
+    ASSERT_TRUE(res.ToStdString(10, Language::Russian) == "2.*j") << res.ToStdString(10, Language::Russian);
+}
+
+TEST_F(CalcTestSymbolicComplex, definite_integral_i_english)
+{
+    Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"definite_integral(0,\u03C0,pow(e,i*z),z);", 10);
+    ASSERT_TRUE(res.ToStdString(10, Language::English) == "2.*i") << res.ToStdString(10, Language::English);
+}
+
+TEST_F(CalcTestSymbolicComplex, definite_integral_i_spanish)
+{
+    parser.SetLocale(Language::Spanish);
+    Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"definite_integral(0,\u03C0,pow(e,i*z),z);", 10);
+    ASSERT_TRUE(res.ToStdString(10, Language::Spanish) == "2.*i") << res.ToStdString(10, Language::Spanish);
+}
+
+TEST_F(CalcTestSymbolicComplex, definite_integral_i_brazilian_portuguese)
+{
+    parser.SetLocale(Language::BrazilianPortuguese);
+    Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"definite_integral(0,\u03C0,pow(e,i*z),z);", 10);
+    ASSERT_TRUE(res.ToStdString(10, Language::BrazilianPortuguese) == "2.*i") << res.ToStdString(10, Language::BrazilianPortuguese);
+}
+
 TEST_F(CalcTestSymbolicComplex, expand1)
 {
     Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"expand(pow((x+1),2));");
