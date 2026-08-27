@@ -523,27 +523,26 @@ TEST_F(CalcTestSymbolicReal, simplify8)
 {
     Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"(pow(x,5))/(pow(x,2));");
     ASSERT_TRUE(res.ToString(10) == U"pow(x,3.)") << res.ToStdString(10);
+    res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"simplify((pow(x,5))/(pow(x,2)));");
+    ASSERT_TRUE(res.ToString(10) == U"pow(x,3.)") << res.ToStdString(10);
 }
 
 TEST_F(CalcTestSymbolicReal, simplify9)
 {
     Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"simplify(1-pow(cos(x),2));");
-    std::string s = res.ToStdString(10);
-    ASSERT_TRUE(!s.empty());
+    ASSERT_TRUE(res.ToStdString(10) == "(-(-1.+cos(x)))*(1.+cos(x))") << res.ToStdString(10);
 }
 
 TEST_F(CalcTestSymbolicReal, simplify10)
 {
     Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"simplify(pow((x+y),2)-pow(x,2)-2*x*y);");
-    std::string s = res.ToStdString(10);
-    ASSERT_TRUE(!s.empty());
+    ASSERT_TRUE(res.ToStdString(10) == "pow(y,2.)") << res.ToStdString(10);
 }
 
 TEST_F(CalcTestSymbolicReal, simplify11)
 {
     Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"simplify(pow((x+y),2)+pow((x+y),2));");
-    std::string s = res.ToStdString(10);
-    ASSERT_TRUE(!s.empty());
+    ASSERT_TRUE(res.ToStdString(10) == "2.*pow(x+y,2.)") << res.ToStdString(10);
 }
 
 TEST_F(CalcTestSymbolicReal, simplify_wrong_args)
