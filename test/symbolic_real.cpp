@@ -6,7 +6,9 @@
  */
 
 #include <gtest/gtest.h>
+#include <clocale>
 #include <condition_variable>
+#include <cstdlib>
 #include <iomanip>
 #include <mutex>
 #include <sstream>
@@ -2190,6 +2192,47 @@ TEST_F(CalcTestSymbolicReal, all_symbolic_functions)
             ASSERT_TRUE(res.ToStdString(10) == f.sym_result) << res.ToStdString(10);
         }
     }
+}
+
+TEST_F(CalcTestSymbolicReal, locale_comma_decimal)
+{
+    //numbers must survive a comma decimal locale: on Windows CLocaleGuard forces the C locale around the CRT parsing (giac's own "POSIX" shielding fails on 
+    //MSVC because that locale name does not exist); on other platforms giac shields its strtod itself
+    const char* saved_locale = std::setlocale(LC_NUMERIC, nullptr);
+
+    struct LocaleRestore
+    {
+        std::string saved;
+
+        ~LocaleRestore()
+        {
+            std::setlocale(LC_NUMERIC, saved.c_str());
+        }
+    };
+
+    LocaleRestore restore{ saved_locale ? saved_locale : "" };
+
+    const char* comma_locale = nullptr;
+    for (const char* name : {"ru-RU.UTF-8", "ru_RU.UTF-8", "ru-RU", "ru_RU", "Russian_Russia.1251", "de-DE.UTF-8", "de-DE"})
+    {
+        if (std::setlocale(LC_NUMERIC, name) != nullptr)
+        {
+            comma_locale = name;
+            break;
+        }
+    }
+    if (!comma_locale)
+        GTEST_SKIP() << "no comma decimal locale is installed";
+
+    char* end = nullptr;
+    double parsed = std::strtod("1.5", &end);
+    if (parsed == 1.5 && *end == 0)
+        GTEST_SKIP() << "locale " << comma_locale << " did not install a comma decimal separator";
+
+    Symbolic<Real> res = parser.Parse(LogicalId{ 0, 0, 0, 0, 1 }, U"1.5+2.25;", 3);
+    ASSERT_TRUE(res.ToString(10) == U"3.75") << res.ToStdString(10);
+    res = parser.Parse(LogicalId{ 0, 0, 1 }, U"1.5*x+2.25*x;", 3);
+    ASSERT_TRUE(res.ToString(10) == U"3.75*x") << res.ToStdString(10);
 }
 
 }

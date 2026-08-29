@@ -23,6 +23,9 @@
 #include <iomanip>
 #include <algorithm>
 #include <mutex>
+#ifdef _WIN32
+#include <clocale>
+#endif
 #include <unistd.h>
 #include <fcntl.h>
 
@@ -576,6 +579,32 @@ inline giac::gen InertCall(const char* name, const giac::gen& arg, giac::context
     giac::gen id(full.c_str(), contextptr);
     return giac::symb_of(id, arg);
 }
+
+#ifdef _WIN32
+//Set correct numeric locale for giac
+class CLocaleGuard
+{
+public:
+    CLocaleGuard()
+    {
+        _configthreadlocale(_ENABLE_PER_THREAD_LOCALE);
+        const char* current = std::setlocale(LC_NUMERIC, nullptr);
+        saved = current ? current : "";
+        std::setlocale(LC_NUMERIC, "C");
+    }
+
+    ~CLocaleGuard()
+    {
+        std::setlocale(LC_NUMERIC, saved.c_str());
+    }
+
+private:
+    std::string saved;
+};
+#endif
+
+//Prints a giac::gen to a string in the C locale (giac formats doubles with the current LC_NUMERIC, so a comma decimal locale corrupts the printed decimals)
+std::string PrintGen(const giac::gen& value, const giac::context* context);
 
 giac::gen ParseGen(const char* str, const giac::context* ctx);
 giac::gen ParseGen(const std::string& str, const giac::context* ctx);

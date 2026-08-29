@@ -78,14 +78,14 @@ std::string Symbolic<Real>::ToStdString(int exp, Language language) const
     giac::gen e = giac::eval(*expr, 1, Context());
     if (e.is_integer())
     {
-        std::string int_str = e.print(Context());
+        std::string int_str = PrintGen(e, Context());
         if (int_str.size() < 6)
             return AddDotIfInteger(RealNumberStr(int_str, precision, exp));
         return int_str;
     }
     if (!e.is_integer() && e.type != giac::_REAL && e.type != giac::_DOUBLE_ && !HasUnknownSymbol(e))
         e = giac::evalf(e, 1, Context());
-    std::string s = e.print(Context());
+    std::string s = PrintGen(e, Context());
     //convention: ln(0) is +infinity, not -infinity
     if ((s == "-inf" || s == "-infinity" || s == "-oo") && !explicit_negative_infinity)
         s = "oo";
@@ -93,14 +93,14 @@ std::string Symbolic<Real>::ToStdString(int exp, Language language) const
     if (expr->type == giac::_SYMB && expr->_SYMBptr->sommet == giac::at_sqrt)
     {
         giac::gen arg = giac::eval(expr->_SYMBptr->feuille, 1, Context());
-        std::string arg_str = arg.print(Context());
+        std::string arg_str = PrintGen(arg, Context());
         if (arg_str.find("-inf") != std::string::npos || arg_str.find("-infinity") != std::string::npos || arg_str.find("-oo") != std::string::npos)
             s = "nan";
     }
 
     if (e.is_integer())
     {
-        std::string int_str = e.print(Context());
+        std::string int_str = PrintGen(e, Context());
         if (int_str.size() < 6)
             return AddDotIfInteger(RealNumberStr(int_str, precision, exp));
         return int_str;
@@ -126,8 +126,8 @@ std::string Symbolic<Rational>::ToStdString(int exp, Language language) const
     giac::decimal_digits(std::max(1, precision + 10), Context());
     giac::gen e = giac::eval(*expr, 1, Context());
     if (e.is_integer())
-        return e.print(Context());
-    std::string s = e.print(Context());
+        return PrintGen(e, Context());
+    std::string s = PrintGen(e, Context());
 
     FormatContext c{FormatContext::Rational, precision, exp, language, false};
     return FormatGiacString(std::move(s), c);
@@ -151,8 +151,8 @@ std::string Symbolic<Complex>::ToStdString(int exp, Language language) const
     if (!e.is_integer() && e.type != giac::_REAL && e.type != giac::_DOUBLE_ && e.type != giac::_CPLX && !HasUnknownSymbol(e))
         e = giac::evalf(e, 1, Context());
     if (e.is_integer())
-        return e.print(Context());
-    std::string s = e.print(Context());
+        return PrintGen(e, Context());
+    std::string s = PrintGen(e, Context());
 
     s = Symbolic<Real>::ReplaceSqrtSymbol(s);
     char imag_unit = (language == Language::Russian) ? 'j' : 'i';
@@ -180,7 +180,7 @@ std::string Symbolic<Real>::ToJson(int exp, Language language) const
     GiacMpfrStateGuard mpfr_guard;
     giac::decimal_digits(std::max(1, precision + 10), Context());
     giac::gen e = giac::eval(*expr, 1, Context());
-    std::string s = e.print(Context());
+    std::string s = PrintGen(e, Context());
     FormatContext c{FormatContext::Real, precision, exp, language, true};
     GiacExpression ast = BuildFormattedAst(std::move(s), c);
     return ExprToJson(ast, 45, c);
@@ -195,7 +195,7 @@ std::string Symbolic<Rational>::ToJson(int exp, Language language) const
     GiacMpfrStateGuard mpfr_guard;
     giac::decimal_digits(std::max(1, precision + 10), Context());
     giac::gen e = giac::eval(*expr, 1, Context());
-    std::string s = e.print(Context());
+    std::string s = PrintGen(e, Context());
     FormatContext c{FormatContext::Rational, precision, exp, language, true};
     GiacExpression ast = BuildFormattedAst(std::move(s), c);
     return ExprToJson(ast, 46, c);
@@ -210,7 +210,7 @@ std::string Symbolic<Complex>::ToJson(int exp, Language language) const
     GiacMpfrStateGuard mpfr_guard;
     giac::decimal_digits(std::max(1, precision + 10), Context());
     giac::gen e = giac::eval(*expr, 1, Context());
-    std::string s = e.print(Context());
+    std::string s = PrintGen(e, Context());
     s = Symbolic<Real>::ReplaceSqrtSymbol(s);
     char imag_unit = (language == Language::Russian) ? 'j' : 'i';
     s = Symbolic<Real>::ReplaceImaginaryUnit(s, imag_unit);

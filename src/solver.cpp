@@ -2060,6 +2060,10 @@ template Integer Solver<Integer>::operator()(ScriptNode<Integer> const&, Logical
 template Complex Solver<Complex>::operator()(ScriptNode<Complex> const&, LogicalId, AngleMeasure, AngleMeasure, int, Dependencies*) const;
 template void Solver<Symbolic<Rational>>::FillBuiltinOperations();
 template void Solver<Symbolic<Complex>>::FillBuiltinOperations();
+
+template Symbolic<Real> Solver<Symbolic<Real>>::operator()(PostfixOperationNode<Symbolic<Real>> const&) const;
+template Symbolic<Rational> Solver<Symbolic<Rational>>::operator()(PostfixOperationNode<Symbolic<Rational>> const&) const;
+template Symbolic<Complex> Solver<Symbolic<Complex>>::operator()(PostfixOperationNode<Symbolic<Complex>> const&) const;
 #endif
 
 }

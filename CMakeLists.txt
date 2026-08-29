@@ -9,6 +9,7 @@ message(STATUS "CXX Compiler ID: ${CMAKE_CXX_COMPILER_ID}")
 
 if(WIN32)
     set(INSTALL_PATH "$ENV{VCPKG_ROOT}/installed/x64-windows")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /utf-8 /bigobj /EHsc /MP")
 else()
     set(INSTALL_PATH "$ENV{YUTOVO_DEPLOY}")
 endif()
