@@ -13,6 +13,7 @@
 #include "complex.h"
 #include "export.h"
 #include <giac/input_lexer.h>
+#include <climits>
 #include <mutex>
 
 namespace yutovo_calculator
@@ -37,6 +38,14 @@ public:
     }
 };
 
+std::string PrintGen(const giac::gen& value, const giac::context* context)
+{
+#ifdef _WIN32
+    CLocaleGuard locale_guard;
+#endif
+    return value.print(context);
+}
+
 bool IsClonableSingleLetterIdentifier(const char* name)
 {
     if (!name || !name[0] || name[1])
@@ -53,6 +62,9 @@ bool IsClonableSingleLetterIdentifier(const char* name)
 giac::gen ParseGen(const char* str, const giac::context* ctx)
 {
     std::lock_guard<std::mutex> lock(giac_parsing_mutex);
+#ifdef _WIN32
+    CLocaleGuard locale_guard;
+#endif
     std::call_once(freeze_static_ids_once, FreezeStaticGiacIdentifiers);
     return CloneSingleLetterIdentifiers(giac::gen(str, ctx));
 }
@@ -215,7 +227,7 @@ giac::gen SimplifyPowerDivision(const giac::gen& n, const giac::gen& d, giac::co
 
 std::string GiacToString(const giac::gen& g, giac::context* ctx)
 {
-    return g.print(ctx);
+    return PrintGen(g, ctx);
 }
 
 std::string RoundScientificHalfUp(std::string str, int decimals)
@@ -267,6 +279,9 @@ std::string RoundScientificHalfUp(std::string str, int decimals)
 
 std::string RealNumberStr(const std::string& num_str, int precision, int exp)
 {
+#ifdef _WIN32
+    CLocaleGuard locale_guard;
+#endif
     std::string raw = num_str;
     if (!raw.empty() && raw.back() == '.')
         raw.pop_back();
@@ -303,6 +318,7 @@ std::string RealNumberStr(const std::string& num_str, int precision, int exp)
     if (can_use_double)
     {
         std::ostringstream oss;
+        oss.imbue(std::locale::classic());
         if (order > exp && exp >= 0)
         {
             oss << std::scientific << std::setprecision(precision) << d;
@@ -931,6 +947,9 @@ static std::string CoeffStringFromGiac(const giac::gen& g, const FormatContext& 
 
 std::string AddCoeffs(const std::string& a, const std::string& b, const FormatContext& ctx)
 {
+#ifdef _WIN32
+    CLocaleGuard locale_guard;
+#endif
     giac::context ct;
     giac::decimal_digits(std::max(1, ctx.precision + 1), &ct);
     giac::gen ag(a.c_str(), &ct);
@@ -945,6 +964,9 @@ std::string AddCoeffs(const std::string& a, const std::string& b, const FormatCo
 
 std::string MultiplyCoeffs(const std::string& a, const std::string& b, const FormatContext& ctx)
 {
+#ifdef _WIN32
+    CLocaleGuard locale_guard;
+#endif
     giac::context ct;
     giac::decimal_digits(std::max(1, ctx.precision + 1), &ct);
     giac::gen ag(a.c_str(), &ct);
@@ -1120,19 +1142,24 @@ long long IntegerNthRootExact(long long base, int n)
     long long r = static_cast<long long>(std::llround(approx));
     if (r < 1)
         r = 1;
-    auto ipow = [&](long long x) -> __int128
-    {
-        __int128 res = 1;
-        for (int i = 0; i < n; ++i)
-            res *= x;
-        return res;
-    };
+    auto ipow = 
+        [&](long long x) -> long long
+        {
+            long long res = 1;
+            for (int i = 0; i < n; ++i)
+            {
+                if (x != 0 && res > LLONG_MAX / x)
+                    return -1;
+                res *= x;
+            }
+            return res;
+        };
     for (long long cand = r - 1; cand <= r + 1; ++cand)
     {
         if (cand <= 0)
             continue;
-        __int128 p = ipow(cand);
-        if (p == static_cast<__int128>(abs_base))
+        long long p = ipow(cand);
+        if (p == static_cast<long long>(abs_base))
             return negative ? -cand : cand;
     }
     return 0;
@@ -1174,6 +1201,9 @@ bool IsArithmeticConstantExpr(const GiacExpression& e)
 
 std::string EvaluateGiacExpression(const std::string& expr, int precision)
 {
+#ifdef _WIN32
+    CLocaleGuard locale_guard;
+#endif
     giac::context ct;
     giac::decimal_digits(std::max(1, precision + 1), &ct);
     giac::gen g(expr.c_str(), &ct);
@@ -1184,7 +1214,7 @@ std::string EvaluateGiacExpression(const std::string& expr, int precision)
         return "nan";
     if (g.type == giac::_SYMB)
     {
-        std::string str = g.print(&ct);
+        std::string str = PrintGen(g, &ct);
         if (str.find("undef") != std::string::npos || str.find("error") != std::string::npos || str.find("Error") != std::string::npos)
             return "nan";
     }
@@ -1235,6 +1265,9 @@ std::string InertFunctionExpr(const std::string& name, const std::string& arg)
 
 bool IsGiacExpressionZero(const std::string& expr, int precision)
 {
+#ifdef _WIN32
+    CLocaleGuard locale_guard;
+#endif
     giac::context ct;
     giac::decimal_digits(60, &ct);
     giac::gen g(expr.c_str(), &ct);
@@ -1354,6 +1387,9 @@ GiacExpression EvaluateArithmeticExpr(GiacExpression e, const FormatContext& ctx
     if (ctx.mode == FormatContext::Rational)
     {
         std::string expr = EmitString(e, ctx);
+#ifdef _WIN32
+        CLocaleGuard locale_guard;
+#endif
         giac::context ct;
         giac::decimal_digits(std::max(1, ctx.precision + 1), &ct);
         giac::gen g(expr.c_str(), &ct);
@@ -1940,6 +1976,9 @@ GiacExpression Transform(GiacExpression e, const FormatContext& ctx)
             std::string expr = InertFunctionExpr(e.value, EmitString(e.args[0], ctx));
             if (ctx.mode == FormatContext::Rational)
             {
+#ifdef _WIN32
+                CLocaleGuard locale_guard;
+#endif
                 giac::context ct;
                 giac::decimal_digits(std::max(1, ctx.precision + 1), &ct);
                 giac::gen g(expr.c_str(), &ct);
@@ -2235,7 +2274,7 @@ bool IsInfiniteLimit(const giac::gen& lim, giac::context* ctx)
         return true;
     if (lim.type == giac::_IDNT)
     {
-        std::string str = lim.print(ctx);
+        std::string str = PrintGen(lim, ctx);
         if (str == "undef" || str == "unsigned_inf" || str == "infinity")
             return true;
     }

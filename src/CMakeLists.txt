@@ -161,7 +161,7 @@ if(EMSCRIPTEN)
     target_compile_options(${PROJECT_NAME} PUBLIC -Wno-overloaded-shift-op-parentheses)
 else()
     if(WIN32)
-        target_link_libraries(${PROJECT_NAME} PRIVATE PkgConfig::mpfr)
+        target_link_libraries(${PROJECT_NAME} PRIVATE PkgConfig::mpfr giac_imported)
     else()
         target_link_libraries(${PROJECT_NAME} PRIVATE 
             stdc++
@@ -201,7 +201,7 @@ target_compile_definitions(${PROJECT_NAME} PUBLIC
     $<$<BOOL:${EMSCRIPTEN}>:EMCC2>
     $<$<BOOL:${EMSCRIPTEN}>:gammaf=tgammaf>
     $<$<NOT:$<BOOL:${EMSCRIPTEN}>>:SIZEOF_VOID_P=8>
-    $<$<NOT:$<BOOL:${EMSCRIPTEN}>>:HAVE_LIBPTHREAD>
+    $<$<AND:$<NOT:$<BOOL:${EMSCRIPTEN}>>,$<NOT:$<BOOL:${WIN32}>>>:HAVE_LIBPTHREAD>
     $<$<NOT:$<BOOL:${EMSCRIPTEN}>>:HAVE_SYS_TIMES_H>
     $<$<NOT:$<BOOL:${EMSCRIPTEN}>>:HAVE_UNISTD_H>
     $<$<NOT:$<BOOL:${EMSCRIPTEN}>>:HAVE_SYS_TIME_H>
