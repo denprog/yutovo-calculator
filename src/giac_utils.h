@@ -643,6 +643,7 @@ bool IsNumberString(const std::string& v);
 bool IsIntegerString(const std::string& v);
 std::string StripDot(const std::string& v);
 bool IsOne(const std::string& v);
+bool IsMinusOne(const std::string& v);
 bool IsNumericFactor(const GiacExpression& e);
 std::string ReciprocalDecimal(const std::string& den, int precision, int exp);
 bool IsPolynomial(const GiacExpression& e);

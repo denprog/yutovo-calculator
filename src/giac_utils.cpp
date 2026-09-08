@@ -429,6 +429,11 @@ bool IsOne(const std::string& v)
     return t == "1" || t == "+1";
 }
 
+bool IsMinusOne(const std::string& v)
+{
+    return StripDot(v) == "-1";
+}
+
 bool IsNumericFactor(const GiacExpression& e)
 {
     return e.kind == GiacExpression::Number && (IsNumberString(e.value) || e.value.find('/') != std::string::npos);
@@ -2158,6 +2163,17 @@ std::vector<std::string> EmitJson(const GiacExpression& e, const FormatContext& 
             base_inner = base_elems[0];
         else
             base_inner = Symbolic<Real>::JsonCodeRow(base_elems);
+        //pow(base,-1) is rendered as the fraction (1)/(base); the fraction bar delimits the operands, so no parentheses are needed
+        if (e.args[1].kind == GiacExpression::Number && IsMinusOne(e.args[1].value))
+        {
+            std::string numerator = Symbolic<Real>::JsonCodeRow({Symbolic<Real>::JsonCodeString("1")});
+            std::string denominator;
+            if (base_inner.size() >= 10 && base_inner.substr(0, 10) == R"({"type":7,)")
+                denominator = base_inner;
+            else
+                denominator = Symbolic<Real>::JsonCodeRow({base_inner});
+            return {Symbolic<Real>::JsonDivision(numerator, denominator)};
+        }
         std::string base_row;
         if (base_needs_parens)
         {
