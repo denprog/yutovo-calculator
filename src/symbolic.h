@@ -490,6 +490,13 @@ public:
         return res;
     }
 
+    friend Symbolic<Number> abs(const Symbolic<Number>& num)
+    {
+        Symbolic<Number> res(num.precision);
+        *res.expr = giac::abs(*num.expr, res.Context());
+        return res;
+    }
+
     friend Symbolic<Number> sin(const Symbolic<Number>& num)
     {
         Symbolic<Number> res(num.precision);
