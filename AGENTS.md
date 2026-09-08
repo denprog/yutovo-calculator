@@ -134,11 +134,13 @@ auto callback =
 - `definite_integral(a, b, expr, var)` computes the exact antiderivative with `giac::_integrate`, simplifies it with `giac::simplify`, and, for `Symbolic<Real>`/`Symbolic<Complex>`, evaluates the result numerically when it is a constant (so numeric bounds produce a decimal number instead of an exact expression containing constants such as `e`).
 - Numeric `definite_integral` for `Real`/`Complex` first tries giac integration; if giac fails (for example because the integrand calls a user-defined function), it falls back to adaptive Simpson quadrature implemented in `Solver::NumericalDefiniteIntegral`.
 - `sqrt(x)` is implemented for all symbolic types via `root(x, 2)` (i.e. `pow(x, 1/2)`). `sqrt(-∞)` returns `nan` for Real/Complex and throws for Rational.
+- `abs(x)` is registered as a unary builtin for all three symbolic parsers (`Symbolic<Real>/<Rational>/<Complex>`), implemented as `giac::abs` in `src/symbolic.h`; symbolic arguments stay `abs(x)`, numeric ones evaluate (e.g. `abs(-5.2)` → `5.2`, `abs(3+4*i)` → `5`). The namespace-scope `Symbolic<...> abs(...)` declarations in `src/parser.cpp` are required for `&abs` to resolve to the symbolic overload.
 - `cot(x)`, `sec(x)`, `csc(x)`, `coth(x)`, `sech(x)`, `csch(x)` are rendered as inert functions (`yut_cot`, etc.) so that poles map to `∞` instead of being simplified away.
 - Inverse hyperbolic functions (`asinh`, `acosh`, `atanh`, `acoth`, `asech`, `acsch`) and their `arc...`/`ars...` synonyms are registered for all symbolic parsers. Inert wrappers preserve names; singularities such as `acoth(1)` and `acsch(0)` evaluate to `∞` for Real/Complex and remain symbolic for Rational.
 - `fact(x)` (postfix `!`) is implemented for all symbolic types as a product `1*2*...*n` for non-negative integer arguments; returns `factorial(x)` for symbolic/non-integer arguments. The product uses context-aware `giac::operator_times` so release builds use the parser's private `giac::context`.
 - Inert trigonometric/hyperbolic wrappers (`cot`, `sec`, `csc`, `coth`, `sech`, `csch`, `asinh`, `acosh`, `atanh`, `acoth`, `asech`, `acsch`) and `factorial(x)` are built directly via `InertCall()` / `giac::symbolic(*giac::at_factorial, ...)` in `src/symbolic.h`, without converting the argument back to a string. `subs` compares singularities (`acoth(1)`, `acsch(0)`) using the same direct construction instead of printed strings.
 - `Symbolic<Number>::ToJson()` builds an AST from the giac-printed string and emits JSON using yutovo-editor element type codes (7=CODE_ROW, 8=CODE_STRING, 10=SHAPE, 11=PLUS, 12=MINUS, 13=MULTIPLY, 14=DIVISION, 15=POWER, 16=SQUARE_ROOT, 17=NTH_ROOT, 45-47=SYMBOLIC_*_RESULT). Division operands are wrapped in a single `CODE_ROW`; scientific numbers are emitted as flat elements so they do not add extra nesting inside sums or products.
+- `EmitJson` (`src/giac_utils.cpp`) renders a power whose exponent is exactly `-1` as DIVISION (`1` over the base) instead of POWER, so results like `subs((1)/(root(y,3)),y,(pi)/(2))` display as a fraction (`<mfrac>` in the editor; an nth-root base is emitted as NTH_ROOT 17). Text output (`EmitString`) is unchanged and still prints `pow(x,-1.)`; other negative exponents (e.g. `-2`) remain powers. The exponent is detected by `IsMinusOne()` in `giac_utils.h/cpp`.
 - `subs` uses `giac::limit` to detect essential singularities of `exp`, `sin`, `cos`, `sinh`, `cosh` and returns `nan` for Real/Complex (throws for Rational).
 - All giac-specific helpers live in `src/giac_utils.h` / `src/giac_utils.cpp` in the common `yutovo_calculator` namespace; `src/utils.h` / `src/utils.cpp` contain only general-purpose utilities.
 - `GiacOutputGuard` (`src/giac_utils.h`) redirects `stdout`/`stderr` to `/dev/null` around giac calls to suppress spurious diagnostic output (e.g. numeric integration progress comments).
@@ -311,6 +313,13 @@ Running the full `yutovo-editor_tests` suite takes approximately **25 minutes** 
 - `yutovo-calculator/test/symbolic_real.cpp` — updated `all_symbolic_functions` expectations and added `derivative_mixed_second_order` test
 - `yutovo-calculator/test/symbolic_rational.cpp` / `symbolic_complex.cpp` — updated `trig_power1` expectations
 
+- `yutovo-calculator/src/giac_utils.h` / `giac_utils.cpp` — `EmitJson` Power case now emits `JsonDivision` (`1` over base) when the exponent is exactly `-1`; added the `IsMinusOne()` helper next to `IsOne()`
+- `yutovo-calculator/test/symbolic_real.cpp` — `tojson1` (`1/x`) now expects DIVISION; added `tojson_negative_power_fraction` (`subs((1)/(root(y,3)),y,(pi)/(2))` → DIVISION with an NTH_ROOT denominator)
+- `yutovo-calculator/test/symbolic_complex.cpp` — `tojson_power1` (`pow(x,(-1))`) now expects DIVISION
+- `yutovo-calculator/src/symbolic.h` / `parser.cpp` — added symbolic `abs(x)` (friend function + namespace-scope declarations + registration for all three symbolic parsers)
+- `yutovo-calculator/test/symbolic_real.cpp` — added `abs1`/`abs2`/`abs3` (numeric, symbolic, `subs`); `symbolic_rational.cpp` — `abs1`/`abs2`; `symbolic_complex.cpp` — `abs1`/`abs2`
+- `yutovo-editor/test/solver_symbolic.cpp` — `solver8` / `solver9` results now expect `<mfrac>` instead of `<msup>`
+
 ## Current Work: Multi-variable derivative at point
 
 ### yutovo-calculator
@@ -325,8 +334,9 @@ Running the full `yutovo-editor_tests` suite takes approximately **25 minutes** 
 - Tests added/updated in `test/real.cpp`, `test/rational.cpp`, `test/complex.cpp`, `test/symbolic_real.cpp`, `test/symbolic_rational.cpp`, `test/symbolic_complex.cpp`.
 
 ## Next Steps / Blockers
-- All Linux calculator debug tests pass (1232 tests across Real, Complex, Integer, Rational, Array, Symbolic, etc.).
-- `yutovo-solver` tests pass (40 tests).
+- Linux calculator debug tests: 1246 of 1247 pass. `CalcTestSymbolicReal.locale_comma_decimal` fails on machines where a comma-decimal locale (`ru_RU.utf8`) is installed — pre-existing, unrelated to symbolic formatting (giac's `strtod` shielding does not survive the locale there).
+- `yutovo-solver` tests pass (45 tests).
+- All `SolverSymbolicTest` editor tests and `SolverAutoTest.symbolic*` pass; negative-power results now render as fractions. The `subs((1)/(root(y,3)),y,(pi)/(2))` fraction case is covered by the calculator test `CalcTestSymbolicReal.tojson_negative_power_fraction` (an editor-side `solver23` was briefly added and then removed at the user's request).
 - The three failing `SolverSymbolicTest` editor tests (`solver17`, `solver18`, `solver22`) have been fixed by adjusting calculator JSON output; no editor tests were modified.
 - The Emscripten/wasm symbolic stub is implemented; native behavior is unchanged.
 - No remaining blockers for the multi-variable derivative-at-point feature.

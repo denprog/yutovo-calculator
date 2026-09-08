@@ -1184,6 +1184,19 @@ TEST_F(CalcTestSymbolicRational, sqrt2)
     ASSERT_TRUE(s == "sqrt(x)") << s;
 }
 
+TEST_F(CalcTestSymbolicRational, abs1)
+{
+    Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"abs(-(1)/(2));");
+    ASSERT_TRUE(res.ToStdString(10) == "1/2") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicRational, abs2)
+{
+    Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"abs(x);");
+    std::string s = res.ToStdString(10);
+    ASSERT_TRUE(s == "abs(x)") << s;
+}
+
 TEST_F(CalcTestSymbolicRational, power4)
 {
     Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"-(1)/pow(10,100);");

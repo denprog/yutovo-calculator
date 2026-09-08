@@ -780,14 +780,13 @@ TEST_F(CalcTestSymbolicComplex, tojson_power1)
     std::string json = res.ToJson(10);
     ASSERT_TRUE(json ==
         R"({"type":47,"elements":[)"
-            R"({"type":15,"elements":[)"
+            R"({"type":14,"elements":[)"
                 R"({"type":7,"elements":[)"
-                    R"({"type":8,"elements":"x"})"
+                    R"({"type":8,"elements":"1"})"
                 R"(]},)"
                 R"({"type":10,"elements":[]},)"
                 R"({"type":7,"elements":[)"
-                    R"({"type":12,"symbol":"-"},)"
-                    R"({"type":8,"elements":"1"})"
+                    R"({"type":8,"elements":"x"})"
                 R"(]})"
             R"(]})"
         R"(]})" ) << json;
@@ -1257,6 +1256,19 @@ TEST_F(CalcTestSymbolicComplex, sqrt2)
     Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"sqrt(x);");
     std::string s = res.ToStdString(10);
     ASSERT_TRUE(s == "sqrt(x)") << s;
+}
+
+TEST_F(CalcTestSymbolicComplex, abs1)
+{
+    Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"abs(3+4*i);");
+    ASSERT_TRUE(res.ToStdString(10) == "5") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicComplex, abs2)
+{
+    Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"abs(x);");
+    std::string s = res.ToStdString(10);
+    ASSERT_TRUE(s == "abs(x)") << s;
 }
 
 TEST_F(CalcTestSymbolicComplex, pow4)
