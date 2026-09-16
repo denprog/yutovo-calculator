@@ -40,9 +40,7 @@ public:
 
 std::string PrintGen(const giac::gen& value, const giac::context* context)
 {
-#ifdef _WIN32
     CLocaleGuard locale_guard;
-#endif
     return value.print(context);
 }
 
@@ -62,9 +60,7 @@ bool IsClonableSingleLetterIdentifier(const char* name)
 giac::gen ParseGen(const char* str, const giac::context* ctx)
 {
     std::lock_guard<std::mutex> lock(giac_parsing_mutex);
-#ifdef _WIN32
     CLocaleGuard locale_guard;
-#endif
     std::call_once(freeze_static_ids_once, FreezeStaticGiacIdentifiers);
     return CloneSingleLetterIdentifiers(giac::gen(str, ctx));
 }
@@ -279,9 +275,7 @@ std::string RoundScientificHalfUp(std::string str, int decimals)
 
 std::string RealNumberStr(const std::string& num_str, int precision, int exp)
 {
-#ifdef _WIN32
     CLocaleGuard locale_guard;
-#endif
     std::string raw = num_str;
     if (!raw.empty() && raw.back() == '.')
         raw.pop_back();
@@ -952,9 +946,7 @@ static std::string CoeffStringFromGiac(const giac::gen& g, const FormatContext& 
 
 std::string AddCoeffs(const std::string& a, const std::string& b, const FormatContext& ctx)
 {
-#ifdef _WIN32
     CLocaleGuard locale_guard;
-#endif
     giac::context ct;
     giac::decimal_digits(std::max(1, ctx.precision + 1), &ct);
     giac::gen ag(a.c_str(), &ct);
@@ -969,9 +961,7 @@ std::string AddCoeffs(const std::string& a, const std::string& b, const FormatCo
 
 std::string MultiplyCoeffs(const std::string& a, const std::string& b, const FormatContext& ctx)
 {
-#ifdef _WIN32
     CLocaleGuard locale_guard;
-#endif
     giac::context ct;
     giac::decimal_digits(std::max(1, ctx.precision + 1), &ct);
     giac::gen ag(a.c_str(), &ct);
@@ -1206,9 +1196,7 @@ bool IsArithmeticConstantExpr(const GiacExpression& e)
 
 std::string EvaluateGiacExpression(const std::string& expr, int precision)
 {
-#ifdef _WIN32
     CLocaleGuard locale_guard;
-#endif
     giac::context ct;
     giac::decimal_digits(std::max(1, precision + 1), &ct);
     giac::gen g(expr.c_str(), &ct);
@@ -1270,9 +1258,7 @@ std::string InertFunctionExpr(const std::string& name, const std::string& arg)
 
 bool IsGiacExpressionZero(const std::string& expr, int precision)
 {
-#ifdef _WIN32
     CLocaleGuard locale_guard;
-#endif
     giac::context ct;
     giac::decimal_digits(60, &ct);
     giac::gen g(expr.c_str(), &ct);

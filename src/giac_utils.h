@@ -580,28 +580,50 @@ inline giac::gen InertCall(const char* name, const giac::gen& arg, giac::context
     return giac::symb_of(id, arg);
 }
 
-#ifdef _WIN32
-//Set correct numeric locale for giac
+//Set the C numeric locale for giac
 class CLocaleGuard
 {
 public:
     CLocaleGuard()
     {
+#ifdef _WIN32
         _configthreadlocale(_ENABLE_PER_THREAD_LOCALE);
         const char* current = std::setlocale(LC_NUMERIC, nullptr);
         saved = current ? current : "";
         std::setlocale(LC_NUMERIC, "C");
+#elif defined(__GLIBC__)
+        c_locale = newlocale(LC_NUMERIC_MASK, "C", nullptr);
+        saved_locale = c_locale ? uselocale(c_locale) : nullptr;
+#else
+        const char* current = std::setlocale(LC_NUMERIC, nullptr);
+        saved = current ? current : "";
+        std::setlocale(LC_NUMERIC, "C");
+#endif
     }
 
     ~CLocaleGuard()
     {
+#ifdef _WIN32
         std::setlocale(LC_NUMERIC, saved.c_str());
+#elif defined(__GLIBC__)
+        if (saved_locale)
+            uselocale(saved_locale);
+        if (c_locale)
+            freelocale(c_locale);
+#else
+        std::setlocale(LC_NUMERIC, saved.c_str());
+#endif
     }
 
 private:
+#if defined(_WIN32) || !defined(__GLIBC__)
     std::string saved;
-};
+#else
+    locale_t c_locale = nullptr;
+    locale_t saved_locale = nullptr;
 #endif
+};
+
 
 //Prints a giac::gen to a string in the C locale (giac formats doubles with the current LC_NUMERIC, so a comma decimal locale corrupts the printed decimals)
 std::string PrintGen(const giac::gen& value, const giac::context* context);
