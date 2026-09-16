@@ -38,6 +38,7 @@
 #include <boost/fusion/include/adapt_struct.hpp>
 #include <boost/phoenix/core.hpp>
 #include <boost/phoenix/function.hpp>
+#include <boost/phoenix/bind.hpp>
 #include <boost/phoenix/operator.hpp>
 #include <boost/spirit/include/qi_no_case.hpp>
 #include <boost/foreach.hpp>

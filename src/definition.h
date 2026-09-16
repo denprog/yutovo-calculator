@@ -21,15 +21,18 @@ struct Definition : qi::grammar<std::u32string::iterator, DefinitionNode<Number>
     Definition(LogicalId id, std::u32string& expr, Solver<Number>* solver) : 
         Definition::base_type(definition), 
         expression(id, expr, solver), 
-        return_expression(id, expr, solver)
+        return_expression(id, expr, solver),
+        solver(solver)
     {
         using unicode::char_;
         using boost::spirit::qi::lit;
         using boost::spirit::qi::raw;
         using boost::spirit::qi::lexeme;
+        using boost::spirit::qi::omit;
         using unicode::alnum;
         using unicode::alpha;
         using boost::spirit::qi::on_error;
+        using boost::spirit::qi::on_success;
         using boost::spirit::qi::fail;
         qi::_3_type _3;
         
@@ -37,13 +40,17 @@ struct Definition : qi::grammar<std::u32string::iterator, DefinitionNode<Number>
         definition = variable | unit | list | string | function;
         
         //function definition
-        function = identifier >> '(' >> argument_list >> ')' >> ('=' > expression);
-        
+        function = &declared_function_identifier >> identifier >> '(' >> argument_list >> ')' >> ('=' > expression);
+
         //function's argument list
         argument_list = -(identifier % ',');
-        
+
         //variable definition
-        variable = identifier >> ('=' >> expression);
+        variable = &declared_identifier >> identifier >> ('=' >> expression);
+
+        //heads of a variable and a function declaration parsed as a lookahead; they remember the declared identifier before the whole definition is parsed
+        declared_identifier = identifier >> '=';
+        declared_function_identifier = identifier >> omit['(' >> argument_list >> ')'] >> '=';
 
         //unit definition
         unit = identifier >> ('~' > expression);
@@ -79,6 +86,10 @@ struct Definition : qi::grammar<std::u32string::iterator, DefinitionNode<Number>
         //work out the exceptions
         on_error<fail>(definition, 
             boost::phoenix::function<ErrorHandler<SyntaxException>>(ErrorHandler<SyntaxException>(id, expr.begin(), expr.end(), SyntaxError))(_3));
+
+        //remember the declared identifiers so that the variables and functions can be removed when the script fails
+        on_success(declared_identifier, boost::phoenix::bind(&Solver<Number>::AddDeclaringVariable, solver, qi::_val));
+        on_success(declared_function_identifier, boost::phoenix::bind(&Solver<Number>::AddDeclaringFunction, solver, qi::_val));
     }
 
     qi::rule<std::u32string::iterator, DefinitionNode<Number>(), unicode::space_type> definition;
@@ -89,10 +100,13 @@ struct Definition : qi::grammar<std::u32string::iterator, DefinitionNode<Number>
     qi::rule<std::u32string::iterator, StringNode<Number>(), unicode::space_type> string;
     qi::rule<std::u32string::iterator, std::u32string(), unicode::space_type> name, description, str;
     qi::rule<std::u32string::iterator, IdentifierNode<Number>(), unicode::space_type> identifier;
+    qi::rule<std::u32string::iterator, IdentifierNode<Number>(), unicode::space_type> declared_identifier;
+    qi::rule<std::u32string::iterator, IdentifierNode<Number>(), unicode::space_type> declared_function_identifier;
     qi::rule<std::u32string::iterator, std::list<IdentifierNode<Number> >(), unicode::space_type> argument_list;
     
     Expression<Number> expression;
     Expression<Number> return_expression;
+    Solver<Number>* solver;
 };
 
 };

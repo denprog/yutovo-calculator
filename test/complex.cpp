@@ -651,6 +651,47 @@ TEST_F(CalcTestComplex, variables10)
     ASSERT_TRUE(parser_context.no_result == false);
 }
 
+//Remove variable after error of its declaring
+TEST_F(CalcTestComplex, variables11)
+{
+    parser.Parse(LogicalId{0, 0, 1}, U"b=55;");
+    std::string s = parser.Parse(LogicalId{0, 0, 2}, U"b;").ToStdString(3, 3);
+    ASSERT_TRUE(s == "55.E+0") << s;
+
+    EXPECT_THROW(parser.Parse(LogicalId{0, 0, 3}, U"b=sin();"), yutovo_calculator::SyntaxException);
+    try
+    {
+        parser.Parse(LogicalId{0, 0, 4}, U"b;");
+        ASSERT_FALSE(true);
+    }
+    catch (yutovo_calculator::SyntaxException& ex)
+    {
+        ASSERT_TRUE(ex.ex_id == ParserExceptionCode::UnknownIdentifier) << ex.ex_id;
+    }
+
+    EXPECT_THROW(parser.Parse(LogicalId{0, 0, 3}, U"b=(3)/();"), yutovo_calculator::SyntaxException);
+    try
+    {
+        parser.Parse(LogicalId{0, 0, 4}, U"b;");
+        ASSERT_FALSE(true);
+    }
+    catch (yutovo_calculator::SyntaxException& ex)
+    {
+        ASSERT_TRUE(ex.ex_id == ParserExceptionCode::UnknownIdentifier) << ex.ex_id;
+    }
+
+    EXPECT_THROW(parser.Parse(LogicalId{0, 0, 3}, U"b=;"), yutovo_calculator::SyntaxException);
+    try
+    {
+        parser.Parse(LogicalId{0, 0, 4}, U"b;");
+        ASSERT_FALSE(true);
+    }
+    catch (yutovo_calculator::SyntaxException& ex)
+    {
+        ASSERT_TRUE(ex.ex_id == ParserExceptionCode::UnknownIdentifier) << ex.ex_id;
+    }
+}
+
 TEST_F(CalcTestComplex, compare1)
 {
     std::string s = parser.Parse(LogicalId{0, 0, 0, 0, 0, 0, 0, 2, 0}, U"(0<3);").ToStdString(3, 3);

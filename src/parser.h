@@ -70,8 +70,18 @@ struct Parser
         Script<Number> script(id, expression, &solver);
         ScriptNode<Number> script_node;
 
-        phrase_parse(iter, end, script, space, script_node);
-        return solver(script_node, id, default_angle_measure, result_angle_measure, precision, dependencies);
+        solver.ClearDeclaringIdentifiers();
+        try
+        {
+            phrase_parse(iter, end, script, space, script_node);
+            return solver(script_node, id, default_angle_measure, result_angle_measure, precision, dependencies);
+        }
+        catch (...)
+        {
+            //remove the variables and functions that the failed script attempted to declare
+            solver.RemoveDeclaringIdentifiers(id);
+            throw;
+        }
     }
 
     Number Parse(LogicalId id, std::u32string expression, AngleMeasure default_angle_measure, AngleMeasure result_angle_measure, const int precision = -1, 
@@ -157,15 +167,25 @@ struct Parser
         Script<Complex> script(id, expression, &solver);
         ScriptNode<Complex> script_node;
 
-        phrase_parse(iter, end, script, space, script_node);
-
-        for (int i = 0; i < res_count; ++i)
+        solver.ClearDeclaringIdentifiers();
+        try
         {
-            solver.res_pos = i;
-            Number r = solver(script_node, id, default_angle_measure, result_angle_measure, precision, dependencies);
-            if (std::find(results.begin(), results.end(), r) != results.end())
-                break;
-            results.push_back(r);
+            phrase_parse(iter, end, script, space, script_node);
+
+            for (int i = 0; i < res_count; ++i)
+            {
+                solver.res_pos = i;
+                Number r = solver(script_node, id, default_angle_measure, result_angle_measure, precision, dependencies);
+                if (std::find(results.begin(), results.end(), r) != results.end())
+                    break;
+                results.push_back(r);
+            }
+        }
+        catch (...)
+        {
+            //remove the variables and functions that the failed script attempted to declare
+            solver.RemoveDeclaringIdentifiers(id);
+            throw;
         }
         if (results.empty())
         {

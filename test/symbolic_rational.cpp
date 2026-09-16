@@ -457,6 +457,26 @@ TEST_F(CalcTestSymbolicRational, variables5)
     ASSERT_TRUE(parser.Parse(LogicalId{0, 0, 4}, U"a*b;") == parser.Parse(LogicalId{0, 0, 4}, U"5*(1+x);")) << parser.Parse(LogicalId{0, 0, 4}, U"a*b;").ToStdString(0);
 }
 
+//Remove variable after error of its declaring, a removed variable becomes a plain symbol again
+TEST_F(CalcTestSymbolicRational, variables6)
+{
+    parser.Parse(LogicalId{0, 0, 1}, U"b=55;");
+    ASSERT_TRUE(parser.Parse(LogicalId{0, 0, 2}, U"b;") == parser.Parse(LogicalId{0, 0, 2}, U"55;")) <<
+        parser.Parse(LogicalId{0, 0, 2}, U"b;").ToStdString(0);
+
+    EXPECT_THROW(parser.Parse(LogicalId{0, 0, 3}, U"b=sin();"), yutovo_calculator::SyntaxException);
+    Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 4}, U"b;");
+    ASSERT_TRUE(res.ToStdString(0) == "b") << res.ToStdString(0);
+
+    EXPECT_THROW(parser.Parse(LogicalId{0, 0, 3}, U"b=(3)/();"), yutovo_calculator::SyntaxException);
+    res = parser.Parse(LogicalId{0, 0, 4}, U"b;");
+    ASSERT_TRUE(res.ToStdString(0) == "b") << res.ToStdString(0);
+
+    EXPECT_THROW(parser.Parse(LogicalId{0, 0, 3}, U"b=;"), yutovo_calculator::SyntaxException);
+    res = parser.Parse(LogicalId{0, 0, 4}, U"b;");
+    ASSERT_TRUE(res.ToStdString(0) == "b") << res.ToStdString(0);
+}
+
 TEST_F(CalcTestSymbolicRational, long_number_with_symbol)
 {
     Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"12345678901234567890*x;");

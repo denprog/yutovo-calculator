@@ -1029,6 +1029,26 @@ TEST_F(CalcTestSymbolicReal, variables11)
     ASSERT_TRUE(res.ToStdString(10) == "0.5+x") << res.ToStdString(10);
 }
 
+//Remove variable after error of its declaring, a removed variable becomes a plain symbol again
+TEST_F(CalcTestSymbolicReal, variables12)
+{
+    parser.Parse(LogicalId{0, 0, 1}, U"b=55;");
+    ASSERT_TRUE(parser.Parse(LogicalId{0, 0, 2}, U"b;") == parser.Parse(LogicalId{0, 0, 2}, U"55;")) <<
+        parser.Parse(LogicalId{0, 0, 2}, U"b;").ToStdString(10);
+
+    EXPECT_THROW(parser.Parse(LogicalId{0, 0, 3}, U"b=sin();"), yutovo_calculator::SyntaxException);
+    Symbolic res = parser.Parse(LogicalId{0, 0, 4}, U"b;");
+    ASSERT_TRUE(res.ToStdString(10) == "b") << res.ToStdString(10);
+
+    EXPECT_THROW(parser.Parse(LogicalId{0, 0, 3}, U"b=(3)/();"), yutovo_calculator::SyntaxException);
+    res = parser.Parse(LogicalId{0, 0, 4}, U"b;");
+    ASSERT_TRUE(res.ToStdString(10) == "b") << res.ToStdString(10);
+
+    EXPECT_THROW(parser.Parse(LogicalId{0, 0, 3}, U"b=;"), yutovo_calculator::SyntaxException);
+    res = parser.Parse(LogicalId{0, 0, 4}, U"b;");
+    ASSERT_TRUE(res.ToStdString(10) == "b") << res.ToStdString(10);
+}
+
 TEST_F(CalcTestSymbolicReal, user_functions1)
 {
     parser.Parse(LogicalId{0, 0, 1}, U"f(x)=5;");

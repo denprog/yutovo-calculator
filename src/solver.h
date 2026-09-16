@@ -99,6 +99,8 @@ struct SolverSymbols
     mutable std::deque<TempVariable> temp_variables;
     mutable std::deque<VariableNode<Number>> variables; //user variables
     mutable std::vector<FunctionNode<Number>> functions; //user functions
+    mutable std::map<std::pair<std::u32string, std::u32string>, LogicalId> undeclared_variables; //names whose declaration failed mapped to the failure position
+    mutable std::map<std::pair<std::u32string, std::u32string>, LogicalId> undeclared_functions;
     mutable std::map<std::u32string, std::vector<std::u32string>> lists; //user lists
     mutable std::map<std::u32string, std::u32string> strings; //user strings
 
@@ -1422,6 +1424,7 @@ struct Solver : public boost::static_visitor<Number>
                 (*this)(var.expression); //for adding dependencies and throwing exceptions
                 if (parser_context && parser_context->exports && parser_context->include_document)
                     parser_context->exports->AddVariable<Number>(var);
+                RemoveVisible(symbols->functions, var.name, id);
                 return;
             }
             if (v.name.name == var.name.name)
@@ -1459,6 +1462,79 @@ struct Solver : public boost::static_visitor<Number>
         (*this)(var.expression); //for adding dependencies and throwing exceptions
         if (parser_context && parser_context->exports && parser_context->include_document)
             parser_context->exports->AddVariable<Number>(var);
+        RemoveVisible(symbols->functions, var.name, id);
+    }
+
+    //Remove all variables and functions with the given name visible at the given position, definitions placed after this position are kept
+    template<typename Container>
+    void RemoveVisible(Container& container, const IdentifierNode<Number>& name, const LogicalId& position_id) const
+    {
+        container.erase(std::remove_if(container.begin(), container.end(),
+            [&name, &position_id](auto const& node)
+            {
+                return node.name.name == name.name && node.name.subscript == name.subscript &&
+                    (node.id == position_id || IsLess(node.id, position_id));
+            }),
+            container.end());
+    }
+
+    void AddDeclaringVariable(const IdentifierNode<Number>& name)
+    {
+        declaring_variables.push_back(name);
+    }
+
+    void AddDeclaringFunction(const IdentifierNode<Number>& name)
+    {
+        declaring_functions.push_back(name);
+    }
+
+    void ClearDeclaringIdentifiers()
+    {
+        declaring_variables.clear();
+        declaring_functions.clear();
+    }
+
+    typedef std::map<std::pair<std::u32string, std::u32string>, LogicalId> UndeclaredNames;
+
+    //Remember that the declaration of the name failed at the position; the older definitions of the name stay invisible from this position
+    void AddUndeclaredName(UndeclaredNames& undeclared, const IdentifierNode<Number>& name, const LogicalId& position_id) const
+    {
+        auto key = std::make_pair(name.name, name.subscript);
+        auto it = undeclared.find(key);
+        if (it == undeclared.end() || IsLess(it->second, position_id))
+            undeclared[key] = position_id;
+    }
+
+    bool IsUndeclaredName(const UndeclaredNames& undeclared, const IdentifierNode<Number>& name, const LogicalId& definition_id) const
+    {
+        auto it = undeclared.find(std::make_pair(name.name, name.subscript));
+        return it != undeclared.end() && IsLess(definition_id, it->second);
+    }
+
+    void EraseUndeclaredNames(UndeclaredNames& undeclared, const LogicalId& position_id) const
+    {
+        for (auto it = undeclared.begin(); it != undeclared.end();)
+        {
+            if (it->second == position_id)
+                it = undeclared.erase(it);
+            else
+                ++it;
+        }
+    }
+
+    //Remove the variables and functions that a failed script attempted to declare
+    void RemoveDeclaringIdentifiers(const LogicalId& position_id) const
+    {
+        for (const IdentifierNode<Number>& name : declaring_variables)
+        {
+            RemoveVisible(symbols->variables, name, position_id);
+            AddUndeclaredName(symbols->undeclared_variables, name, position_id);
+        }
+        for (const IdentifierNode<Number>& name : declaring_functions)
+        {
+            RemoveVisible(symbols->functions, name, position_id);
+            AddUndeclaredName(symbols->undeclared_functions, name, position_id);
+        }
     }
 
     void AddUnit(UnitNode<Number> const& unit) const
@@ -1515,7 +1591,7 @@ struct Solver : public boost::static_visitor<Number>
             auto& var = symbols->variables[i];
             if (var.name.name == name && var.name.subscript == s)
             {
-                if (exported_id || IsLess(var.id, id))
+                if ((exported_id || IsLess(var.id, id)) && !IsUndeclaredName(symbols->undeclared_variables, var.name, var.id))
                     return &var;
             }
         }
@@ -1537,7 +1613,7 @@ struct Solver : public boost::static_visitor<Number>
             auto& func = symbols->functions[i];
             if (func.name.name == op.name.name)
             {
-                if (exported_id || IsLess(func.id, id))
+                if ((exported_id || IsLess(func.id, id)) && !IsUndeclaredName(symbols->undeclared_functions, func.name, func.id))
                 {
                     if (func.arguments.size() != op.arguments.size())
                         throw SyntaxException(op.id, WrongArgumentsCount, U"Wrong arguments count in '" + op.name.name + U"'", op.pos, CallSize(op), op.line);
@@ -1566,6 +1642,7 @@ struct Solver : public boost::static_visitor<Number>
             {
                 f = func;
                 f.id = id;
+                RemoveVisible(symbols->variables, func.name, id);
                 return;
             }
             if (f.name.name == func.name.name)
@@ -1610,6 +1687,7 @@ struct Solver : public boost::static_visitor<Number>
             PushTempVariable(iter->name, arg);
         (*this)(func.return_expression);
         PopTempVariables(func.arguments.size());
+        RemoveVisible(symbols->variables, func.name, id);
     }
 
     void AddBuiltinFunction(const char32_t* name, UnaryFunction& func)
@@ -1702,6 +1780,10 @@ struct Solver : public boost::static_visitor<Number>
 
     bool RemoveIdentifier(LogicalId id, const std::u32string& name)
     {
+        //declarations that failed at this position are not actual anymore
+        EraseUndeclaredNames(symbols->undeclared_variables, id);
+        EraseUndeclaredNames(symbols->undeclared_functions, id);
+
         auto var_it = symbols->variables.erase(std::remove_if(symbols->variables.begin(), symbols->variables.end(), 
             [id, name](auto& var)
             {
@@ -1737,7 +1819,7 @@ struct Solver : public boost::static_visitor<Number>
         return unit_it != symbols->units.end();
     }
 
-    bool RemoveIdentifier(LogicalId id)
+    bool RemoveIdentifier(LogicalId id) const
     {
         auto var_it = symbols->variables.erase(std::remove_if(symbols->variables.begin(), symbols->variables.end(), 
             [id](auto& var)
@@ -2603,6 +2685,8 @@ private:
     mutable std::map<std::u32string, std::vector<Number>> cast_units;
     mutable bool exported_id = false;
     mutable std::u32string cur_subscript;
+    std::vector<IdentifierNode<Number>> declaring_variables; //identifiers parsed as "name=" before the whole script is parsed
+    std::vector<IdentifierNode<Number>> declaring_functions; //identifiers parsed as "name(args)=" before the whole script is parsed
 
     int max_cast_unit_size = 2; //max size of each unit in the cast vector
 };
