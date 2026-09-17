@@ -73,6 +73,13 @@ typedef Symbolic<Complex> (*SymbolicComplexQuaternaryFunc)(const Symbolic<Comple
 
 typedef std::vector<std::u32string> Dependencies;
 
+//A name whose declaration failed: remembers the solve position of the failure and its error
+struct UndeclaredName
+{
+    LogicalId position;
+    ParserException source;
+};
+
 template<typename Number>
 struct SolverSymbols
 {
@@ -99,8 +106,8 @@ struct SolverSymbols
     mutable std::deque<TempVariable> temp_variables;
     mutable std::deque<VariableNode<Number>> variables; //user variables
     mutable std::vector<FunctionNode<Number>> functions; //user functions
-    mutable std::map<std::pair<std::u32string, std::u32string>, LogicalId> undeclared_variables; //names whose declaration failed mapped to the failure position
-    mutable std::map<std::pair<std::u32string, std::u32string>, LogicalId> undeclared_functions;
+    mutable std::map<std::pair<std::u32string, std::u32string>, UndeclaredName> undeclared_variables; //names whose declaration failed
+    mutable std::map<std::pair<std::u32string, std::u32string>, UndeclaredName> undeclared_functions;
     mutable std::map<std::u32string, std::vector<std::u32string>> lists; //user lists
     mutable std::map<std::u32string, std::u32string> strings; //user strings
 
@@ -499,6 +506,7 @@ struct Solver : public boost::static_visitor<Number>
                     throw SyntaxException(op.id, WrongArgumentsCount, U"Incorrect subs arguments", op.pos, CallSize(op), op.line);
                 }
             }
+            ThrowUndeclaredFunction(op.name.name);
             throw SyntaxException(op.id, UnknownIdentifier, U"Identifier '" + op.name.name + U"' not found", op.pos, op.name.name.length(), op.line);
         }
         else
@@ -522,6 +530,46 @@ struct Solver : public boost::static_visitor<Number>
                 {
                     if (lower.Size() != 1 || upper.Size() != 1)
                         throw MathException(op.id, IncorrectOperation, op.pos, op.line);
+                }
+
+                //validate the integrand with our own grammar: giac accepts identifiers unknown to us (e.g. i in the real parser)
+                {
+                    Solver<Number> validation_solver(precision, default_angle_measure, result_angle_measure, default_notation, im, Number(), symbols);
+                    validation_solver.parser_context = parser_context;
+                    validation_solver.id = id;
+                    validation_solver.dependencies = dependencies;
+
+                    std::u32string validation_str = op.expression;
+                    Expression<Number> validation_expression(validation_solver.id, validation_str, &validation_solver);
+                    ExpressionNode<Number> validation_node;
+                    std::u32string::iterator validation_iter = validation_str.begin();
+                    std::u32string::iterator validation_end = validation_str.end();
+                    unicode::space_type validation_space;
+                    if (!phrase_parse(validation_iter, validation_end, validation_expression, validation_space, validation_node))
+                        throw SyntaxException(op.id, SyntaxError, U"Invalid integrand expression", op.pos, op.size, op.line);
+
+                    Number validation_value = upper;
+                    validation_solver.PushTempVariable(op.variable, validation_value);
+                    try
+                    {
+                        validation_solver(validation_node);
+                    }
+                    catch (const SyntaxException& ex)
+                    {
+                        if (ex.ex_id == UnknownIdentifier || ex.ex_id == WrongArgumentsCount)
+                        {
+                            //the exception position is relative to the integrand substring, remap it into the full expression:
+                            //the call ends with ',' + variable + ')', so the integrand occupies expression_end - expression.length() ..
+                            int expression_end = op.pos + op.size - static_cast<int>(op.variable.length()) - 2;
+                            int expression_start = expression_end - static_cast<int>(op.expression.length());
+                            if (op.size > 0 && expression_start >= op.pos && ex.pos >= 0 && expression_start + ex.pos <= expression_end)
+                                throw SyntaxException(op.id, ex.ex_id, ex.description, expression_start + ex.pos, ex.size, op.line);
+                            throw SyntaxException(op.id, ex.ex_id, ex.description, op.pos, op.size, op.line);
+                        }
+                    }
+                    catch (...)
+                    {
+                    }
                 }
 
                 GiacMpfrStateGuard mpfr_guard;
@@ -559,9 +607,14 @@ struct Solver : public boost::static_visitor<Number>
                 std::u32string lower_str = limit_string(lower);
                 std::u32string upper_str = limit_string(upper);
 
+                std::string expression_str = ToBasicString(op.expression);
+                //giac knows only i as the imaginary unit
+                if (im == U"j")
+                    expression_str = ReplaceImaginaryUnit(expression_str, 'j', 'i');
+
                 giac::gen lower_gen = ParseGen(ToBasicString(lower_str), &ctx);
                 giac::gen upper_gen = ParseGen(ToBasicString(upper_str), &ctx);
-                giac::gen expr_gen = ParseGen(ToBasicString(op.expression), &ctx);
+                giac::gen expr_gen = ParseGen(expression_str, &ctx);
                 giac::gen var_gen = ParseGen(ToBasicString(op.variable), &ctx);
 
                 if (var_gen.type != giac::_IDNT)
@@ -601,7 +654,7 @@ struct Solver : public boost::static_visitor<Number>
             }
             catch (const MathException& e)
             {
-                throw MathException(op.id, e.ex_id, op.pos, op.line);
+                throw MathException(op.id, e.ex_id, op.pos, op.size, op.line);
             }
             catch (...)
             {
@@ -1077,7 +1130,7 @@ struct Solver : public boost::static_visitor<Number>
             Number builtin_id_val;
             if (FindBuiltinIdentifier(op.name, builtin_id_val))
                 return builtin_id_val;
-            if constexpr (std::is_same_v<Number, Symbolic<Complex>>)
+            if constexpr (is_symbolic_v<Number>)
             {
                 if (op.name == U"I" ||
                     (op.name == U"i" && im == U"i") ||
@@ -1129,7 +1182,7 @@ struct Solver : public boost::static_visitor<Number>
             Number builtin_id_val;
             if (FindBuiltinIdentifier(op.identifier.name, builtin_id_val))
                 return (*this)(op.left) * builtin_id_val;
-            if constexpr (std::is_same_v<Number, Symbolic<Complex>>)
+            if constexpr (is_symbolic_v<Number>)
             {
                 if (op.identifier.name == U"I" ||
                     (op.identifier.name == U"i" && im == U"i") ||
@@ -1181,7 +1234,7 @@ struct Solver : public boost::static_visitor<Number>
             {
                 return (*this)(op.upper) / (*this)(op.lower) * val;
             }
-            if constexpr (std::is_same_v<Number, Symbolic<Complex>>)
+            if constexpr (is_symbolic_v<Number>)
             {
                 if (op.identifier.name == U"I" ||
                     (op.identifier.name == U"i" && im == U"i") ||
@@ -1494,46 +1547,68 @@ struct Solver : public boost::static_visitor<Number>
         declaring_functions.clear();
     }
 
-    typedef std::map<std::pair<std::u32string, std::u32string>, LogicalId> UndeclaredNames;
+    typedef std::map<std::pair<std::u32string, std::u32string>, UndeclaredName> UndeclaredNames;
 
     //Remember that the declaration of the name failed at the position; the older definitions of the name stay invisible from this position
-    void AddUndeclaredName(UndeclaredNames& undeclared, const IdentifierNode<Number>& name, const LogicalId& position_id) const
+    void AddUndeclaredName(UndeclaredNames& undeclared, const IdentifierNode<Number>& name, const LogicalId& position_id, const ParserException& source) const
     {
         auto key = std::make_pair(name.name, name.subscript);
         auto it = undeclared.find(key);
-        if (it == undeclared.end() || IsLess(it->second, position_id))
-            undeclared[key] = position_id;
+        if (it == undeclared.end() || IsLess(it->second.position, position_id))
+            undeclared[key] = UndeclaredName{position_id, source};
     }
 
     bool IsUndeclaredName(const UndeclaredNames& undeclared, const IdentifierNode<Number>& name, const LogicalId& definition_id) const
     {
         auto it = undeclared.find(std::make_pair(name.name, name.subscript));
-        return it != undeclared.end() && IsLess(definition_id, it->second);
+        return it != undeclared.end() && IsLess(definition_id, it->second.position);
     }
 
     void EraseUndeclaredNames(UndeclaredNames& undeclared, const LogicalId& position_id) const
     {
         for (auto it = undeclared.begin(); it != undeclared.end();)
         {
-            if (it->second == position_id)
+            if (it->second.position == position_id)
                 it = undeclared.erase(it);
             else
                 ++it;
         }
     }
 
+    //Using a name whose declaration failed reports the error of that failed declaration
+    void ThrowUndeclaredName(const ParserException& source) const
+    {
+        //a syntactically wrong declaration makes the name unknown, an evaluation error of the declaration is reported as is
+        ParserExceptionCode code = source.ex_id <= ParserExceptionCode::IncorrectIdentifier ? UnknownIdentifier : source.ex_id;
+        throw SyntaxException(source.id, code, source.description, source.pos, source.size, source.line);
+    }
+
+    void ThrowUndeclaredVariable(const std::u32string& name, const std::u32string& subscript) const
+    {
+        auto it = symbols->undeclared_variables.find(std::make_pair(name, subscript));
+        if (it != symbols->undeclared_variables.end() && IsLess(it->second.position, id))
+            ThrowUndeclaredName(it->second.source);
+    }
+
+    void ThrowUndeclaredFunction(const std::u32string& name) const
+    {
+        auto it = symbols->undeclared_functions.find(std::make_pair(name, std::u32string()));
+        if (it != symbols->undeclared_functions.end() && IsLess(it->second.position, id))
+            ThrowUndeclaredName(it->second.source);
+    }
+
     //Remove the variables and functions that a failed script attempted to declare
-    void RemoveDeclaringIdentifiers(const LogicalId& position_id) const
+    void RemoveDeclaringIdentifiers(const LogicalId& position_id, const ParserException& source) const
     {
         for (const IdentifierNode<Number>& name : declaring_variables)
         {
             RemoveVisible(symbols->variables, name, position_id);
-            AddUndeclaredName(symbols->undeclared_variables, name, position_id);
+            AddUndeclaredName(symbols->undeclared_variables, name, position_id, source);
         }
         for (const IdentifierNode<Number>& name : declaring_functions)
         {
             RemoveVisible(symbols->functions, name, position_id);
-            AddUndeclaredName(symbols->undeclared_functions, name, position_id);
+            AddUndeclaredName(symbols->undeclared_functions, name, position_id, source);
         }
     }
 
@@ -2631,7 +2706,8 @@ private:
             throw MathException(op.id, e.ex_id, op.pos, op.line);
         }
 
-        //there is no such a function		
+        //there is no such a function
+        ThrowUndeclaredFunction(op.name.name);
         throw SyntaxException(op.id, UnknownIdentifier, op.pos, op.line);
     }
 
@@ -2662,6 +2738,7 @@ private:
         }
 
         //there is no such a function
+        ThrowUndeclaredFunction(op.name.name);
         throw SyntaxException(op.id, UnknownIdentifier, U"Identifier '" + op.name.name + U"' not found", op.pos, op.line);
     }
 

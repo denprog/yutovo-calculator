@@ -258,18 +258,18 @@ ASSERT_TRUE(document.ToHtml() == "<body>...</body>") << document.ToHtml();
 ### Build
 Each component is built and tested from its own `build/debug` subdirectory (in-tree builds are not used):
 ```bash
-cd yutovo-calculator/build/debug && make -j4 yutovo-calculator_tests
+cd yutovo-calculator/build/debug && make -j16 yutovo-calculator_tests
 ./test/yutovo-calculator_tests
 
-cd yutovo-solver/build/debug && make -j4
+cd yutovo-solver/build/debug && make -j16
 
-cd yutovo-editor/build/debug && make -j4 yutovo-editor_tests
+cd yutovo-editor/build/debug && make -j16 yutovo-editor_tests
 ./test/yutovo-editor_tests
 
-cd yutovo-desktop/build/debug && make -j4 yutovo-desktop
+cd yutovo-desktop/build/debug && make -j16 yutovo-desktop
 
 # Emscripten/wasm build (from yutovo-calculator)
-cd yutovo-calculator/build_web/debug && make -j4 yutovo-calculator
+cd yutovo-calculator/build_web/debug && make -j16 yutovo-calculator
 ```
 Use `-j16` maximum for building on any platform.
 

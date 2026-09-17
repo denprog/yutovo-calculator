@@ -1035,7 +1035,7 @@ TEST_F(CalcTestSymbolicRational, inf5)
 TEST_F(CalcTestSymbolicRational, inf6)
 {
     Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"subs(ln(x),x,0);");
-    ASSERT_TRUE(res.ToStdString(10) == "∞") << res.ToStdString(10);
+    ASSERT_TRUE(res.ToStdString(10) == "-∞") << res.ToStdString(10);
 }
 
 TEST_F(CalcTestSymbolicRational, inf7)

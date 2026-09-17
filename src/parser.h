@@ -76,10 +76,15 @@ struct Parser
             phrase_parse(iter, end, script, space, script_node);
             return solver(script_node, id, default_angle_measure, result_angle_measure, precision, dependencies);
         }
-        catch (...)
+        catch (ParserException& e)
         {
             //remove the variables and functions that the failed script attempted to declare
-            solver.RemoveDeclaringIdentifiers(id);
+            solver.RemoveDeclaringIdentifiers(id, e);
+            throw;
+        }
+        catch (...)
+        {
+            solver.RemoveDeclaringIdentifiers(id, ParserException());
             throw;
         }
     }
@@ -181,10 +186,15 @@ struct Parser
                 results.push_back(r);
             }
         }
-        catch (...)
+        catch (ParserException& e)
         {
             //remove the variables and functions that the failed script attempted to declare
-            solver.RemoveDeclaringIdentifiers(id);
+            solver.RemoveDeclaringIdentifiers(id, e);
+            throw;
+        }
+        catch (...)
+        {
+            solver.RemoveDeclaringIdentifiers(id, ParserException());
             throw;
         }
         if (results.empty())

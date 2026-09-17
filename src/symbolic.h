@@ -73,8 +73,6 @@ public:
         giac::decimal_digits(std::max(1, _precision + 1), Context());
     }
 
-    static bool IsNegativeInfinityNumber(const Real& num);
-
     explicit Symbolic(int _precision, float num) :
         precision(_precision),
         expr(std::make_unique<giac::gen>(static_cast<double>(num)))
@@ -87,11 +85,6 @@ public:
         expr(std::make_unique<giac::gen>(ToExpression(num)))
     {
         giac::decimal_digits(std::max(1, _precision + 1), Context());
-        if constexpr (std::is_same_v<Number, Real>)
-        {
-            if (IsNegativeInfinityNumber(num))
-                explicit_negative_infinity = true;
-        }
     }
 
     explicit Symbolic(int _precision, const std::u32string& num) :
@@ -110,8 +103,7 @@ public:
 
     Symbolic(const Symbolic& source) :
         precision(source.precision),
-        expr(std::make_unique<giac::gen>(*source.expr)),
-        explicit_negative_infinity(source.explicit_negative_infinity)
+        expr(std::make_unique<giac::gen>(*source.expr))
     {
     }
 
@@ -122,7 +114,6 @@ public:
     {
         precision = source.precision;
         *expr = *source.expr;
-        explicit_negative_infinity = source.explicit_negative_infinity;
         return *this;
     }
 
@@ -147,12 +138,6 @@ public:
     Symbolic<Number>& operator=(const Number& num)
     {
         *expr = ToExpression(num);
-        explicit_negative_infinity = false;
-        if constexpr (std::is_same_v<Number, Real>)
-        {
-            if (IsNegativeInfinityNumber(num))
-                explicit_negative_infinity = true;
-        }
         return *this;
     }
 
@@ -165,8 +150,6 @@ public:
     {
         Symbolic<Number> res(*this);
         *res.expr = -*expr;
-        if (*res.expr == giac::minus_inf)
-            res.explicit_negative_infinity = true;
         return res;
     }
 
@@ -429,11 +412,6 @@ public:
                 return Symbolic<Number>(num.precision, std::string("nan"));
             }
             return Symbolic<Number>(num.precision, std::string("nan"));
-        }
-        if (*res.expr == giac::minus_inf && num.expr->type == giac::_SYMB && num.expr->_SYMBptr->sommet == giac::at_ln &&
-            giac::is_zero(giac::subst(num.expr->_SYMBptr->feuille, *var.expr, *value.expr, false, res.Context()), res.Context()))
-        {
-            return Symbolic<Number>(num.precision, std::u32string(U"∞"));
         }
         if constexpr (!std::is_same_v<Number, Rational>)
         {
@@ -1447,24 +1425,7 @@ public:
 
     static std::string ReplaceImaginaryUnit(const std::string& s, char imag_unit)
     {
-        std::string result;
-        for (size_t i = 0; i < s.size(); ++i)
-        {
-            if (s[i] == 'i')
-            {
-                bool boundary_before = (i == 0) ||
-                    (!std::isalnum(static_cast<unsigned char>(s[i - 1])) && s[i - 1] != '.' && s[i - 1] != '_');
-                bool boundary_after = (i + 1 == s.size()) ||
-                    (!std::isalnum(static_cast<unsigned char>(s[i + 1])) && s[i + 1] != '.' && s[i + 1] != '_');
-                if (boundary_before && boundary_after)
-                {
-                    result += imag_unit;
-                    continue;
-                }
-            }
-            result += s[i];
-        }
-        return result;
+        return yutovo_calculator::ReplaceImaginaryUnit(s, 'i', imag_unit);
     }
 
 public:
@@ -1593,7 +1554,6 @@ private:
     int precision = 0;
     mutable giac::context context;
     std::unique_ptr<giac::gen> expr;
-    bool explicit_negative_infinity = false;
 };
 
 template<typename T>

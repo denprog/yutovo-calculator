@@ -246,6 +246,16 @@ TEST_F(CalcTestSymbolicComplex, definite_integral1)
     ASSERT_TRUE(res.ToStdString(10) == "96.*y") << res.ToStdString(10);
 }
 
+TEST_F(CalcTestSymbolicReal, definite_integral2)
+{
+    auto res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"definite_integral(0,1,(1)/(x+i),x);", 10);
+    ASSERT_TRUE(res.ToStdString(10) == "0.5*((-i)*π+2.*log(1.+i))") << res.ToStdString(10);
+
+    parser.SetLocale(Language::Russian);
+    auto res_russian = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"definite_integral(0,1,(1)/(x+j),x);", 10);
+    ASSERT_TRUE(res_russian.ToStdString(10) == "0.5*((-i)*π+2.*log(1.+i))") << res_russian.ToStdString(10);
+}
+
 TEST_F(CalcTestSymbolicComplex, definite_integral_j_russian)
 {
     parser.SetLocale(Language::Russian);
@@ -1088,7 +1098,7 @@ TEST_F(CalcTestSymbolicComplex, inf5)
 TEST_F(CalcTestSymbolicComplex, inf6)
 {
     Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"subs(ln(x),x,0);");
-    ASSERT_TRUE(res.ToStdString(10) == "∞") << res.ToStdString(10);
+    ASSERT_TRUE(res.ToStdString(10) == "-∞") << res.ToStdString(10);
 }
 
 TEST_F(CalcTestSymbolicComplex, inf7)

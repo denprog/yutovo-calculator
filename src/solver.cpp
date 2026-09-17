@@ -644,6 +644,7 @@ Integer Solver<Integer>::operator()(FunctionCallNode<Integer> const& op) const
     }
 
     //there is no such a function		
+    ThrowUndeclaredFunction(op.name.name);
     throw SyntaxException(op.id, UnknownIdentifier, op.pos, op.name.name.length(), op.line);
 }
 
@@ -756,6 +757,7 @@ Rational Solver<Rational>::operator()(FunctionCallNode<Rational> const& op) cons
     }
 
     //there is no such a function		
+    ThrowUndeclaredFunction(op.name.name);
     throw SyntaxException(op.id, UnknownIdentifier, U"Identifier '" + op.name.name + U"' not found", op.pos, op.name.name.length(), op.line);
 }
 
@@ -796,6 +798,7 @@ Integer Solver<Integer>::operator()(FunctionCallStringNode<Integer> const& op) c
     }
 
     //there is no such a function		
+    ThrowUndeclaredFunction(op.name.name);
     throw SyntaxException(op.id, UnknownIdentifier, op.pos, op.name.name.length(), op.line);
 }
 
@@ -803,6 +806,7 @@ template<>
 Real Solver<Real>::operator()(FunctionCallStringNode<Real> const& op) const
 {
     //there is no such a function		
+    ThrowUndeclaredFunction(op.name.name);
     throw SyntaxException(op.id, UnknownIdentifier, op.pos, op.name.name.length(), op.line);
 }
 
@@ -810,6 +814,7 @@ template<>
 Rational Solver<Rational>::operator()(FunctionCallStringNode<Rational> const& op) const
 {
     //there is no such a function		
+    ThrowUndeclaredFunction(op.name.name);
     throw SyntaxException(op.id, UnknownIdentifier, op.pos, op.name.name.length(), op.line);
 }
 
@@ -817,6 +822,7 @@ template<>
 Complex Solver<Complex>::operator()(FunctionCallStringNode<Complex> const& op) const
 {
     //there is no such a function		
+    ThrowUndeclaredFunction(op.name.name);
     throw SyntaxException(op.id, UnknownIdentifier, op.pos, op.name.name.length(), op.line);
 }
 
@@ -909,6 +915,7 @@ Integer Solver<Integer>::operator()(IdentifierNode<Integer> const& op) const
     }
     
     //there is no such an identifier
+    ThrowUndeclaredVariable(op.name, op.subscript);
     throw SyntaxException(op.id, UnknownIdentifier, U"Identifier '" + op.name + U"' not found", op.pos, op.name.length(), op.line);
 }
 
@@ -978,6 +985,7 @@ Real Solver<Real>::operator()(IdentifierNode<Real> const& op) const
     }
 
     //there is no such an identifier
+    ThrowUndeclaredVariable(op.name, op.subscript);
     throw SyntaxException(op.id, UnknownIdentifier, U"Identifier '" + op.name + U"' not found", op.pos, op.name.length(), op.line);
 }
 
@@ -1046,6 +1054,7 @@ Rational Solver<Rational>::operator()(IdentifierNode<Rational> const& op) const
     }
 
     //there is no such an identifier
+    ThrowUndeclaredVariable(op.name, op.subscript);
     throw SyntaxException(op.id, UnknownIdentifier, U"Identifier '" + op.name + U"' not found", op.pos, op.name.length(), op.line);
 }
 
@@ -1091,6 +1100,7 @@ Complex Solver<Complex>::operator()(IdentifierNode<Complex> const& op) const
         return Complex(MathHelper::ToBitPrecision(precision), 0, 1);
 
     //there is no such an identifier
+    ThrowUndeclaredVariable(op.name, op.subscript);
     throw SyntaxException(op.id, UnknownIdentifier, U"Identifier '" + op.name + U"' not found", op.pos, op.name.length(), op.line);
 }
 
@@ -1213,6 +1223,7 @@ Array<Real> Solver<Array<Real>>::operator()(IdentifierNode<Array<Real>> const& o
     }
 
     //there is no such an identifier
+    ThrowUndeclaredVariable(op.name, op.subscript);
     throw SyntaxException(op.id, UnknownIdentifier, U"Identifier '" + op.name + U"' not found", op.pos, op.name.length(), op.line);
 }
 
@@ -1251,6 +1262,7 @@ Integer Solver<Integer>::operator()(ImplicitStringMulNode<Integer> const& op) co
     }
     
     //there is no such an identifier
+    ThrowUndeclaredVariable(op.identifier.name, op.identifier.subscript);
     throw SyntaxException(op.id, UnknownIdentifier, U"Identifier '" + op.identifier.name + U"' not found", op.pos, op.identifier.name.length(), op.line);
 }
 
@@ -1311,6 +1323,7 @@ Real Solver<Real>::operator()(ImplicitStringMulNode<Real> const& op) const
         return (*this)(op.left) * val;
 
     //there is no such an identifier
+    ThrowUndeclaredVariable(op.identifier.name, op.identifier.subscript);
     throw SyntaxException(op.id, UnknownIdentifier, U"Identifier '" + op.identifier.name + U"' not found", op.pos, op.identifier.name.length(), op.line);
 }
 
@@ -1366,6 +1379,7 @@ Rational Solver<Rational>::operator()(ImplicitStringMulNode<Rational> const& op)
     }
 
     //there is no such an identifier
+    ThrowUndeclaredVariable(op.identifier.name, op.identifier.subscript);
     throw SyntaxException(op.id, UnknownIdentifier, U"Identifier '" + op.identifier.name + U"' not found", op.pos, op.identifier.name.length(), op.line);
 }
 
@@ -1408,6 +1422,7 @@ Complex Solver<Complex>::operator()(ImplicitStringMulNode<Complex> const& op) co
         return (*this)(op.left) * Complex(MathHelper::ToBitPrecision(precision), 0, 1);
 
     //there is no such an identifier
+    ThrowUndeclaredVariable(op.identifier.name, op.identifier.subscript);
     throw SyntaxException(op.id, UnknownIdentifier, U"Identifier '" + op.identifier.name + U"' not found", op.pos, op.identifier.name.length(), op.line);
 }
 
@@ -1487,6 +1502,7 @@ Array<Real> Solver<Array<Real>>::operator()(ImplicitStringMulNode<Array<Real>> c
         return (*this)(op.left) * val;
 
     //there is no such an identifier
+    ThrowUndeclaredVariable(op.identifier.name, op.identifier.subscript);
     throw SyntaxException(op.id, UnknownIdentifier, U"Identifier '" + op.identifier.name + U"' not found", op.pos, op.identifier.name.length(), op.line);
 }
 
@@ -1569,6 +1585,7 @@ Real Solver<Real>::operator()(ImplicitDivMulNode<Real> const& op) const
     }
 
     //there is no such an identifier
+    ThrowUndeclaredVariable(op.identifier.name, op.identifier.subscript);
     throw SyntaxException(op.id, UnknownIdentifier, U"Identifier '" + op.identifier.name + U"' not found", op.pos, op.identifier.name.length(), op.line);
 }
 
@@ -1637,6 +1654,7 @@ Rational Solver<Rational>::operator()(ImplicitDivMulNode<Rational> const& op) co
     }
 
     //there is no such an identifier
+    ThrowUndeclaredVariable(op.identifier.name, op.identifier.subscript);
     throw SyntaxException(op.id, UnknownIdentifier, U"Identifier '" + op.identifier.name + U"' not found", op.pos, op.identifier.name.length(), op.line);
 }
 
@@ -1687,6 +1705,7 @@ Complex Solver<Complex>::operator()(ImplicitDivMulNode<Complex> const& op) const
         return Complex(MathHelper::ToBitPrecision(precision), 0, 1);
 
     //there is no such an identifier
+    ThrowUndeclaredVariable(op.identifier.name, op.identifier.subscript);
     throw SyntaxException(op.id, UnknownIdentifier, U"Identifier '" + op.identifier.name + U"' not found", op.pos, op.identifier.name.length(), op.line);
 }
 
@@ -1785,6 +1804,7 @@ Array<Real> Solver<Array<Real>>::operator()(ImplicitDivMulNode<Array<Real>> cons
     }
 
     //there is no such an identifier
+    ThrowUndeclaredVariable(op.identifier.name, op.identifier.subscript);
     throw SyntaxException(op.id, UnknownIdentifier, U"Identifier '" + op.identifier.name + U"' not found", op.pos, op.identifier.name.length(), op.line);
 }
 

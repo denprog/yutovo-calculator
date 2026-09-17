@@ -1179,6 +1179,16 @@ TEST_F(CalcTestComplex, definite_integral8)
     ASSERT_TRUE(res.ToStdString(10, 10) == "1.7182818285E+0") << res.ToStdString(10, 10);
 }
 
+TEST_F(CalcTestComplex, definite_integral9)
+{
+    Complex res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"definite_integral(0,1,(1)/(x+i),x);", 10);
+    ASSERT_TRUE(res.ToStdString(10, 10) == "0.3465735903E+0+i*-0.7853981634E+0") << res.ToStdString(10, 10);
+
+    parser.SetLocale(Language::Russian);
+    Complex res_russian = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"definite_integral(0,1,(1)/(x+j),x);", 10);
+    ASSERT_TRUE(res_russian.ToStdString(10, 10) == "0.3465735903E+0+i*-0.7853981634E+0") << res_russian.ToStdString(10, 10);
+}
+
 TEST_F(CalcTestComplex, derivative_at_point1)
 {
     Complex res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"derivative(x*x, [x=3]);");

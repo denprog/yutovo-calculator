@@ -278,7 +278,7 @@ TEST_F(CalcTestSymbolicReal, inf5)
 TEST_F(CalcTestSymbolicReal, inf6)
 {
     Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"subs(ln(x),x,0);");
-    ASSERT_TRUE(res.ToStdString(10) == "∞") << res.ToStdString(10);
+    ASSERT_TRUE(res.ToStdString(10) == "-∞") << res.ToStdString(10);
 }
 
 TEST_F(CalcTestSymbolicReal, inf7)
@@ -735,6 +735,12 @@ TEST_F(CalcTestSymbolicReal, definite_integral_nonsymbol)
 TEST_F(CalcTestSymbolicReal, definite_integral_inf_divergent)
 {
     Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"definite_integral(1,∞,1/x,x);", 10);
+    ASSERT_TRUE(res.ToStdString(10) == "∞") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicReal, definite_integral_inf6)
+{
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"definite_integral(0,1,1/x,x);", 10);
     ASSERT_TRUE(res.ToStdString(10) == "∞") << res.ToStdString(10);
 }
 

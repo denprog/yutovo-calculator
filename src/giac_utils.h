@@ -487,8 +487,14 @@ inline Real FromGiac<Real>(const giac::gen& g, int precision)
         break;
     }
     case giac::_CPLX:
+    {
+        //a value with an imaginary part cannot be cast to the real type
+        Real imaginary_part = FromGiac<Real>(g._CPLXptr[1], precision);
+        if (!imaginary_part.IsZero())
+            throw MathException(IncorrectOperation);
         result = FromGiac<Real>(g._CPLXptr[0], precision);
         break;
+    }
     default:
         if (g == giac::plus_inf || g == giac::unsigned_inf)
         {
@@ -560,16 +566,7 @@ template<>
 inline Array<Real> FromGiac<Array<Real>>(const giac::gen& g, int precision)
 {
     Array<Real> result;
-    if (g.type == giac::_VECT)
-    {
-        const giac::vecteur& v = *g._VECTptr;
-        for (const auto& elem : v)
-            result.Add(FromGiac<Real>(elem, precision));
-    }
-    else
-    {
-        result.Add(FromGiac<Real>(g, precision));
-    }
+    result.Add(FromGiac<Real>(g, precision));
     return result;
 }
 
@@ -630,6 +627,29 @@ std::string PrintGen(const giac::gen& value, const giac::context* context);
 
 giac::gen ParseGen(const char* str, const giac::context* ctx);
 giac::gen ParseGen(const std::string& str, const giac::context* ctx);
+
+//Replaces a standalone imaginary unit character (not part of a longer identifier) with another one
+inline std::string ReplaceImaginaryUnit(const std::string& str, char from_unit, char to_unit)
+{
+    std::string result;
+    for (size_t i = 0; i < str.size(); ++i)
+    {
+        if (str[i] == from_unit)
+        {
+            bool boundary_before = (i == 0) ||
+                (!std::isalnum(static_cast<unsigned char>(str[i - 1])) && str[i - 1] != '.' && str[i - 1] != '_');
+            bool boundary_after = (i + 1 == str.size()) ||
+                (!std::isalnum(static_cast<unsigned char>(str[i + 1])) && str[i + 1] != '.' && str[i + 1] != '_');
+            if (boundary_before && boundary_after)
+            {
+                result += to_unit;
+                continue;
+            }
+        }
+        result += str[i];
+    }
+    return result;
+}
 
 //Convert a numeric value to a giac::gen without string round-tripping.
 giac::gen NumberToGiac(const Real& value);

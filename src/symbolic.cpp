@@ -27,12 +27,6 @@ namespace yutovo_calculator
 //Symbolic
 
 template<>
-bool Symbolic<Real>::IsNegativeInfinityNumber(const Real& num)
-{
-    return num.IsInfinity() && num.GetSign();
-}
-
-template<>
 giac::gen Symbolic<Real>::ToExpression(const Real& num) const
 {
     if (!num.unit.IsEmpty())
@@ -86,9 +80,6 @@ std::string Symbolic<Real>::ToStdString(int exp, Language language) const
     if (!e.is_integer() && e.type != giac::_REAL && e.type != giac::_DOUBLE_ && !HasUnknownSymbol(e))
         e = giac::evalf(e, 1, Context());
     std::string s = PrintGen(e, Context());
-    //convention: ln(0) is +infinity, not -infinity
-    if ((s == "-inf" || s == "-infinity" || s == "-oo") && !explicit_negative_infinity)
-        s = "oo";
     //real sqrt of -infinity is undefined
     if (expr->type == giac::_SYMB && expr->_SYMBptr->sommet == giac::at_sqrt)
     {

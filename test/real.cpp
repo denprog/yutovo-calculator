@@ -2695,6 +2695,26 @@ TEST_F(CalcTestReal, definite_integral12)
     ASSERT_TRUE(res.ToStdString(10, 10) == "0.2232442755E+0") << res.ToStdString(10, 10);
 }
 
+TEST_F(CalcTestReal, definite_integral13)
+{
+    try
+    {
+        parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"definite_integral(0,1,(1)/(x+i),x);", 10);
+        ASSERT_FALSE(true);
+    }
+    catch (yutovo_calculator::SyntaxException& ex)
+    {
+        ASSERT_TRUE(ex.ex_id == ParserExceptionCode::UnknownIdentifier) << ex.ex_id;
+        ASSERT_TRUE(ex.pos == 29) << ex.pos;
+        ASSERT_TRUE(ex.size == 1) << ex.size;
+    }
+}
+
+TEST_F(CalcTestReal, definite_integral14)
+{
+    EXPECT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"definite_integral(-2,-1,sqrt(x),x);", 10), yutovo_calculator::ParserException);
+}
+
 TEST_F(CalcTestReal, definite_integral_inf1)
 {
     auto res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"definite_integral(0,∞,exp(-x),x);", 10);
