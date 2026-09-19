@@ -2315,4 +2315,46 @@ TEST_F(CalcTestSymbolicReal, locale_comma_decimal)
     ASSERT_TRUE(res.ToString(10) == U"3.75*x") << res.ToStdString(10);
 }
 
+TEST_F(CalcTestSymbolicReal, evaluate1)
+{
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"evaluate(pow(x,2), [x=3]);");
+    ASSERT_TRUE(res.ToString(10) == U"9.") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicReal, evaluate2)
+{
+    parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"f(x)=pow(x,2);");
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"evaluate(f(x), [x=3]);");
+    ASSERT_TRUE(res.ToString(10) == U"9.") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicReal, evaluate3)
+{
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"evaluate(pow(x,2), [x=3])+1;");
+    ASSERT_TRUE(res.ToString(10) == U"10.") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicReal, evaluate_multi1)
+{
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"evaluate(x+y, [x=1, y=2]);");
+    ASSERT_TRUE(res.ToString(10) == U"3.") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicReal, evaluate_multi2)
+{
+    parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"f(x,y)=pow(x,y);");
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"evaluate(f(x,y), [y=3]);");
+    ASSERT_TRUE(res.ToString(10) == U"pow(x,3.)") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicReal, evaluate_error1)
+{
+    EXPECT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"evaluate(x, [x+1=1]);"), yutovo_calculator::ParserException);
+}
+
+TEST_F(CalcTestSymbolicReal, evaluate_error2)
+{
+    EXPECT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"evaluate(x, [5=1]);"), yutovo_calculator::ParserException);
+}
+
 }

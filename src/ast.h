@@ -69,6 +69,8 @@ struct DerivativeVariableNode;
 template<typename Number>
 struct DerivativeAtPointNode;
 template<typename Number>
+struct EvaluateAtPointNode;
+template<typename Number>
 struct NoFencesFunctionCallNode;
 template<typename Number>
 struct CompareNode;
@@ -138,7 +140,8 @@ struct UnaryOperationNode : public ExpressionPosition
         boost::recursive_wrapper<FunctionCallNode<Number>>, 
         boost::recursive_wrapper<FunctionCallStringNode<Number>>, 
         boost::recursive_wrapper<DefiniteIntegralNode<Number>>, 
-        boost::recursive_wrapper<DerivativeAtPointNode<Number>>, 
+        boost::recursive_wrapper<DerivativeAtPointNode<Number>>,
+        boost::recursive_wrapper<EvaluateAtPointNode<Number>>,
         boost::recursive_wrapper<NoFencesFunctionCallNode<Number>>, 
         boost::recursive_wrapper<CompareNode<Number>>, 
         boost::recursive_wrapper<LoopNode<Number>>, 
@@ -170,7 +173,8 @@ struct OperationNode : ExpressionPosition
         boost::recursive_wrapper<FunctionCallNode<Number>>, 
         boost::recursive_wrapper<FunctionCallStringNode<Number>>, 
         boost::recursive_wrapper<DefiniteIntegralNode<Number>>, 
-        boost::recursive_wrapper<DerivativeAtPointNode<Number>>, 
+        boost::recursive_wrapper<DerivativeAtPointNode<Number>>,
+        boost::recursive_wrapper<EvaluateAtPointNode<Number>>,
         boost::recursive_wrapper<NoFencesFunctionCallNode<Number>>, 
         boost::recursive_wrapper<CompareNode<Number>>, 
         boost::recursive_wrapper<LoopNode<Number>>, 
@@ -202,7 +206,8 @@ struct PostfixOperationNode : ExpressionPosition
         boost::recursive_wrapper<FunctionCallNode<Number>>, 
         boost::recursive_wrapper<FunctionCallStringNode<Number>>, 
         boost::recursive_wrapper<DefiniteIntegralNode<Number>>, 
-        boost::recursive_wrapper<DerivativeAtPointNode<Number>>, 
+        boost::recursive_wrapper<DerivativeAtPointNode<Number>>,
+        boost::recursive_wrapper<EvaluateAtPointNode<Number>>,
         boost::recursive_wrapper<NoFencesFunctionCallNode<Number>>, 
         boost::recursive_wrapper<CompareNode<Number>>, 
         boost::recursive_wrapper<LoopNode<Number>>, 
@@ -357,6 +362,14 @@ struct DerivativeAtPointNode : ExpressionPosition
 };
 
 template<typename Number>
+struct EvaluateAtPointNode : ExpressionPosition
+{
+    using FunctionType = boost::variant<std::u32string, ExpressionNode<Number>>;
+    FunctionType function;
+    std::list<DerivativeVariableNode<Number>> variables;
+};
+
+template<typename Number>
 struct FunctionParamNode : ExpressionPosition
 {
     typedef Number value_type;
@@ -421,7 +434,8 @@ struct ExpressionNode : ExpressionPosition
         boost::recursive_wrapper<FunctionCallNode<Number>>, 
         boost::recursive_wrapper<FunctionCallStringNode<Number>>, 
         boost::recursive_wrapper<DefiniteIntegralNode<Number>>, 
-        boost::recursive_wrapper<DerivativeAtPointNode<Number>>, 
+        boost::recursive_wrapper<DerivativeAtPointNode<Number>>,
+        boost::recursive_wrapper<EvaluateAtPointNode<Number>>,
         boost::recursive_wrapper<NoFencesFunctionCallNode<Number>>, 
         boost::recursive_wrapper<CompareNode<Number>>, 
         boost::recursive_wrapper<LoopNode<Number>>, 
@@ -437,6 +451,11 @@ struct ExpressionNode : ExpressionPosition
     }
     
     ExpressionNode(const DerivativeAtPointNode<Number>& node) : 
+        first(node)
+    {
+    }
+
+    ExpressionNode(const EvaluateAtPointNode<Number>& node) : 
         first(node)
     {
     }
@@ -720,6 +739,10 @@ BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::DerivativeAtPointNode<yutovo_calcul
     (yutovo_calculator::DerivativeAtPointNode<yutovo_calculator::Real>::FunctionType, function)
     (std::list<yutovo_calculator::DerivativeVariableNode<yutovo_calculator::Real>>, variables))
 
+BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::EvaluateAtPointNode<yutovo_calculator::Real>, 
+    (yutovo_calculator::EvaluateAtPointNode<yutovo_calculator::Real>::FunctionType, function)
+    (std::list<yutovo_calculator::DerivativeVariableNode<yutovo_calculator::Real>>, variables))
+
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::NoFencesFunctionCallNode<yutovo_calculator::Real>, 
     (yutovo_calculator::IdentifierNode<yutovo_calculator::Real>, name)
     (std::list<yutovo_calculator::ExpressionNode<yutovo_calculator::Real>>, arguments)
@@ -860,6 +883,10 @@ BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::DerivativeVariableNode<yutovo_calcu
 
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::DerivativeAtPointNode<yutovo_calculator::Rational>, 
     (yutovo_calculator::DerivativeAtPointNode<yutovo_calculator::Rational>::FunctionType, function)
+    (std::list<yutovo_calculator::DerivativeVariableNode<yutovo_calculator::Rational>>, variables))
+
+BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::EvaluateAtPointNode<yutovo_calculator::Rational>, 
+    (yutovo_calculator::EvaluateAtPointNode<yutovo_calculator::Rational>::FunctionType, function)
     (std::list<yutovo_calculator::DerivativeVariableNode<yutovo_calculator::Rational>>, variables))
 
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::NoFencesFunctionCallNode<yutovo_calculator::Rational>, 
@@ -1004,6 +1031,10 @@ BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::DerivativeAtPointNode<yutovo_calcul
     (yutovo_calculator::DerivativeAtPointNode<yutovo_calculator::Complex>::FunctionType, function)
     (std::list<yutovo_calculator::DerivativeVariableNode<yutovo_calculator::Complex>>, variables))
 
+BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::EvaluateAtPointNode<yutovo_calculator::Complex>, 
+    (yutovo_calculator::EvaluateAtPointNode<yutovo_calculator::Complex>::FunctionType, function)
+    (std::list<yutovo_calculator::DerivativeVariableNode<yutovo_calculator::Complex>>, variables))
+
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::NoFencesFunctionCallNode<yutovo_calculator::Complex>, 
     (yutovo_calculator::IdentifierNode<yutovo_calculator::Complex>, name)
     (std::list<yutovo_calculator::ExpressionNode<yutovo_calculator::Complex>>, arguments)
@@ -1140,6 +1171,10 @@ BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::DerivativeAtPointNode<yutovo_calcul
     (yutovo_calculator::DerivativeAtPointNode<yutovo_calculator::Symbolic<Real>>::FunctionType, function)
     (std::list<yutovo_calculator::DerivativeVariableNode<yutovo_calculator::Symbolic<Real>>>, variables))
 
+BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::EvaluateAtPointNode<yutovo_calculator::Symbolic<Real>>, 
+    (yutovo_calculator::EvaluateAtPointNode<yutovo_calculator::Symbolic<Real>>::FunctionType, function)
+    (std::list<yutovo_calculator::DerivativeVariableNode<yutovo_calculator::Symbolic<Real>>>, variables))
+
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::NoFencesFunctionCallNode<yutovo_calculator::Symbolic<Real>>, 
     (yutovo_calculator::IdentifierNode<yutovo_calculator::Symbolic<Real>>, name)
     (std::list<yutovo_calculator::ExpressionNode<yutovo_calculator::Symbolic<Real>>>, arguments)
@@ -1274,6 +1309,10 @@ BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::DerivativeAtPointNode<yutovo_calcul
     (yutovo_calculator::DerivativeAtPointNode<yutovo_calculator::Symbolic<Rational>>::FunctionType, function)
     (std::list<yutovo_calculator::DerivativeVariableNode<yutovo_calculator::Symbolic<Rational>>>, variables))
 
+BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::EvaluateAtPointNode<yutovo_calculator::Symbolic<Rational>>, 
+    (yutovo_calculator::EvaluateAtPointNode<yutovo_calculator::Symbolic<Rational>>::FunctionType, function)
+    (std::list<yutovo_calculator::DerivativeVariableNode<yutovo_calculator::Symbolic<Rational>>>, variables))
+
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::NoFencesFunctionCallNode<yutovo_calculator::Symbolic<Rational>>, 
     (yutovo_calculator::IdentifierNode<yutovo_calculator::Symbolic<Rational>>, name)
     (std::list<yutovo_calculator::ExpressionNode<yutovo_calculator::Symbolic<Rational>>>, arguments)
@@ -1406,6 +1445,10 @@ BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::DerivativeVariableNode<yutovo_calcu
 
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::DerivativeAtPointNode<yutovo_calculator::Symbolic<Complex>>, 
     (yutovo_calculator::DerivativeAtPointNode<yutovo_calculator::Symbolic<Complex>>::FunctionType, function)
+    (std::list<yutovo_calculator::DerivativeVariableNode<yutovo_calculator::Symbolic<Complex>>>, variables))
+
+BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::EvaluateAtPointNode<yutovo_calculator::Symbolic<Complex>>, 
+    (yutovo_calculator::EvaluateAtPointNode<yutovo_calculator::Symbolic<Complex>>::FunctionType, function)
     (std::list<yutovo_calculator::DerivativeVariableNode<yutovo_calculator::Symbolic<Complex>>>, variables))
 
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::NoFencesFunctionCallNode<yutovo_calculator::Symbolic<Complex>>, 

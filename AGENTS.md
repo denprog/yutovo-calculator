@@ -333,6 +333,15 @@ Running the full `yutovo-editor_tests` suite takes approximately **25 minutes** 
 - The `^` power operator is now supported in the `Real`, `Complex`, and `Rational` expression grammars (previously it was only available for `Integer` and symbolic types). It binds tighter than `*`/`/`/`%` and produces an `OperationNode` with op `'^'`, which `Solver` evaluates via the existing `pow` functions.
 - Tests added/updated in `test/real.cpp`, `test/rational.cpp`, `test/complex.cpp`, `test/symbolic_real.cpp`, `test/symbolic_rational.cpp`, `test/symbolic_complex.cpp`.
 
+## Evaluate at a Point
+
+### yutovo-calculator
+- `evaluate(expr, [x=2, y=3])` evaluates an expression at a point (substitution). It mirrors `derivative_at_point` exactly: the grammar rule `evaluate_at_point` (`lit("evaluate") >> '(' >> symbolic_arg >> ',' >> '[' >> derivative_variable % ',' >> ']' >> ')'`) is placed in `unary` right after `hold[derivative_at_point]` in **all six** parser instantiations; the AST node is `EvaluateAtPointNode<Number>` (same shape as `DerivativeAtPointNode`: `FunctionType function` + `std::list<DerivativeVariableNode<Number>>`), added to every `Operand` variant, `ExpressionNode` constructor, `BOOST_FUSION_ADAPT_STRUCT` block, and `annotation.h` handlers.
+- `Solver::operator()(EvaluateAtPointNode<Number>)`: symbolic types parse the expression string and apply `subs` per variable; `Real`/`Rational`/`Complex` build a `(name, value)` list and call the existing `EvaluateWithTempVariables` (sub-solver with `PushTempVariable`); `Integer`/array types throw `IncorrectOperation` (same as `derivative_at_point`).
+- `"evaluate"` is in TermDegree `known_funcs` (src/symbolic.h) so it is recognized as a function name when sorting result terms.
+- Tests `evaluate*` in all six test files (single variable, user function, inside a bigger expression, multi-variable, `[1=3]`/`[5=1]` error cases).
+- yutovo-editor emits this syntax from `CodeRow::ToParserString` for an `EvaluationBarSubscript` that does not follow a derivative fraction (see the editor AGENTS.md "Evaluation at a Point" section).
+
 ## Next Steps / Blockers
 - Linux calculator debug tests: 1246 of 1247 pass. `CalcTestSymbolicReal.locale_comma_decimal` fails on machines where a comma-decimal locale (`ru_RU.utf8`) is installed — pre-existing, unrelated to symbolic formatting (giac's `strtod` shielding does not survive the locale there).
 - `yutovo-solver` tests pass (45 tests).

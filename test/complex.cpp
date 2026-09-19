@@ -1227,4 +1227,34 @@ TEST_F(CalcTestComplex, derivative_at_point_multi3)
     ASSERT_TRUE(res.ToStdString(3, 3) == parser.Parse(LogicalId{0, 0, 0, 0, 3}, U"12;").ToStdString(3, 3)) << res.ToStdString(3, 3);
 }
 
+TEST_F(CalcTestComplex, evaluate1)
+{
+    Complex res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"evaluate(x*x, [x=3]);");
+    ASSERT_TRUE(res == parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"9;")) << res.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestComplex, evaluate2)
+{
+    parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"f(x)=x*x;");
+    Complex res = parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"evaluate(f(x), [x=2]);");
+    ASSERT_TRUE(res.ToStdString(3, 3) == parser.Parse(LogicalId{0, 0, 0, 0, 3}, U"4;").ToStdString(3, 3)) << res.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestComplex, evaluate3)
+{
+    Complex res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"evaluate(x*x, [x=3])+1;");
+    ASSERT_TRUE(res == parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"10;")) << res.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestComplex, evaluate_multi1)
+{
+    Complex res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"evaluate(x*y, [x=2, y=3]);");
+    ASSERT_TRUE(res.ToStdString(3, 3) == parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"6;").ToStdString(3, 3)) << res.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestComplex, evaluate_error1)
+{
+    EXPECT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"evaluate(x*x, [1=3]);"), yutovo_calculator::SyntaxException);
+}
+
 }

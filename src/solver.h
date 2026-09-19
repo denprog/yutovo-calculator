@@ -756,6 +756,87 @@ struct Solver : public boost::static_visitor<Number>
         }
     }
 
+    Number operator()(EvaluateAtPointNode<Number> const& op) const
+    {
+        if constexpr (is_symbolic_v<Number>)
+        {
+            try
+            {
+                if (op.variables.empty())
+                    throw ParserException({}, ParserExceptionCode::IncorrectOperation);
+
+                const std::u32string& s = boost::get<std::u32string>(op.function);
+                std::u32string expr = s;
+                Expression<Number> expression(op.id, expr, const_cast<Solver<Number>*>(this));
+                ExpressionNode<Number> func;
+                std::u32string::iterator iter = expr.begin();
+                std::u32string::iterator end = expr.end();
+                unicode::space_type space;
+                if (!phrase_parse(iter, end, expression, space, func))
+                    throw MathException(IncorrectOperation);
+
+                Number result = (*this)(func);
+                for (const auto& var : op.variables)
+                {
+                    Number value = (*this)(var.value);
+                    result = subs(result, Number(precision, var.name), value);
+                }
+                return result;
+            }
+            catch (const MathException& e)
+            {
+                throw MathException(op.id, e.ex_id, op.pos, op.line);
+            }
+            catch (const ParserException&)
+            {
+                throw MathException(op.id, ParserExceptionCode::IncorrectOperation, op.pos, op.line);
+            }
+            catch (const std::bad_variant_access&)
+            {
+                throw MathException(op.id, ParserExceptionCode::IncorrectOperation, op.pos, op.line);
+            }
+            catch (...)
+            {
+                if constexpr (std::is_same_v<Number, Symbolic<Real>> || std::is_same_v<Number, Symbolic<Complex>>)
+                    return Number(precision, std::u32string(U"nan"));
+                throw MathException(op.id, ParserExceptionCode::IncorrectOperation, op.pos, op.line);
+            }
+        }
+        else if constexpr (std::is_same_v<Number, Real> || std::is_same_v<Number, Complex> || std::is_same_v<Number, Rational>)
+        {
+            try
+            {
+                if (op.variables.empty())
+                    throw ParserException({}, ParserExceptionCode::IncorrectOperation);
+                const std::u32string& s = boost::get<std::u32string>(op.function);
+                std::list<std::pair<std::u32string, Number>> values;
+                for (const auto& var : op.variables)
+                    values.emplace_back(var.name, (*this)(var.value));
+                return EvaluateWithTempVariables(s, values);
+            }
+            catch (const MathException& e)
+            {
+                throw MathException(op.id, e.ex_id, op.pos, op.line);
+            }
+            catch (const ParserException&)
+            {
+                throw;
+            }
+            catch (const std::bad_variant_access&)
+            {
+                throw MathException(op.id, ParserExceptionCode::IncorrectOperation, op.pos, op.line);
+            }
+            catch (...)
+            {
+                throw MathException(op.id, ParserExceptionCode::IncorrectOperation, op.pos, op.line);
+            }
+        }
+        else
+        {
+            throw MathException(op.id, ParserExceptionCode::IncorrectOperation, op.pos, 1, op.line);
+        }
+    }
+
     Number StepForNumericalDerivative(const Number& value) const
     {
         if constexpr (std::is_same_v<Number, Real>)

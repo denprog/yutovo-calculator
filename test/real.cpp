@@ -2950,4 +2950,41 @@ TEST_F(CalcTestReal, definite_integral_user_function)
     ASSERT_TRUE(res.ToStdString(10, 10) == "2.1616617919E+0") << res.ToStdString(10, 10);
 }
 
+TEST_F(CalcTestReal, evaluate1)
+{
+    Real res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"evaluate(pow(x,2), [x=3]);");
+    ASSERT_TRUE(res == parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"9;")) << res.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestReal, evaluate2)
+{
+    parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"f(x)=2*x;");
+    Real res = parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"evaluate(f(x), [x=5]);");
+    ASSERT_TRUE(res.ToStdString(3, 3) == parser.Parse(LogicalId{0, 0, 0, 0, 3}, U"10;").ToStdString(3, 3)) << res.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestReal, evaluate3)
+{
+    Real res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"evaluate(pow(x,2), [x=3])+1;");
+    ASSERT_TRUE(res == parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"10;")) << res.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestReal, evaluate_multi1)
+{
+    Real res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"evaluate(x+y, [x=1, y=2]);");
+    ASSERT_TRUE(res == parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"3;")) << res.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestReal, evaluate_multi2)
+{
+    parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"f(x,y)=pow(x,2)*y;");
+    Real res = parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"evaluate(f(x,y), [x=2, y=3]);");
+    ASSERT_TRUE(res.ToStdString(3, 3) == parser.Parse(LogicalId{0, 0, 0, 0, 3}, U"12;").ToStdString(3, 3)) << res.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestReal, evaluate_error1)
+{
+    EXPECT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"evaluate(pow(x,2), [1=3]);"), yutovo_calculator::SyntaxException);
+}
+
 }

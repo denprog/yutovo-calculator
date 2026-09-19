@@ -1058,7 +1058,7 @@ public:
         static const std::set<std::string> known_funcs = {"sin", "cos", "tan", "tg", "cot", "ctg", "sec", "csc", "cosec", "sinh", "sh", "cosh", "ch", "tanh", "th", "coth", "cth", "sech", "sch", "csch", "cosech",
             "asinh", "acosh", "atanh", "acoth", "asech", "acsch", "arsinh", "arcosh", "artanh", "arcoth", "arsech", "arcsch",
             "arcsinh", "arccosh", "arctanh", "arccoth", "arcsech", "arccsch", "arccosech", "arctg", "arcctg", "exp", "ln", "log", "sqrt", "root", "pow",
-            "gamma", "factorial", "min", "max", "derivative", "indefinite_integral", "definite_integral", "subs", "expand", "simplify", "evalf"};
+            "gamma", "factorial", "min", "max", "derivative", "indefinite_integral", "definite_integral", "subs", "expand", "simplify", "evalf", "evaluate"};
         static const std::set<std::string> known_consts = {"pi", "i", "j", "e", "oo", "inf", "nan", "undef"};
         int degree = 0;
         //count explicit powers pow(var,exp)

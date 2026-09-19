@@ -1867,4 +1867,34 @@ TEST_F(CalcTestSymbolicComplex, derivative_at_point_multi3)
     ASSERT_TRUE(res.ToStdString(10) == "12") << res.ToStdString(10);
 }
 
+TEST_F(CalcTestSymbolicComplex, evaluate1)
+{
+    Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"evaluate(x*x, [x=3]);");
+    ASSERT_TRUE(res.ToStdString(10) == "9") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicComplex, evaluate2)
+{
+    parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"f(x)=pow(x,2);");
+    Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"evaluate(f(x), [x=3]);");
+    ASSERT_TRUE(res.ToStdString(10) == "9") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicComplex, evaluate3)
+{
+    Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"evaluate(x*x, [x=3])+1;");
+    ASSERT_TRUE(res.ToStdString(10) == "10") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicComplex, evaluate_multi1)
+{
+    Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"evaluate(x*y, [x=2, y=3]);");
+    ASSERT_TRUE(res.ToStdString(10) == "6") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicComplex, evaluate_error1)
+{
+    EXPECT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"evaluate(x, [5=1]);"), yutovo_calculator::ParserException);
+}
+
 }
