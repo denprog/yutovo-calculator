@@ -216,6 +216,127 @@ Array<Real> Solver<Array<Real>>::operator()(LineGraphNode<Array<Real>> const& op
 }
 
 template<>
+Array<Real> Solver<Array<Real>>::operator()(SurfaceGraphNode<Array<Real>> const& op) const
+{
+    Array<Real> res;
+    if (!op.x_identifier.subscript.empty())
+        throw SyntaxException(op.x_identifier.id, UnknownIdentifier, op.x_identifier.pos, op.x_identifier.name.length(), op.line);
+    if (!op.y_identifier.subscript.empty())
+        throw SyntaxException(op.y_identifier.id, UnknownIdentifier, op.y_identifier.pos, op.y_identifier.name.length(), op.line);
+    if (op.x_identifier.name == op.y_identifier.name)
+        throw MathException(op.id, IncorrectOperation, op.pos, 1, op.line);
+
+    Array<Real> x, y;
+    PushTempVariable(op.x_identifier.name, x);
+    PushTempVariable(op.y_identifier.name, y);
+    Array<Real> x_right, y_bottom, y_top, x_count, y_count;
+    Real nan;
+    nan.SetNaN();
+
+    try
+    {
+        x = (*this)(op.x_left);
+        SetTempVariable(op.x_identifier.name, x);
+        x_right = (*this)(op.x_right);
+        y = (*this)(op.y_bottom);
+        SetTempVariable(op.y_identifier.name, y);
+        y_top = (*this)(op.y_top);
+        x_count = (*this)(op.x_points_count);
+        y_count = (*this)(op.y_points_count);
+    }
+    catch (...)
+    {
+        PopTempVariables(2);
+        throw;
+    }
+
+    if (x_count.Size() != 1 || y_count.Size() != 1)
+        throw MathException(IncorrectOperation);
+
+    long xn = (long)(int)x_count[0];
+    long yn = (long)(int)y_count[0];
+    if (xn < 2)
+        xn = 2;
+    if (xn > 1000)
+        xn = 1000;
+    if (yn < 2)
+        yn = 2;
+    if (yn > 1000)
+        yn = 1000;
+
+    Array<Real> max_float(64, std::numeric_limits<float>::max());
+    if (abs(x) > max_float || abs(x_right) > max_float || abs(y) > max_float || abs(y_top) > max_float)
+        throw MathException(Overflow);
+
+    if (x == x_right || y == y_top)
+        throw MathException(IncorrectOperation);
+
+    //the first items are bounds of the graph and the sizes of the grid
+    res.Add(x);
+    res.Add(x_right);
+    res.Add(y);
+    res.Add(y_top);
+    res.Add(Array<Real>(64, (int)xn));
+    res.Add(Array<Real>(64, (int)yn));
+
+    Array<Real> x_start = x, y_start = y;
+    Array<Real> dx = (x_right - x) / Array<Real>(64, (int)(xn - 1));
+    Array<Real> dy = (y_top - y) / Array<Real>(64, (int)(yn - 1));
+
+    auto get_next_point =
+        [&](Array<Real>& z)
+        {
+            try
+            {
+                z = (*this)(op.expression);
+            }
+            catch (TimeExceedException)
+            {
+                PopTempVariables(2);
+                throw;
+            }
+            catch (BreakException)
+            {
+                PopTempVariables(2);
+                throw;
+            }
+            catch (SyntaxException)
+            {
+                PopTempVariables(2);
+                throw;
+            }
+            catch (...)
+            {
+                z.Clear();
+                z.Add(nan);
+            }
+        };
+
+    //next items are z values of the grid, the x index changes faster
+    for (long j = 0; j < yn; ++j, y += dy)
+    {
+        SetTempVariable(op.y_identifier.name, y);
+        x = x_start;
+        for (long i = 0; i < xn; ++i, x += dx)
+        {
+            if (parser_context)
+                parser_context->ReInit();
+
+            SetTempVariable(op.x_identifier.name, x);
+            Array<Real> z;
+            get_next_point(z);
+            if (z.Size() == 1)
+                res.Add(z);
+            else
+                res.Add(nan);
+        }
+    }
+
+    PopTempVariables(2);
+    return res;
+}
+
+template<>
 Real Solver<Real>::operator()(UnitNode<Real> const& op) const
 {
     //store the unit

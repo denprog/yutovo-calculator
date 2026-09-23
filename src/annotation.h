@@ -346,6 +346,11 @@ struct Annotation
 		UpdatePosition(pos, op);
 	}
 
+	void operator()(SurfaceGraphNode<Number>& op, std::u32string::iterator pos) const
+	{
+		UpdatePosition(pos, op);
+	}
+
 	void operator()(GraphNode<Number>& op, std::u32string::iterator pos) const
 	{
 		UpdatePosition(pos, op);
@@ -479,6 +484,11 @@ struct Annotation
 		}
 
 		void operator()(LineGraphNode<Num> const& op) const
+		{
+			annotation->UpdatePosition(iter, op);
+		}
+
+		void operator()(SurfaceGraphNode<Num> const& op) const
 		{
 			annotation->UpdatePosition(iter, op);
 		}

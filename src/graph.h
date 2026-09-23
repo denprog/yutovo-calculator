@@ -33,12 +33,15 @@ struct Graph : qi::grammar<std::u32string::iterator, GraphNode<Number>(), unicod
         qi::_1_type _1;
         qi::_3_type _3;
 
-        graph = line_graph | bar_graph;
+        graph = line_graph | bar_graph | surface_graph;
 
         line_graph = "graph_line(" > expression > ',' > identifier > ',' > expression > ',' > expression > ',' > 
             expression > ',' > expression > ',' > number > ')';
 
         bar_graph = "graph_bar(" > expression > ',' > number > ')';
+
+        surface_graph = "graph_surface(" > expression > ',' > identifier > ',' > identifier > ',' > expression > ',' > 
+            expression > ',' > expression > ',' > expression > ',' > number > ',' > number > ')';
         
         identifier = name >> -('{' > (+char_("0-9") | name) > '}') >> -('`' > description > '`');
         
@@ -53,6 +56,10 @@ struct Graph : qi::grammar<std::u32string::iterator, GraphNode<Number>(), unicod
         exp_number = +char_("0-9.") >> raw[lexeme[(no_case[char_("E")] > (char_('+') | char_('-')))]] > +(char_("0-9"));
 
         on_success(line_graph, 
+            boost::phoenix::function<Annotation<Number>>(Annotation<Number>(expr.begin(), expr.end(), id, 
+            &solver->parser_context))(qi::_val, _1));
+
+        on_success(surface_graph, 
             boost::phoenix::function<Annotation<Number>>(Annotation<Number>(expr.begin(), expr.end(), id, 
             &solver->parser_context))(qi::_val, _1));
 
@@ -77,6 +84,7 @@ struct Graph : qi::grammar<std::u32string::iterator, GraphNode<Number>(), unicod
     qi::rule<std::u32string::iterator, GraphNode<Number>(), unicode::space_type> graph;
     qi::rule<std::u32string::iterator, LineGraphNode<Number>(), unicode::space_type> line_graph;
     qi::rule<std::u32string::iterator, BarGraphNode<Number>(), unicode::space_type> bar_graph;
+    qi::rule<std::u32string::iterator, SurfaceGraphNode<Number>(), unicode::space_type> surface_graph;
     qi::rule<std::u32string::iterator, std::u32string(), unicode::space_type> name, description;
     qi::rule<std::u32string::iterator, IdentifierNode<Number>(), unicode::space_type> identifier;
     qi::rule<std::u32string::iterator, std::u32string(), unicode::space_type> digits_number, exp_number;

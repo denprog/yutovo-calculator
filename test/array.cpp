@@ -289,6 +289,40 @@ TEST_F(CalcTestArrayReal, graph6)
         res.ToStdString(3, 3).substr(0, 200);
 }
 
+TEST_F(CalcTestArrayReal, surface_graph1)
+{
+    auto res = parser.Parse(LogicalId{0, 0, 1}, U"graph_surface(x+y,x,y,0,1,0,1,3,3);", AngleMeasure::Radian, AngleMeasure::Radian);
+    ASSERT_TRUE(res.ToStdString(3, 3) == "[0.E+0,1.E+0,0.E+0,1.E+0,3.E+0,3.E+0,0.E+0,0.5E+0,1.E+0,0.5E+0,1.E+0,1.5E+0,1.E+0,1.5E+0,2.E+0]") <<
+        res.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestArrayReal, surface_graph2)
+{
+    yutovo_calculator::ParserContext parser_context;
+    parser_context.Init(100);
+    auto res = parser.Parse(LogicalId{0, 0, 1}, U"graph_surface(sin(x)+cos(y),x,y,0,1,0,1,2,2);", &parser_context);
+    ASSERT_TRUE(res.ToStdString(3, 3) == "[0.E+0,1.E+0,0.E+0,1.E+0,2.E+0,2.E+0,1.E+0,1.841E+0,0.54E+0,1.382E+0]") <<
+        res.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestArrayReal, surface_graph3)
+{
+    yutovo_calculator::ParserContext parser_context;
+    parser_context.Init(100);
+    auto res = parser.Parse(LogicalId{0, 0, 1}, U"graph_surface(sqrt(x),x,y,-1,1,0,1,3,3);", &parser_context);
+    ASSERT_TRUE(res.ToStdString(3, 3) == "[-1.E+0,1.E+0,0.E+0,1.E+0,3.E+0,3.E+0,NAN,0.E+0,1.E+0,NAN,0.E+0,1.E+0,NAN,0.E+0,1.E+0]") <<
+        res.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestArrayReal, surface_graph4)
+{
+    yutovo_calculator::ParserContext parser_context;
+    parser_context.Init(100);
+    EXPECT_THROW(parser.Parse(LogicalId{0, 0, 1}, U"graph_surface(x+y,x,y,1,1,0,1,10,10);", &parser_context), yutovo_calculator::MathException);
+    EXPECT_THROW(parser.Parse(LogicalId{0, 0, 1}, U"graph_surface(x+y,x,y,-1,1,0,0,10,10);", &parser_context), yutovo_calculator::MathException);
+    EXPECT_THROW(parser.Parse(LogicalId{0, 0, 1}, U"graph_surface(x+y,x,x,-1,1,0,1,10,10);", &parser_context), yutovo_calculator::MathException);
+}
+
 TEST_F(CalcTestArrayReal, units1)
 {
     parser.SetLocale(Language::Russian);
