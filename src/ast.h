@@ -482,7 +482,6 @@ template<typename Number>
 struct BarGraphNode : ExpressionPosition
 {
     ExpressionNode<Number> expression;
-    NumberNode<Number> points_count;
 };
 
 //Surface graph node
@@ -653,8 +652,7 @@ BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::LineGraphNode<yutovo_calculator::In
     (yutovo_calculator::NumberNode<yutovo_calculator::Integer>, points_count))
 
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::BarGraphNode<yutovo_calculator::Integer>, 
-    (yutovo_calculator::ExpressionNode<yutovo_calculator::Integer>, expression)
-    (yutovo_calculator::NumberNode<yutovo_calculator::Integer>, points_count))
+    (yutovo_calculator::ExpressionNode<yutovo_calculator::Integer>, expression))
 
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::SurfaceGraphNode<yutovo_calculator::Integer>, 
     (yutovo_calculator::ExpressionNode<yutovo_calculator::Integer>, expression)
@@ -810,8 +808,7 @@ BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::LineGraphNode<yutovo_calculator::Re
     (yutovo_calculator::NumberNode<yutovo_calculator::Real>, points_count))
 
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::BarGraphNode<yutovo_calculator::Real>, 
-    (yutovo_calculator::ExpressionNode<yutovo_calculator::Real>, expression)
-    (yutovo_calculator::NumberNode<yutovo_calculator::Real>, points_count))
+    (yutovo_calculator::ExpressionNode<yutovo_calculator::Real>, expression))
 
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::SurfaceGraphNode<yutovo_calculator::Real>, 
     (yutovo_calculator::ExpressionNode<yutovo_calculator::Real>, expression)
@@ -967,8 +964,7 @@ BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::LineGraphNode<yutovo_calculator::Ra
     (yutovo_calculator::NumberNode<yutovo_calculator::Rational>, points_count))
 
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::BarGraphNode<yutovo_calculator::Rational>, 
-    (yutovo_calculator::ExpressionNode<yutovo_calculator::Rational>, expression)
-    (yutovo_calculator::NumberNode<yutovo_calculator::Rational>, points_count))
+    (yutovo_calculator::ExpressionNode<yutovo_calculator::Rational>, expression))
 
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::SurfaceGraphNode<yutovo_calculator::Rational>, 
     (yutovo_calculator::ExpressionNode<yutovo_calculator::Rational>, expression)
@@ -1124,8 +1120,7 @@ BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::LineGraphNode<yutovo_calculator::Co
     (yutovo_calculator::NumberNode<yutovo_calculator::Complex>, points_count))
 
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::BarGraphNode<yutovo_calculator::Complex>, 
-    (yutovo_calculator::ExpressionNode<yutovo_calculator::Complex>, expression)
-    (yutovo_calculator::NumberNode<yutovo_calculator::Complex>, points_count))
+    (yutovo_calculator::ExpressionNode<yutovo_calculator::Complex>, expression))
 
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::SurfaceGraphNode<yutovo_calculator::Complex>, 
     (yutovo_calculator::ExpressionNode<yutovo_calculator::Complex>, expression)
@@ -1275,8 +1270,7 @@ BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::LineGraphNode<yutovo_calculator::Sy
     (yutovo_calculator::NumberNode<yutovo_calculator::Symbolic<Real>>, points_count))
 
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::BarGraphNode<yutovo_calculator::Symbolic<Real>>, 
-    (yutovo_calculator::ExpressionNode<yutovo_calculator::Symbolic<Real>>, expression)
-    (yutovo_calculator::NumberNode<yutovo_calculator::Symbolic<Real>>, points_count))
+    (yutovo_calculator::ExpressionNode<yutovo_calculator::Symbolic<Real>>, expression))
 
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::SurfaceGraphNode<yutovo_calculator::Symbolic<Real>>, 
     (yutovo_calculator::ExpressionNode<yutovo_calculator::Symbolic<Real>>, expression)
@@ -1424,8 +1418,7 @@ BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::LineGraphNode<yutovo_calculator::Sy
     (yutovo_calculator::NumberNode<yutovo_calculator::Symbolic<Rational>>, points_count))
 
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::BarGraphNode<yutovo_calculator::Symbolic<Rational>>, 
-    (yutovo_calculator::ExpressionNode<yutovo_calculator::Symbolic<Rational>>, expression)
-    (yutovo_calculator::NumberNode<yutovo_calculator::Symbolic<Rational>>, points_count))
+    (yutovo_calculator::ExpressionNode<yutovo_calculator::Symbolic<Rational>>, expression))
 
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::SurfaceGraphNode<yutovo_calculator::Symbolic<Rational>>, 
     (yutovo_calculator::ExpressionNode<yutovo_calculator::Symbolic<Rational>>, expression)
@@ -1573,8 +1566,7 @@ BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::LineGraphNode<yutovo_calculator::Sy
     (yutovo_calculator::NumberNode<yutovo_calculator::Symbolic<Complex>>, points_count))
 
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::BarGraphNode<yutovo_calculator::Symbolic<Complex>>, 
-    (yutovo_calculator::ExpressionNode<yutovo_calculator::Symbolic<Complex>>, expression)
-    (yutovo_calculator::NumberNode<yutovo_calculator::Symbolic<Complex>>, points_count))
+    (yutovo_calculator::ExpressionNode<yutovo_calculator::Symbolic<Complex>>, expression))
 
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::SurfaceGraphNode<yutovo_calculator::Symbolic<Complex>>, 
     (yutovo_calculator::ExpressionNode<yutovo_calculator::Symbolic<Complex>>, expression)
@@ -1718,8 +1710,7 @@ BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::LineGraphNode<yutovo_calculator::Ar
     (yutovo_calculator::NumberNode<yutovo_calculator::Array<yutovo_calculator::Real>>, points_count))
 
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::BarGraphNode<yutovo_calculator::Array<yutovo_calculator::Real>>, 
-    (yutovo_calculator::ExpressionNode<yutovo_calculator::Array<yutovo_calculator::Real>>, expression)
-    (yutovo_calculator::NumberNode<yutovo_calculator::Array<yutovo_calculator::Real>>, points_count))
+    (yutovo_calculator::ExpressionNode<yutovo_calculator::Array<yutovo_calculator::Real>>, expression))
 
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::SurfaceGraphNode<yutovo_calculator::Array<yutovo_calculator::Real>>, 
     (yutovo_calculator::ExpressionNode<yutovo_calculator::Array<yutovo_calculator::Real>>, expression)

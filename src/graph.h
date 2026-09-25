@@ -38,7 +38,7 @@ struct Graph : qi::grammar<std::u32string::iterator, GraphNode<Number>(), unicod
         line_graph = "graph_line(" > expression > ',' > identifier > ',' > expression > ',' > expression > ',' > 
             expression > ',' > expression > ',' > number > ')';
 
-        bar_graph = "graph_bar(" > expression > ',' > number > ')';
+        bar_graph = "graph_bar(" > expression > ')';
 
         surface_graph = "graph_surface(" > expression > ',' > identifier > ',' > identifier > ',' > expression > ',' > 
             expression > ',' > expression > ',' > expression > ',' > number > ',' > number > ')';
@@ -60,6 +60,10 @@ struct Graph : qi::grammar<std::u32string::iterator, GraphNode<Number>(), unicod
             &solver->parser_context))(qi::_val, _1));
 
         on_success(surface_graph, 
+            boost::phoenix::function<Annotation<Number>>(Annotation<Number>(expr.begin(), expr.end(), id, 
+            &solver->parser_context))(qi::_val, _1));
+
+        on_success(bar_graph, 
             boost::phoenix::function<Annotation<Number>>(Annotation<Number>(expr.begin(), expr.end(), id, 
             &solver->parser_context))(qi::_val, _1));
 

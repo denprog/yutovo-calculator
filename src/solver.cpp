@@ -337,6 +337,48 @@ Array<Real> Solver<Array<Real>>::operator()(SurfaceGraphNode<Array<Real>> const&
 }
 
 template<>
+Array<Real> Solver<Array<Real>>::operator()(BarGraphNode<Array<Real>> const& op) const
+{
+    Array<Real> data = (*this)(op.expression);
+
+    const int n = data.Size();
+    if (n == 0)
+        throw MathException(op.id, IncorrectOperation, op.pos, 1, op.line);
+
+    //the bottom bound includes zero so the bars grow from the zero line, NaN elements are ignored
+    Real y_bottom, y_top;
+    y_bottom = 0;
+    y_top = 0;
+    bool found = false;
+    for (int i = 0; i < n; ++i)
+    {
+        const Real& value = data[i];
+        if (value.IsNaN())
+            continue;
+        if (abs(value) > std::numeric_limits<float>::max())
+            throw MathException(Overflow);
+        if (value < y_bottom)
+            y_bottom = value;
+        if (value > y_top)
+            y_top = value;
+        found = true;
+    }
+    if (!found || y_bottom == y_top)
+        y_top = y_bottom + 1;
+
+    //the first items are bounds of the graph, then the number of bars and the bar heights follow
+    Array<Real> res;
+    res.Add(Array<Real>(64, 0.5f));
+    res.Add(Array<Real>(64, (float)n + 0.5f));
+    res.Add(Array<Real>(y_bottom));
+    res.Add(Array<Real>(y_top));
+    res.Add(Array<Real>(64, n));
+    for (int i = 0; i < n; ++i)
+        res.Add(data[i]);
+    return res;
+}
+
+template<>
 Real Solver<Real>::operator()(UnitNode<Real> const& op) const
 {
     //store the unit

@@ -2857,6 +2857,7 @@ private:
 //explicit specializations declared here so dependent TUs link to the definitions in solver.cpp instead of inlining the primary template
 template<> Array<Real> Solver<Array<Real>>::operator()(LineGraphNode<Array<Real>> const& op) const;
 template<> Array<Real> Solver<Array<Real>>::operator()(SurfaceGraphNode<Array<Real>> const& op) const;
+template<> Array<Real> Solver<Array<Real>>::operator()(BarGraphNode<Array<Real>> const& op) const;
 template<> Real Solver<Real>::operator()(UnitNode<Real> const& op) const;
 template<> Rational Solver<Rational>::operator()(UnitNode<Rational> const& op) const;
 template<> Array<Real> Solver<Array<Real>>::operator()(UnitNode<Array<Real>> const& op) const;

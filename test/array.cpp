@@ -323,6 +323,45 @@ TEST_F(CalcTestArrayReal, surface_graph4)
     EXPECT_THROW(parser.Parse(LogicalId{0, 0, 1}, U"graph_surface(x+y,x,x,-1,1,0,1,10,10);", &parser_context), yutovo_calculator::MathException);
 }
 
+TEST_F(CalcTestArrayReal, graph_bar1)
+{
+    auto res = parser.Parse(LogicalId{0, 0, 1}, U"graph_bar([1,5,3,2]);", AngleMeasure::Radian, AngleMeasure::Radian);
+    ASSERT_TRUE(res.ToStdString(3, 3) == "[0.5E+0,4.5E+0,0.E+0,5.E+0,4.E+0,1.E+0,5.E+0,3.E+0,2.E+0]") << res.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestArrayReal, graph_bar2)
+{
+    auto res = parser.Parse(LogicalId{0, 0, 1}, U"graph_bar([-2,3]);", AngleMeasure::Radian, AngleMeasure::Radian);
+    ASSERT_TRUE(res.ToStdString(3, 3) == "[0.5E+0,2.5E+0,-2.E+0,3.E+0,2.E+0,-2.E+0,3.E+0]") << res.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestArrayReal, graph_bar3)
+{
+    yutovo_calculator::ParserContext parser_context;
+    parser_context.Init(100);
+    EXPECT_THROW(parser.Parse(LogicalId{0, 0, 1}, U"graph_bar([]);", &parser_context), yutovo_calculator::MathException);
+}
+
+TEST_F(CalcTestArrayReal, graph_bar4)
+{
+    auto res = parser.Parse(LogicalId{0, 0, 1}, U"graph_bar(5);", AngleMeasure::Radian, AngleMeasure::Radian);
+    ASSERT_TRUE(res.ToStdString(3, 3) == "[0.5E+0,1.5E+0,0.E+0,5.E+0,1.E+0,5.E+0]") << res.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestArrayReal, graph_bar5)
+{
+    yutovo_calculator::ParserContext parser_context;
+    parser_context.Init(100);
+    auto res = parser.Parse(LogicalId{0, 0, 1}, U"graph_bar([sqrt(-1),1]);", &parser_context);
+    ASSERT_TRUE(res.ToStdString(3, 3) == "[0.5E+0,2.5E+0,0.E+0,1.E+0,2.E+0,NAN,1.E+0]") << res.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestArrayReal, graph_bar6)
+{
+    auto res = parser.Parse(LogicalId{0, 0, 1}, U"graph_bar([0,0]);", AngleMeasure::Radian, AngleMeasure::Radian);
+    ASSERT_TRUE(res.ToStdString(3, 3) == "[0.5E+0,2.5E+0,0.E+0,1.E+0,2.E+0,0.E+0,0.E+0]") << res.ToStdString(3, 3);
+}
+
 TEST_F(CalcTestArrayReal, units1)
 {
     parser.SetLocale(Language::Russian);
