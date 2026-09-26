@@ -674,7 +674,9 @@ Expression<Array<Real>>::Expression(LogicalId id, std::u32string& expr, Solver<A
 
     exp_number = digits_number >> raw[lexeme[(no_case[char_("E")] > (char_('+') | char_('-')))]] > +(char_("0-9"));
 
-    identifier = name >> -('{' > (integer_number_str | name) > '}');
+    identifier = name >> -('{' > subscript > '}');
+
+    subscript = raw[expression];
 
     implicit_div_mul = '(' >> expression >> ')' >> '/' >> '(' >> expression >> ')' >> identifier;
 

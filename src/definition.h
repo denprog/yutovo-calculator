@@ -8,6 +8,7 @@
 #ifndef DEFINITION_H
 #define DEFINITION_H
 
+#include <type_traits>
 #include "ast.h"
 #include "expression.h"
 
@@ -66,7 +67,12 @@ struct Definition : qi::grammar<std::u32string::iterator, DefinitionNode<Number>
         str = raw[lexeme[+(alnum | '_')]];
 
 		//identifier is a name with an optional subscript and optional description
-		identifier = name >> -('{' > (+char_("0-9") | name) > '}') >> -('`' > description > '`');
+		//the array parser accepts an arbitrary expression as the subscript, other parsers only a number or a name
+		if constexpr (std::is_same_v<Number, Array<Real>>)
+			subscript = expression.subscript.alias();
+		else
+			subscript = (+char_("0-9") | name);
+		identifier = name >> -('{' > subscript > '}') >> -('`' > description > '`');
 		
 		//name is a letter-numeric std::u32string with an letter in the beginning
 		//0x00B0 = U'°', 39 = U'\'', 0x00A2 = U'¢'
@@ -98,7 +104,7 @@ struct Definition : qi::grammar<std::u32string::iterator, DefinitionNode<Number>
     qi::rule<std::u32string::iterator, UnitNode<Number>(), unicode::space_type> unit;
     qi::rule<std::u32string::iterator, ListNode<Number>(), unicode::space_type> list;
     qi::rule<std::u32string::iterator, StringNode<Number>(), unicode::space_type> string;
-    qi::rule<std::u32string::iterator, std::u32string(), unicode::space_type> name, description, str;
+    qi::rule<std::u32string::iterator, std::u32string(), unicode::space_type> name, description, str, subscript;
     qi::rule<std::u32string::iterator, IdentifierNode<Number>(), unicode::space_type> identifier;
     qi::rule<std::u32string::iterator, IdentifierNode<Number>(), unicode::space_type> declared_identifier;
     qi::rule<std::u32string::iterator, IdentifierNode<Number>(), unicode::space_type> declared_function_identifier;

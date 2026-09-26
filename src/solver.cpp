@@ -1011,6 +1011,85 @@ VariableNode<Array<Real>>* Solver<Array<Real>>::FindVariable(const std::u32strin
 }
 
 template<>
+Array<Real> Solver<Array<Real>>::ArrayElementBySubscript(const Array<Real>& array, const IdentifierNode<Array<Real>>& identifier,
+    LogicalId error_id, int error_pos, int error_line) const
+{
+    //the element access depends on the array itself, so its redefinition re-solves the expression
+    IdentifierNode<Array<Real>> arr;
+    arr.name = identifier.name;
+    AddDependency(arr);
+
+    Array<Real> index_value;
+    bool v = false;
+
+    VariableNode<Array<Real>>* index_variable = FindVariable(identifier.subscript, U"");
+    if (index_variable)
+    {
+        //the declared index variable is a dependency too, so its redefinition re-solves the expression
+        IdentifierNode<Array<Real>> d;
+        d.name = identifier.subscript;
+        AddDependency(d);
+        index_value = (*this)(index_variable->expression);
+        v = true;
+    }
+    else
+    {
+        TempVariable* index_temp = FindTempVariable(identifier.subscript);
+        if (index_temp)
+        {
+            index_value = index_temp->second;
+            v = true;
+        }
+    }
+
+    int index = 0;
+    if (!v)
+    {
+        try
+        {
+            index = StringToInt(identifier.subscript);
+        }
+        catch (const std::exception&)
+        {
+            //the subscript is an arbitrary expression; its result must be an integer
+            try
+            {
+                index_value = EvaluateWithTempVariables(identifier.subscript, {});
+                v = true;
+            }
+            catch (...)
+            {
+                throw SyntaxException(error_id, ArgumentIsOver, U"Index of '" + identifier.name + U"' is over", error_pos, identifier.name.length(), error_line);
+            }
+        }
+    }
+
+    if (v)
+    {
+        if (index_value.Size() != 1)
+            throw SyntaxException(error_id, IncorrectOperation, U"Index of '" + identifier.name + U"' is over", error_pos, identifier.name.length(), error_line);
+        if (!index_value.Get(0).IsInteger())
+            throw SyntaxException(error_id, IncorrectOperation, U"Index of '" + identifier.name + U"' is not an integer", error_pos, identifier.name.length(), error_line);
+        try
+        {
+            index = (int)(index_value.Get(0));
+        }
+        catch (const MathException&)
+        {
+            throw SyntaxException(error_id, ArgumentIsOver, U"Index of '" + identifier.name + U"' is over", error_pos, identifier.name.length(), error_line);
+        }
+    }
+
+    if (array.Size() > index && index >= 0)
+    {
+        Array<Real> res;
+        res.Add(array.Get(index));
+        return res;
+    }
+    throw SyntaxException(error_id, ArgumentIsOver, U"Index of '" + identifier.name + U"' is over", error_pos, identifier.name.length(), error_line);
+}
+
+template<>
 Integer Solver<Integer>::operator()(NoFencesFunctionCallNode<Integer> const& op) const
 {
     AddDependency(op.name);
@@ -1286,74 +1365,13 @@ Array<Real> Solver<Array<Real>>::operator()(IdentifierNode<Array<Real>> const& o
         id = v->id;
         exported_id = v->exported;
         Array<Real> res = (*this)(v->expression);
-        if (!op.subscript.empty() && v->name.subscript != op.subscript)
-        {
-            VariableNode<Array<Real>>* s = FindVariable(op.subscript, U"");
-            if (s)
-            {
-                Array<Real> s_res = (*this)(s->expression);
-                if (s_res.Size() == 1)
-                {
-                    int index = (int)(s_res.Get(0));
-                    if (res.Size() > index && index >= 0)
-                    {
-                        Real r = res.Get(index);
-                        res.Clear();
-                        res.Add(r);
-                    }
-                    else
-                        throw SyntaxException(op.id, ArgumentIsOver, U"Index of '" + op.name + U"' is over", op.pos, op.name.length(), op.line);
-                }
-                else
-                    throw SyntaxException(op.id, IncorrectOperation, U"Index of '" + op.name + U"' is over", op.pos, op.name.length(), op.line);
-            }
-            else
-            {
-                TempVariable* t = FindTempVariable(op.subscript);
-                if (t)
-                {
-                    Array<Real> s_res = t->second;
-                    if (s_res.Size() == 1)
-                    {
-                        int index = (int)(s_res.Get(0));
-                        if (res.Size() > index && index >= 0)
-                        {
-                            Real r = res.Get(index);
-                            res.Clear();
-                            res.Add(r);
-                        }
-                        else
-                            throw SyntaxException(op.id, ArgumentIsOver, U"Index of '" + op.name + U"' is over", op.pos, op.name.length(), op.line);
-                    }
-                    else
-                        throw SyntaxException(op.id, IncorrectOperation, U"Index of '" + op.name + U"' is over", op.pos, op.name.length(), op.line);
-                }
-                else
-                {
-                    try
-                    {
-                        int index = StringToInt(op.subscript);
-                        if (res.Size() > index && index >= 0)
-                        {
-                            Real r = res.Get(index);
-                            res.Clear();
-                            res.Add(r);
-                        }
-                        else
-                            throw SyntaxException(op.id, ArgumentIsOver, U"Index of '" + op.name + U"' is over", op.pos, op.name.length(), op.line);
-                    }
-                    catch (const std::exception& e)
-                    {
-                        throw SyntaxException(op.id, ArgumentIsOver, U"Index of '" + op.name + U"' is over", op.pos, op.name.length(), op.line);
-                    }
-                }
-            }
-        }
         id = _id;
         exported_id = _exported_id;
+        if (!op.subscript.empty() && v->name.subscript != op.subscript)
+            res = ArrayElementBySubscript(res, op, op.id, op.pos, op.line);
         return res;
     }
-    
+
     //find in the build-in variables
     BuiltinVariable* var = FindBuiltinVariable(op.name);
     if (var)
@@ -1606,26 +1624,9 @@ Array<Real> Solver<Array<Real>>::operator()(ImplicitStringMulNode<Array<Real>> c
         LogicalId _id = id;
         id = v->id;
         Array<Real> res = (*this)(v->expression);
-        if (!op.identifier.subscript.empty() && v->name.subscript != op.identifier.subscript)
-        {
-            try
-            {
-                int index = StringToInt(op.identifier.subscript);
-                if (res.Size() > index && index >= 0)
-                {
-                    Real r = res.Get(index);
-                    res.Clear();
-                    res.Add(r);
-                }
-                else
-                    throw SyntaxException(op.id, ArgumentIsOver, U"Index of '" + op.identifier.name + U"' is over", op.pos, op.identifier.name.length(), op.line);
-            }
-            catch (const std::exception& e)
-            {
-                throw SyntaxException(op.id, ArgumentIsOver, U"Index of '" + op.identifier.name + U"' is over", op.pos, op.identifier.name.length(), op.line);
-            }
-        }
         id = _id;
+        if (!op.identifier.subscript.empty() && v->name.subscript != op.identifier.subscript)
+            res = ArrayElementBySubscript(res, op.identifier, op.id, op.pos, op.line);
         return (*this)(op.left) * res;
     }
     
@@ -1895,27 +1896,10 @@ Array<Real> Solver<Array<Real>>::operator()(ImplicitDivMulNode<Array<Real>> cons
         id = v->id;
         exported_id = v->exported;
         Array<Real> res = (*this)(v->expression);
-        if (!op.identifier.subscript.empty() && v->name.subscript != op.identifier.subscript)
-        {
-            try
-            {
-                int index = StringToInt(op.identifier.subscript);
-                if (res.Size() > index && index >= 0)
-                {
-                    Real r = res.Get(index);
-                    res.Clear();
-                    res.Add(r);
-                }
-                else
-                    throw SyntaxException(op.id, ArgumentIsOver, U"Index of '" + op.identifier.name + U"' is over", op.pos, op.identifier.name.length(), op.line);
-            }
-            catch (const std::exception& e)
-            {
-                throw SyntaxException(op.id, ArgumentIsOver, U"Index of '" + op.identifier.name + U"' is over", op.pos, op.identifier.name.length(), op.line);
-            }
-        }
         id = _id;
         exported_id = _exported_id;
+        if (!op.identifier.subscript.empty() && v->name.subscript != op.identifier.subscript)
+            res = ArrayElementBySubscript(res, op.identifier, op.id, op.pos, op.line);
         Array<Real> arg1 = (*this)(op.upper);
         Array<Real> arg2 = (*this)(op.lower);
         return (arg1 / arg2) * res;

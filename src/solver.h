@@ -937,6 +937,8 @@ struct Solver : public boost::static_visitor<Number>
         return res;
     }
 
+    Number ArrayElementBySubscript(const Number& array, const IdentifierNode<Number>& identifier, LogicalId error_id, int error_pos, int error_line) const;
+
     Number NumericalDerivativeAtPoint(const std::u32string& expression_str, const std::list<DerivativeVariableNode<Number>>& variables) const
     {
         auto var_iter = variables.begin();
@@ -2889,6 +2891,8 @@ template<> Real Solver<Real>::operator()(FunctionCallStringNode<Real> const& op)
 template<> Rational Solver<Rational>::operator()(FunctionCallStringNode<Rational> const& op) const;
 template<> Complex Solver<Complex>::operator()(FunctionCallStringNode<Complex> const& op) const;
 template<> VariableNode<Array<Real>>* Solver<Array<Real>>::FindVariable(const std::u32string& name, const std::u32string& subscript) const;
+template<> Array<Real> Solver<Array<Real>>::ArrayElementBySubscript(const Array<Real>& array, const IdentifierNode<Array<Real>>& identifier,
+    LogicalId error_id, int error_pos, int error_line) const;
 template<> Integer Solver<Integer>::operator()(NoFencesFunctionCallNode<Integer> const& op) const;
 template<> Real Solver<Real>::operator()(NoFencesFunctionCallNode<Real> const& op) const;
 template<> Rational Solver<Rational>::operator()(NoFencesFunctionCallNode<Rational> const& op) const;
