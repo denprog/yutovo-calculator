@@ -2715,6 +2715,37 @@ TEST_F(CalcTestReal, definite_integral14)
     EXPECT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"definite_integral(-2,-1,sqrt(x),x);", 10), yutovo_calculator::ParserException);
 }
 
+TEST_F(CalcTestReal, definite_integral_unit_limits1)
+{
+    auto res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"definite_integral(0mm,1mm,5,x);", 10);
+    ASSERT_TRUE(res.ToStdString(10, 10) == "0.005E+0(m)") << res.ToStdString(10, 10);
+}
+
+TEST_F(CalcTestReal, definite_integral_unit_limits2)
+{
+    auto res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"definite_integral(0s,2s,x,x);", 10);
+    ASSERT_TRUE(res.ToStdString(10, 10) == "2.E+0(s^2)") << res.ToStdString(10, 10);
+}
+
+TEST_F(CalcTestReal, definite_integral_unit_limits3)
+{
+    auto res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"definite_integral(0mm,1cm,5,x);", 10);
+    ASSERT_TRUE(res.ToStdString(10, 10) == "0.05E+0(m)") << res.ToStdString(10, 10);
+}
+
+TEST_F(CalcTestReal, definite_integral_unit_limits_incompatible)
+{
+    try
+    {
+        parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"definite_integral(0m,1kg,5,x);", 10);
+        ASSERT_FALSE(true);
+    }
+    catch (yutovo_calculator::MathException& ex)
+    {
+        ASSERT_TRUE(ex.ex_id == ParserExceptionCode::UnitsAreIncompatible) << ex.ex_id;
+    }
+}
+
 TEST_F(CalcTestReal, definite_integral_inf1)
 {
     auto res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"definite_integral(0,∞,exp(-x),x);", 10);

@@ -537,6 +537,17 @@ struct Solver : public boost::static_visitor<Number>
                         throw MathException(op.id, IncorrectOperation, op.pos, op.line);
                 }
 
+                auto limit_has_unit =
+                    [](const Number& value) -> bool
+                    {
+                        if constexpr (std::is_same_v<Number, Real> || std::is_same_v<Number, Rational>)
+                            return !value.unit.IsEmpty();
+                        else if constexpr (std::is_same_v<Number, Array<Real>>)
+                            return value.Size() > 0 && !value[0].unit.IsEmpty();
+                        else
+                            return false;
+                    };
+
                 //validate the integrand with our own grammar: giac accepts identifiers unknown to us (e.g. i in the real parser)
                 {
                     Solver<Number> validation_solver(precision, default_angle_measure, result_angle_measure, default_notation, im, Number(), symbols);
@@ -633,8 +644,14 @@ struct Solver : public boost::static_visitor<Number>
 
                 if constexpr (std::is_same_v<Number, Real> || std::is_same_v<Number, Complex>)
                 {
-                    if (HasUserFunctionCall(op.expression))
+                    if (HasUserFunctionCall(op.expression) || limit_has_unit(lower) || limit_has_unit(upper))
                         return NumericalDefiniteIntegral(op.expression, op.variable, lower, upper);
+                }
+                else if constexpr (std::is_same_v<Number, Rational> || std::is_same_v<Number, Array<Real>>)
+                {
+                    //these types have no numerical integration fallback: dimensioned limits cannot be integrated without losing the unit
+                    if (limit_has_unit(lower) || limit_has_unit(upper))
+                        throw MathException(op.id, IncorrectOperation, op.pos, op.size, op.line);
                 }
 
                 giac::gen res;

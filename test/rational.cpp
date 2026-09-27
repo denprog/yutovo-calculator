@@ -937,6 +937,19 @@ TEST_F(CalcTestRational, definite_integral5)
     ASSERT_TRUE(res.ToStdString() == "7/3") << res.ToStdString();
 }
 
+TEST_F(CalcTestRational, definite_integral_unit_limits)
+{
+    try
+    {
+        parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"definite_integral(0m,1m,x,x);");
+        ASSERT_FALSE(true);
+    }
+    catch (yutovo_calculator::MathException& ex)
+    {
+        ASSERT_TRUE(ex.ex_id == ParserExceptionCode::IncorrectOperation) << ex.ex_id;
+    }
+}
+
 TEST_F(CalcTestRational, definite_integral6)
 {
     auto res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"definite_integral(0,10,x,x);");
