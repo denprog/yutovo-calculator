@@ -493,6 +493,19 @@ TEST_F(CalcTestReal, str2)
     EXPECT_THROW(parser.Parse(LogicalId{0, 0, 1}, U"33t;"), yutovo_calculator::SyntaxException);
 }
 
+TEST_F(CalcTestReal, underscore_variables)
+{
+    parser.Parse(LogicalId{0, 0, 1}, U"_=1;");
+    parser.Parse(LogicalId{0, 0, 2}, U"_a=2;");
+    parser.Parse(LogicalId{0, 0, 3}, U"_a_=3;");
+    parser.Parse(LogicalId{0, 0, 4}, U"__=4;");
+    parser.Parse(LogicalId{0, 0, 5}, U"a_=5;");
+    ASSERT_TRUE(parser.Parse(LogicalId{0, 0, 6}, U"_+_a+_a_+__+a_;") == parser.Parse(LogicalId{0, 0, 6}, U"15;")) <<
+        parser.Parse(LogicalId{0, 0, 6}, U"_+_a+_a_+__+a_;").ToStdString(3, 3);
+    ASSERT_TRUE(parser.Parse(LogicalId{0, 0, 7}, U"_a*_a;") == parser.Parse(LogicalId{0, 0, 7}, U"4;")) <<
+        parser.Parse(LogicalId{0, 0, 7}, U"_a*_a;").ToStdString(3, 3);
+}
+
 TEST_F(CalcTestReal, variables1)
 {
     std::vector<std::u32string> dependencies;

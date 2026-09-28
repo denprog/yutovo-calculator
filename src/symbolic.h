@@ -17,6 +17,7 @@
 #include <climits>
 #include <set>
 #include <cmath>
+#include <cstring>
 #if !defined(_WIN32) && !defined(HAVE_ALLOCA_H)
 #define HAVE_ALLOCA_H
 #endif
@@ -772,6 +773,13 @@ public:
         return ParseGen(utf8, c);
     }
 
+    //Bytes the expression tokenizer (ExpressionParser::ParseIdentOrFunc) lexes into one operand: any byte except its stop
+    //characters and whitespace, so multibyte UTF-8 identifiers and underscores stay part of a scanned power base or exponent
+    static bool IsPowerOperandByte(unsigned char c)
+    {
+        return !std::isspace(c) && std::strchr("()+-*/^,!", c) == nullptr;
+    }
+
     static std::string ReplacePowerOperator(std::string s)
     {
         size_t pos = 0;
@@ -817,7 +825,7 @@ public:
             }
             else
             {
-                while (base_start > 0 && (std::isalnum(static_cast<unsigned char>(s[base_start - 1])) || s[base_start - 1] == '.'))
+                while (base_start > 0 && IsPowerOperandByte(static_cast<unsigned char>(s[base_start - 1])))
                     --base_start;
             }
 
@@ -840,7 +848,7 @@ public:
             }
             else
             {
-                while (exp_end < s.size() && (std::isalnum(static_cast<unsigned char>(s[exp_end])) || s[exp_end] == '.'))
+                while (exp_end < s.size() && IsPowerOperandByte(static_cast<unsigned char>(s[exp_end])))
                     ++exp_end;
             }
 
@@ -898,7 +906,7 @@ public:
             }
             else
             {
-                while (base_start > 0 && (std::isalnum(static_cast<unsigned char>(s[base_start - 1])) || s[base_start - 1] == '.'))
+                while (base_start > 0 && IsPowerOperandByte(static_cast<unsigned char>(s[base_start - 1])))
                     --base_start;
             }
 
@@ -923,7 +931,7 @@ public:
             {
                 if (exp_end < s.size() && s[exp_end] == '-')
                     ++exp_end;
-                while (exp_end < s.size() && (std::isalnum(static_cast<unsigned char>(s[exp_end])) || s[exp_end] == '.'))
+                while (exp_end < s.size() && IsPowerOperandByte(static_cast<unsigned char>(s[exp_end])))
                     ++exp_end;
             }
 

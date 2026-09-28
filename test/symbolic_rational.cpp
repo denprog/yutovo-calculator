@@ -300,6 +300,34 @@ TEST_F(CalcTestSymbolicRational, infinity_in_number)
     ASSERT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"∞12.3;"), SyntaxException);
 }
 
+TEST_F(CalcTestSymbolicRational, underscore_variables)
+{
+    //giac does not accept a lone underscore or a double underscore as a free identifier: the value degrades to nan
+    Symbolic<Rational> power1 = parser.Parse(LogicalId{0, 0, 1}, U"pow(_,2);", 10);
+    ASSERT_TRUE(power1.ToStdString(0) == "nan") << power1.ToStdString(0);
+    Symbolic<Rational> power4 = parser.Parse(LogicalId{0, 0, 4}, U"pow(__,2);", 10);
+    ASSERT_TRUE(power4.ToStdString(0) == "nan") << power4.ToStdString(0);
+    //giac evaluates identifiers starting with an underscore instead of keeping them symbolic
+    Symbolic<Rational> power2 = parser.Parse(LogicalId{0, 0, 2}, U"pow(_a,2);", 10);
+    ASSERT_TRUE(power2.ToStdString(0) == "1") << power2.ToStdString(0);
+    Symbolic<Rational> power3 = parser.Parse(LogicalId{0, 0, 3}, U"pow(_a_,2);", 10);
+    ASSERT_TRUE(power3.ToStdString(0) == "1") << power3.ToStdString(0);
+    //a trailing underscore stays in the name: the power base must not lose it (no empty brackets)
+    Symbolic<Rational> power5 = parser.Parse(LogicalId{0, 0, 5}, U"pow(a_,2);", 10);
+    ASSERT_TRUE(power5.ToStdString(0) == "pow(a_,2)") << power5.ToStdString(0);
+    ASSERT_TRUE(power5.ToJson(10) ==
+        R"r({"type":46,"elements":[{"type":15,"elements":[{"type":7,"elements":[{"type":8,"elements":"a_"}]},{"type":10,"elements":[]},{"type":7,"elements":[{"type":8,"elements":"2"}]}]}]})r") << power5.ToJson(10);
+
+    //all underscore names work as defined variables: values are stored by the calculator itself
+    parser.Parse(LogicalId{0, 0, 6}, U"_=1;");
+    parser.Parse(LogicalId{0, 0, 7}, U"_a=2;");
+    parser.Parse(LogicalId{0, 0, 8}, U"_a_=3;");
+    parser.Parse(LogicalId{0, 0, 9}, U"__=4;");
+    parser.Parse(LogicalId{0, 0, 10}, U"a_=5;");
+    Symbolic<Rational> sum = parser.Parse(LogicalId{0, 0, 11}, U"_+_a+_a_+__+a_;");
+    ASSERT_TRUE(sum.ToStdString(0) == "15") << sum.ToStdString(0);
+}
+
 TEST_F(CalcTestSymbolicRational, variables1)
 {
     parser.Parse(LogicalId{0, 0, 1}, U"a=2;");

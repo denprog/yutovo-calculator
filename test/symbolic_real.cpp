@@ -726,6 +726,45 @@ TEST_F(CalcTestSymbolicReal, definite_integral1)
     ASSERT_TRUE(res.ToStdString(10) == "0.5*x") << res.ToStdString(10);
 }
 
+TEST_F(CalcTestSymbolicReal, definite_integral_unit_limits1)
+{
+    parser.SetLocale(Language::Russian);
+    parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"t1=0мс;");
+    parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"t2=1мс;");
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 3}, U"definite_integral(t1,t2,t,t);", 10);
+    ASSERT_TRUE(res.ToStdString(10) == "0.5*pow(мс,2.)") << res.ToStdString(10);
+    ASSERT_TRUE(res.ToJson(10) ==
+        R"r({"type":45,"elements":[{"type":7,"elements":[{"type":8,"elements":"0.5"},{"type":13,"symbol":"·"},{"type":15,"elements":[{"type":7,"elements":[{"type":8,"elements":"мс"}]},{"type":10,"elements":[]},{"type":7,"elements":[{"type":8,"elements":"2"}]}]}]}]})r") << res.ToJson(10);
+}
+
+TEST_F(CalcTestSymbolicReal, underscore_variables)
+{
+    //giac does not accept a lone underscore or a double underscore as a free identifier: the value degrades to nan
+    Symbolic<Real> power1 = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"pow(_,2);", 10);
+    ASSERT_TRUE(power1.ToStdString(10) == "nan") << power1.ToStdString(10);
+    Symbolic<Real> power4 = parser.Parse(LogicalId{0, 0, 0, 0, 4}, U"pow(__,2);", 10);
+    ASSERT_TRUE(power4.ToStdString(10) == "nan") << power4.ToStdString(10);
+    //giac evaluates identifiers starting with an underscore instead of keeping them symbolic
+    Symbolic<Real> power2 = parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"pow(_a,2);", 10);
+    ASSERT_TRUE(power2.ToStdString(10) == "1.") << power2.ToStdString(10);
+    Symbolic<Real> power3 = parser.Parse(LogicalId{0, 0, 0, 0, 3}, U"pow(_a_,2);", 10);
+    ASSERT_TRUE(power3.ToStdString(10) == "1.") << power3.ToStdString(10);
+    //a trailing underscore stays in the name: the power base must not lose it (no empty brackets)
+    Symbolic<Real> power5 = parser.Parse(LogicalId{0, 0, 0, 0, 5}, U"pow(a_,2);", 10);
+    ASSERT_TRUE(power5.ToStdString(10) == "pow(a_,2.)") << power5.ToStdString(10);
+    ASSERT_TRUE(power5.ToJson(10) ==
+        R"r({"type":45,"elements":[{"type":15,"elements":[{"type":7,"elements":[{"type":8,"elements":"a_"}]},{"type":10,"elements":[]},{"type":7,"elements":[{"type":8,"elements":"2"}]}]}]})r") << power5.ToJson(10);
+
+    //all underscore names work as defined variables: values are stored by the calculator itself
+    parser.Parse(LogicalId{0, 0, 0, 0, 6}, U"_=1;");
+    parser.Parse(LogicalId{0, 0, 0, 0, 7}, U"_a=2;");
+    parser.Parse(LogicalId{0, 0, 0, 0, 8}, U"_a_=3;");
+    parser.Parse(LogicalId{0, 0, 0, 0, 9}, U"__=4;");
+    parser.Parse(LogicalId{0, 0, 0, 0, 10}, U"a_=5;");
+    Symbolic<Real> sum = parser.Parse(LogicalId{0, 0, 0, 0, 11}, U"_+_a+_a_+__+a_;", 10);
+    ASSERT_TRUE(sum.ToStdString(10) == "15.") << sum.ToStdString(10);
+}
+
 TEST_F(CalcTestSymbolicReal, definite_integral_nonsymbol)
 {
     EXPECT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"definite_integral(0,1,x,1);"), yutovo_calculator::ParserException);

@@ -543,6 +543,19 @@ TEST_F(CalcTestComplex, exp1)
     ASSERT_TRUE(res == "0.54E+0+i*0.841E+0") << res;
 }
 
+TEST_F(CalcTestComplex, underscore_variables)
+{
+    parser.Parse(LogicalId{0, 0, 1}, U"_=1;");
+    parser.Parse(LogicalId{0, 0, 2}, U"_a=2;");
+    parser.Parse(LogicalId{0, 0, 3}, U"_a_=3;");
+    parser.Parse(LogicalId{0, 0, 4}, U"__=4;");
+    parser.Parse(LogicalId{0, 0, 5}, U"a_=5;");
+    std::string sum = parser.Parse(LogicalId{0, 0, 6}, U"_+_a+_a_+__+a_;").ToStdString(3, 3);
+    ASSERT_TRUE(sum == "15.E+0") << sum;
+    std::string power = parser.Parse(LogicalId{0, 0, 7}, U"_a*_a;").ToStdString(3, 3);
+    ASSERT_TRUE(power == "4.E+0") << power;
+}
+
 TEST_F(CalcTestComplex, variables1)
 {
     parser.Parse(LogicalId{0, 0, 1}, U"v=5;");

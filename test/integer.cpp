@@ -157,6 +157,17 @@ TEST_F(CalcTestInteger, power1)
     ASSERT_TRUE(res.ToString(10) == U"8") << res.ToStdString(10);
 }
 
+TEST_F(CalcTestInteger, underscore_variables)
+{
+    parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"_=1;");
+    parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"_a=2;");
+    parser.Parse(LogicalId{0, 0, 0, 0, 3}, U"_a_=3;");
+    parser.Parse(LogicalId{0, 0, 0, 0, 4}, U"__=4;");
+    parser.Parse(LogicalId{0, 0, 0, 0, 5}, U"a_=5;");
+    ASSERT_TRUE(parser.Parse(LogicalId{0, 0, 0, 0, 6}, U"_+_a+_a_+__+a_;") == parser.Parse(LogicalId{0, 0, 0, 0, 6}, U"15;"));
+    ASSERT_TRUE(parser.Parse(LogicalId{0, 0, 0, 0, 7}, U"_a*_a;") == parser.Parse(LogicalId{0, 0, 0, 0, 7}, U"4;"));
+}
+
 TEST_F(CalcTestInteger, variables1)
 {
     parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"a=5;");
