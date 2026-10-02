@@ -258,20 +258,20 @@ ASSERT_TRUE(document.ToHtml() == "<body>...</body>") << document.ToHtml();
 ### Build
 Each component is built and tested from its own `build/debug` subdirectory (in-tree builds are not used):
 ```bash
-cd yutovo-calculator/build/debug && make -j16 yutovo-calculator_tests
+cd yutovo-calculator/build/debug && make -j$(lscpu -p=Core,Socket | grep -v '^#' | sort -u | wc -l) yutovo-calculator_tests
 ./test/yutovo-calculator_tests
 
-cd yutovo-solver/build/debug && make -j16
+cd yutovo-solver/build/debug && make -j$(lscpu -p=Core,Socket | grep -v '^#' | sort -u | wc -l)
 
-cd yutovo-editor/build/debug && make -j16 yutovo-editor_tests
+cd yutovo-editor/build/debug && make -j$(lscpu -p=Core,Socket | grep -v '^#' | sort -u | wc -l) yutovo-editor_tests
 ./test/yutovo-editor_tests
 
-cd yutovo-desktop/build/debug && make -j16 yutovo-desktop
+cd yutovo-desktop/build/debug && make -j$(lscpu -p=Core,Socket | grep -v '^#' | sort -u | wc -l) yutovo-desktop
 
 # Emscripten/wasm build (from yutovo-calculator)
-cd yutovo-calculator/build_web/debug && make -j16 yutovo-calculator
+cd yutovo-calculator/build_web/debug && make -j$(lscpu -p=Core,Socket | grep -v '^#' | sort -u | wc -l) yutovo-calculator
 ```
-Use `-j16` maximum for building on any platform.
+Use the number of **physical** cores for `-j` (`lscpu -p=Core,Socket | grep -v '^#' | sort -u | wc -l`), not `nproc` — `nproc` counts hyperthreads too and the build is slower with them.
 
 ### Test runtime
 Running the full `yutovo-editor_tests` suite takes approximately **25 minutes** (symbolic tests are particularly slow due to WebSocket solver round-trips).
