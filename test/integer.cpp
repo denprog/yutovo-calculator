@@ -130,7 +130,11 @@ TEST_F(CalcTestInteger, integers5)
 TEST_F(CalcTestInteger, logical1)
 {
     Integer res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"¬5;");
-    ASSERT_TRUE(res.ToString(10) == U"2") << res.ToStdString(10);
+    ASSERT_TRUE(res.ToString(10) == U"-6") << res.ToStdString(10);
+    res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"¬0;");
+    ASSERT_TRUE(res.ToString(10) == U"-1") << res.ToStdString(10);
+    res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"¬-5;");
+    ASSERT_TRUE(res.ToString(10) == U"4") << res.ToStdString(10);
 }
 
 TEST_F(CalcTestInteger, logical2)
@@ -149,6 +153,20 @@ TEST_F(CalcTestInteger, logical4)
 {
     Integer res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"10⊕12;");
     ASSERT_TRUE(res.ToString(10) == U"6") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestInteger, logical5)
+{
+    Integer res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"¬¬7;");
+    ASSERT_TRUE(res.ToString(10) == U"7") << res.ToStdString(10);
+    res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"¬-1;");
+    ASSERT_TRUE(res.ToString(10) == U"0") << res.ToStdString(10);
+    res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"¬255;");
+    ASSERT_TRUE(res.ToString(10) == U"-256") << res.ToStdString(10);
+    res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"¬(10∧12);");
+    ASSERT_TRUE(res.ToString(10) == U"-9") << res.ToStdString(10);
+    res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"¬10∨¬12;");
+    ASSERT_TRUE(res.ToString(10) == U"-9") << res.ToStdString(10);
 }
 
 TEST_F(CalcTestInteger, power1)

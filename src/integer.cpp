@@ -326,16 +326,11 @@ Integer operator^(const Integer& num1, const Integer& num2)
 
 Integer operator!(const Integer& num)
 {
-    auto s = num.ToString(2);
-    std::u32string r;
-    for (auto ch : s)
-    {
-        if (ch == U'1')
-            r += U'0';
-        else
-            r += U'1';
-    }
-    return Integer::FromString(r, 2);
+    Integer res;
+
+    mpz_com(res.number, num.number);
+
+    return res;
 }
 
 void Integer::operator+=(const Integer& num)
