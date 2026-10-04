@@ -71,8 +71,13 @@ else()
                 add_definitions(-D_LIBCPP_ENABLE_ASSERTIONS)
                 add_link_options(-fsanitize=undefined)
             elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-                set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0 -fhardened -Wimplicit-fallthrough -U_FORTIFY_SOURCE -fstrict-flex-arrays=3 -Wtrampolines \
-                    -Werror=format-security -Wno-hardened")
+                if (CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 14)
+                    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0 -fhardened -Wimplicit-fallthrough -U_FORTIFY_SOURCE -fstrict-flex-arrays=3 -Wtrampolines \
+                        -Werror=format-security -Wno-hardened")
+                else()
+                    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0 -Wimplicit-fallthrough -U_FORTIFY_SOURCE -fstrict-flex-arrays=3 -Wtrampolines \
+                        -Werror=format-security")
+                endif()
             endif()
         endif()
     elseif (CMAKE_BUILD_TYPE STREQUAL "RelWithDebugInfo")
