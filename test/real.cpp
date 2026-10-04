@@ -132,6 +132,16 @@ TEST_F(CalcTestReal, arithmetic1)
     ASSERT_TRUE(res.ToString(3, 3) == U"7.5E+0") << res.ToStdString(3, 3);
 }
 
+TEST_F(CalcTestReal, percent_precision)
+{
+    Real res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"200%50;");
+    ASSERT_TRUE(res.ToStdString(3, 15) == "100.E+0") << res.ToStdString(3, 15);
+    res = parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"3%7;");
+    ASSERT_TRUE(res.ToStdString(3, 15) == "0.21E+0") << res.ToStdString(3, 15);
+    res = parser.Parse(LogicalId{0, 0, 0, 0, 3}, U"10%75;");
+    ASSERT_TRUE(res.ToStdString(3, 15) == "7.5E+0") << res.ToStdString(3, 15);
+}
+
 TEST_F(CalcTestReal, arithmetic2)
 {
     Real res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"2(3+4);");

@@ -65,6 +65,14 @@ TEST_F(CalcTestComplex, numbers3)
     ASSERT_TRUE(res == "4.E+0+i*6.E+0") << res;
 }
 
+TEST_F(CalcTestComplex, percent1)
+{
+    std::string res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"(2+3i)%10;").ToStdString(3, 15);
+    ASSERT_TRUE(res == "0.2E+0+i*0.3E+0") << res;
+    res = parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"200%50;").ToStdString(3, 15);
+    ASSERT_TRUE(res == "100.E+0") << res;
+}
+
 TEST_F(CalcTestComplex, numbers4)
 {
     parser.SetLocale(Language::Russian);

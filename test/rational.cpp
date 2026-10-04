@@ -21,6 +21,8 @@ TEST_F(CalcTestRational, arithmetic1)
 {
     Rational res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"10%75;");
     ASSERT_TRUE(res.ToString() == U"15/2") << res.ToStdString();
+    res = parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"200%50;");
+    ASSERT_TRUE(res.ToString() == U"100") << res.ToStdString();
 }
 
 TEST_F(CalcTestRational, arithmetic2)

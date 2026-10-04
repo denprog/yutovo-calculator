@@ -119,6 +119,12 @@ TEST_F(CalcTestArrayReal, functions10)
     ASSERT_TRUE(r.ToStdString(3, 3) == "[2.E+0]") << r.ToStdString(3, 3);
 }
 
+TEST_F(CalcTestArrayReal, percent1)
+{
+    auto r = parser.Parse(LogicalId{0, 0, 1}, U"[5]%50;");
+    ASSERT_TRUE(r.ToStdString(3, 15) == "[2.5E+0]") << r.ToStdString(3, 15);
+}
+
 TEST_F(CalcTestArrayReal, sum1)
 {
     auto r = parser.Parse(LogicalId{0, 0, 1}, U"var=[1,2,3];", 3);

@@ -554,7 +554,7 @@ Real Solver<Real>::operator()(OperationNode<Real> const& op) const
         case U'/':
             return left_value / right;
         case U'%':
-            return left_value * (float)0.01 * right;
+            return left_value * right / 100;
         }
     }
     catch (MathException e)
@@ -618,7 +618,7 @@ Complex Solver<Complex>::operator()(OperationNode<Complex> const& op) const
         case U'/':
             return left_value / right;
         case U'%':
-            return left_value * (float)0.01 * right;
+            return left_value * right / 100;
         }
     }
     catch (MathException e)
@@ -648,7 +648,7 @@ Array<Real> Solver<Array<Real>>::operator()(OperationNode<Array<Real>> const& op
         case U'/':
             return left_value / right;
         case U'%':
-            return left_value * (float)0.01 * right;
+            return left_value * right / 100;
         }
     }
     catch (MathException e)
