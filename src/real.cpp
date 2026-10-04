@@ -1433,7 +1433,7 @@ Real Real::ToRadian() const
     case AngleMeasure::Grad:
         res = *this;
         res.angle_measure = AngleMeasure::None;
-        res *= pi(GetBitPrecision()) / 180 * (float)0.9;
+        res *= pi(GetBitPrecision()) / 200;
         break;
     default:
         res = *this;
@@ -1460,7 +1460,8 @@ Real Real::ToDegree() const
     case AngleMeasure::Grad:
         res = *this;
         res.angle_measure = AngleMeasure::None;
-        res *= (float)0.9;
+        res *= 9;
+        res /= 10;
         break;
     default:
         res = *this;
@@ -1480,10 +1481,10 @@ Real Real::ToGrad() const
     case AngleMeasure::Radian:
         res = *this;
         res.angle_measure = AngleMeasure::None;
-        res *= 180 / pi(GetBitPrecision()) * (float)0.9;
+        res *= 200 / pi(GetBitPrecision());
         break;
     case AngleMeasure::Degree:
-        res = *this / (float)0.9;
+        res = *this * 10 / 9;
         break;
     case AngleMeasure::Grad:
         return *this;

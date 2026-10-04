@@ -1084,7 +1084,7 @@ TEST_F(CalcTestReal, trigonometric7)
     ASSERT_TRUE(res.angle_measure == AngleMeasure::Degree && res.ToStdString(3, 10) == "114.5915590262E+0") << res.ToStdString(3, 10);
 
     res = parser.Parse(LogicalId{0, 0, 1}, U"2grad;", AngleMeasure::Radian, AngleMeasure::Radian, 10);
-    ASSERT_TRUE(res.angle_measure == AngleMeasure::Radian && res.ToStdString(3, 10) == "0.0314159257E+0") << res.ToStdString(3, 10);
+    ASSERT_TRUE(res.angle_measure == AngleMeasure::Radian && res.ToStdString(3, 10) == "0.03141592654E+0") << res.ToStdString(3, 10);
 }
 
 TEST_F(CalcTestReal, trigonometric8)
@@ -1155,6 +1155,22 @@ TEST_F(CalcTestReal, trigonometric9)
     ASSERT_TRUE(res.angle_measure == AngleMeasure::Degree) << (int)res.angle_measure;
     ASSERT_TRUE(res.ToStdString(3, 3) == parser.Parse(LogicalId{0, 0, 1}, U"90deg;", AngleMeasure::Radian, AngleMeasure::Degree).ToStdString(3, 3)) << 
         res.ToStdString(3, 3);
+}
+
+//Grad conversions must stay exact at high precision: 1 grad = 9/10 degree = pi/200 radian
+TEST_F(CalcTestReal, trigonometric10)
+{
+    Real res = parser.Parse(LogicalId{0, 0, 1}, U"10grad;", AngleMeasure::Radian, AngleMeasure::Degree, 10);
+    ASSERT_TRUE(res.angle_measure == AngleMeasure::Degree && res.ToStdString(3, 10) == "9.E+0") << res.ToStdString(3, 10);
+
+    res = parser.Parse(LogicalId{0, 0, 1}, U"1grad;", AngleMeasure::Radian, AngleMeasure::Degree, 10);
+    ASSERT_TRUE(res.angle_measure == AngleMeasure::Degree && res.ToStdString(3, 10) == "0.9E+0") << res.ToStdString(3, 10);
+
+    res = parser.Parse(LogicalId{0, 0, 1}, U"90deg;", AngleMeasure::Radian, AngleMeasure::Grad, 10);
+    ASSERT_TRUE(res.angle_measure == AngleMeasure::Grad && res.ToStdString(3, 10) == "100.E+0") << res.ToStdString(3, 10);
+
+    res = parser.Parse(LogicalId{0, 0, 1}, U"1rad;", AngleMeasure::Radian, AngleMeasure::Grad, 10);
+    ASSERT_TRUE(res.angle_measure == AngleMeasure::Grad && res.ToStdString(3, 10) == "63.6619772368E+0") << res.ToStdString(3, 10);
 }
 
 TEST_F(CalcTestReal, units1)
