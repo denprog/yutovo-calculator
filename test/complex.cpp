@@ -1275,6 +1275,13 @@ TEST_F(CalcTestComplex, derivative_at_point_multi3)
     ASSERT_TRUE(res.ToStdString(3, 3) == parser.Parse(LogicalId{0, 0, 0, 0, 3}, U"12;").ToStdString(3, 3)) << res.ToStdString(3, 3);
 }
 
+TEST_F(CalcTestComplex, derivative_at_point_large_point)
+{
+    parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"f(x)=pow(x,2);");
+    Complex res = parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"derivative(f(x), [x=10000000000]);");
+    ASSERT_TRUE(res.ToStdString(3, 3) == parser.Parse(LogicalId{0, 0, 0, 0, 3}, U"20000000000;").ToStdString(3, 3)) << res.ToStdString(3, 3);
+}
+
 TEST_F(CalcTestComplex, evaluate1)
 {
     Complex res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"evaluate(x*x, [x=3]);");

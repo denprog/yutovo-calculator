@@ -859,14 +859,48 @@ struct Solver : public boost::static_visitor<Number>
         }
     }
 
+    Number RaiseDerivativePrecision(const Number& value) const
+    {
+        if constexpr (std::is_same_v<Number, Real> || std::is_same_v<Number, Complex>)
+        {
+            //the central difference keeps only about two thirds of the significant digits, so the function
+            //is evaluated at a point raised to one and a half times the bit precision
+            Number raised(value);
+            int bits = raised.GetBitPrecision();
+            raised.SetBitPrecision(bits + bits / 2 + 16);
+            return raised;
+        }
+        else
+        {
+            return value;
+        }
+    }
+
     Number StepForNumericalDerivative(const Number& value) const
     {
-        if constexpr (std::is_same_v<Number, Real>)
-            return Number(precision, "1e-7");
-        else if constexpr (std::is_same_v<Number, Complex>)
-            return Number(Real(precision, "1e-7"), Real(precision, "0"));
+        if constexpr (std::is_same_v<Number, Real> || std::is_same_v<Number, Complex>)
+        {
+            //the truncation error of the central difference is O(h^2), the rounding error is O(epsilon / h) with
+            //epsilon = 10^(-decimal precision of the evaluation point); they balance at h ~ cbrt(epsilon) * max(|value|, 1)
+            int bits = value.GetBitPrecision();
+            int step_digits = std::max(1, MathHelper::ToDecimalPrecision(bits) / 3);
+            int value_exponent = 0;
+            if constexpr (std::is_same_v<Number, Real>)
+                value_exponent = value.GetExp();
+            else
+                value_exponent = std::max(value.GetRe().GetExp(), value.GetIm().GetExp());
+            int step_exponent = std::max(0, value_exponent) - step_digits;
+            std::string step_str = std::string("1e") + std::to_string(step_exponent);
+            if constexpr (std::is_same_v<Number, Real>)
+                return Number(bits, step_str.c_str());
+            else
+                return Number(Real(bits, step_str.c_str()), Real(bits, "0"));
+        }
         else
-            return Number(U"1/1000000");
+        {
+            //Rational arithmetic is exact, there is no cancellation: only the O(h^2) truncation remains
+            return Number(U"1/1000000000");
+        }
     }
 
     Number EvaluateWithTempVariable(const std::u32string& expression_str, const std::u32string& variable, const Number& value) const
@@ -906,9 +940,10 @@ struct Solver : public boost::static_visitor<Number>
 
     Number NumericalDerivativeAtPoint(const std::u32string& expression_str, const std::u32string& variable, const Number& value) const
     {
-        Number h = StepForNumericalDerivative(value);
-        Number plus = value + h;
-        Number minus = value - h;
+        Number point = RaiseDerivativePrecision(value);
+        Number h = StepForNumericalDerivative(point);
+        Number plus = point + h;
+        Number minus = point - h;
         Number f_plus = EvaluateWithTempVariable(expression_str, variable, plus);
         Number f_minus = EvaluateWithTempVariable(expression_str, variable, minus);
         return (f_plus - f_minus) / (h + h);
@@ -960,7 +995,7 @@ struct Solver : public boost::static_visitor<Number>
     {
         auto var_iter = variables.begin();
         std::u32string first_variable = var_iter->name;
-        Number first_value = (*this)(var_iter->value);
+        Number first_value = RaiseDerivativePrecision((*this)(var_iter->value));
 
         std::list<std::pair<std::u32string, Number>> other_variables;
         ++var_iter;

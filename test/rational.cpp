@@ -1015,6 +1015,14 @@ TEST_F(CalcTestRational, derivative_at_point_multi3)
     ASSERT_TRUE(res == parser.Parse(LogicalId{0, 0, 0, 0, 3}, U"12;")) << res.ToStdString();
 }
 
+TEST_F(CalcTestRational, derivative_at_point_truncation)
+{
+    parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"f(x)=pow(x,3);");
+    Rational res = parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"derivative(f(x), [x=1]);");
+    Rational error = abs(res - Rational(3));
+    ASSERT_TRUE(error < Rational(0, 1e-15)) << res.ToStdString();
+}
+
 TEST_F(CalcTestRational, evaluate1)
 {
     Rational res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"evaluate(x*x, [x=3]);");
