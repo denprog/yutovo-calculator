@@ -588,9 +588,15 @@ Complex pow(const Complex& num1, const Complex& num2, int& res_pos)
     {
         Real p = num2.GetRe();
         Real r = pow(num1.GetIm(), num2.GetRe());
-        if (p % 2 == 0)
-            return -Complex(r.GetBitPrecision(), r, 0);
-        return Complex(r.GetBitPrecision(), 0, r);
+        Real zero(num2.GetBitPrecision(), 0);
+        Real remainder = p - 4 * floor(p / 4);
+        if (remainder == 0)
+            return Complex(r, zero);
+        if (remainder == 1)
+            return Complex(zero, r);
+        if (remainder == 2)
+            return -Complex(r, zero);
+        return -Complex(zero, r);
     }
 
     Complex res = exp(num2 * ln(num1, res_pos), res_pos);

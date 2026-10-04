@@ -390,7 +390,7 @@ TEST_F(CalcTestComplex, functions2)
     std::string res = parser.Parse(LogicalId{0, 0, 1}, U"pow(i,2);").ToStdString(3, 3);
     ASSERT_TRUE(res == "-1.E+0") << res;
     res = parser.Parse(LogicalId{0, 0, 1}, U"pow(2i,3);").ToStdString(3, 3);
-    ASSERT_TRUE(res == "i*8.E+0") << res;
+    ASSERT_TRUE(res == "i*-8.E+0") << res;
 }
 
 TEST_F(CalcTestComplex, functions3)
@@ -463,7 +463,7 @@ TEST_F(CalcTestComplex, functions11)
     ASSERT_TRUE(r.ToStdString(3, 3) == r1.ToStdString(3, 3)) << r.ToStdString(3, 3);
 }
 
-TEST_F(CalcTestComplex, functions12)
+TEST_F(CalcTestComplex, pow1)
 {
     try
     {
@@ -477,13 +477,13 @@ TEST_F(CalcTestComplex, functions12)
     ASSERT_FALSE(true);
 }
 
-TEST_F(CalcTestComplex, functions13)
+TEST_F(CalcTestComplex, pow2)
 {
     Complex res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"pow(0, 2);");
     ASSERT_TRUE(res.ToStdString(3, 3) == "0.E+0") << res.ToStdString(3, 3);
 }
 
-TEST_F(CalcTestComplex, functions14)
+TEST_F(CalcTestComplex, pow3)
 {
     try
     {
@@ -495,6 +495,28 @@ TEST_F(CalcTestComplex, functions14)
         return;
     }
     ASSERT_FALSE(true);
+}
+
+TEST_F(CalcTestComplex, pow4)
+{
+    std::string res = parser.Parse(LogicalId{0, 0, 1}, U"pow(2*i,0);").ToStdString(3, 3);
+    ASSERT_TRUE(res == "1.E+0") << res;
+    res = parser.Parse(LogicalId{0, 0, 1}, U"pow(2*i,1);").ToStdString(3, 3);
+    ASSERT_TRUE(res == "i*2.E+0") << res;
+    res = parser.Parse(LogicalId{0, 0, 1}, U"pow(2*i,2);").ToStdString(3, 3);
+    ASSERT_TRUE(res == "-4.E+0") << res;
+    res = parser.Parse(LogicalId{0, 0, 1}, U"pow(2*i,3);").ToStdString(3, 3);
+    ASSERT_TRUE(res == "i*-8.E+0") << res;
+    res = parser.Parse(LogicalId{0, 0, 1}, U"pow(2*i,4);").ToStdString(3, 3);
+    ASSERT_TRUE(res == "16.E+0") << res;
+    res = parser.Parse(LogicalId{0, 0, 1}, U"pow(2*i,-1);").ToStdString(3, 3);
+    ASSERT_TRUE(res == "i*-0.5E+0") << res;
+    res = parser.Parse(LogicalId{0, 0, 1}, U"pow(0.5*i,3);").ToStdString(3, 3);
+    ASSERT_TRUE(res == "i*-0.125E+0") << res;
+    res = parser.Parse(LogicalId{0, 0, 1}, U"pow(-2*i,3);").ToStdString(3, 3);
+    ASSERT_TRUE(res == "i*8.E+0") << res;
+    res = parser.Parse(LogicalId{0, 0, 1}, U"pow(-2*i,2);").ToStdString(3, 3);
+    ASSERT_TRUE(res == "-4.E+0") << res;
 }
 
 TEST_F(CalcTestComplex, sqrt1)
