@@ -534,6 +534,11 @@ TEST_F(CalcTestComplex, root1)
     ASSERT_TRUE(res == "1.084E+0+i*0.291E+0,-0.794E+0+i*0.794E+0,-0.291E+0+i*-1.084E+0") << res;
 }
 
+TEST_F(CalcTestComplex, root2)
+{
+    EXPECT_THROW(parser.Parse(LogicalId{0, 0, 1}, U"root(1+i,0);"), yutovo_calculator::MathException);
+}
+
 TEST_F(CalcTestComplex, exp1)
 {
     Dependencies dependencies;

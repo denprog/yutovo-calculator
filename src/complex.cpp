@@ -640,6 +640,8 @@ Complex root(const Complex& num1, const Complex& num2, int& res_pos)
     if (num2.IsReal() && num2.re.IsInteger())
     {
         int _num2 = (int)num2.re;
+        if (_num2 == 0)
+            throw MathException(ArgumentIsOver);
         Real modulus(num1.GetBitPrecision(), 0);
         Real theta(num1.GetBitPrecision(), 0);
         Real pi2 = pi(num1.GetBitPrecision()) * 2;
