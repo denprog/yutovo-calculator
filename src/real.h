@@ -231,6 +231,8 @@ public:
 public:
     friend Real exp(const int precision);
     friend Real pi(const int precision);
+    friend Real arc_minute(const int precision);
+    friend Real arc_second(const int precision);
 
 public:
     Real ToRadian() const;

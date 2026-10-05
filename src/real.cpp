@@ -1417,6 +1417,32 @@ Real pi(const int precision)
     return res;
 }
 
+Real arc_minute(const int precision)
+{
+    Real res(MathHelper::ToBitPrecision(precision), AngleMeasure::Degree);
+
+    res = 1;
+    res /= 60;
+
+#ifdef TRACE_OUTPUT
+    res.UpdateNumberStr();
+#endif
+    return res;
+}
+
+Real arc_second(const int precision)
+{
+    Real res(MathHelper::ToBitPrecision(precision), AngleMeasure::Degree);
+
+    res = 1;
+    res /= 3600;
+
+#ifdef TRACE_OUTPUT
+    res.UpdateNumberStr();
+#endif
+    return res;
+}
+
 Real Real::ToRadian() const
 {
     Real res(GetBitPrecision());

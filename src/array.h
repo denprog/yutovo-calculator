@@ -68,6 +68,9 @@ Real minute(const Real& num);
 Real second(const Real& num);
 Real grad(const Real& num);
 
+Real arc_minute(const int precision);
+Real arc_second(const int precision);
+
 template<class Number>
 class Array
 {
@@ -686,6 +689,20 @@ public:
     {
         Array<Number> r;
         r.numbers.push_back(Number(pi(precision)));
+        return r;
+    }
+
+    friend Array<Number> arc_minute_array_real(const int precision)
+    {
+        Array<Number> r;
+        r.numbers.push_back(Number(arc_minute(precision)));
+        return r;
+    }
+
+    friend Array<Number> arc_second_array_real(const int precision)
+    {
+        Array<Number> r;
+        r.numbers.push_back(Number(arc_second(precision)));
         return r;
     }
 

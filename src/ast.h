@@ -71,6 +71,8 @@ struct DerivativeAtPointNode;
 template<typename Number>
 struct EvaluateAtPointNode;
 template<typename Number>
+struct DegreeMinuteSecondNode;
+template<typename Number>
 struct NoFencesFunctionCallNode;
 template<typename Number>
 struct CompareNode;
@@ -142,6 +144,7 @@ struct UnaryOperationNode : public ExpressionPosition
         boost::recursive_wrapper<DefiniteIntegralNode<Number>>, 
         boost::recursive_wrapper<DerivativeAtPointNode<Number>>,
         boost::recursive_wrapper<EvaluateAtPointNode<Number>>,
+        boost::recursive_wrapper<DegreeMinuteSecondNode<Number>>,
         boost::recursive_wrapper<NoFencesFunctionCallNode<Number>>, 
         boost::recursive_wrapper<CompareNode<Number>>, 
         boost::recursive_wrapper<LoopNode<Number>>, 
@@ -175,6 +178,7 @@ struct OperationNode : ExpressionPosition
         boost::recursive_wrapper<DefiniteIntegralNode<Number>>, 
         boost::recursive_wrapper<DerivativeAtPointNode<Number>>,
         boost::recursive_wrapper<EvaluateAtPointNode<Number>>,
+        boost::recursive_wrapper<DegreeMinuteSecondNode<Number>>,
         boost::recursive_wrapper<NoFencesFunctionCallNode<Number>>, 
         boost::recursive_wrapper<CompareNode<Number>>, 
         boost::recursive_wrapper<LoopNode<Number>>, 
@@ -208,6 +212,7 @@ struct PostfixOperationNode : ExpressionPosition
         boost::recursive_wrapper<DefiniteIntegralNode<Number>>, 
         boost::recursive_wrapper<DerivativeAtPointNode<Number>>,
         boost::recursive_wrapper<EvaluateAtPointNode<Number>>,
+        boost::recursive_wrapper<DegreeMinuteSecondNode<Number>>,
         boost::recursive_wrapper<NoFencesFunctionCallNode<Number>>, 
         boost::recursive_wrapper<CompareNode<Number>>, 
         boost::recursive_wrapper<LoopNode<Number>>, 
@@ -370,6 +375,14 @@ struct EvaluateAtPointNode : ExpressionPosition
 };
 
 template<typename Number>
+struct DegreeMinuteSecondNode : ExpressionPosition
+{
+    NumberNode<Number> degrees;
+    NumberNode<Number> minutes;
+    NumberNode<Number> seconds;
+};
+
+template<typename Number>
 struct FunctionParamNode : ExpressionPosition
 {
     typedef Number value_type;
@@ -436,6 +449,7 @@ struct ExpressionNode : ExpressionPosition
         boost::recursive_wrapper<DefiniteIntegralNode<Number>>, 
         boost::recursive_wrapper<DerivativeAtPointNode<Number>>,
         boost::recursive_wrapper<EvaluateAtPointNode<Number>>,
+        boost::recursive_wrapper<DegreeMinuteSecondNode<Number>>,
         boost::recursive_wrapper<NoFencesFunctionCallNode<Number>>, 
         boost::recursive_wrapper<CompareNode<Number>>, 
         boost::recursive_wrapper<LoopNode<Number>>, 
@@ -455,7 +469,12 @@ struct ExpressionNode : ExpressionPosition
     {
     }
 
-    ExpressionNode(const EvaluateAtPointNode<Number>& node) : 
+    ExpressionNode(const EvaluateAtPointNode<Number>& node) :
+        first(node)
+    {
+    }
+
+    ExpressionNode(const DegreeMinuteSecondNode<Number>& node) :
         first(node)
     {
     }
@@ -767,6 +786,11 @@ BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::DerivativeAtPointNode<yutovo_calcul
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::EvaluateAtPointNode<yutovo_calculator::Real>, 
     (yutovo_calculator::EvaluateAtPointNode<yutovo_calculator::Real>::FunctionType, function)
     (std::list<yutovo_calculator::DerivativeVariableNode<yutovo_calculator::Real>>, variables))
+
+BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::DegreeMinuteSecondNode<yutovo_calculator::Real>, 
+    (yutovo_calculator::NumberNode<yutovo_calculator::Real>, degrees)
+    (yutovo_calculator::NumberNode<yutovo_calculator::Real>, minutes)
+    (yutovo_calculator::NumberNode<yutovo_calculator::Real>, seconds))
 
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::NoFencesFunctionCallNode<yutovo_calculator::Real>, 
     (yutovo_calculator::IdentifierNode<yutovo_calculator::Real>, name)
@@ -1604,6 +1628,11 @@ BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::MixedDivivsionNode<yutovo_calculato
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::ImplicitStringMulNode<yutovo_calculator::Array<yutovo_calculator::Real>>,
     (yutovo_calculator::NumberNode<yutovo_calculator::Array<yutovo_calculator::Real>>, left)
     (yutovo_calculator::IdentifierNode<yutovo_calculator::Array<yutovo_calculator::Real>>, identifier))
+
+BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::DegreeMinuteSecondNode<yutovo_calculator::Array<yutovo_calculator::Real>>, 
+    (yutovo_calculator::NumberNode<yutovo_calculator::Array<yutovo_calculator::Real>>, degrees)
+    (yutovo_calculator::NumberNode<yutovo_calculator::Array<yutovo_calculator::Real>>, minutes)
+    (yutovo_calculator::NumberNode<yutovo_calculator::Array<yutovo_calculator::Real>>, seconds))
 
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::ImplicitDivMulNode<yutovo_calculator::Array<yutovo_calculator::Real>>,
     (yutovo_calculator::ExpressionNode<yutovo_calculator::Array<yutovo_calculator::Real>>, upper)

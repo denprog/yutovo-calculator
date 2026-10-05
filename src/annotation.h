@@ -34,7 +34,8 @@ struct Annotation
 		boost::recursive_wrapper<FunctionCallStringNode<Number>>, 
 		boost::recursive_wrapper<DefiniteIntegralNode<Number>>, 
 		boost::recursive_wrapper<DerivativeAtPointNode<Number>>, 
-		boost::recursive_wrapper<EvaluateAtPointNode<Number>>, 
+		boost::recursive_wrapper<EvaluateAtPointNode<Number>>,
+		boost::recursive_wrapper<DegreeMinuteSecondNode<Number>>,
 		boost::recursive_wrapper<NoFencesFunctionCallNode<Number>>, 
 		boost::recursive_wrapper<CompareNode<Number>>, 
 		boost::recursive_wrapper<LoopNode<Number>>, 
@@ -311,6 +312,11 @@ struct Annotation
 		op.size = static_cast<int>(op.name.name.length());
 	}
 
+	void operator()(DegreeMinuteSecondNode<Number>& op, std::u32string::iterator pos) const
+	{
+		UpdatePosition(pos, op);
+	}
+
 	void operator()(CompareNode<Number>& op, std::u32string::iterator pos) const
 	{
 		UpdatePosition(pos, op);
@@ -444,6 +450,11 @@ struct Annotation
 		}
 
 		void operator()(EvaluateAtPointNode<Num> const& op) const
+		{
+			annotation->UpdatePosition(iter, op);
+		}
+
+		void operator()(DegreeMinuteSecondNode<Num> const& op) const
 		{
 			annotation->UpdatePosition(iter, op);
 		}

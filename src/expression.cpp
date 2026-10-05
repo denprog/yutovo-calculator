@@ -160,21 +160,22 @@ Expression<Real>::Expression(LogicalId id, std::u32string& expr, Solver<Real>* _
     using boost::spirit::qi::fail;
     using boost::spirit::qi::lit;
     using boost::spirit::qi::hold;
+    using boost::spirit::qi::attr;
     using boost::phoenix::function;
     using namespace boost::phoenix::arg_names;
     qi::_1_type _1;
     qi::_3_type _3;
 
     expression = addition.alias();
-    
+
     addition = multiplication >> *((char_(U'+') > multiplication) | (char_(U'-') > multiplication));
-    
+
     multiplication = unary >> *(multiply);
 
     multiply = char_(U'*') > unary | char_(U'/') > unary | char_(U'%') >> unary;
 
-    unary = hold[derivative_at_point] | hold[evaluate_at_point] | definite_integral | loop | compare | implicit_function_mul | implicit_post_function_mul | postfix_operation | 
-        implicit_div_mul | implicit_string_mul | implicit_fraction_mul | mixed_division | implicit_mul | number | function_call | 
+    unary = hold[derivative_at_point] | hold[evaluate_at_point] | definite_integral | loop | compare | implicit_function_mul | implicit_post_function_mul | postfix_operation |
+        implicit_div_mul | degree_minute_second | implicit_string_mul | implicit_fraction_mul | mixed_division | implicit_mul | number | function_call |
         no_fences_function_call | identifier | unary_operation | '(' > expression > ')';
     
     number = exp_number | digits_number;
@@ -203,10 +204,17 @@ Expression<Real>::Expression(LogicalId id, std::u32string& expr, Solver<Real>* _
 
     implicit_string_mul = (number >> identifier);
 
+    //0x00B0 = U'°', 39 = U'\''
+    NumberNode<Real> zero_degrees;
+    zero_degrees.number = U"0";
+    degree_minute_second = (number >> omit[char_(0x00B0)] >> number >> omit[char_(39)] >> number >> omit[char_(39)] >> omit[char_(39)]) |
+        (number >> omit[char_(0x00B0)] >> number >> omit[char_(39)]) |
+        (attr(zero_degrees) >> number >> omit[char_(39)] >> number >> omit[char_(39)] >> omit[char_(39)]);
+
     implicit_mul = real_number >> '(' >> expression > ')';
 
     //0x00B0 = U'°', 39 = U'\'', 0x20BD = U'₽', 0x00A2 = U'¢', 0x0024 = U'$', 0x20AC = U'€', 0x00A5 = U'¥', 0x20B9 = U'₹'
-    name = (raw[lexeme[(alpha | char_(U'∞') | char_(0x00B0) | char_(39) | char_(U'_') | char_(0x20BD) | char_(0x0024) | char_(0x00A2) | 
+    name = (raw[lexeme[(alpha | char_(U'∞') | char_(0x00B0) | char_(39) | char_(U'_') | char_(0x20BD) | char_(0x0024) | char_(0x00A2) |
         char_(0x20AC) | char_(0x00A5) | char_(0x20B9)) >> *(alnum | char_(39) | char_(U'_') | char_(0x0024))]]);
 
     unary_operation = (char_(U'+') > unary) | (char_(U'-') > unary);
@@ -274,10 +282,13 @@ Expression<Real>::Expression(LogicalId id, std::u32string& expr, Solver<Real>* _
     on_success(mixed_division, 
         boost::phoenix::function<Annotation<yutovo_calculator::Real>>(Annotation<yutovo_calculator::Real>(expr.begin(), expr.end(), id, 
         &solver->parser_context))(qi::_val, _1));
-    on_success(implicit_string_mul, 
-        boost::phoenix::function<Annotation<yutovo_calculator::Real>>(Annotation<yutovo_calculator::Real>(expr.begin(), expr.end(), id, 
+    on_success(implicit_string_mul,
+        boost::phoenix::function<Annotation<yutovo_calculator::Real>>(Annotation<yutovo_calculator::Real>(expr.begin(), expr.end(), id,
         &solver->parser_context))(qi::_val, _1));
-    on_success(implicit_div_mul, 
+    on_success(degree_minute_second,
+        boost::phoenix::function<Annotation<yutovo_calculator::Real>>(Annotation<yutovo_calculator::Real>(expr.begin(), expr.end(), id,
+        &solver->parser_context))(qi::_val, _1));
+    on_success(implicit_div_mul,
         boost::phoenix::function<Annotation<yutovo_calculator::Real>>(Annotation<yutovo_calculator::Real>(expr.begin(), expr.end(), id, 
         &solver->parser_context))(qi::_val, _1));
     on_success(implicit_mul, 
@@ -620,7 +631,7 @@ Expression<Complex>::Expression(LogicalId id, std::u32string& expr, Solver<Compl
 }
 
 template<>
-Expression<Array<Real>>::Expression(LogicalId id, std::u32string& expr, Solver<Array<Real>>* _solver) : 
+Expression<Array<Real>>::Expression(LogicalId id, std::u32string& expr, Solver<Array<Real>>* _solver) :
     Expression::base_type(expression),
     solver(_solver)
 {
@@ -635,6 +646,7 @@ Expression<Array<Real>>::Expression(LogicalId id, std::u32string& expr, Solver<A
     using boost::spirit::qi::fail;
     using boost::spirit::qi::lit;
     using boost::spirit::qi::hold;
+    using boost::spirit::qi::attr;
     using boost::phoenix::function;
     using namespace boost::phoenix::arg_names;
     qi::_1_type _1;
@@ -648,8 +660,8 @@ Expression<Array<Real>>::Expression(LogicalId id, std::u32string& expr, Solver<A
 
     multiply = char_('*') > unary | char_('/') > unary | char_('%') >> unary;
     
-    unary = definite_integral | loop | array | compare | implicit_function_mul | implicit_post_function_mul | postfix_operation | 
-        implicit_div_mul | implicit_string_mul | implicit_fraction_mul | mixed_division | implicit_mul | number | function_call | 
+    unary = definite_integral | loop | array | compare | implicit_function_mul | implicit_post_function_mul | postfix_operation |
+        implicit_div_mul | degree_minute_second | implicit_string_mul | implicit_fraction_mul | mixed_division | implicit_mul | number | function_call |
         no_fences_function_call | identifier | unary_operation | '(' > expression > ')';
     
     number = exp_number | digits_number;
@@ -682,9 +694,16 @@ Expression<Array<Real>>::Expression(LogicalId id, std::u32string& expr, Solver<A
 
     implicit_string_mul = (number >> identifier);
 
+    //0x00B0 = U'°', 39 = U'\''
+    NumberNode<Array<Real>> zero_degrees;
+    zero_degrees.number = U"0";
+    degree_minute_second = (number >> omit[char_(0x00B0)] >> number >> omit[char_(39)] >> number >> omit[char_(39)] >> omit[char_(39)]) |
+        (number >> omit[char_(0x00B0)] >> number >> omit[char_(39)]) |
+        (attr(zero_degrees) >> number >> omit[char_(39)] >> number >> omit[char_(39)] >> omit[char_(39)]);
+
     implicit_mul = real_number >> '(' >> expression > ')';
 
-    //0x00B0 = U'°', 39 = U'\'', 0x20BD = U'₽', 0x00A2 = U'¢', 0x0024 = U'$', 0x00A2 = U'€', 0x00A5 = U'¥', 0x20B9 = U'₹'
+    //0x00B0 = U'°', 39 = U'\'', 0x20BD = U'₽', 0x00A2 = U'¢', 0x0024 = U'$', 0x20AC = U'€', 0x00A5 = U'¥', 0x20B9 = U'₹'
     name = (raw[lexeme[(alpha | char_(0x00B0) | char_(U'\'') | char_(U'_') | char_(0x20BD) | char_(U'$') | char_(0x00A2) | char_(0x20AC) | char_(0x00A5) |
         char_(0x20B9)) >> *(alnum | char_(U'\'') | char_(U'_') | char_(U'$'))]]);
 
@@ -743,10 +762,13 @@ Expression<Array<Real>>::Expression(LogicalId id, std::u32string& expr, Solver<A
     on_success(mixed_division, 
         boost::phoenix::function<Annotation<yutovo_calculator::Array<Real>>>(Annotation<yutovo_calculator::Array<Real>>(expr.begin(), expr.end(), id, 
         &solver->parser_context))(qi::_val, _1));
-    on_success(implicit_string_mul, 
-        boost::phoenix::function<Annotation<yutovo_calculator::Array<Real>>>(Annotation<yutovo_calculator::Array<Real>>(expr.begin(), expr.end(), id, 
+    on_success(implicit_string_mul,
+        boost::phoenix::function<Annotation<yutovo_calculator::Array<Real>>>(Annotation<yutovo_calculator::Array<Real>>(expr.begin(), expr.end(), id,
         &solver->parser_context))(qi::_val, _1));
-    on_success(implicit_div_mul, 
+    on_success(degree_minute_second,
+        boost::phoenix::function<Annotation<yutovo_calculator::Array<Real>>>(Annotation<yutovo_calculator::Array<Real>>(expr.begin(), expr.end(), id,
+        &solver->parser_context))(qi::_val, _1));
+    on_success(implicit_div_mul,
         boost::phoenix::function<Annotation<yutovo_calculator::Array<Real>>>(Annotation<yutovo_calculator::Array<Real>>(expr.begin(), expr.end(), id, 
         &solver->parser_context))(qi::_val, _1));
     on_success(implicit_mul, 

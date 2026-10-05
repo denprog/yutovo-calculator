@@ -1183,6 +1183,85 @@ TEST_F(CalcTestReal, trigonometric10)
     ASSERT_TRUE(res.angle_measure == AngleMeasure::Grad && res.ToStdString(3, 10) == "63.6619772368E+0") << res.ToStdString(3, 10);
 }
 
+//Arc minutes and seconds
+TEST_F(CalcTestReal, trigonometric11)
+{
+    Real res = parser.Parse(LogicalId{0, 0, 1}, U"1';", AngleMeasure::Radian, AngleMeasure::Degree, 10);
+    ASSERT_TRUE(res.angle_measure == AngleMeasure::Degree && res.ToStdString(3, 10) == "0.01666666667E+0") << res.ToStdString(3, 10);
+
+    res = parser.Parse(LogicalId{0, 0, 1}, U"1'';", AngleMeasure::Radian, AngleMeasure::Degree, 10);
+    ASSERT_TRUE(res.angle_measure == AngleMeasure::Degree && res.ToStdString(3, 10) == "2.7777777778E-4") << res.ToStdString(3, 10);
+
+    res = parser.Parse(LogicalId{0, 0, 1}, U"90';", AngleMeasure::Radian, AngleMeasure::Radian, 10);
+    ASSERT_TRUE(res.angle_measure == AngleMeasure::Radian && res.ToStdString(3, 10) == "0.02617993878E+0") << res.ToStdString(3, 10);
+
+    res = parser.Parse(LogicalId{0, 0, 1}, U"1';", AngleMeasure::Radian, AngleMeasure::Grad, 10);
+    ASSERT_TRUE(res.angle_measure == AngleMeasure::Grad && res.ToStdString(3, 10) == "0.01851851852E+0") << res.ToStdString(3, 10);
+
+    res = parser.Parse(LogicalId{0, 0, 1}, U"sin(30');", AngleMeasure::Radian, AngleMeasure::Radian, 10);
+    ASSERT_TRUE(res.angle_measure == AngleMeasure::None && res.ToStdString(3, 10) == "0.008726535498E+0") << res.ToStdString(3, 10);
+
+    res = parser.Parse(LogicalId{0, 0, 1}, U"1°+30';", AngleMeasure::Radian, AngleMeasure::Degree);
+    ASSERT_TRUE(res.angle_measure == AngleMeasure::Degree && res.ToStdString(3, 3) == "1.5E+0") << res.ToStdString(3, 3);
+
+    //arc minutes must stay exact at high precision: 1' = 1/60 degree
+    res = parser.Parse(LogicalId{0, 0, 1}, U"1';", AngleMeasure::Radian, AngleMeasure::Degree, 30);
+    ASSERT_TRUE(res.angle_measure == AngleMeasure::Degree && res.ToStdString(3, 30) == "0.0166666666666666666666666666667E+0") << res.ToStdString(3, 30);
+
+    //DMS components are number literals, so 1°20' is computed exactly like 1+20/60
+    res = parser.Parse(LogicalId{0, 0, 1}, U"1°20';", AngleMeasure::Radian, AngleMeasure::Degree, 30);
+    ASSERT_TRUE(res.angle_measure == AngleMeasure::Degree &&
+        res.ToStdString(3, 30) == parser.Parse(LogicalId{0, 0, 1}, U"1+20/60;", AngleMeasure::Radian, AngleMeasure::Degree, 30).ToStdString(3, 30)) <<
+        res.ToStdString(3, 30);
+}
+
+//Degree-minute-second notation
+TEST_F(CalcTestReal, trigonometric12)
+{
+    Real res = parser.Parse(LogicalId{0, 0, 1}, U"1°30';", AngleMeasure::Radian, AngleMeasure::Degree, 10);
+    ASSERT_TRUE(res.angle_measure == AngleMeasure::Degree && res.ToStdString(3, 10) == "1.5E+0") << res.ToStdString(3, 10);
+
+    res = parser.Parse(LogicalId{0, 0, 1}, U"1°30'30'';", AngleMeasure::Radian, AngleMeasure::Degree, 10);
+    ASSERT_TRUE(res.angle_measure == AngleMeasure::Degree && res.ToStdString(3, 10) == "1.5083333333E+0") << res.ToStdString(3, 10);
+
+    res = parser.Parse(LogicalId{0, 0, 1}, U"1°0'30'';", AngleMeasure::Radian, AngleMeasure::Degree, 10);
+    ASSERT_TRUE(res.angle_measure == AngleMeasure::Degree && res.ToStdString(3, 10) == "1.0083333333E+0") << res.ToStdString(3, 10);
+
+    res = parser.Parse(LogicalId{0, 0, 1}, U"1°30';", AngleMeasure::Radian, AngleMeasure::Radian, 10);
+    ASSERT_TRUE(res.angle_measure == AngleMeasure::Radian && res.ToStdString(3, 10) == "0.02617993878E+0") << res.ToStdString(3, 10);
+
+    res = parser.Parse(LogicalId{0, 0, 1}, U"sin(1°30');", AngleMeasure::Radian, AngleMeasure::Radian, 10);
+    ASSERT_TRUE(res.angle_measure == AngleMeasure::None && res.ToStdString(3, 10) == "0.02617694831E+0") << res.ToStdString(3, 10);
+
+    res = parser.Parse(LogicalId{0, 0, 1}, U"-1°30';", AngleMeasure::Radian, AngleMeasure::Degree);
+    ASSERT_TRUE(res.angle_measure == AngleMeasure::Degree && res.ToStdString(3, 3) == "-1.5E+0") << res.ToStdString(3, 3);
+
+    res = parser.Parse(LogicalId{0, 0, 1}, U"2*1°30';", AngleMeasure::Radian, AngleMeasure::Degree);
+    ASSERT_TRUE(res.angle_measure == AngleMeasure::Degree && res.ToStdString(3, 3) == "3.E+0") << res.ToStdString(3, 3);
+
+    //minutes with seconds and no degrees: 22'3'' = 22/60 + 3/3600 = 0.3675 degrees
+    res = parser.Parse(LogicalId{0, 0, 1}, U"22'3'';", AngleMeasure::Radian, AngleMeasure::Degree, 10);
+    ASSERT_TRUE(res.angle_measure == AngleMeasure::Degree && res.ToStdString(3, 10) == "0.3675E+0") << res.ToStdString(3, 10);
+
+    res = parser.Parse(LogicalId{0, 0, 1}, U"22'3'';", AngleMeasure::Radian, AngleMeasure::Radian, 10);
+    ASSERT_TRUE(res.angle_measure == AngleMeasure::Radian && res.ToStdString(3, 10) == "0.006414085001E+0") << res.ToStdString(3, 10);
+
+    res = parser.Parse(LogicalId{0, 0, 1}, U"-22'3'';", AngleMeasure::Radian, AngleMeasure::Degree, 10);
+    ASSERT_TRUE(res.angle_measure == AngleMeasure::Degree && res.ToStdString(3, 10) == "-0.3675E+0") << res.ToStdString(3, 10);
+
+    //plain minutes keep working when not followed by seconds
+    res = parser.Parse(LogicalId{0, 0, 1}, U"22';", AngleMeasure::Radian, AngleMeasure::Degree);
+    ASSERT_TRUE(res.angle_measure == AngleMeasure::Degree && res.ToStdString(3, 3) == "0.367E+0") << res.ToStdString(3, 3);
+    EXPECT_THROW(parser.Parse(LogicalId{0, 0, 1}, U"22'3;"), yutovo_calculator::SyntaxException);
+
+    //temperature units must still parse next to the degree sign
+    res = parser.Parse(LogicalId{0, 0, 1}, U"1°C;", AngleMeasure::Radian, AngleMeasure::Degree);
+    ASSERT_TRUE(res.ToStdString(3, 3) == "1.E+0(K)") << res.ToStdString(3, 3);
+
+    //seconds without minutes are ambiguous and rejected (1°0'30'' must be used instead)
+    EXPECT_THROW(parser.Parse(LogicalId{0, 0, 1}, U"1°30'';"), yutovo_calculator::SyntaxException);
+}
+
 TEST_F(CalcTestReal, units1)
 {
     std::string s = parser.GetSuitableUnit(LogicalId{0, 0, 0, 0, 1}, parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"1m;")).ToStdString(3, 3);
@@ -1463,11 +1542,11 @@ TEST_F(CalcTestReal, units34)
 
     r = parser.Parse(LogicalId{0, 0, 0, 0, 0, 0, 0, 2, 0}, U"1';");
     s = parser.GetSuitableUnit(LogicalId{0, 0, 0, 0, 0, 0, 0, 2, 0}, r).ToStdString(3, 3);
-    ASSERT_TRUE(s == "1.E+0") << s;
+    ASSERT_TRUE(s == "0.0167E+0") << s;
 
     r = parser.Parse(LogicalId{0, 0, 0, 0, 0, 0, 0, 2, 0}, U"1'';");
     s = parser.GetSuitableUnit(LogicalId{0, 0, 0, 0, 0, 0, 0, 2, 0}, r).ToStdString(3, 3);
-    ASSERT_TRUE(s == "1.E+0") << s;
+    ASSERT_TRUE(s == "2.778E-4") << s;
 }
 
 TEST_F(CalcTestReal, units35)

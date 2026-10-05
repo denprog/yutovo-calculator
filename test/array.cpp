@@ -233,6 +233,22 @@ TEST_F(CalcTestArrayReal, trigonometric4)
     ASSERT_TRUE(res.GetAngleMeasure() == AngleMeasure::None && res.ToStdString(3, 3) == "[1.E+0,1.E+0]") << res.ToStdString(3, 3);
 }
 
+//Arc minutes and seconds: 1' = 1/60 degree, 1'' = 1/3600 degree; 1°30' = 1.5 degrees
+TEST_F(CalcTestArrayReal, trigonometric5)
+{
+    auto res = parser.Parse(LogicalId{0, 0, 1}, U"[1',1''];", AngleMeasure::Radian, AngleMeasure::Degree);
+    ASSERT_TRUE(res.GetAngleMeasure() == AngleMeasure::Degree && res.ToStdString(3, 3) == "[0.0167E+0,2.778E-4]") << res.ToStdString(3, 3);
+
+    res = parser.Parse(LogicalId{0, 0, 1}, U"[1°30',1°30'30''];", AngleMeasure::Radian, AngleMeasure::Degree);
+    ASSERT_TRUE(res.GetAngleMeasure() == AngleMeasure::Degree && res.ToStdString(3, 3) == "[1.5E+0,1.508E+0]") << res.ToStdString(3, 3);
+
+    res = parser.Parse(LogicalId{0, 0, 1}, U"[45'30'',22'];", AngleMeasure::Radian, AngleMeasure::Degree);
+    ASSERT_TRUE(res.GetAngleMeasure() == AngleMeasure::Degree && res.ToStdString(3, 3) == "[0.758E+0,0.367E+0]") << res.ToStdString(3, 3);
+
+    res = parser.Parse(LogicalId{0, 0, 1}, U"sin([1°30']);", AngleMeasure::Radian, AngleMeasure::Radian);
+    ASSERT_TRUE(res.GetAngleMeasure() == AngleMeasure::None && res.ToStdString(3, 3) == "[0.0262E+0]") << res.ToStdString(3, 3);
+}
+
 TEST_F(CalcTestArrayReal, graph1)
 {
     auto res = parser.Parse(LogicalId{0, 0, 1}, U"graph_line(sin(x),x,0,1,0,1,50);", AngleMeasure::Radian, AngleMeasure::Radian);

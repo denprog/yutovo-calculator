@@ -41,7 +41,8 @@ struct Expression : qi::grammar<std::u32string::iterator, ExpressionNode<Number>
 		boost::recursive_wrapper<FunctionCallStringNode<Number>>, 
 		boost::recursive_wrapper<DefiniteIntegralNode<Number>>, 
 		boost::recursive_wrapper<DerivativeAtPointNode<Number>>, 
-		boost::recursive_wrapper<EvaluateAtPointNode<Number>>, 
+		boost::recursive_wrapper<EvaluateAtPointNode<Number>>,
+		boost::recursive_wrapper<DegreeMinuteSecondNode<Number>>,
 		boost::recursive_wrapper<NoFencesFunctionCallNode<Number>>, 
 		boost::recursive_wrapper<CompareNode<Number>>, 
 		boost::recursive_wrapper<LoopNode<Number>>, 
@@ -68,6 +69,7 @@ struct Expression : qi::grammar<std::u32string::iterator, ExpressionNode<Number>
 	qi::rule<std::u32string::iterator, DerivativeVariableNode<Number>(), unicode::space_type> derivative_variable;
 	qi::rule<std::u32string::iterator, DerivativeAtPointNode<Number>(), unicode::space_type> derivative_at_point;
 	qi::rule<std::u32string::iterator, EvaluateAtPointNode<Number>(), unicode::space_type> evaluate_at_point;
+	qi::rule<std::u32string::iterator, DegreeMinuteSecondNode<Number>(), unicode::space_type> degree_minute_second;
 	qi::rule<std::u32string::iterator, NoFencesFunctionCallNode<Number>(), unicode::space_type> no_fences_function_call;
 	qi::rule<std::u32string::iterator, FunctionParamNode<Number>(), unicode::space_type> function_param;
 	qi::rule<std::u32string::iterator, CompareNode<Number>(), unicode::space_type> compare;

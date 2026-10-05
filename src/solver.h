@@ -859,6 +859,21 @@ struct Solver : public boost::static_visitor<Number>
         }
     }
 
+    Number operator()(DegreeMinuteSecondNode<Number> const& op) const
+    {
+        if constexpr (std::is_same_v<Number, Real> || std::is_same_v<Number, Array<Real>>)
+        {
+            Number res = (*this)(op.degrees).ToDegree() + minute((*this)(op.minutes));
+            if (!op.seconds.number.empty())
+                res = res + second((*this)(op.seconds));
+            return res;
+        }
+        else
+        {
+            throw MathException(op.id, ParserExceptionCode::IncorrectOperation, op.pos, 1, op.line);
+        }
+    }
+
     Number RaiseDerivativePrecision(const Number& value) const
     {
         if constexpr (std::is_same_v<Number, Real> || std::is_same_v<Number, Complex>)

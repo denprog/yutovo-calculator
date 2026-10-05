@@ -71,6 +71,8 @@ Real arcsch(const Real& num);
 
 Real pi(const int precision);
 Real exp(const int precision);
+Real arc_minute(const int precision);
+Real arc_second(const int precision);
 
 Real exp(const Real& num);
 
@@ -149,6 +151,8 @@ Complex arg(const Complex& num);
 
 Array<Real> pi_array_real(const int precision);
 Array<Real> exp_array_real(const int precision);
+Array<Real> arc_minute_array_real(const int precision);
+Array<Real> arc_second_array_real(const int precision);
 
 Array<Real> exp(const Array<Real>& num);
 
@@ -400,6 +404,10 @@ Parser<yutovo_calculator::Real>::Parser(const int precision, const Language _lan
     solver.AddBuiltinVariable(U"e", var);
     var = &infinity;
     solver.AddBuiltinVariable(std::u32string(1, 0x221E).c_str(), var); //∞
+    var = &arc_minute;
+    solver.AddBuiltinVariable(U"'", var); //' - arc minute (angle)
+    var = &arc_second;
+    solver.AddBuiltinVariable(U"''", var); //'' - arc second (angle)
     
     RealUnaryFunc unary_func;
     unary_func = &exp;
@@ -680,6 +688,10 @@ Parser<yutovo_calculator::Array<yutovo_calculator::Real>>::Parser(const int prec
     solver.AddBuiltinVariable(std::u32string(1, 0x03C0).c_str(), var); //π
     var = &exp_array_real;
     solver.AddBuiltinVariable(U"e", var);
+    var = &arc_minute_array_real;
+    solver.AddBuiltinVariable(U"'", var); //' - arc minute (angle)
+    var = &arc_second_array_real;
+    solver.AddBuiltinVariable(U"''", var); //'' - arc second (angle)
     
     ArrayRealUnaryFunc unary_func;
     unary_func = &exp;
@@ -1352,8 +1364,6 @@ void Parser<yutovo_calculator::Real>::InitBuiltinIdentifiers()
             v.angle_measure = AngleMeasure::Degree;
             solver.AddBuiltinIdentifier(std::u32string(1, 0x00B0).c_str(), v); //° - degree (angle)
             solver.AddBuiltinIdentifier(U"deg", v); //degree (angle)
-            solver.AddBuiltinIdentifier(U"'", v);
-            solver.AddBuiltinIdentifier(U"''", v);
             v.angle_measure = AngleMeasure::Grad;
             solver.AddBuiltinIdentifier(U"grad", v); //grad (angle)
         }
@@ -1366,8 +1376,6 @@ void Parser<yutovo_calculator::Real>::InitBuiltinIdentifiers()
             solver.AddBuiltinIdentifier(U"рад", v); //radian (angle)
             v.angle_measure = AngleMeasure::Degree;
             solver.AddBuiltinIdentifier(std::u32string(1, 0x00B0).c_str(), v); //° - degree (angle)
-            solver.AddBuiltinIdentifier(U"'", v);
-            solver.AddBuiltinIdentifier(U"''", v);
             v.angle_measure = AngleMeasure::Grad;
             solver.AddBuiltinIdentifier(U"град", v); //grad (angle)
         }
@@ -1394,8 +1402,6 @@ void Parser<yutovo_calculator::Array<Real>>::InitBuiltinIdentifiers()
             v.angle_measure = AngleMeasure::Degree;
             solver.AddBuiltinIdentifier(std::u32string(1, 0x00B0).c_str(), v); //° - degree (angle)
             solver.AddBuiltinIdentifier(U"deg", v); //degree (angle)
-            solver.AddBuiltinIdentifier(U"'", v);
-            solver.AddBuiltinIdentifier(U"''", v);
             v.angle_measure = AngleMeasure::Grad;
             solver.AddBuiltinIdentifier(U"grad", v); //grad (angle)
         }
@@ -1408,8 +1414,6 @@ void Parser<yutovo_calculator::Array<Real>>::InitBuiltinIdentifiers()
             solver.AddBuiltinIdentifier(U"рад", v); //radian (angle)
             v.angle_measure = AngleMeasure::Degree;
             solver.AddBuiltinIdentifier(std::u32string(1, 0x00B0).c_str(), v); //° - degree (angle)
-            solver.AddBuiltinIdentifier(U"'", v);
-            solver.AddBuiltinIdentifier(U"''", v);
             v.angle_measure = AngleMeasure::Grad;
             solver.AddBuiltinIdentifier(U"град", v); //grad (angle)
         }
