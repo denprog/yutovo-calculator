@@ -692,7 +692,7 @@ public:
     friend Symbolic<Number> ln(const Symbolic<Number>& num)
     {
         if (giac::is_zero(*num.expr, num.Context()))
-            return Symbolic<Number>(num.precision, std::u32string(U"∞"));
+            return Symbolic<Number>(num.precision, std::u32string(U"-∞"));
         Symbolic<Number> res(num.precision);
         *res.expr = giac::log(*num.expr, res.Context());
         return res;

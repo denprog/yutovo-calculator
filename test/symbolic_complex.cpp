@@ -1129,6 +1129,12 @@ TEST_F(CalcTestSymbolicComplex, inf6)
     ASSERT_TRUE(res.ToStdString(10) == "-∞") << res.ToStdString(10);
 }
 
+TEST_F(CalcTestSymbolicComplex, ln_zero)
+{
+    Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"ln(0);");
+    ASSERT_TRUE(res.ToStdString(10) == "-∞") << res.ToStdString(10);
+}
+
 TEST_F(CalcTestSymbolicComplex, inf7)
 {
     Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"subs(exp(x),x,∞);");

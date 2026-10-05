@@ -281,6 +281,12 @@ TEST_F(CalcTestSymbolicReal, inf6)
     ASSERT_TRUE(res.ToStdString(10) == "-∞") << res.ToStdString(10);
 }
 
+TEST_F(CalcTestSymbolicReal, ln_zero)
+{
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"ln(0);");
+    ASSERT_TRUE(res.ToStdString(10) == "-∞") << res.ToStdString(10);
+}
+
 TEST_F(CalcTestSymbolicReal, inf7)
 {
     Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"subs(exp(x),x,∞);");
