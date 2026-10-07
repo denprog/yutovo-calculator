@@ -127,6 +127,12 @@ TEST_F(CalcTestInteger, integers5)
     ASSERT_TRUE(res.ToString(10) == U"40") << res.ToStdString(10);
 }
 
+TEST_F(CalcTestInteger, integers6)
+{
+    parser.SetLocale(Language::German);
+    ASSERT_TRUE(parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"1+1;") == parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"2;"));
+}
+
 TEST_F(CalcTestInteger, logical1)
 {
     Integer res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"¬5;");

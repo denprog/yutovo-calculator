@@ -60,7 +60,8 @@ enum class Language
 	English = 1,
 	Russian,
 	Spanish,
-	BrazilianPortuguese
+	BrazilianPortuguese,
+	German
 };
 
 class Real;

@@ -373,6 +373,23 @@ private:
             solver.AddBuiltinUnit(Unit(U"₹", U"rupia", 1));
             solver.AddBuiltinUnit(Unit(U"R$", U"real", 1));
             break;
+        case Language::German:
+            solver.AddBuiltinUnit(Unit(U"m", U"Meter", 1)); //meter (length)
+            solver.AddBuiltinUnit(Unit(U"kg", U"Kilogramm", 1)); //kilogram (mass)
+            solver.AddBuiltinUnit(Unit(U"s", U"Sekunde", 1)); //second (time)
+            solver.AddBuiltinUnit(Unit(U"mol", U"Mol", 1)); //mole (amount of matter)
+            solver.AddBuiltinUnit(Unit(U"A", U"Ampere", 1)); //ampere (electric current)
+            solver.AddBuiltinUnit(Unit(U"cd", U"Candela", 1)); //candella (luminosity)
+            solver.AddBuiltinUnit(Unit(U"K", U"Kelvin", 1)); //kelvin (temperature)
+            solver.AddBuiltinUnit(Unit(U"sr", U"Steradiant", 1)); //steradian (solid angle)
+            solver.AddBuiltinUnit(Unit(U"bit")); //bit (data)
+            solver.AddBuiltinUnit(Unit(U"₽", U"Rubel", 1)); //russian ruble
+            solver.AddBuiltinUnit(Unit(U"$", U"Dollar", 1)); //US dollar
+            solver.AddBuiltinUnit(Unit(U"€", U"Euro", 1)); //euro
+            solver.AddBuiltinUnit(Unit(U"¥", U"Yuan", 1)); //chinese yuan
+            solver.AddBuiltinUnit(Unit(U"₹", U"Rupie", 1)); //indian rupee
+            solver.AddBuiltinUnit(Unit(U"R$", U"Real", 1)); //brazilian real
+            break;
         default:
             throw ParserException({}, ParserExceptionCode::UnknownLanguage);
         }
@@ -1107,6 +1124,119 @@ private:
                     U"kGy`quilogray`~1000Gy;",
                     U"MGy`megagray`~1000000Gy;"
                 }
+            },
+            {
+                Language::German,
+                {
+                    U"nm`Nanometer`~0.000000001m;",
+                    U"mcm`Mikrometer`~0.000001m;",
+                    U"mm`Millimeter`~0.001m;",
+                    U"cm`Zentimeter`~0.01m;",
+                    U"dm`Dezimeter`~0.1m;",
+                    U"km`Kilometer`~1000m;",
+                    U"ps`Pikosekunde`~0.000000000001s;",
+                    U"ns`Nanosekunde`~0.000000001s;",
+                    U"mcs`Mikrosekunde`~0.000001s;",
+                    U"ms`Millisekunde`~0.001s;",
+                    U"min`Minute`~60s;",
+                    U"stunde~60min;",
+                    U"tag~24stunde;",
+                    U"woche~7tag;",
+                    U"jahr~365tag;",
+                    U"g`Gramm`~0.001kg;",
+                    U"mcg`Mikrogramm`~0.000001kg;",
+                    U"mg`Milligramm`~0.001kg;",
+                    U"ton~1000kg;",
+                    U"mcA`Mikroampere`~0.000001A;",
+                    U"mA`Milliampere`~0.001A;",
+                    U"kA`Kiloampere`~1000A;",
+                    U"MA`Megaampere`~1000000A;",
+                    U"Hz`Hertz`~1/s;",
+                    U"kHz`Kilohertz`~1000Hz;",
+                    U"MHz`Megahertz`~1000kHz;",
+                    U"GHz`Gigahertz`~1000MHz;",
+                    U"N`Newton`~(kg*m)/(pow(s,2));",
+                    U"mcN`Mikronewton`~0.000001N;",
+                    U"mN`Millinewton`~0.001N;",
+                    U"kN`Kilonewton`~1000N;",
+                    U"MN`Meganewton`~1000kN;",
+                    U"J`Joule`~N*m;",
+                    U"mcJ`Mikrojoule`~0.000001J;",
+                    U"mJ`Millijoule`~0.001J;",
+                    U"kJ`Kilojoule`~1000J;",
+                    U"MJ`Megajoule`~1000000J;",
+                    U"W`Watt`~(J)/(s);",
+                    U"mcW`Mikrowatt`~0.000001W;",
+                    U"mW`Milliwatt`~0.001W;",
+                    U"kW`Kilowatt`~1000W;",
+                    U"MW`Megawatt`~1000000W;",
+                    U"Pa`Pascal`~(N)/(pow(m,2));",
+                    U"mcPa`Mikropascal`~0.000001Pa;",
+                    U"mPa`Millipascal`~0.001Pa;",
+                    U"kPa`Kilopascal`~1000Pa;",
+                    U"MPa`Megapascal`~1000000Pa;",
+                    U"mccd`Mikrocandela`~0.000001cd;",
+                    U"mcd`Millicandela`~0.001cd;",
+                    U"kcd`Kilocandela`~1000cd;",
+                    U"Mcd`Megacandela`~1000000cd;",
+                    U"lm`Lumen`~cd*sr;",
+                    U"mclm`Mikrolumen`~0.000001lm;",
+                    U"mlm`Millilumen`~0.001lm;",
+                    U"klm`Kilolumen`~1000lm;",
+                    U"Mlm`Megalumen`~1000000lm;",
+                    U"lx`Lux`~lm/pow(m,2);",
+                    U"mclx`Mikrolux`~0.000001lx;",
+                    U"mlx`Millilux`~0.001lx;",
+                    U"klx`Kilolux`~1000lx;",
+                    U"Mlx`Megalux`~1000000lx;",
+                    U"C`Coulomb`~A*s;",
+                    U"mcC`Mikrocoulomb`~0.000001C;",
+                    U"mC`Millicoulomb`~0.001C;",
+                    U"kC`Kilocoulomb`~1000C;",
+                    U"MC`Megacoulomb`~1000000C;",
+                    U"V`Volt`~(J)/(C);",
+                    U"pV`Pikovolt`~0.000000000001V;",
+                    U"nV`Nanovolt`~0.000000001V;",
+                    U"mcV`Mikrovolt`~0.000001V;",
+                    U"mV`Millivolt`~0.001V;",
+                    U"kV`Kilovolt`~1000V;",
+                    U"MV`Megavolt`~1000000V;",
+                    U"Ohm~V/A;",
+                    U"mcOhm`Mikroohm`~0.000001Ohm;",
+                    U"mOhm`Milliohm`~0.001Ohm;",
+                    U"kOhm`Kiloohm`~1000Ohm;",
+                    U"MOhm`Megaohm`~1000000Ohm;",
+                    U"F`Farad`~C/V;",
+                    U"pF`Pikofarad`~0.000000000001F;",
+                    U"nF`Nanofarad`~0.000000001F;",
+                    U"mcF`Mikrofarad`~0.000001F;",
+                    U"mF`Millifarad`~0.001F;",
+                    U"Wb`Weber`~(kg*pow(m,2)/(pow(s,2)*A));",
+                    U"mcWb`Mikroweber`~0.000001Wb;",
+                    U"mWb`Milliweber`~0.001Wb;",
+                    U"kWb`Kiloweber`~1000Wb;",
+                    U"MWb`Megaweber`~1000000Wb;",
+                    U"T`Tesla`~(Wb)/(pow(m,2));",
+                    U"mcT`Mikrotesla`~0.000001T;",
+                    U"mT`Millitesla`~0.001T;",
+                    U"kT`Kilotesla`~1000T;",
+                    U"MT`Megatesla`~1000000T;",
+                    U"H`Henry`~(kg*pow(m,2))/(pow(s,2)*pow(A,2));",
+                    U"pH`Pikohenry`~0.000000000001H;",
+                    U"nH`Nanohenry`~0.000000001H;",
+                    U"mcH`Mikrohenry`~0.000001H;",
+                    U"mH`Millihenry`~0.001H;",
+                    U"S`Siemens`~(1)/(Ohm);",
+                    U"mcS`Mikrosiemens`~0.000001S;",
+                    U"mS`Millisiemens`~0.001S;",
+                    U"kS`Kilosiemens`~1000S;",
+                    U"MS`Megasiemens`~1000000S;",
+                    U"Gy`Gray`~(J)/(kg);",
+                    U"mcGy`Mikrogray`~0.000001Gy;",
+                    U"mGy`Milligray`~0.001Gy;",
+                    U"kGy`Kilogray`~1000Gy;",
+                    U"MGy`Megagray`~1000000Gy;",
+                }
             }
         };
 
@@ -1270,6 +1400,35 @@ private:
                     U"yuan~¥;",
                     U"rupia~₹;",
                     U"real~R$;"
+                }
+            },
+            {
+                Language::German,
+                {
+                    U"ang`Angström`~0.000000000001m;",
+                    U"°C~K;",
+                    U"byte~8bit;",
+                    U"kbyte~1024byte;",
+                    U"Mbyte~1024kbyte;",
+                    U"Gbyte~1024Mbyte;",
+                    U"Tbyte~1024Gbyte;",
+                    U"a`Ar`~100*pow(m,2);",
+                    U"ha`Hektar`~100a;",
+                    U"l`Liter`~pow(dm,3);",
+                    U"ml`Milliliter`~0.001l;",
+                    U"dl`Deziliter`~0.1l;",
+                    U"dal~10l;",
+                    U"hl`Hektoliter`~100l;",
+                    U"kop~0.01₽;",
+                    U"dollar~$;",
+                    U"¢~0.01$;",
+                    U"cent~¢;",
+                    U"euro~€;",
+                    U"ct~0.01€;",
+                    U"eurocent~0.01€;",
+                    U"yuan~¥;",
+                    U"rupee~₹;",
+                    U"real~R$;",
                 }
             }
         };
@@ -1475,6 +1634,49 @@ private:
                     U"vedro{rus}~4chet{rus};",
                     U"bochka{rus}~40vedro{rus};"
                 }
+            },
+            {
+                Language::German,
+                {
+                    U"punkt{rus}~(254)/(1000)mm;",
+                    U"linie{rus}~10punkt{rus};",
+                    U"sotka{rus}~84punkt{rus};",
+                    U"zoll{rus}~10linie{rus};",
+                    U"werschok{rus}~(7)/(4)zoll{rus};",
+                    U"viertel{rus}~7zoll{rus};",
+                    U"fuß{rus}~12zoll{rus};",
+                    U"arschin{rus}~28zoll{rus};",
+                    U"saschen{rus}~7fuß{rus};",
+                    U"werst{rus}~500saschen{rus};",
+                    U"pfund{rus}~0.4095124*kg;",
+                    U"batman{rus}~10pfund{rus};",
+                    U"pud{rus}~40pfund{rus};",
+                    U"bezmen{rus}~(1)/(16)pud{rus};",
+                    U"kongar{rus}~40.95kg;",
+                    U"pirog{rus}~43mg;",
+                    U"solotnik{rus}~4.266g;",
+                    U"dolja{rus}~(1)/(96)solotnik{rus};",
+                    U"pochka{rus}~(1)/(25)solotnik{rus};",
+                    U"lot{rus}~solotnik{rus};",
+                    U"s{rus}~s;",
+                    U"min{rus}~min;",
+                    U"stunde{rus}~stunde;",
+                    U"glas{rus}~0.273l;",
+                    U"polygarnets{rus}~6glas{rus};",
+                    U"garnets{rus}~12glas{rus};",
+                    U"chetveric{rus}~8garnets{rus};",
+                    U"osmina{rus}~4chetveric{rus};",
+                    U"polosminy{rus}~52.48*l;",
+                    U"chet{rus}~64garnets{rus};",
+                    U"polovnik{rus}~419.84l;",
+                    U"kadka{rus}~2polovnik{rus};",
+                    U"shkalic{rus}~61.5ml;",
+                    U"charka{rus}~2shkalic{rus};",
+                    U"kosushka{rus}~5shkalic{rus};",
+                    U"shtof{rus}~10charka{rus};",
+                    U"vedro{rus}~4chet{rus};",
+                    U"bochka{rus}~40vedro{rus};",
+                }
             }
         };
 
@@ -1670,6 +1872,51 @@ private:
                     U"pk{us}~peck{us};",
                     U"bu{us}~bushel{us};"
                 }
+            },
+            {
+                Language::German,
+                {
+                    U"zoll{us}~25.4mm;",
+                    U"fuß{us}~12zoll{us};",
+                    U"yard{us}~3fuß{us};",
+                    U"meile{us}~1760yard{us};",
+                    U"unze{us}~28.3495g;",
+                    U"pfund{us}~16unze{us};",
+                    U"stone{us}~14pfund{us};",
+                    U"hundredweight{us}~100pfund{us};",
+                    U"ton{us}~2000pfund{us};",
+                    U"teelöffel{us}~4.92892ml;",
+                    U"esslöffel{us}~14.7868ml;",
+                    U"flüssigunze{us}~29.5735ml;",
+                    U"cup{us}~236.588ml;",
+                    U"pinte{us}~16flüssigunze{us};",
+                    U"quart{us}~2pinte{us};",
+                    U"gallone{us}~4quart{us};",
+                    U"trockenpinte{us}~550.6ml;",
+                    U"trockenquart{us}~1.101l;",
+                    U"trockengallone{us}~4.4048l;",
+                    U"bushel{us}~35.2391l;",
+                    U"peck{us}~8.8098l;",
+                    U"in{us}~zoll{us};",
+                    U"ft{us}~fuß{us};",
+                    U"yd{us}~yard{us};",
+                    U"mi{us}~meile{us};",
+                    U"oz{us}~unze{us};",
+                    U"lb{us}~pfund{us};",
+                    U"st{us}~stone{us};",
+                    U"cwt{us}~hundredweight{us};",
+                    U"tsp{us}~teelöffel{us};",
+                    U"tbsp{us}~esslöffel{us};",
+                    U"fl_oz{us}~flüssigunze{us};",
+                    U"pt{us}~pinte{us};",
+                    U"qt{us}~quart{us};",
+                    U"gal{us}~gallone{us};",
+                    U"dry_pt{us}~trockenpinte{us};",
+                    U"dry_qt{us}~trockenquart{us};",
+                    U"dry_gal{us}~trockengallone{us};",
+                    U"pk{us}~peck{us};",
+                    U"bu{us}~bushel{us};",
+                }
             }
         };
 
@@ -1745,6 +1992,24 @@ private:
                     U"a_g`aceleração da gravidade`=9.80665(m/pow(s,2));",
                     U"μ{0}`permeabilidade do vácuo`=4*pi*pow(10,-7)*(H/m);",
                     U"ε{0}`permissividade do vácuo`=1/(μ{0}*pow(v_l,2));"
+                }
+            },
+            {
+                Language::German,
+                {
+                    U"c`Lichtgeschwindigkeit`=299792458(m/s);",
+                    U"G`Gravitationskonstante`=6.674301515151515*pow(10,-11)*(pow(m,3)/(kg*pow(s,2)));",
+                    U"h`Plancksche Konstante`=6.62607015*pow(10,-34)*(J*s);",
+                    U"e_c`Elementarladung`=-1.602176634*pow(10,-19)*C;",
+                    U"e_m`Elektronenmasse`=9.1093837015*pow(10,-31)*kg;",
+                    U"p_c`Protonenladung`=1.602176634*pow(10,-19)*C;",
+                    U"p_m`Protonenmasse`=1.67262192595*pow(10,-27)*kg;",
+                    U"n_c`Neutronenladung`=0.*C;",
+                    U"n_m`Neutronenmasse`=1.67492749804*pow(10,-27)*kg;",
+                    U"k`Boltzmannsche Konstante`=1.380649*pow(10,-23)*(J/K);",
+                    U"g_a`Fallbeschleunigung`=9.80665(m/pow(s,2));",
+                    U"μ{0}`magnetische Feldkonstante`=4*pi*pow(10,-7)*(H/m);",
+                    U"ε{0}`elektrische Feldkonstante`=1/(μ{0}*pow(c,2));",
                 }
             }
         };

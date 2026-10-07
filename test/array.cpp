@@ -391,6 +391,17 @@ TEST_F(CalcTestArrayReal, units1)
     ASSERT_TRUE(r.ToStdString(3, 3) == "[5.E+0(м),3.E+0((м)/(с))]") << r.ToStdString(3, 3);
 }
 
+TEST_F(CalcTestArrayReal, units_german)
+{
+    parser.SetLocale(Language::German);
+    auto r = parser.Parse(LogicalId{0, 0, 1}, U"[5m,3*(m/s)];");
+    ASSERT_TRUE(r.ToStdString(3, 3) == "[5.E+0(m),3.E+0((m)/(s))]") << r.ToStdString(3, 3);
+
+    //angle identifiers of the array parser under the German locale
+    r = parser.Parse(LogicalId{0, 0, 2}, U"[sin(90deg)];");
+    ASSERT_TRUE(r.ToStdString(3, 3) == "[1.E+0]") << r.ToStdString(3, 3);
+}
+
 TEST_F(CalcTestArrayReal, errors1)
 {
     EXPECT_THROW(parser.Parse(LogicalId{0, 0, 1}, U"(1)/(0);"), yutovo_calculator::MathException);

@@ -16,7 +16,7 @@ Yutovo calculator is a library for calculations using its own simple syntax.
    * The following angular units are supported: degrees, radians, and grads.
    * Basic physical constants are built-in.
    * Automatic unit selection is supported.
-   * Units are presented in the following languages: Russian, English, Spanish.
+   * Units are presented in the following languages: Russian, English, Spanish, Portuguese (Brazil), German.
 
 ## Building for Ubuntu
 
