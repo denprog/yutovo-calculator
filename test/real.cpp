@@ -2523,6 +2523,227 @@ TEST_F(CalcTestReal, german_locale_switch)
     ASSERT_TRUE(r.ToStdString(3, 3) == "1.E+0") << r.ToStdString(3, 3);
 }
 
+TEST_F(CalcTestReal, french_language_to_string)
+{
+    ASSERT_TRUE(LanguageToString(Language::French) == "French");
+}
+
+TEST_F(CalcTestReal, french_units_and_currencies)
+{
+    parser.SetLocale(Language::French);
+
+    //SI units are available under the French locale with the international identifiers
+    std::string s = parser.GetSuitableUnit(LogicalId{0, 0, 2}, parser.Parse(LogicalId{0, 0, 2}, U"1km;")).ToStdString(3, 3);
+    ASSERT_TRUE(s == "1.E+0(km)") << s;
+
+    s = parser.GetSuitableUnit(LogicalId{0, 0, 3}, parser.Parse(LogicalId{0, 0, 3}, U"0.2m;")).ToStdString(3, 3);
+    ASSERT_TRUE(s == "2.E+0(dm)") << s;
+
+    //angle identifiers
+    auto r = parser.Parse(LogicalId{0, 0, 4}, U"sin(90deg);");
+    ASSERT_TRUE(r.ToStdString(3, 3) == "1.E+0") << r.ToStdString(3, 3);
+
+    r = parser.Parse(LogicalId{0, 0, 5}, U"2rad;");
+    ASSERT_TRUE(r.GetAngleMeasure() == AngleMeasure::Radian) << r.ToStdString(3, 3);
+
+    //currencies
+    r = parser.Parse(LogicalId{0, 0, 6}, U"1₽*2;");
+    ASSERT_TRUE(r.ToStdString(3, 3) == "2.E+0(₽)") << r.ToStdString(3, 3);
+
+    //physical constants: speed of light is available under the French locale
+    r = parser.Parse(LogicalId{0, 0, 7}, U"c;");
+    ASSERT_TRUE(r.ToStdString(3, 3) == "2.998E+8((m)/(s))") << r.ToStdString(3, 3);
+
+    //Russian and American unit systems use French word identifiers
+    s = parser.GetSuitableUnit(LogicalId{0, 0, 8}, parser.Parse(LogicalId{0, 0, 8}, U"1verste{rus};")).ToStdString(3, 3);
+    ASSERT_TRUE(s == "1.E+0(verste){rus}") << s;
+    s = parser.GetSuitableUnit(LogicalId{0, 0, 9}, parser.Parse(LogicalId{0, 0, 9}, U"1pouce{us};")).ToStdString(3, 3);
+    ASSERT_TRUE(s == "1.E+0(pouce){us}") << s;
+}
+
+TEST_F(CalcTestReal, french_builtin_unit_names)
+{
+    parser.SetLocale(Language::French);
+
+    //base units and currencies: ListBuiltinUnits
+    std::vector<std::pair<std::u32string, std::u32string>> builtin_units;
+    parser.ListBuiltinUnits(builtin_units);
+    auto has = [&builtin_units](const std::u32string& id, const std::u32string& name)
+        {
+            return std::find_if(builtin_units.begin(), builtin_units.end(),
+                [&](auto& p)
+                {
+                    return p.first == id && p.second == name;
+                }) != builtin_units.end();
+        };
+    EXPECT_TRUE(has(U"m", U"mètre"));
+    EXPECT_TRUE(has(U"kg", U"kilogramme"));
+    EXPECT_TRUE(has(U"s", U"seconde"));
+    EXPECT_TRUE(has(U"A", U"ampère"));
+    EXPECT_TRUE(has(U"cd", U"candela"));
+    EXPECT_TRUE(has(U"K", U"kelvin"));
+    EXPECT_TRUE(has(U"mol", U"mole"));
+    EXPECT_TRUE(has(U"sr", U"stéradian"));
+    EXPECT_TRUE(has(U"₽", U"rouble"));
+    EXPECT_TRUE(has(U"$", U"dollar"));
+    EXPECT_TRUE(has(U"€", U"euro"));
+    EXPECT_TRUE(has(U"¥", U"yuan"));
+    EXPECT_TRUE(has(U"₹", U"roupie"));
+    EXPECT_TRUE(has(U"R$", U"réal"));
+
+    //derived units (SI prefixes, time words, unit systems): ListUserUnits
+    std::vector<CustomUnit<Real>> units;
+    parser.ListUserUnits(units);
+    auto has_unit = [&units](const std::u32string& id, const std::u32string& name)
+        {
+            return std::find_if(units.begin(), units.end(),
+                [&](auto& p)
+                {
+                    return p.name == id && p.description == name;
+                }) != units.end();
+        };
+    EXPECT_TRUE(has_unit(U"nm", U"nanomètre"));
+    EXPECT_TRUE(has_unit(U"mcm", U"micromètre"));
+    EXPECT_TRUE(has_unit(U"km", U"kilomètre"));
+    EXPECT_TRUE(has_unit(U"mg", U"milligramme"));
+    EXPECT_TRUE(has_unit(U"kV", U"kilovolt"));
+    EXPECT_TRUE(has_unit(U"mcWb", U"microweber"));
+    EXPECT_TRUE(has_unit(U"mT", U"millitesla"));
+    EXPECT_TRUE(has_unit(U"kOhm", U"kiloohm"));
+    EXPECT_TRUE(has_unit(U"nF", U"nanofarad"));
+    EXPECT_TRUE(has_unit(U"mcGy", U"microgray"));
+    EXPECT_TRUE(has_unit(U"l", U"litre"));
+    EXPECT_TRUE(has_unit(U"ml", U"millilitre"));
+    EXPECT_TRUE(has_unit(U"ha", U"hectare"));
+    EXPECT_TRUE(has_unit(U"ang", U"angström"));
+
+    //word identifiers carry no display description (like in the English tree)
+    auto has_unit_id = [&units](const std::u32string& id)
+        {
+            return std::find_if(units.begin(), units.end(),
+                [&](auto& p)
+                {
+                    return p.name == id;
+                }) != units.end();
+        };
+
+    //French time identifiers
+    EXPECT_TRUE(has_unit_id(U"heure"));
+    EXPECT_TRUE(has_unit_id(U"jour"));
+    EXPECT_TRUE(has_unit_id(U"semaine"));
+    EXPECT_TRUE(has_unit_id(U"an"));
+
+    //French word identifiers of the American and Russian unit systems
+    auto has_sys_unit = [&units](const std::u32string& id, const std::u32string& system)
+        {
+            return std::find_if(units.begin(), units.end(),
+                [&](auto& p)
+                {
+                    return p.name == id && p.system == system;
+                }) != units.end();
+        };
+
+    EXPECT_TRUE(has_sys_unit(U"pouce", U"us"));
+    EXPECT_TRUE(has_sys_unit(U"pied", U"us"));
+    EXPECT_TRUE(has_sys_unit(U"mille", U"us"));
+    EXPECT_TRUE(has_sys_unit(U"livre", U"us"));
+    EXPECT_TRUE(has_sys_unit(U"gallon", U"us"));
+    EXPECT_TRUE(has_sys_unit(U"cuillere_cafe", U"us"));
+    EXPECT_TRUE(has_sys_unit(U"verste", U"rus"));
+    EXPECT_TRUE(has_sys_unit(U"archine", U"rus"));
+    EXPECT_TRUE(has_sys_unit(U"livre", U"rus"));
+    EXPECT_TRUE(has_sys_unit(U"zolotnik", U"rus"));
+    EXPECT_TRUE(has_sys_unit(U"verre", U"rus"));
+    EXPECT_TRUE(has_sys_unit(U"heure", U"rus"));
+
+    //physical constants: ListUserVariables
+    std::vector<std::pair<std::u32string, std::u32string>> variables;
+    parser.ListUserVariables(variables);
+    auto has_var = [&variables](const std::u32string& id, const std::u32string& name)
+        {
+            return std::find_if(variables.begin(), variables.end(),
+                [&](auto& p)
+                {
+                    return p.first == id && p.second == name;
+                }) != variables.end();
+        };
+
+    EXPECT_TRUE(has_var(U"c", U"vitesse de la lumière"));
+    EXPECT_TRUE(has_var(U"G", U"constante gravitationnelle"));
+    EXPECT_TRUE(has_var(U"h", U"constante de Planck"));
+    EXPECT_TRUE(has_var(U"k", U"constante de Boltzmann"));
+    EXPECT_TRUE(has_var(U"e_c", U"charge élémentaire"));
+    EXPECT_TRUE(has_var(U"g_a", U"accélération de la pesanteur"));
+}
+
+TEST_F(CalcTestReal, french_word_units_parse)
+{
+    parser.SetLocale(Language::French);
+
+    //French time identifiers
+    auto r = parser.Parse(LogicalId{0, 0, 1}, U"2an;");
+    EXPECT_TRUE(r.ToStdString(3, 3) == "6.307E+7(s)") << r.ToStdString(3, 3);
+    r = parser.Parse(LogicalId{0, 0, 2}, U"1semaine;");
+    EXPECT_TRUE(r.ToStdString(3, 3) == "6.048E+5(s)") << r.ToStdString(3, 3);
+    r = parser.Parse(LogicalId{0, 0, 3}, U"1heure;");
+    EXPECT_TRUE(r.ToStdString(3, 3) == "3.6E+3(s)") << r.ToStdString(3, 3);
+
+    //American system with French identifiers
+    std::string s = parser.GetSuitableUnit(LogicalId{0, 0, 4}, parser.Parse(LogicalId{0, 0, 4}, U"1pied{us};")).ToStdString(3, 3);
+    EXPECT_TRUE(s == "1.E+0(pied){us}") << s;
+    s = parser.GetSuitableUnit(LogicalId{0, 0, 5}, parser.Parse(LogicalId{0, 0, 5}, U"1gallon{us};")).ToStdString(3, 3);
+    EXPECT_TRUE(s == "1.E+0(gallon){us}") << s;
+
+    //Russian system with French identifiers
+    s = parser.GetSuitableUnit(LogicalId{0, 0, 6}, parser.Parse(LogicalId{0, 0, 6}, U"1archine{rus};")).ToStdString(3, 3);
+    EXPECT_TRUE(s == "1.E+0(archine){rus}") << s;
+    s = parser.GetSuitableUnit(LogicalId{0, 0, 7}, parser.Parse(LogicalId{0, 0, 7}, U"1zolotnik{rus};")).ToStdString(3, 3);
+    EXPECT_TRUE(s == "1.E+0(zolotnik){rus}") << s;
+}
+
+TEST_F(CalcTestReal, french_angle_identifiers)
+{
+    parser.SetLocale(Language::French);
+
+    auto r = parser.Parse(LogicalId{0, 0, 1}, U"sin(90°);");
+    ASSERT_TRUE(r.ToStdString(3, 3) == "1.E+0") << r.ToStdString(3, 3);
+
+    r = parser.Parse(LogicalId{0, 0, 2}, U"sin(100grad);");
+    ASSERT_TRUE(r.ToStdString(3, 3) == "1.E+0") << r.ToStdString(3, 3);
+
+    r = parser.Parse(LogicalId{0, 0, 3}, U"sin(1.5707963rad);");
+    ASSERT_TRUE(r.ToStdString(3, 3) == "1.E+0") << r.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestReal, french_constructor_locale)
+{
+    //the parser must also work when constructed directly with the French locale
+    Parser<Real> french_parser(3, Language::French);
+    std::string s = french_parser.GetSuitableUnit(LogicalId{0, 0, 1}, french_parser.Parse(LogicalId{0, 0, 1}, U"1km;")).ToStdString(3, 3);
+    ASSERT_TRUE(s == "1.E+0(km)") << s;
+    auto r = french_parser.Parse(LogicalId{0, 0, 2}, U"sin(90deg);");
+    ASSERT_TRUE(r.ToStdString(3, 3) == "1.E+0") << r.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestReal, french_locale_switch)
+{
+    parser.SetLocale(Language::French);
+    std::string s = parser.GetSuitableUnit(LogicalId{0, 0, 1}, parser.Parse(LogicalId{0, 0, 1}, U"1km;")).ToStdString(3, 3);
+    ASSERT_TRUE(s == "1.E+0(km)") << s;
+
+    //switching away and back must re-register the French unit lists
+    parser.SetLocale(Language::Russian);
+    s = parser.GetSuitableUnit(LogicalId{0, 0, 2}, parser.Parse(LogicalId{0, 0, 2}, U"1км;")).ToStdString(3, 3);
+    ASSERT_TRUE(s == "1.E+0(км)") << s;
+
+    parser.SetLocale(Language::French);
+    s = parser.GetSuitableUnit(LogicalId{0, 0, 3}, parser.Parse(LogicalId{0, 0, 3}, U"1km;")).ToStdString(3, 3);
+    ASSERT_TRUE(s == "1.E+0(km)") << s;
+
+    auto r = parser.Parse(LogicalId{0, 0, 4}, U"sin(90deg);");
+    ASSERT_TRUE(r.ToStdString(3, 3) == "1.E+0") << r.ToStdString(3, 3);
+}
+
 TEST_F(CalcTestReal, pt_BR_si_units_distance)
 {
     parser.SetLocale(Language::BrazilianPortuguese);
