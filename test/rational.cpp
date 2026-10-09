@@ -803,6 +803,25 @@ TEST_F(CalcTestRational, money5)
     ASSERT_TRUE(r.ToStdString() == "1(km)") << r.ToStdString();
 }
 
+TEST_F(CalcTestRational, money6)
+{
+    parser.SetLocale(Language::Italian);
+
+    auto r = parser.Parse(LogicalId{0, 0, 1}, U"1₽;", 3);
+    ASSERT_TRUE(r.ToStdString() == "1(₽)") << r.ToStdString();
+    r = parser.GetSuitableUnit(LogicalId{0, 0, 1}, parser.Parse(LogicalId{0, 0, 1}, U"1kop;", 3));
+    ASSERT_TRUE(r.ToStdString() == "1(kop)") << r.ToStdString();
+
+    r = parser.Parse(LogicalId{0, 0, 1}, U"1€;", 3);
+    ASSERT_TRUE(r.ToStdString() == "1(€)") << r.ToStdString();
+    r = parser.GetSuitableUnit(LogicalId{0, 0, 1}, parser.Parse(LogicalId{0, 0, 1}, U"1eurocent;", 3));
+    ASSERT_TRUE(r.ToStdString() == "1(ct)") << r.ToStdString();
+
+    //SI units in the rational parser under the Italian locale
+    r = parser.GetSuitableUnit(LogicalId{0, 0, 1}, parser.Parse(LogicalId{0, 0, 1}, U"1000m;", 3));
+    ASSERT_TRUE(r.ToStdString() == "1(km)") << r.ToStdString();
+}
+
 TEST_F(CalcTestRational, user_functions1)
 {
     parser.Parse(LogicalId{0, 0, 1}, U"f(x)=5;");

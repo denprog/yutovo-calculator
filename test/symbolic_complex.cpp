@@ -297,6 +297,13 @@ TEST_F(CalcTestSymbolicComplex, definite_integral_i_french)
     ASSERT_TRUE(res.ToStdString(10, Language::French) == "2.*i") << res.ToStdString(10, Language::French);
 }
 
+TEST_F(CalcTestSymbolicComplex, definite_integral_i_italian)
+{
+    parser.SetLocale(Language::Italian);
+    Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"definite_integral(0,\u03C0,pow(e,i*z),z);", 10);
+    ASSERT_TRUE(res.ToStdString(10, Language::Italian) == "2.*i") << res.ToStdString(10, Language::Italian);
+}
+
 TEST_F(CalcTestSymbolicComplex, expand1)
 {
     Symbolic<Complex> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"expand(pow((x+1),2));");

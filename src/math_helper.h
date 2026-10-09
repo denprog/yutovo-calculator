@@ -62,7 +62,8 @@ enum class Language
 	Spanish,
 	BrazilianPortuguese,
 	German,
-	French
+	French,
+	Italian
 };
 
 class Real;

@@ -178,6 +178,8 @@ std::string LanguageToString(const Language language)
         return "German";
     case Language::French:
         return "French";
+    case Language::Italian:
+        return "Italian";
     case Language::None:
         return "";
     }

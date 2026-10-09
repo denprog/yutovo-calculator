@@ -139,6 +139,12 @@ TEST_F(CalcTestInteger, integers7)
     ASSERT_TRUE(parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"1+1;") == parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"2;"));
 }
 
+TEST_F(CalcTestInteger, integers8)
+{
+    parser.SetLocale(Language::Italian);
+    ASSERT_TRUE(parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"1+1;") == parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"2;"));
+}
+
 TEST_F(CalcTestInteger, logical1)
 {
     Integer res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"¬5;");

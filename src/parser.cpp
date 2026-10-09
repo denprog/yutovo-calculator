@@ -1358,6 +1358,7 @@ void Parser<yutovo_calculator::Real>::InitBuiltinIdentifiers()
     case Language::BrazilianPortuguese:
     case Language::German:
     case Language::French:
+    case Language::Italian:
         {
             Real v;
             v = 1;
@@ -1398,6 +1399,7 @@ void Parser<yutovo_calculator::Array<Real>>::InitBuiltinIdentifiers()
     case Language::BrazilianPortuguese:
     case Language::German:
     case Language::French:
+    case Language::Italian:
         {
             Real v;
             v = 1;

@@ -108,6 +108,19 @@ TEST_F(CalcTestComplex, numbers6)
     ASSERT_TRUE(res == "1.E+0+i*2.E+0") << res;
 }
 
+TEST_F(CalcTestComplex, numbers7)
+{
+    parser.SetLocale(Language::Italian);
+    std::string res;
+    //the Italian locale uses i as the imaginary unit, j is not an identifier
+    EXPECT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"(1+2)*j;").ToStdString(3, 3), yutovo_calculator::SyntaxException);
+    res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"(1+2)*i;").ToStdString(3, 3);
+    ASSERT_TRUE(res == "i*3.E+0") << res;
+
+    res = parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"2i+1;").ToStdString(3, 3);
+    ASSERT_TRUE(res == "1.E+0+i*2.E+0") << res;
+}
+
 TEST_F(CalcTestComplex, scientific1)
 {
     std::string res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"1.23e-5;").ToStdString(3, 3);
