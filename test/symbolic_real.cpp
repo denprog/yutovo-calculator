@@ -649,6 +649,26 @@ TEST_F(CalcTestSymbolicReal, derivative4)
     ASSERT_TRUE(res.ToString(10) == U"cos(x)") << res.ToStdString(10);
 }
 
+TEST_F(CalcTestSymbolicReal, recursion_depth_symbolic1)
+{
+    std::u32string deep(U"derivative(");
+    deep.append(20000, U'(');
+    deep += U"x";
+    deep.append(20000, U')');
+    deep += U", [x=1]);";
+    EXPECT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 1}, deep), yutovo_calculator::SyntaxException);
+}
+
+TEST_F(CalcTestSymbolicReal, recursion_depth_symbolic2)
+{
+    std::u32string deep(U"derivative('");
+    deep.append(20000, U'(');
+    deep += U"x";
+    deep.append(20000, U')');
+    deep += U", [x=1]);";
+    EXPECT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 1}, deep), yutovo_calculator::SyntaxException);
+}
+
 TEST_F(CalcTestSymbolicReal, indefinite_integral1)
 {
     Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"indefinite_integral(pow(x,2), x);");

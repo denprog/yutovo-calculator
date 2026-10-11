@@ -1014,6 +1014,41 @@ TEST_F(CalcTestReal, errors9)
     ASSERT_FALSE(true);
 }
 
+TEST_F(CalcTestReal, recursion_depth1)
+{
+    std::u32string deep(20000, U'(');
+    deep += U"1";
+    deep.append(20000, U')');
+    deep += U";";
+    EXPECT_THROW(parser.Parse(LogicalId{0, 0, 1}, deep), yutovo_calculator::SyntaxException);
+}
+
+TEST_F(CalcTestReal, recursion_depth2)
+{
+    std::u32string deep(20000, U'(');
+    deep += U"1;";
+    EXPECT_THROW(parser.Parse(LogicalId{0, 0, 1}, deep), yutovo_calculator::SyntaxException);
+}
+
+TEST_F(CalcTestReal, recursion_depth3)
+{
+    std::u32string deep(20000, U'-');
+    deep += U"1;";
+    EXPECT_THROW(parser.Parse(LogicalId{0, 0, 1}, deep), yutovo_calculator::SyntaxException);
+}
+
+TEST_F(CalcTestReal, recursion_depth4)
+{
+    //moderate nesting must still parse below the recursion limit;
+    //deeper nesting (~14+) is exponentially slow due to the backtracking alternatives of the grammar, which is a pre-existing property
+    std::u32string deep(8, U'(');
+    deep += U"1";
+    deep.append(8, U')');
+    deep += U";";
+    Real res = parser.Parse(LogicalId{0, 0, 1}, deep);
+    ASSERT_TRUE(res.ToStdString(3, 3) == parser.Parse(LogicalId{0, 0, 1}, U"1;").ToStdString(3, 3)) << res.ToStdString(3, 3);
+}
+
 TEST_F(CalcTestReal, trigonometric1)
 {
     Real res = parser.Parse(LogicalId{0, 0, 1}, U"sin(0);");

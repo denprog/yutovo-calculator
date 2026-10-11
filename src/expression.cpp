@@ -28,28 +28,34 @@ Expression<Integer>::Expression(LogicalId id, std::u32string& expr, Solver<Integ
     using boost::spirit::qi::on_error;
     using boost::spirit::qi::on_success;
     using boost::spirit::qi::fail;
+    using boost::spirit::qi::eps;
     using boost::phoenix::function;
+    using boost::phoenix::bind;
+    using boost::phoenix::ref;
     using namespace boost::phoenix::arg_names;
     qi::_1_type _1;
     qi::_3_type _3;
 
+    recursion_guard = eps[bind(&EnterRecursionDepth, ref(recursion_depth), qi::_pass)];
+
     expression = addition.alias();
-    
+
     addition = multiplication >> *((char_('+') > multiplication) | (char_('-') > multiplication));
-    
+
     multiplication = unary >> *(multiply);
 
     multiply = char_(U'*') > unary | char_(U'/') > unary | char_(U'∧') > unary | char_(U'∨') > unary | char_(U'⊕') > unary;
 
     if (solver->default_notation == 16)
     {
-        unary = loop | array | compare | postfix_operation | implicit_mul | function_call | function_call_string | 
-            no_fences_function_call | number | identifier | implicit_string_mul | unary_operation | '(' > expression > ')';
+        unary = recursion_guard >> (loop | array | compare | postfix_operation | implicit_mul | function_call | function_call_string |
+            no_fences_function_call | number | identifier | implicit_string_mul | unary_operation | '(' > expression > ')');
     }
     else
     {
-        unary = loop | array | compare | implicit_function_mul | implicit_post_function_mul | postfix_operation | implicit_string_mul | implicit_mul | 
-            number | function_call | function_call_string | identifier | no_fences_function_call | unary_operation | '(' > expression > ')';
+        unary = recursion_guard >> (loop | array | compare | implicit_function_mul | implicit_post_function_mul | postfix_operation |
+            implicit_string_mul | implicit_mul | number | function_call | function_call_string | identifier |
+            no_fences_function_call | unary_operation | '(' > expression > ')');
     }
     
     if (solver->default_notation == 16)	
@@ -125,12 +131,14 @@ Expression<Integer>::Expression(LogicalId id, std::u32string& expr, Solver<Integ
     on_success(implicit_fraction_mul, 
         boost::phoenix::function<Annotation<yutovo_calculator::Integer>>(Annotation<yutovo_calculator::Integer>(expr.begin(), expr.end(), id, 
         &solver->parser_context))(qi::_val, _1));
-    on_success(compare, 
-        boost::phoenix::function<Annotation<yutovo_calculator::Integer>>(Annotation<yutovo_calculator::Integer>(expr.begin(), expr.end(), id, 
+    on_success(compare,
+        boost::phoenix::function<Annotation<yutovo_calculator::Integer>>(Annotation<yutovo_calculator::Integer>(expr.begin(), expr.end(), id,
         &solver->parser_context))(qi::_val, _1));
-    
+
+    on_success(unary, bind(&LeaveRecursionDepth, ref(recursion_depth)));
+
     //work out the exceptions
-    on_error<fail>(expression, 
+    on_error<fail>(expression,
         boost::phoenix::function<ErrorHandler<SyntaxException>>(ErrorHandler<SyntaxException>(id, expr.begin(), expr.end(), SyntaxError))(_3));
     
     // BOOST_SPIRIT_DEBUG_NODE(expression);
@@ -161,10 +169,15 @@ Expression<Real>::Expression(LogicalId id, std::u32string& expr, Solver<Real>* _
     using boost::spirit::qi::lit;
     using boost::spirit::qi::hold;
     using boost::spirit::qi::attr;
+    using boost::spirit::qi::eps;
     using boost::phoenix::function;
+    using boost::phoenix::bind;
+    using boost::phoenix::ref;
     using namespace boost::phoenix::arg_names;
     qi::_1_type _1;
     qi::_3_type _3;
+
+    recursion_guard = eps[bind(&EnterRecursionDepth, ref(recursion_depth), qi::_pass)];
 
     expression = addition.alias();
 
@@ -174,9 +187,13 @@ Expression<Real>::Expression(LogicalId id, std::u32string& expr, Solver<Real>* _
 
     multiply = char_(U'*') > unary | char_(U'/') > unary | char_(U'%') >> unary;
 
-    unary = hold[derivative_at_point] | hold[evaluate_at_point] | definite_integral | loop | compare | implicit_function_mul | implicit_post_function_mul | postfix_operation |
-        implicit_div_mul | degree_minute_second | implicit_string_mul | implicit_fraction_mul | mixed_division | implicit_mul | number | function_call |
-        no_fences_function_call | identifier | unary_operation | '(' > expression > ')';
+    unary = recursion_guard >>
+        (hold[derivative_at_point] | hold[evaluate_at_point] | definite_integral | loop | compare | implicit_function_mul |
+        implicit_post_function_mul | postfix_operation | implicit_div_mul | degree_minute_second | implicit_string_mul |
+        implicit_fraction_mul | mixed_division | implicit_mul | number | function_call | no_fences_function_call | identifier |
+        unary_operation | '(' > expression > ')');
+
+    on_success(unary, bind(&LeaveRecursionDepth, ref(recursion_depth)));
     
     number = exp_number | digits_number;
     
@@ -221,7 +238,10 @@ Expression<Real>::Expression(LogicalId id, std::u32string& expr, Solver<Real>* _
 
     postfix_operation = (identifier >> char_('!')) | ((number | '(' > expression > ')') >> char_('!'));
 
-    symbolic_body = +((char_(U'(') >> *symbolic_body >> char_(U')')) | (unicode::char_ - unicode::char_(U'(') - unicode::char_(U')')));
+    symbolic_body = eps[bind(&EnterRecursionDepth, ref(recursion_depth), qi::_pass)] >> +((char_(U'(') >> *symbolic_body >> char_(U')')) |
+        (unicode::char_ - unicode::char_(U'(') - unicode::char_(U')')));
+
+    on_success(symbolic_body, bind(&LeaveRecursionDepth, ref(recursion_depth)));
 
     symbolic_arg = raw[+( (char_(U'(') >> *symbolic_body >> char_(U')')) |
         (unicode::char_ - unicode::char_(U',') - unicode::char_(U'(') - unicode::char_(U')')))];
@@ -348,10 +368,15 @@ Expression<yutovo_calculator::Rational>::Expression(LogicalId id, std::u32string
     using boost::spirit::qi::fail;
     using boost::spirit::qi::lit;
     using boost::spirit::qi::hold;
+    using boost::spirit::qi::eps;
     using boost::phoenix::function;
+    using boost::phoenix::bind;
+    using boost::phoenix::ref;
     using namespace boost::phoenix::arg_names;
     qi::_1_type _1;
     qi::_3_type _3;
+
+    recursion_guard = eps[bind(&EnterRecursionDepth, ref(recursion_depth), qi::_pass)];
 
     expression = addition.alias();
     
@@ -361,8 +386,10 @@ Expression<yutovo_calculator::Rational>::Expression(LogicalId id, std::u32string
 
     multiply = (char_('*') > unary) | (char_('/') > unary) | (char_('%') > unary);
 
-    symbolic_body = +( (char_(U'(') >> *symbolic_body >> char_(U')')) |
+    symbolic_body = eps[bind(&EnterRecursionDepth, ref(recursion_depth), qi::_pass)] >> +( (char_(U'(') >> *symbolic_body >> char_(U')')) |
         (unicode::char_ - unicode::char_(U'(') - unicode::char_(U')')) );
+
+    on_success(symbolic_body, bind(&LeaveRecursionDepth, ref(recursion_depth)));
 
     symbolic_arg = raw[ +( (char_(U'(') >> *symbolic_body >> char_(U')')) |
         (unicode::char_ - unicode::char_(U',') - unicode::char_(U'(') - unicode::char_(U')')) ) ];
@@ -376,9 +403,12 @@ Expression<yutovo_calculator::Rational>::Expression(LogicalId id, std::u32string
 
     evaluate_at_point = lit("evaluate") >> '(' >> symbolic_arg >> ',' >> '[' >> derivative_variable % ',' >> ']' >> ')';
     
-    unary = hold[derivative_at_point] | hold[evaluate_at_point] | definite_integral | loop | array | compare | implicit_function_mul | implicit_post_function_mul | implicit_div_mul | 
-        implicit_string_mul | implicit_fraction_mul | mixed_division | implicit_mul | number | function_call | identifier | 
-        no_fences_function_call | unary_operation | '(' > expression > ')';
+    unary = recursion_guard >>
+        (hold[derivative_at_point] | hold[evaluate_at_point] | definite_integral | loop | array | compare | implicit_function_mul |
+        implicit_post_function_mul | implicit_div_mul | implicit_string_mul | implicit_fraction_mul | mixed_division | implicit_mul |
+        number | function_call | identifier | no_fences_function_call | unary_operation | '(' > expression > ')');
+
+    on_success(unary, bind(&LeaveRecursionDepth, ref(recursion_depth)));
     
     number = digits_number;
 
@@ -486,10 +516,15 @@ Expression<Complex>::Expression(LogicalId id, std::u32string& expr, Solver<Compl
     using boost::spirit::qi::fail;
     using boost::spirit::qi::lit;
     using boost::spirit::qi::hold;
+    using boost::spirit::qi::eps;
     using boost::phoenix::function;
+    using boost::phoenix::bind;
+    using boost::phoenix::ref;
     using namespace boost::phoenix::arg_names;
     qi::_1_type _1;
     qi::_3_type _3;
+
+    recursion_guard = eps[bind(&EnterRecursionDepth, ref(recursion_depth), qi::_pass)];
 
     expression = addition.alias();
     
@@ -499,9 +534,13 @@ Expression<Complex>::Expression(LogicalId id, std::u32string& expr, Solver<Compl
 
     multiply = char_('*') > unary | char_('/') > unary | char_('%') > unary;
 
-    unary = hold[derivative_at_point] | hold[evaluate_at_point] | definite_integral | loop | array | compare | implicit_function_mul | implicit_post_function_mul | postfix_operation | 
-        implicit_div_mul | implicit_string_mul | implicit_fraction_mul | mixed_division | implicit_mul | number | function_call | 
-        no_fences_function_call | identifier | unary_operation | '(' > expression > ')';
+    unary = recursion_guard >>
+        (hold[derivative_at_point] | hold[evaluate_at_point] | definite_integral | loop | array | compare | implicit_function_mul |
+        implicit_post_function_mul | postfix_operation | implicit_div_mul | implicit_string_mul | implicit_fraction_mul |
+        mixed_division | implicit_mul | number | function_call | no_fences_function_call | identifier | unary_operation |
+        '(' > expression > ')');
+
+    on_success(unary, bind(&LeaveRecursionDepth, ref(recursion_depth)));
     
     number = exp_number | digits_number;
     
@@ -537,8 +576,10 @@ Expression<Complex>::Expression(LogicalId id, std::u32string& expr, Solver<Compl
 
     postfix_operation = ((number | '(' > expression > ')') >> char_('!'));
     
-    symbolic_body = +( (char_(U'(') >> *symbolic_body >> char_(U')')) |
+    symbolic_body = eps[bind(&EnterRecursionDepth, ref(recursion_depth), qi::_pass)] >> +( (char_(U'(') >> *symbolic_body >> char_(U')')) |
         (unicode::char_ - unicode::char_(U'(') - unicode::char_(U')')) );
+
+    on_success(symbolic_body, bind(&LeaveRecursionDepth, ref(recursion_depth)));
 
     symbolic_arg = raw[ +( (char_(U'(') >> *symbolic_body >> char_(U')')) |
         (unicode::char_ - unicode::char_(U',') - unicode::char_(U'(') - unicode::char_(U')')) ) ];
@@ -647,10 +688,15 @@ Expression<Array<Real>>::Expression(LogicalId id, std::u32string& expr, Solver<A
     using boost::spirit::qi::lit;
     using boost::spirit::qi::hold;
     using boost::spirit::qi::attr;
+    using boost::spirit::qi::eps;
     using boost::phoenix::function;
+    using boost::phoenix::bind;
+    using boost::phoenix::ref;
     using namespace boost::phoenix::arg_names;
     qi::_1_type _1;
     qi::_3_type _3;
+
+    recursion_guard = eps[bind(&EnterRecursionDepth, ref(recursion_depth), qi::_pass)];
 
     expression = addition.alias();
     
@@ -660,9 +706,12 @@ Expression<Array<Real>>::Expression(LogicalId id, std::u32string& expr, Solver<A
 
     multiply = char_('*') > unary | char_('/') > unary | char_('%') >> unary;
     
-    unary = definite_integral | loop | array | compare | implicit_function_mul | implicit_post_function_mul | postfix_operation |
-        implicit_div_mul | degree_minute_second | implicit_string_mul | implicit_fraction_mul | mixed_division | implicit_mul | number | function_call |
-        no_fences_function_call | identifier | unary_operation | '(' > expression > ')';
+    unary = recursion_guard >>
+        (definite_integral | loop | array | compare | implicit_function_mul | implicit_post_function_mul | postfix_operation |
+        implicit_div_mul | degree_minute_second | implicit_string_mul | implicit_fraction_mul | mixed_division | implicit_mul | number |
+        function_call | no_fences_function_call | identifier | unary_operation | '(' > expression > ')');
+
+    on_success(unary, bind(&LeaveRecursionDepth, ref(recursion_depth)));
     
     number = exp_number | digits_number;
     
@@ -711,8 +760,10 @@ Expression<Array<Real>>::Expression(LogicalId id, std::u32string& expr, Solver<A
 
     postfix_operation = (identifier >> char_('!')) | ((number | '(' > expression > ')') >> char_('!'));
     
-    symbolic_body = +((char_(U'(') >> *symbolic_body >> char_(U')')) |
+    symbolic_body = eps[bind(&EnterRecursionDepth, ref(recursion_depth), qi::_pass)] >> +((char_(U'(') >> *symbolic_body >> char_(U')')) |
         (unicode::char_ - unicode::char_(U'(') - unicode::char_(U')')));
+
+    on_success(symbolic_body, bind(&LeaveRecursionDepth, ref(recursion_depth)));
 
     symbolic_arg = raw[+( (char_(U'(') >> *symbolic_body >> char_(U')')) |
         (unicode::char_ - unicode::char_(U',') - unicode::char_(U'(') - unicode::char_(U')')))];
@@ -822,12 +873,17 @@ Expression<Symbolic<Real>>::Expression(LogicalId id, std::u32string& expr, Solve
     using boost::spirit::qi::no_case;
     using boost::spirit::qi::lit;
     using boost::spirit::qi::hold;
+    using boost::spirit::qi::eps;
     using boost::spirit::qi::on_error;
     using boost::spirit::qi::fail;
     using boost::phoenix::function;
+    using boost::phoenix::bind;
+    using boost::phoenix::ref;
     using namespace boost::phoenix::arg_names;
     qi::_1_type _1;
     qi::_3_type _3;
+
+    recursion_guard = eps[bind(&EnterRecursionDepth, ref(recursion_depth), qi::_pass)];
 
     expression = addition.alias();
 
@@ -837,9 +893,13 @@ Expression<Symbolic<Real>>::Expression(LogicalId id, std::u32string& expr, Solve
 
     multiply = char_('*') > unary | char_('/') > unary | char_('%') >> unary;
     
-    unary = hold[derivative_at_point] | hold[evaluate_at_point] | loop | array | compare | implicit_function_mul | implicit_post_function_mul | postfix_operation | implicit_div_mul |
-        implicit_string_mul | implicit_fraction_mul | mixed_division | implicit_mul | number | function_call | no_fences_function_call | identifier |
-        unary_operation | '(' > expression > ')';
+    unary = recursion_guard >>
+        (hold[derivative_at_point] | hold[evaluate_at_point] | loop | array | compare | implicit_function_mul |
+        implicit_post_function_mul | postfix_operation | implicit_div_mul | implicit_string_mul | implicit_fraction_mul |
+        mixed_division | implicit_mul | number | function_call | no_fences_function_call | identifier | unary_operation |
+        '(' > expression > ')');
+
+    on_success(unary, bind(&LeaveRecursionDepth, ref(recursion_depth)));
 
     number = exp_number | digits_number;
 
@@ -877,8 +937,10 @@ Expression<Symbolic<Real>>::Expression(LogicalId id, std::u32string& expr, Solve
 
     function_call = identifier >> '(' >> -(expression % ',') > ')';
 
-    symbolic_body = +((char_(U'(') >> *symbolic_body >> char_(U')')) |
+    symbolic_body = eps[bind(&EnterRecursionDepth, ref(recursion_depth), qi::_pass)] >> +((char_(U'(') >> *symbolic_body >> char_(U')')) |
         (unicode::char_ - unicode::char_(U'(') - unicode::char_(U')')));
+
+    on_success(symbolic_body, bind(&LeaveRecursionDepth, ref(recursion_depth)));
 
     symbolic_arg = raw[+( (char_(U'(') >> *symbolic_body >> char_(U')')) |
         (unicode::char_ - unicode::char_(U',') - unicode::char_(U'(') - unicode::char_(U')')) )];
@@ -1029,12 +1091,17 @@ Expression<Symbolic<Rational>>::Expression(LogicalId id, std::u32string& expr, S
     using boost::spirit::qi::no_case;
     using boost::spirit::qi::lit;
     using boost::spirit::qi::hold;
+    using boost::spirit::qi::eps;
     using boost::spirit::qi::on_error;
     using boost::spirit::qi::fail;
     using boost::phoenix::function;
+    using boost::phoenix::bind;
+    using boost::phoenix::ref;
     using namespace boost::phoenix::arg_names;
     qi::_1_type _1;
     qi::_3_type _3;
+
+    recursion_guard = eps[bind(&EnterRecursionDepth, ref(recursion_depth), qi::_pass)];
 
     expression = addition.alias();
 
@@ -1044,9 +1111,13 @@ Expression<Symbolic<Rational>>::Expression(LogicalId id, std::u32string& expr, S
 
     multiply = char_('*') > unary | char_('/') > unary | char_('%') >> unary;
 
-    unary = hold[derivative_at_point] | hold[evaluate_at_point] | loop | array | compare | implicit_function_mul | implicit_post_function_mul | postfix_operation | implicit_div_mul |
-        implicit_string_mul | implicit_fraction_mul | mixed_division | implicit_mul | number | function_call | no_fences_function_call | identifier |
-        unary_operation | '(' > expression > ')';
+    unary = recursion_guard >>
+        (hold[derivative_at_point] | hold[evaluate_at_point] | loop | array | compare | implicit_function_mul |
+        implicit_post_function_mul | postfix_operation | implicit_div_mul | implicit_string_mul | implicit_fraction_mul |
+        mixed_division | implicit_mul | number | function_call | no_fences_function_call | identifier | unary_operation |
+        '(' > expression > ')');
+
+    on_success(unary, bind(&LeaveRecursionDepth, ref(recursion_depth)));
 
     number = exp_number | digits_number;
 
@@ -1084,8 +1155,10 @@ Expression<Symbolic<Rational>>::Expression(LogicalId id, std::u32string& expr, S
 
     function_call = identifier >> '(' >> -(expression % ',') > ')';
 
-    symbolic_body = +( (char_(U'(') >> *symbolic_body >> char_(U')')) |
+    symbolic_body = eps[bind(&EnterRecursionDepth, ref(recursion_depth), qi::_pass)] >> +( (char_(U'(') >> *symbolic_body >> char_(U')')) |
         (unicode::char_ - unicode::char_(U'(') - unicode::char_(U')')) );
+
+    on_success(symbolic_body, bind(&LeaveRecursionDepth, ref(recursion_depth)));
 
     symbolic_arg = raw[ +( (char_(U'(') >> *symbolic_body >> char_(U')')) |
         (unicode::char_ - unicode::char_(U',') - unicode::char_(U'(') - unicode::char_(U')')) ) ];
@@ -1194,12 +1267,17 @@ Expression<Symbolic<Complex>>::Expression(LogicalId id, std::u32string& expr, So
     using boost::spirit::qi::no_case;
     using boost::spirit::qi::lit;
     using boost::spirit::qi::hold;
+    using boost::spirit::qi::eps;
     using boost::spirit::qi::on_error;
     using boost::spirit::qi::fail;
     using boost::phoenix::function;
+    using boost::phoenix::bind;
+    using boost::phoenix::ref;
     using namespace boost::phoenix::arg_names;
     qi::_1_type _1;
     qi::_3_type _3;
+
+    recursion_guard = eps[bind(&EnterRecursionDepth, ref(recursion_depth), qi::_pass)];
 
     expression = addition.alias();
 
@@ -1209,9 +1287,13 @@ Expression<Symbolic<Complex>>::Expression(LogicalId id, std::u32string& expr, So
 
     multiply = char_('*') > unary | char_('/') > unary | char_('%') >> unary;
 
-    unary = hold[derivative_at_point] | hold[evaluate_at_point] | loop | array | compare | implicit_function_mul | implicit_post_function_mul | postfix_operation | implicit_div_mul |
-        implicit_string_mul | implicit_fraction_mul | mixed_division | implicit_mul | number | function_call | no_fences_function_call | identifier |
-        unary_operation | '(' > expression > ')';
+    unary = recursion_guard >>
+        (hold[derivative_at_point] | hold[evaluate_at_point] | loop | array | compare | implicit_function_mul |
+        implicit_post_function_mul | postfix_operation | implicit_div_mul | implicit_string_mul | implicit_fraction_mul |
+        mixed_division | implicit_mul | number | function_call | no_fences_function_call | identifier | unary_operation |
+        '(' > expression > ')');
+
+    on_success(unary, bind(&LeaveRecursionDepth, ref(recursion_depth)));
 
     number = exp_number | digits_number;
 
@@ -1249,8 +1331,10 @@ Expression<Symbolic<Complex>>::Expression(LogicalId id, std::u32string& expr, So
 
     function_call = identifier >> '(' >> -(expression % ',') > ')';
 
-    symbolic_body = +( (char_(U'(') >> *symbolic_body >> char_(U')')) |
+    symbolic_body = eps[bind(&EnterRecursionDepth, ref(recursion_depth), qi::_pass)] >> +( (char_(U'(') >> *symbolic_body >> char_(U')')) |
         (unicode::char_ - unicode::char_(U'(') - unicode::char_(U')')) );
+
+    on_success(symbolic_body, bind(&LeaveRecursionDepth, ref(recursion_depth)));
 
     symbolic_arg = raw[ +( (char_(U'(') >> *symbolic_body >> char_(U')')) |
         (unicode::char_ - unicode::char_(U',') - unicode::char_(U'(') - unicode::char_(U')')) ) ];
@@ -1345,5 +1429,16 @@ Expression<Symbolic<Complex>>::Expression(LogicalId id, std::u32string& expr, So
     // BOOST_SPIRIT_DEBUG_NODE(variable);
 }
 
+template<typename Number>
+void Expression<Number>::EnterRecursionDepth(int& depth, bool& pass)
+{
+    pass = ++depth <= max_recursion_depth;
+}
+
+template<typename Number>
+void Expression<Number>::LeaveRecursionDepth(int& depth)
+{
+    --depth;
+}
 
 };

@@ -51,6 +51,12 @@ struct Expression : qi::grammar<std::u32string::iterator, ExpressionNode<Number>
 		Operand;
 	
 	qi::rule<std::u32string::iterator, ExpressionNode<Number>(), unicode::space_type> expression, term, addition, multiplication;
+	static constexpr int max_recursion_depth = 512;
+
+	static void EnterRecursionDepth(int& depth, bool& pass);
+	static void LeaveRecursionDepth(int& depth);
+
+	qi::rule<std::u32string::iterator, unicode::space_type> recursion_guard;
 	qi::rule<std::u32string::iterator, Operand(), unicode::space_type> unary;
 	qi::rule<std::u32string::iterator, OperationNode<Number>(), unicode::space_type> multiply;
 	qi::rule<std::u32string::iterator, UnaryOperationNode<Number>(), unicode::space_type> unary_operation;
@@ -85,6 +91,7 @@ struct Expression : qi::grammar<std::u32string::iterator, ExpressionNode<Number>
 	qi::rule<std::u32string::iterator, VariableNode<Number>(), unicode::space_type> variable;
 
 	Solver<Number>* solver;
+	int recursion_depth = 0;
 };
 
 };
