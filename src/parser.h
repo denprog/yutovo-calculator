@@ -1506,7 +1506,7 @@ private:
                 Language::English,
                 {
                     //distance
-                    U"ang`angstrom`~0.000000000001m;",
+                    U"ang`angstrom`~0.0000000001m;",
 
                     //temperature
                     U"°C~K;",
@@ -1586,7 +1586,7 @@ private:
                 Language::Spanish,
                 {
                     //distance
-                    U"ang`ångström`~0.000000000001m;",
+                    U"ang`ångström`~0.0000000001m;",
 
                     //temperature
                     U"°C~K;",
@@ -1626,7 +1626,7 @@ private:
                 Language::BrazilianPortuguese,
                 {
                     //distance
-                    U"ang`ångström`~0.000000000001m;",
+                    U"ang`ångström`~0.0000000001m;",
 
                     //temperature
                     U"°C~K;",
@@ -1665,7 +1665,7 @@ private:
             {
                 Language::German,
                 {
-                    U"ang`Angström`~0.000000000001m;",
+                    U"ang`Angström`~0.0000000001m;",
                     U"°C~K;",
                     U"byte~8bit;",
                     U"kbyte~1024byte;",
@@ -1694,7 +1694,7 @@ private:
             {
                 Language::French,
                 {
-                    U"ang`angström`~0.000000000001m;",
+                    U"ang`angström`~0.0000000001m;",
                     U"°C~K;",
                     U"byte~8bit;",
                     U"kbyte~1024byte;",
@@ -1723,7 +1723,7 @@ private:
             {
                 Language::Italian,
                 {
-                    U"ang`angstrom`~0.000000000001m;",
+                    U"ang`angstrom`~0.0000000001m;",
                     U"°C~K;",
                     U"byte~8bit;",
                     U"kbyte~1024byte;",

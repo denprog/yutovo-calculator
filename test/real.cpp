@@ -2067,6 +2067,23 @@ TEST_F(CalcTestReal, units78)
     EXPECT_NO_THROW(solver.GetCastUnits(LogicalId{0, 0, 0, 0, 3}, val, U"SI", cast_units));
 }
 
+TEST_F(CalcTestReal, units79)
+{
+    // 1 angstrom = 1e-10 m in every locale
+    LogicalId id{0, 0, 0, 1};
+    for (Language language :
+        {Language::English, Language::Spanish, Language::BrazilianPortuguese, Language::German, Language::French, Language::Italian})
+    {
+        parser.SetLocale(language);
+        std::string s = parser.Parse(id, U"1ang/m;").ToStdString(3, 3);
+        ASSERT_TRUE(s == "1.E-10") << s;
+    }
+
+    parser.SetLocale(Language::Russian);
+    std::string s = parser.Parse(id, U"1анг/м;").ToStdString(3, 3);
+    ASSERT_TRUE(s == "1.E-10") << s;
+}
+
 TEST_F(CalcTestReal, compare1)
 {
     std::string s = parser.Parse(LogicalId{0, 0, 0, 0, 0, 0, 0, 2, 0}, U"(0<10);").ToStdString(3, 3);
