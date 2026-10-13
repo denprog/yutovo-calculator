@@ -1799,7 +1799,7 @@ private:
                     U"charka{rus}~2shkalic{rus};",
                     U"kosushka{rus}~5shkalic{rus};",
                     U"shtof{rus}~10charka{rus};",
-                    U"vedro{rus}~4chet{rus};",
+                    U"vedro{rus}~10shtof{rus};",
                     U"bochka{rus}~40vedro{rus};",
                 }
             },
@@ -1849,7 +1849,7 @@ private:
                     U"чарка{rus}~2шкалик{rus};",
                     U"косушка{rus}~5шкалик{rus};",
                     U"штоф{rus}~10чарка{rus};",
-                    U"ведро{rus}~4чет{rus};",
+                    U"ведро{rus}~10штоф{rus};",
                     U"бочка{rus}~40ведро{rus};",
                 }
             },
@@ -1899,7 +1899,7 @@ private:
                     U"charka{rus}~2shkalik{rus};",
                     U"kosushka{rus}~5shkalik{rus};",
                     U"shtof{rus}~10charka{rus};",
-                    U"vedro{rus}~4chet{rus};",
+                    U"vedro{rus}~10shtof{rus};",
                     U"bochka{rus}~40vedro{rus};"
                 }
             },
@@ -1949,7 +1949,7 @@ private:
                     U"charka{rus}~2shkalik{rus};",
                     U"kosushka{rus}~5shkalik{rus};",
                     U"shtof{rus}~10charka{rus};",
-                    U"vedro{rus}~4chet{rus};",
+                    U"vedro{rus}~10shtof{rus};",
                     U"bochka{rus}~40vedro{rus};"
                 }
             },
@@ -1992,7 +1992,7 @@ private:
                     U"charka{rus}~2shkalic{rus};",
                     U"kosushka{rus}~5shkalic{rus};",
                     U"shtof{rus}~10charka{rus};",
-                    U"vedro{rus}~4chet{rus};",
+                    U"vedro{rus}~10shtof{rus};",
                     U"bochka{rus}~40vedro{rus};",
                 }
             },
@@ -2035,7 +2035,7 @@ private:
                     U"charka{rus}~2shkalic{rus};",
                     U"kosushka{rus}~5shkalic{rus};",
                     U"shtof{rus}~10charka{rus};",
-                    U"vedro{rus}~4chet{rus};",
+                    U"vedro{rus}~10shtof{rus};",
                     U"bochka{rus}~40vedro{rus};",
                 }
             },
@@ -2078,7 +2078,7 @@ private:
                     U"charka{rus}~2shkalic{rus};",
                     U"kosushka{rus}~5shkalic{rus};",
                     U"shtof{rus}~10charka{rus};",
-                    U"vedro{rus}~4chet{rus};",
+                    U"vedro{rus}~10shtof{rus};",
                     U"bochka{rus}~40vedro{rus};",
                 }
             }

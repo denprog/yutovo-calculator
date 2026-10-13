@@ -2084,6 +2084,27 @@ TEST_F(CalcTestReal, units79)
     ASSERT_TRUE(s == "1.E-10") << s;
 }
 
+TEST_F(CalcTestReal, units80)
+{
+    //1 vedro = 10 shtof = 12.3 l, 1 bochka = 40 vedro = 492 l in every locale
+    LogicalId id{0, 0, 0, 1};
+    for (Language language :
+        {Language::English, Language::Spanish, Language::BrazilianPortuguese, Language::German, Language::French, Language::Italian})
+    {
+        parser.SetLocale(language);
+        std::string s = parser.Parse(id, U"1vedro{rus}/l;").ToStdString(3, 3);
+        ASSERT_TRUE(s == "12.3E+0") << s;
+        s = parser.Parse(id, U"1bochka{rus}/l;").ToStdString(3, 3);
+        ASSERT_TRUE(s == "492.E+0") << s;
+    }
+
+    parser.SetLocale(Language::Russian);
+    std::string s = parser.Parse(id, U"1ведро{rus}/л;").ToStdString(3, 3);
+    ASSERT_TRUE(s == "12.3E+0") << s;
+    s = parser.Parse(id, U"1бочка{rus}/л;").ToStdString(3, 3);
+    ASSERT_TRUE(s == "492.E+0") << s;
+}
+
 TEST_F(CalcTestReal, compare1)
 {
     std::string s = parser.Parse(LogicalId{0, 0, 0, 0, 0, 0, 0, 2, 0}, U"(0<10);").ToStdString(3, 3);
