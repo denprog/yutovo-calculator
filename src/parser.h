@@ -1778,7 +1778,7 @@ private:
                     U"zolotnik{rus}~4.266g;",
                     U"dolya{rus}~(1)/(96)zolotnik{rus};",
                     U"pochka{rus}~(1)/(25)zolotnik{rus};",
-                    U"lot{rus}~zolotnik{rus};",
+                    U"lot{rus}~3zolotnik{rus};",
 
                     //time
                     U"s{rus}~s;",
@@ -1828,7 +1828,7 @@ private:
                     U"золотник{rus}~4.266г;",
                     U"доля{rus}~(1)/(96)золотник{rus};",
                     U"почка{rus}~(1)/(25)золотник{rus};",
-                    U"лот{rus}~золотник{rus};",
+                    U"лот{rus}~3золотник{rus};",
 
                     //time
                     U"с{rus}~с;",
@@ -1878,7 +1878,7 @@ private:
                     U"zolotnik{rus}~4.266g;",
                     U"dole{rus}~(1)/(96)zolotnik{rus};",
                     U"pochka{rus}~(1)/(25)zolotnik{rus};",
-                    U"lot{rus}~zolotnik{rus};",
+                    U"lot{rus}~3zolotnik{rus};",
 
                     //time
                     U"s{rus}~s;",
@@ -1928,7 +1928,7 @@ private:
                     U"zolotnik{rus}~4.266g;",
                     U"dole{rus}~(1)/(96)zolotnik{rus};",
                     U"pochka{rus}~(1)/(25)zolotnik{rus};",
-                    U"lot{rus}~zolotnik{rus};",
+                    U"lot{rus}~3zolotnik{rus};",
 
                     //time
                     U"s{rus}~s;",
@@ -1975,7 +1975,7 @@ private:
                     U"solotnik{rus}~4.266g;",
                     U"dolja{rus}~(1)/(96)solotnik{rus};",
                     U"pochka{rus}~(1)/(25)solotnik{rus};",
-                    U"lot{rus}~solotnik{rus};",
+                    U"lot{rus}~3solotnik{rus};",
                     U"s{rus}~s;",
                     U"min{rus}~min;",
                     U"stunde{rus}~stunde;",
@@ -2018,7 +2018,7 @@ private:
                     U"zolotnik{rus}~4.266g;",
                     U"dolia{rus}~(1)/(96)zolotnik{rus};",
                     U"pochka{rus}~(1)/(25)zolotnik{rus};",
-                    U"lot{rus}~zolotnik{rus};",
+                    U"lot{rus}~3zolotnik{rus};",
                     U"s{rus}~s;",
                     U"min{rus}~min;",
                     U"heure{rus}~heure;",
@@ -2061,7 +2061,7 @@ private:
                     U"zolotnik{rus}~4.266g;",
                     U"dolia{rus}~(1)/(96)zolotnik{rus};",
                     U"pochka{rus}~(1)/(25)zolotnik{rus};",
-                    U"lot{rus}~zolotnik{rus};",
+                    U"lot{rus}~3zolotnik{rus};",
                     U"s{rus}~s;",
                     U"min{rus}~min;",
                     U"ora{rus}~ora;",

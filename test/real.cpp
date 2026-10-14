@@ -2105,6 +2105,22 @@ TEST_F(CalcTestReal, units80)
     ASSERT_TRUE(s == "492.E+0") << s;
 }
 
+TEST_F(CalcTestReal, units81)
+{
+    LogicalId id{0, 0, 0, 1};
+    for (Language language : 
+        {Language::English, Language::Spanish, Language::BrazilianPortuguese, Language::German, Language::French, Language::Italian})
+    {
+        parser.SetLocale(language);
+        std::string s = parser.Parse(id, U"1lot{rus}/g;").ToStdString(3, 3);
+        ASSERT_TRUE(s == "12.798E+0") << s;
+    }
+
+    parser.SetLocale(Language::Russian);
+    std::string s = parser.Parse(id, U"1лот{rus}/г;").ToStdString(3, 3);
+    ASSERT_TRUE(s == "12.798E+0") << s;
+}
+
 TEST_F(CalcTestReal, compare1)
 {
     std::string s = parser.Parse(LogicalId{0, 0, 0, 0, 0, 0, 0, 2, 0}, U"(0<10);").ToStdString(3, 3);
