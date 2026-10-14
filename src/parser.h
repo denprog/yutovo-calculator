@@ -2420,7 +2420,7 @@ private:
                 Language::English,
                 {
                     U"c`speed of light`=299792458(m/s);",
-                    U"G`gravitational constant`=6.674301515151515*pow(10,-11)*(pow(m,3)/(kg*pow(s,2)));",
+                    U"G`gravitational constant`=6.67430*pow(10,-11)*(pow(m,3)/(kg*pow(s,2)));",
                     U"h`Planck constant`=6.62607015*pow(10,-34)*(J*s);",
                     U"e_c`electron charge`=-1.602176634*pow(10,-19)*C;",
                     U"e_m`mass of an electron`=9.1093837015*pow(10,-31)*kg;",
@@ -2438,7 +2438,7 @@ private:
                 Language::Russian,
                 {
                     U"ск_св`скорость света`=299792458(м/с);",
-                    U"G`гравитационная постоянная`=6.674301515151515*pow(10,-11)*(pow(м,3)/(кг*pow(с,2)));",
+                    U"G`гравитационная постоянная`=6.67430*pow(10,-11)*(pow(м,3)/(кг*pow(с,2)));",
                     U"h`постоянная Планка`=6.62607015*pow(10,-34)*(Дж*с);",
                     U"e_c`заряд электрона`=-1.602176634*pow(10,-19)*Кл;",
                     U"e_m`масса электрона`=9.1093837015*pow(10,-31)*кг;",
@@ -2456,7 +2456,7 @@ private:
                 Language::Spanish,
                 {
                     U"v_l`velocidad de la luz`=299792458(m/s);",
-                    U"G`constante gravitacional`=6.674301515151515*pow(10,-11)*(pow(m,3)/(kg*pow(s,2)));",
+                    U"G`constante gravitacional`=6.67430*pow(10,-11)*(pow(m,3)/(kg*pow(s,2)));",
                     U"h`constante de Planck`=6.62607015*pow(10,-34)*(J*s);",
                     U"e_c`carga del electrón`=-1.602176634*pow(10,-19)*C;",
                     U"e_m`masa del electrón`=9.1093837015*pow(10,-31)*kg;",
@@ -2474,7 +2474,7 @@ private:
                 Language::BrazilianPortuguese,
                 {
                     U"v_l`velocidade da luz`=299792458(m/s);",
-                    U"G`constante gravitacional`=6.674301515151515*pow(10,-11)*(pow(m,3)/(kg*pow(s,2)));",
+                    U"G`constante gravitacional`=6.67430*pow(10,-11)*(pow(m,3)/(kg*pow(s,2)));",
                     U"h`constante de Planck`=6.62607015*pow(10,-34)*(J*s);",
                     U"e_c`carga do elétron`=-1.602176634*pow(10,-19)*C;",
                     U"e_m`massa do elétron`=9.1093837015*pow(10,-31)*kg;",
@@ -2492,7 +2492,7 @@ private:
                 Language::German,
                 {
                     U"c`Lichtgeschwindigkeit`=299792458(m/s);",
-                    U"G`Gravitationskonstante`=6.674301515151515*pow(10,-11)*(pow(m,3)/(kg*pow(s,2)));",
+                    U"G`Gravitationskonstante`=6.67430*pow(10,-11)*(pow(m,3)/(kg*pow(s,2)));",
                     U"h`Plancksche Konstante`=6.62607015*pow(10,-34)*(J*s);",
                     U"e_c`Elementarladung`=-1.602176634*pow(10,-19)*C;",
                     U"e_m`Elektronenmasse`=9.1093837015*pow(10,-31)*kg;",
@@ -2510,7 +2510,7 @@ private:
                 Language::French,
                 {
                     U"c`vitesse de la lumière`=299792458(m/s);",
-                    U"G`constante gravitationnelle`=6.674301515151515*pow(10,-11)*(pow(m,3)/(kg*pow(s,2)));",
+                    U"G`constante gravitationnelle`=6.67430*pow(10,-11)*(pow(m,3)/(kg*pow(s,2)));",
                     U"h`constante de Planck`=6.62607015*pow(10,-34)*(J*s);",
                     U"e_c`charge élémentaire`=-1.602176634*pow(10,-19)*C;",
                     U"e_m`masse électronique`=9.1093837015*pow(10,-31)*kg;",
@@ -2528,7 +2528,7 @@ private:
                 Language::Italian,
                 {
                     U"c`velocità della luce`=299792458(m/s);",
-                    U"G`costante gravitazionale`=6.674301515151515*pow(10,-11)*(pow(m,3)/(kg*pow(s,2)));",
+                    U"G`costante gravitazionale`=6.67430*pow(10,-11)*(pow(m,3)/(kg*pow(s,2)));",
                     U"h`costante di Planck`=6.62607015*pow(10,-34)*(J*s);",
                     U"e_c`carica elementare`=-1.602176634*pow(10,-19)*C;",
                     U"e_m`massa elettronica`=9.1093837015*pow(10,-31)*kg;",

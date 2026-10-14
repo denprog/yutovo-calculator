@@ -3167,6 +3167,22 @@ TEST_F(CalcTestReal, pt_BR_physical_constants)
     ASSERT_TRUE(r.ToStdString(3, 3).find("9.807E+0") == 0) << r.ToStdString(3, 3);
 }
 
+TEST_F(CalcTestReal, physical_constants1)
+{
+    LogicalId id{0, 0, 0, 1};
+    for (Language language :
+        {Language::English, Language::Spanish, Language::BrazilianPortuguese, Language::German, Language::French, Language::Italian})
+    {
+        parser.SetLocale(language);
+        std::string s = parser.Parse(id, U"G;").ToStdString(3, 6);
+        ASSERT_TRUE(s == "6.6743E-11((m^3)/(kg*s^2))") << s;
+    }
+
+    parser.SetLocale(Language::Russian);
+    std::string s = parser.Parse(id, U"G;").ToStdString(3, 6);
+    ASSERT_TRUE(s == u8"6.6743E-11((м^3)/(кг*с^2))") << s;
+}
+
 TEST_F(CalcTestReal, pt_BR_us_units)
 {
     parser.SetLocale(Language::BrazilianPortuguese);
