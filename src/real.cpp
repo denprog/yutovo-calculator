@@ -834,8 +834,18 @@ Real sin(const Real& num)
 
     if (_num.angle_measure != AngleMeasure::Radian)
     {
-        _num = _num.ToRadian();
-        res.CalcFunc(mpfr_sin, _num);
+        Real period(num.GetBitPrecision(), _num.angle_measure == AngleMeasure::Degree ? 360 : 400);
+        Real misc = MathHelper::GetMisc<Real>(_num);
+        Real r(num.GetBitPrecision());
+        r.CalcFunc(mpfr_remainder, _num, period);
+        r = abs(r);
+        if (r <= misc || abs(r - period / 2) <= misc)
+            res = 0;
+        else
+        {
+            _num = _num.ToRadian();
+            res.CalcFunc(mpfr_sin, _num);
+        }
         return res;
     }
 
@@ -863,8 +873,22 @@ Real cos(const Real& num)
 
     if (_num.angle_measure != AngleMeasure::Radian)
     {
-        _num = _num.ToRadian();
-        res.CalcFunc(mpfr_cos, _num);
+        Real period(num.GetBitPrecision(), _num.angle_measure == AngleMeasure::Degree ? 360 : 400);
+        Real misc = MathHelper::GetMisc<Real>(_num);
+        Real r(num.GetBitPrecision());
+        r.CalcFunc(mpfr_remainder, _num, period);
+        r = abs(r);
+        if (r <= misc)
+            res = 1;
+        else if (abs(r - period / 2) <= misc)
+            res = -1;
+        else if (abs(r - period / 4) <= misc)
+            res = 0;
+        else
+        {
+            _num = _num.ToRadian();
+            res.CalcFunc(mpfr_cos, _num);
+        }
         return res;
     }
 

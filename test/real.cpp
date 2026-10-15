@@ -1297,6 +1297,81 @@ TEST_F(CalcTestReal, trigonometric12)
     EXPECT_THROW(parser.Parse(LogicalId{0, 0, 1}, U"1°30'';"), yutovo_calculator::SyntaxException);
 }
 
+//sin/cos special cases must be exact in rad, degrees and grads
+TEST_F(CalcTestReal, trigonometric13)
+{
+    Real zero = parser.Parse(LogicalId{0, 0, 1}, U"0;", AngleMeasure::Radian, AngleMeasure::Radian, 30);
+    Real one = parser.Parse(LogicalId{0, 0, 1}, U"1;", AngleMeasure::Radian, AngleMeasure::Radian, 30);
+    Real minus_one = parser.Parse(LogicalId{0, 0, 1}, U"-1;", AngleMeasure::Radian, AngleMeasure::Radian, 30);
+
+    Real res = parser.Parse(LogicalId{0, 0, 1}, U"sin(180deg);", AngleMeasure::Radian, AngleMeasure::Radian, 30);
+    ASSERT_TRUE(res.angle_measure == AngleMeasure::None && res.ToStdString(3, 30) == zero.ToStdString(3, 30)) << res.ToStdString(3, 30);
+
+    res = parser.Parse(LogicalId{0, 0, 1}, U"sin(180°);", AngleMeasure::Radian, AngleMeasure::Radian, 30);
+    ASSERT_TRUE(res.ToStdString(3, 30) == zero.ToStdString(3, 30)) << res.ToStdString(3, 30);
+
+    res = parser.Parse(LogicalId{0, 0, 1}, U"sin(-180deg);", AngleMeasure::Radian, AngleMeasure::Radian, 30);
+    ASSERT_TRUE(res.ToStdString(3, 30) == zero.ToStdString(3, 30)) << res.ToStdString(3, 30);
+
+    res = parser.Parse(LogicalId{0, 0, 1}, U"sin(360deg);", AngleMeasure::Radian, AngleMeasure::Radian, 30);
+    ASSERT_TRUE(res.ToStdString(3, 30) == zero.ToStdString(3, 30)) << res.ToStdString(3, 30);
+
+    res = parser.Parse(LogicalId{0, 0, 1}, U"sin(90deg);", AngleMeasure::Radian, AngleMeasure::Radian, 30);
+    ASSERT_TRUE(res.ToStdString(3, 30) == one.ToStdString(3, 30)) << res.ToStdString(3, 30);
+
+    res = parser.Parse(LogicalId{0, 0, 1}, U"cos(0deg);", AngleMeasure::Radian, AngleMeasure::Radian, 30);
+    ASSERT_TRUE(res.ToStdString(3, 30) == one.ToStdString(3, 30)) << res.ToStdString(3, 30);
+
+    res = parser.Parse(LogicalId{0, 0, 1}, U"cos(90deg);", AngleMeasure::Radian, AngleMeasure::Radian, 30);
+    ASSERT_TRUE(res.angle_measure == AngleMeasure::None && res.ToStdString(3, 30) == zero.ToStdString(3, 30)) << res.ToStdString(3, 30);
+
+    res = parser.Parse(LogicalId{0, 0, 1}, U"cos(180deg);", AngleMeasure::Radian, AngleMeasure::Radian, 30);
+    ASSERT_TRUE(res.ToStdString(3, 30) == minus_one.ToStdString(3, 30)) << res.ToStdString(3, 30);
+
+    res = parser.Parse(LogicalId{0, 0, 1}, U"cos(270deg);", AngleMeasure::Radian, AngleMeasure::Radian, 30);
+    ASSERT_TRUE(res.ToStdString(3, 30) == zero.ToStdString(3, 30)) << res.ToStdString(3, 30);
+
+    res = parser.Parse(LogicalId{0, 0, 1}, U"cos(360deg);", AngleMeasure::Radian, AngleMeasure::Radian, 30);
+    ASSERT_TRUE(res.ToStdString(3, 30) == one.ToStdString(3, 30)) << res.ToStdString(3, 30);
+
+    //default degree measure must snap exact zeros too
+    res = parser.Parse(LogicalId{0, 0, 1}, U"sin(180);", AngleMeasure::Degree, AngleMeasure::Degree, 30);
+    ASSERT_TRUE(res.angle_measure == AngleMeasure::None && res.ToStdString(3, 30) == zero.ToStdString(3, 30)) << res.ToStdString(3, 30);
+
+    res = parser.Parse(LogicalId{0, 0, 1}, U"sin(200grad);", AngleMeasure::Radian, AngleMeasure::Radian, 30);
+    ASSERT_TRUE(res.ToStdString(3, 30) == zero.ToStdString(3, 30)) << res.ToStdString(3, 30);
+
+    res = parser.Parse(LogicalId{0, 0, 1}, U"sin(100grad);", AngleMeasure::Radian, AngleMeasure::Radian, 30);
+    ASSERT_TRUE(res.ToStdString(3, 30) == one.ToStdString(3, 30)) << res.ToStdString(3, 30);
+
+    res = parser.Parse(LogicalId{0, 0, 1}, U"cos(100grad);", AngleMeasure::Radian, AngleMeasure::Radian, 30);
+    ASSERT_TRUE(res.ToStdString(3, 30) == zero.ToStdString(3, 30)) << res.ToStdString(3, 30);
+
+    res = parser.Parse(LogicalId{0, 0, 1}, U"cos(200grad);", AngleMeasure::Radian, AngleMeasure::Radian, 30);
+    ASSERT_TRUE(res.ToStdString(3, 30) == minus_one.ToStdString(3, 30)) << res.ToStdString(3, 30);
+
+    //DMS values that reduce to exact multiples of 90 degrees
+    res = parser.Parse(LogicalId{0, 0, 1}, U"sin(180°0');", AngleMeasure::Radian, AngleMeasure::Radian, 30);
+    ASSERT_TRUE(res.ToStdString(3, 30) == zero.ToStdString(3, 30)) << res.ToStdString(3, 30);
+
+    res = parser.Parse(LogicalId{0, 0, 1}, U"sin(179°60');", AngleMeasure::Radian, AngleMeasure::Radian, 30);
+    ASSERT_TRUE(res.ToStdString(3, 30) == zero.ToStdString(3, 30)) << res.ToStdString(3, 30);
+
+    //self-consistency with the radian path at the same precision
+    res = parser.Parse(LogicalId{0, 0, 1}, U"sin(rad(pi));", AngleMeasure::Radian, AngleMeasure::Radian, 30);
+    ASSERT_TRUE(res.ToStdString(3, 30) == zero.ToStdString(3, 30)) << res.ToStdString(3, 30);
+
+    //near-special values must not be snapped
+    res = parser.Parse(LogicalId{0, 0, 1}, U"sin(180.001deg);", AngleMeasure::Radian, AngleMeasure::Radian, 10);
+    ASSERT_FALSE(res == Real(3, 0)) << res.ToStdString(3, 10);
+
+    res = parser.Parse(LogicalId{0, 0, 1}, U"cos(89.9deg);", AngleMeasure::Radian, AngleMeasure::Radian, 10);
+    ASSERT_FALSE(res == Real(3, 0) || res == Real(3, 1) || res == Real(3, -1)) << res.ToStdString(3, 10);
+
+    res = parser.Parse(LogicalId{0, 0, 1}, U"sin(deg(pow(10,20)));", AngleMeasure::Radian, AngleMeasure::Radian, 30);
+    ASSERT_FALSE(res == Real(3, 0)) << res.ToStdString(3, 10);
+}
+
 TEST_F(CalcTestReal, units1)
 {
     std::string s = parser.GetSuitableUnit(LogicalId{0, 0, 0, 0, 1}, parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"1m;")).ToStdString(3, 3);
