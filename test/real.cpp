@@ -2297,6 +2297,22 @@ TEST_F(CalcTestReal, max_time2)
     ASSERT_TRUE(s == "123.E+0") << s;
 }
 
+TEST_F(CalcTestReal, max_time3)
+{
+#ifdef NDEBUG
+    parser.SetDefaultMaxTime(100);
+#elif defined(_WIN32)
+    parser.SetDefaultMaxTime(200);
+#else
+    parser.SetDefaultMaxTime(1000);
+#endif
+    //the loop condition never becomes false (the counter overshoots 5), but the default time limit is armed even without a passed context
+    EXPECT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"loop(i=0,(i<>5),i=i+2,t=0,t=t+i);"), yutovo_calculator::TimeExceedException);
+    parser.SetDefaultMaxTime(60000);
+    std::string s = parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"loop(i=0,(i<=10),i=i+1,t=0,t=t+1);").ToStdString(3, 3);
+    ASSERT_TRUE(s == "11.E+0") << s;
+}
+
 TEST_F(CalcTestReal, list_identifiers1)
 {
     std::vector<std::pair<std::u32string, std::u32string>> variables;

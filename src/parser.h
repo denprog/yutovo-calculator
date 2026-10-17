@@ -46,7 +46,7 @@ struct Parser
     Number Parse(LogicalId id, std::u32string expression, Dependencies* dependencies, AngleMeasure default_angle_measure, AngleMeasure result_angle_measure, 
         Notation default_notation, const int precision = -1, ParserContext* _context = nullptr)
     {
-        InitThreadTime();
+        _context = InitParserContext(_context);
 
         if (expression.empty() || expression == U";")
             throw SyntaxException(id, ExpressionExpected, 0, 0);
@@ -160,11 +160,11 @@ struct Parser
         AngleMeasure default_angle_measure, AngleMeasure result_angle_measure, const int precision, const int res_count, 
         std::vector<Number>& results, ParserContext* _context = nullptr)
     {
-        InitThreadTime();
+        _context = InitParserContext(_context);
 
         if (expression.empty() || expression == U";")
             throw SyntaxException(id, ExpressionExpected, 0, 0);
-        
+
         std::u32string::iterator iter = expression.begin();
         std::u32string::iterator end = expression.end();
         unicode::space_type space;
@@ -230,19 +230,19 @@ struct Parser
 
     Number GetSuitableUnit(LogicalId id, const Number& val)
     {
-        InitThreadTime();
+        solver.SetParserContext(InitParserContext(solver.parser_context));
         return solver.GetSuitableUnit(id, val, solver.symbols->last_unit_system, solver.symbols->buildin_elements);
     }
 
     void GetCastUnits(const LogicalId id, const Number& val, std::vector<Unit>& cast_units)
     {
-        InitThreadTime();
+        solver.SetParserContext(InitParserContext(solver.parser_context));
         solver.GetCastUnits(id, val, cast_units);
     }
 
     Number CastToUnit(const LogicalId id, const Number& val, const Unit& unit)
     {
-        InitThreadTime();
+        solver.SetParserContext(InitParserContext(solver.parser_context));
         return solver.CastToUnit(id, val, unit);
     }
 
@@ -298,7 +298,21 @@ struct Parser
         solver.SetMaxCastUnitSize(max_cast_unit_size);
     }
 
+    void SetDefaultMaxTime(uint64_t max_time)
+    {
+        default_max_time = max_time;
+    }
+
 private:
+    ParserContext* InitParserContext(ParserContext* _context)
+    {
+        InitThreadTime();
+        if (_context)
+            return _context;
+        default_parser_context.Init(default_max_time);
+        return &default_parser_context;
+    }
+
     void InitUnits()
     {
         solver.ResetBuildinUnits();
@@ -535,6 +549,10 @@ private:
     }
 
     Solver<Number> solver;
+
+    ParserContext default_parser_context;
+
+    uint64_t default_max_time = 10000; //ms; the time limit for Parse called without a context
 
     std::unique_ptr<giac::context> giac_context;
 
