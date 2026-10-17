@@ -311,6 +311,32 @@ TEST_F(CalcTestArrayReal, graph6)
         res.ToStdString(3, 3).substr(0, 200);
 }
 
+TEST_F(CalcTestArrayReal, graph7)
+{
+    auto res = parser.Parse(LogicalId{0, 0, 1}, U"graph_line(sin(x),x,0,1,0,1,10000);", AngleMeasure::Radian, AngleMeasure::Radian);
+    auto res_c = parser.Parse(LogicalId{0, 0, 1}, U"graph_line(sin(x),x,0,1,0,1,1000000000);", AngleMeasure::Radian, AngleMeasure::Radian);
+    ASSERT_TRUE(res_c.ToStdString(3, 3) == res.ToStdString(3, 3)) << res_c.ToStdString(3, 3);
+
+    res = parser.Parse(LogicalId{0, 0, 1}, U"graph_line(sin(x),x,0,1,0,1,2);", AngleMeasure::Radian, AngleMeasure::Radian);
+    res_c = parser.Parse(LogicalId{0, 0, 1}, U"graph_line(sin(x),x,0,1,0,1,1);", AngleMeasure::Radian, AngleMeasure::Radian);
+    ASSERT_TRUE(res_c.ToStdString(3, 3) == res.ToStdString(3, 3)) << res_c.ToStdString(3, 3);
+
+    res_c = parser.Parse(LogicalId{0, 0, 1}, U"graph_line(sin(x),x,0,1,0,1,0);", AngleMeasure::Radian, AngleMeasure::Radian);
+    ASSERT_TRUE(res_c.ToStdString(3, 3) == res.ToStdString(3, 3)) << res_c.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestArrayReal, graph8)
+{
+    std::u32string expression = U"x";
+    for (int i = 0; i < 3000; ++i)
+        expression += U"*x";
+
+    yutovo_calculator::ParserContext parser_context;
+    parser_context.Init(100);
+    EXPECT_THROW(parser.Parse(LogicalId{0, 0, 1}, U"graph_line(" + expression + U",x,0,1,0,1,10000);", &parser_context), 
+        yutovo_calculator::TimeExceedException);
+}
+
 TEST_F(CalcTestArrayReal, surface_graph1)
 {
     auto res = parser.Parse(LogicalId{0, 0, 1}, U"graph_surface(x+y,x,y,0,1,0,1,3,3);", AngleMeasure::Radian, AngleMeasure::Radian);
@@ -343,6 +369,14 @@ TEST_F(CalcTestArrayReal, surface_graph4)
     EXPECT_THROW(parser.Parse(LogicalId{0, 0, 1}, U"graph_surface(x+y,x,y,1,1,0,1,10,10);", &parser_context), yutovo_calculator::MathException);
     EXPECT_THROW(parser.Parse(LogicalId{0, 0, 1}, U"graph_surface(x+y,x,y,-1,1,0,0,10,10);", &parser_context), yutovo_calculator::MathException);
     EXPECT_THROW(parser.Parse(LogicalId{0, 0, 1}, U"graph_surface(x+y,x,x,-1,1,0,1,10,10);", &parser_context), yutovo_calculator::MathException);
+}
+
+TEST_F(CalcTestArrayReal, surface_graph5)
+{
+    yutovo_calculator::ParserContext parser_context;
+    parser_context.Init(100);
+    EXPECT_THROW(parser.Parse(LogicalId{0, 0, 1}, U"graph_surface(x*y+x+y,x,y,0,1,0,1,1000,1000);", &parser_context),
+        yutovo_calculator::TimeExceedException);
 }
 
 TEST_F(CalcTestArrayReal, graph_bar1)

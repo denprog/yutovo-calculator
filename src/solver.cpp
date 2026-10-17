@@ -21,7 +21,7 @@ Array<Real> Solver<Array<Real>>::operator()(LineGraphNode<Array<Real>> const& op
     if (!op.identifier.subscript.empty())
         throw SyntaxException(op.identifier.id, UnknownIdentifier, op.identifier.pos, op.identifier.name.length(), op.line);
     PushTempVariable(op.identifier.name, x);
-    Array<Real> x_right, y_bottom, y_top;
+    Array<Real> x_right, y_bottom, y_top, points_count;
     Array<Real> inc;
     Array<Real> start_pos, end_pos;
     Real nan;
@@ -34,7 +34,7 @@ Array<Real> Solver<Array<Real>>::operator()(LineGraphNode<Array<Real>> const& op
         x_right = (*this)(op.x_right);
         y_bottom = (*this)(op.y_bottom);
         y_top = (*this)(op.y_top);
-        inc = (x_right - x) / ((*this)(op.points_count));
+        points_count = (*this)(op.points_count);
     }
     catch (...)
     {
@@ -42,12 +42,23 @@ Array<Real> Solver<Array<Real>>::operator()(LineGraphNode<Array<Real>> const& op
         throw;
     }
 
+    if (points_count.Size() != 1)
+        throw MathException(IncorrectOperation);
+
+    long count = (long)(int)points_count[0];
+    if (count < 2)
+        count = 2;
+    if (count > 10000)
+        count = 10000;
+
     Array<Real> max_float(64, std::numeric_limits<float>::max());
     if (abs(x) > max_float || abs(x_right) > max_float)
         throw MathException(Overflow);
 
     if (x == x_right || y_bottom == y_top)
         throw MathException(IncorrectOperation);
+
+    inc = (x_right - x) / Array<Real>(64, (int)count);
     
     //the first items are bounds of the graph
     res.Add(x);
@@ -138,9 +149,6 @@ Array<Real> Solver<Array<Real>>::operator()(LineGraphNode<Array<Real>> const& op
     //next items are points of the graph x, y
     while (x < x_right)
     {
-        if (parser_context)
-            parser_context->ReInit();
-        
         SetTempVariable(op.identifier.name, x);
         get_next_point(y);
 
@@ -319,9 +327,6 @@ Array<Real> Solver<Array<Real>>::operator()(SurfaceGraphNode<Array<Real>> const&
         x = x_start;
         for (long i = 0; i < xn; ++i, x += dx)
         {
-            if (parser_context)
-                parser_context->ReInit();
-
             SetTempVariable(op.x_identifier.name, x);
             Array<Real> z;
             get_next_point(z);
