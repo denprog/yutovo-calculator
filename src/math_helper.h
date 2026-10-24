@@ -15,7 +15,7 @@
 #define DEFAULT_INCREASE_PRECISION 5
 #define DEFAULT_RND MPFR_RNDN
 
-#ifdef DEBUG
+#if defined(DEBUG) && !defined(_WIN32)
 #define TRACE_OUTPUT
 #endif
 

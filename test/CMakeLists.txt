@@ -60,6 +60,10 @@ if(NOT WIN32)
 	gtest_discover_tests(${PROJECT_NAME}_tests)
 endif()
 
+if(WIN32)
+    target_link_options(${PROJECT_NAME}_tests PRIVATE "LINKER:/STACK:16777216")
+endif()
+
 install(
     TARGETS ${PROJECT_NAME}_tests
     EXPORT ${PROJECT_NAME}

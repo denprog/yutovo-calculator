@@ -3414,8 +3414,11 @@ TEST_F(CalcTestReal, fact2)
 {
     yutovo_calculator::ParserContext parser_context;
     parser_context.Init(100);
-    EXPECT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"1000000!;", &parser_context),
-        yutovo_calculator::TimeExceedException);
+#ifdef _WIN32
+    EXPECT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"5000000!;", &parser_context), yutovo_calculator::TimeExceedException);
+#else
+    EXPECT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"1000000!;", &parser_context), yutovo_calculator::TimeExceedException);
+#endif
 }
 
 TEST_F(CalcTestReal, min_max1)
