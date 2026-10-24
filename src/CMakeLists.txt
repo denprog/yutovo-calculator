@@ -147,6 +147,8 @@ add_library(${PROJECT_NAME} ${CALCULATOR_SOURCES})
 
 if(WIN32)
     set_source_files_properties(solver.cpp PROPERTIES COMPILE_FLAGS "/Zc:inline-")
+    target_compile_definitions(${PROJECT_NAME} PRIVATE $<$<CONFIG:Debug>:NDEBUG>)
+    target_compile_options(${PROJECT_NAME} PRIVATE $<$<CONFIG:Debug>:/O2>)
 endif()
 
 if(EMSCRIPTEN)
@@ -231,6 +233,38 @@ else()
         DESTINATION ${INSTALL_PATH}/lib
         COMPONENT ${PROJECT_NAME}
     )
+endif()
+
+if(NOT EMSCRIPTEN)
+    if(WIN32)
+        set(YUTOVO_DEBUG_LIBRARY "${PROJECT_NAME}d.lib")
+        set(YUTOVO_RELEASE_LIBRARY "${PROJECT_NAME}.lib")
+    else()
+        set(YUTOVO_DEBUG_LIBRARY "lib${PROJECT_NAME}d.a")
+        set(YUTOVO_RELEASE_LIBRARY "lib${PROJECT_NAME}.a")
+    endif()
+
+    file(GENERATE
+        OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}-release.cmake"
+        CONTENT "set_property(TARGET ${PROJECT_NAME} APPEND PROPERTY IMPORTED_CONFIGURATIONS RELEASE)
+        set_target_properties(${PROJECT_NAME} PROPERTIES IMPORTED_LINK_INTERFACE_LANGUAGES_RELEASE \"CXX\" 
+        IMPORTED_LOCATION_RELEASE \"${INSTALL_PATH}/lib/${YUTOVO_RELEASE_LIBRARY}\")"
+    )
+
+    install(
+        FILES "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}-release.cmake"
+        DESTINATION ${INSTALL_PATH}/lib/cmake/${PROJECT_NAME}
+        COMPONENT ${PROJECT_NAME}
+    )
+
+    if(CMAKE_BUILD_TYPE STREQUAL "Debug" OR DEFINED CMAKE_CONFIGURATION_TYPES)
+        install(
+            FILES $<TARGET_FILE:${PROJECT_NAME}>
+            DESTINATION ${INSTALL_PATH}/lib
+            RENAME ${YUTOVO_RELEASE_LIBRARY}
+            COMPONENT ${PROJECT_NAME}
+        )
+    endif()
 endif()
 
 install(
