@@ -31,12 +31,14 @@ public:
     template<typename Number>
     void AddList(const ListNode<Number>& list)
     {
+        std::scoped_lock<std::mutex> lock(export_mutex);
         lists[list.name.name] = list.list;
     }
 
     template<typename Number>
     void AddString(const StringNode<Number>& str)
     {
+        std::scoped_lock<std::mutex> lock(export_mutex);
         strings[str.name.name] = str.str;
     }
 
