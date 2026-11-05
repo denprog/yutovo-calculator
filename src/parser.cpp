@@ -206,6 +206,42 @@ Array<Real> size(const Array<Real> &num);
 Array<Real> min(const Array<Real>& num);
 Array<Real> max(const Array<Real>& num);
 
+Matrix<Real> det(const Matrix<Real>& matrix);
+Matrix<Real> inverse(const Matrix<Real>& matrix);
+Matrix<Real> transpose(const Matrix<Real>& matrix);
+Matrix<Real> trace(const Matrix<Real>& matrix);
+Matrix<Real> rank(const Matrix<Real>& matrix);
+Matrix<Real> rref(const Matrix<Real>& matrix);
+Matrix<Real> idn(const Matrix<Real>& order);
+Matrix<Real> rows(const Matrix<Real>& matrix);
+Matrix<Real> cols(const Matrix<Real>& matrix);
+Matrix<Real> size(const Matrix<Real>& matrix);
+Matrix<Real> linsolve(const Matrix<Real>& left, const Matrix<Real>& right);
+
+Matrix<Rational> det(const Matrix<Rational>& matrix);
+Matrix<Rational> inverse(const Matrix<Rational>& matrix);
+Matrix<Rational> transpose(const Matrix<Rational>& matrix);
+Matrix<Rational> trace(const Matrix<Rational>& matrix);
+Matrix<Rational> rank(const Matrix<Rational>& matrix);
+Matrix<Rational> rref(const Matrix<Rational>& matrix);
+Matrix<Rational> idn(const Matrix<Rational>& order);
+Matrix<Rational> rows(const Matrix<Rational>& matrix);
+Matrix<Rational> cols(const Matrix<Rational>& matrix);
+Matrix<Rational> size(const Matrix<Rational>& matrix);
+Matrix<Rational> linsolve(const Matrix<Rational>& left, const Matrix<Rational>& right);
+
+Matrix<Complex> det(const Matrix<Complex>& matrix);
+Matrix<Complex> inverse(const Matrix<Complex>& matrix);
+Matrix<Complex> transpose(const Matrix<Complex>& matrix);
+Matrix<Complex> trace(const Matrix<Complex>& matrix);
+Matrix<Complex> rank(const Matrix<Complex>& matrix);
+Matrix<Complex> rref(const Matrix<Complex>& matrix);
+Matrix<Complex> idn(const Matrix<Complex>& order);
+Matrix<Complex> rows(const Matrix<Complex>& matrix);
+Matrix<Complex> cols(const Matrix<Complex>& matrix);
+Matrix<Complex> size(const Matrix<Complex>& matrix);
+Matrix<Complex> linsolve(const Matrix<Complex>& left, const Matrix<Complex>& right);
+
 Real definite_integral_real(const Real& a, const Real& b, const Real& c, const Real& d);
 Complex definite_integral_complex(const Complex& a, const Complex& b, const Complex& c, const Complex& d);
 Array<Real> definite_integral_array(const Array<Real>& a, const Array<Real>& b, const Array<Real>& c, const Array<Real>& d);
@@ -264,6 +300,12 @@ Symbolic<Real> acsch(const Symbolic<Real>& num);
 Symbolic<Real> exp(const Symbolic<Real>& num);
 Symbolic<Real> sqrt(const Symbolic<Real>& num);
 Symbolic<Real> abs(const Symbolic<Real>& num);
+Symbolic<Real> det(const Symbolic<Real>& num);
+Symbolic<Real> inverse(const Symbolic<Real>& num);
+Symbolic<Real> transpose(const Symbolic<Real>& num);
+Symbolic<Real> trace(const Symbolic<Real>& num);
+Symbolic<Real> rank(const Symbolic<Real>& num);
+Symbolic<Real> rref(const Symbolic<Real>& num);
 Symbolic<Real> ln(const Symbolic<Real>& num);
 Symbolic<Real> min(const Symbolic<Real>& num1, const Symbolic<Real>& num2);
 Symbolic<Real> max(const Symbolic<Real>& num1, const Symbolic<Real>& num2);
@@ -310,6 +352,12 @@ Symbolic<Rational> acsch(const Symbolic<Rational>& num);
 Symbolic<Rational> exp(const Symbolic<Rational>& num);
 Symbolic<Rational> sqrt(const Symbolic<Rational>& num);
 Symbolic<Rational> abs(const Symbolic<Rational>& num);
+Symbolic<Rational> det(const Symbolic<Rational>& num);
+Symbolic<Rational> inverse(const Symbolic<Rational>& num);
+Symbolic<Rational> transpose(const Symbolic<Rational>& num);
+Symbolic<Rational> trace(const Symbolic<Rational>& num);
+Symbolic<Rational> rank(const Symbolic<Rational>& num);
+Symbolic<Rational> rref(const Symbolic<Rational>& num);
 Symbolic<Rational> ln(const Symbolic<Rational>& num);
 Symbolic<Rational> min(const Symbolic<Rational>& num1, const Symbolic<Rational>& num2);
 Symbolic<Rational> max(const Symbolic<Rational>& num1, const Symbolic<Rational>& num2);
@@ -353,6 +401,12 @@ Symbolic<Complex> acsch(const Symbolic<Complex>& num);
 Symbolic<Complex> exp(const Symbolic<Complex>& num);
 Symbolic<Complex> sqrt(const Symbolic<Complex>& num);
 Symbolic<Complex> abs(const Symbolic<Complex>& num);
+Symbolic<Complex> det(const Symbolic<Complex>& num);
+Symbolic<Complex> inverse(const Symbolic<Complex>& num);
+Symbolic<Complex> transpose(const Symbolic<Complex>& num);
+Symbolic<Complex> trace(const Symbolic<Complex>& num);
+Symbolic<Complex> rank(const Symbolic<Complex>& num);
+Symbolic<Complex> rref(const Symbolic<Complex>& num);
 Symbolic<Complex> ln(const Symbolic<Complex>& num);
 Symbolic<Complex> min(const Symbolic<Complex>& num1, const Symbolic<Complex>& num2);
 Symbolic<Complex> max(const Symbolic<Complex>& num1, const Symbolic<Complex>& num2);
@@ -818,6 +872,115 @@ Parser<yutovo_calculator::Array<yutovo_calculator::Real>>::Parser(const int prec
 }
 
 template<>
+Parser<yutovo_calculator::Matrix<yutovo_calculator::Real>>::Parser(const int precision, const Language _language) :
+    solver(precision, AngleMeasure::Radian),
+    language(_language),
+    last_language(_language)
+{
+    InitThreadTime();
+
+    MatrixRealUnaryFunc unary_func = &det;
+    solver.AddBuiltinFunction(U"det", unary_func);
+    unary_func = &inverse;
+    solver.AddBuiltinFunction(U"inverse", unary_func);
+    unary_func = &transpose;
+    solver.AddBuiltinFunction(U"transpose", unary_func);
+    unary_func = &trace;
+    solver.AddBuiltinFunction(U"trace", unary_func);
+    unary_func = &rank;
+    solver.AddBuiltinFunction(U"rank", unary_func);
+    unary_func = &rref;
+    solver.AddBuiltinFunction(U"rref", unary_func);
+    unary_func = &idn;
+    solver.AddBuiltinFunction(U"idn", unary_func);
+    unary_func = &rows;
+    solver.AddBuiltinFunction(U"rows", unary_func);
+    unary_func = &cols;
+    solver.AddBuiltinFunction(U"cols", unary_func);
+    unary_func = &size;
+    solver.AddBuiltinFunction(U"size", unary_func);
+
+    MatrixRealBinaryFunc binary_func = &linsolve;
+    solver.AddBuiltinFunction(U"linsolve", binary_func);
+}
+
+template<>
+Parser<yutovo_calculator::Matrix<yutovo_calculator::Rational>>::Parser(const int precision, const Language _language) :
+    solver(precision, AngleMeasure::Radian),
+    language(_language),
+    last_language(_language)
+{
+    InitThreadTime();
+
+    MatrixRationalUnaryFunc unary_func = &det;
+    solver.AddBuiltinFunction(U"det", unary_func);
+    unary_func = &inverse;
+    solver.AddBuiltinFunction(U"inverse", unary_func);
+    unary_func = &transpose;
+    solver.AddBuiltinFunction(U"transpose", unary_func);
+    unary_func = &trace;
+    solver.AddBuiltinFunction(U"trace", unary_func);
+    unary_func = &rank;
+    solver.AddBuiltinFunction(U"rank", unary_func);
+    unary_func = &rref;
+    solver.AddBuiltinFunction(U"rref", unary_func);
+    unary_func = &idn;
+    solver.AddBuiltinFunction(U"idn", unary_func);
+    unary_func = &rows;
+    solver.AddBuiltinFunction(U"rows", unary_func);
+    unary_func = &cols;
+    solver.AddBuiltinFunction(U"cols", unary_func);
+    unary_func = &size;
+    solver.AddBuiltinFunction(U"size", unary_func);
+
+    MatrixRationalBinaryFunc binary_func = &linsolve;
+    solver.AddBuiltinFunction(U"linsolve", binary_func);
+}
+
+template<>
+Parser<yutovo_calculator::Matrix<yutovo_calculator::Complex>>::Parser(const int precision, const Language _language) :
+    solver(precision, AngleMeasure::Radian),
+    language(_language),
+    last_language(_language)
+{
+    InitThreadTime();
+
+    MatrixComplexUnaryFunc unary_func = &det;
+    solver.AddBuiltinFunction(U"det", unary_func);
+    unary_func = &inverse;
+    solver.AddBuiltinFunction(U"inverse", unary_func);
+    unary_func = &transpose;
+    solver.AddBuiltinFunction(U"transpose", unary_func);
+    unary_func = &trace;
+    solver.AddBuiltinFunction(U"trace", unary_func);
+    unary_func = &rank;
+    solver.AddBuiltinFunction(U"rank", unary_func);
+    unary_func = &rref;
+    solver.AddBuiltinFunction(U"rref", unary_func);
+    unary_func = &idn;
+    solver.AddBuiltinFunction(U"idn", unary_func);
+    unary_func = &rows;
+    solver.AddBuiltinFunction(U"rows", unary_func);
+    unary_func = &cols;
+    solver.AddBuiltinFunction(U"cols", unary_func);
+    unary_func = &size;
+    solver.AddBuiltinFunction(U"size", unary_func);
+
+    MatrixComplexBinaryFunc binary_func = &linsolve;
+    solver.AddBuiltinFunction(U"linsolve", binary_func);
+
+    switch (language)
+    {
+    case Language::Russian:
+        solver.im = U"j";
+        break;
+    default:
+        solver.im = U"i";
+        break;
+    }
+}
+
+template<>
 Parser<yutovo_calculator::Symbolic<yutovo_calculator::Real>>::Parser(const int precision, const Language _language) :
     solver(precision, AngleMeasure::Radian),
     language(_language),
@@ -874,6 +1037,20 @@ Parser<yutovo_calculator::Symbolic<yutovo_calculator::Real>>::Parser(const int p
     solver.AddBuiltinFunction(U"sqrt", unary_func);
     unary_func = &abs;
     solver.AddBuiltinFunction(U"abs", unary_func);
+
+    unary_func = &det;
+    solver.AddBuiltinFunction(U"det", unary_func);
+    unary_func = &inverse;
+    solver.AddBuiltinFunction(U"inverse", unary_func);
+    unary_func = &transpose;
+    solver.AddBuiltinFunction(U"transpose", unary_func);
+    unary_func = &trace;
+    solver.AddBuiltinFunction(U"trace", unary_func);
+    unary_func = &rank;
+    solver.AddBuiltinFunction(U"rank", unary_func);
+    unary_func = &rref;
+    solver.AddBuiltinFunction(U"rref", unary_func);
+
     unary_func = &ln;
     solver.AddBuiltinFunction(U"ln", unary_func);
     unary_func = &sinh;
@@ -1012,6 +1189,36 @@ void Parser<yutovo_calculator::Array<Real>>::SetLocale(Language _language)
 }
 
 template<>
+void Parser<yutovo_calculator::Matrix<yutovo_calculator::Real>>::SetLocale(Language _language)
+{
+    language = _language;
+    last_language = language;
+}
+
+template<>
+void Parser<yutovo_calculator::Matrix<yutovo_calculator::Rational>>::SetLocale(Language _language)
+{
+    language = _language;
+    last_language = language;
+}
+
+template<>
+void Parser<yutovo_calculator::Matrix<yutovo_calculator::Complex>>::SetLocale(Language _language)
+{
+    language = _language;
+    switch (language)
+    {
+    case Language::Russian:
+        solver.im = U"j";
+        break;
+    default:
+        solver.im = U"i";
+        break;
+    }
+    last_language = language;
+}
+
+template<>
 void Parser<yutovo_calculator::Symbolic<yutovo_calculator::Real>>::SetLocale(Language _language)
 {
     language = _language;
@@ -1082,6 +1289,20 @@ Parser<yutovo_calculator::Symbolic<yutovo_calculator::Rational>>::Parser(const i
     solver.AddBuiltinFunction(U"sqrt", unary_func);
     unary_func = &abs;
     solver.AddBuiltinFunction(U"abs", unary_func);
+
+    unary_func = &det;
+    solver.AddBuiltinFunction(U"det", unary_func);
+    unary_func = &inverse;
+    solver.AddBuiltinFunction(U"inverse", unary_func);
+    unary_func = &transpose;
+    solver.AddBuiltinFunction(U"transpose", unary_func);
+    unary_func = &trace;
+    solver.AddBuiltinFunction(U"trace", unary_func);
+    unary_func = &rank;
+    solver.AddBuiltinFunction(U"rank", unary_func);
+    unary_func = &rref;
+    solver.AddBuiltinFunction(U"rref", unary_func);
+
     unary_func = &ln;
     solver.AddBuiltinFunction(U"ln", unary_func);
     unary_func = &sinh;
@@ -1243,6 +1464,20 @@ Parser<yutovo_calculator::Symbolic<yutovo_calculator::Complex>>::Parser(const in
     solver.AddBuiltinFunction(U"sqrt", unary_func);
     unary_func = &abs;
     solver.AddBuiltinFunction(U"abs", unary_func);
+
+    unary_func = &det;
+    solver.AddBuiltinFunction(U"det", unary_func);
+    unary_func = &inverse;
+    solver.AddBuiltinFunction(U"inverse", unary_func);
+    unary_func = &transpose;
+    solver.AddBuiltinFunction(U"transpose", unary_func);
+    unary_func = &trace;
+    solver.AddBuiltinFunction(U"trace", unary_func);
+    unary_func = &rank;
+    solver.AddBuiltinFunction(U"rank", unary_func);
+    unary_func = &rref;
+    solver.AddBuiltinFunction(U"rref", unary_func);
+
     unary_func = &ln;
     solver.AddBuiltinFunction(U"ln", unary_func);
     unary_func = &sinh;

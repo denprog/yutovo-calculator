@@ -1110,4 +1110,23 @@ TEST_F(CalcTestRational, evaluate_error1)
     EXPECT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"evaluate(x*x, [1=3]);"), yutovo_calculator::SyntaxException);
 }
 
+TEST_F(CalcTestRational, implicit_mul_div1)
+{
+    parser.Parse(LogicalId{0, 0, 1}, U"a=5/2;");
+    parser.Parse(LogicalId{0, 0, 2}, U"x=3;");
+    parser.Parse(LogicalId{0, 0, 3}, U"y=4;");
+    auto r = parser.Parse(LogicalId{0, 0, 4}, U"2a;");
+    ASSERT_TRUE(r.ToString() == U"5") << r.ToStdString();
+    r = parser.Parse(LogicalId{0, 0, 5}, U"(x)/(y)a;");
+    ASSERT_TRUE(r.ToString() == U"15/8") << r.ToStdString();
+    r = parser.Parse(LogicalId{0, 0, 6}, U"(1/2)a;");
+    ASSERT_TRUE(r.ToString() == U"5/4") << r.ToStdString();
+    r = parser.Parse(LogicalId{0, 0, 7}, U"2(a+1);");
+    ASSERT_TRUE(r.ToString() == U"7") << r.ToStdString();
+    r = parser.Parse(LogicalId{0, 0, 8}, U"2abs(-2);");
+    ASSERT_TRUE(r.ToString() == U"4") << r.ToStdString();
+    r = parser.Parse(LogicalId{0, 0, 9}, U"abs(2)a;");
+    ASSERT_TRUE(r.ToString() == U"5") << r.ToStdString();
+}
+
 }

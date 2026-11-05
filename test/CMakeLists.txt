@@ -23,6 +23,9 @@ add_executable(${PROJECT_NAME}_tests
 	symbolic_rational.cpp
 	symbolic_complex.cpp
 	array.cpp
+	matrix_real.cpp
+	matrix_rational.cpp
+	matrix_complex.cpp
 )
 
 if (NOT WIN32)

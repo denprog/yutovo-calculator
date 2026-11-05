@@ -1721,4 +1721,27 @@ TEST_F(CalcTestSymbolicRational, evaluate_error1)
     EXPECT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"evaluate(x, [5=1]);"), yutovo_calculator::ParserException);
 }
 
+TEST_F(CalcTestSymbolicRational, matrix1)
+{
+    Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"det([[1/2,1/3],[1/4,1/5]]);");
+    ASSERT_TRUE(res.ToStdString(10) == "1/60") << res.ToStdString(10);
+    res = parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"det([[x,y],[z,w]]);");
+    ASSERT_TRUE(res.ToStdString(10) == "x*w-y*z") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicRational, implicit_mul_div)
+{
+    parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"a=x;");
+    auto r = parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"2a;");
+    ASSERT_TRUE(r.ToStdString(10) == "2*x") << r.ToStdString(10);
+    r = parser.Parse(LogicalId{0, 0, 0, 0, 3}, U"(1/2)a;");
+    ASSERT_TRUE(r.ToStdString(10) == "(1/2)*x") << r.ToStdString(10);
+    r = parser.Parse(LogicalId{0, 0, 0, 0, 4}, U"2(a+1);");
+    ASSERT_TRUE(r.ToStdString(10) == "2*(1+x)") << r.ToStdString(10);
+    r = parser.Parse(LogicalId{0, 0, 0, 0, 5}, U"2sin(x);");
+    ASSERT_TRUE(r.ToStdString(10) == "2*sin(x)") << r.ToStdString(10);
+    r = parser.Parse(LogicalId{0, 0, 0, 0, 6}, U"sin(x)a;");
+    ASSERT_TRUE(r.ToStdString(10) == "sin(x)*x") << r.ToStdString(10);
+}
+
 }

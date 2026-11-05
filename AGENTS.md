@@ -22,6 +22,8 @@
 ### Code Style
 Always place braces on their own line for control structures.
 
+Never leave two blank lines in a row — use at most one blank line between definitions or statements.
+
 For constructors, place the colon of the initializer list on the same line as the constructor signature. Put each initializer/base on its own line with a normal 4-space indent, and place the opening brace on its own line:
 ```cpp
 // CORRECT
@@ -60,6 +62,12 @@ ExpressionNode(const DerivativeAtPointNode<Number>& node)
 
 ### Naming
 Avoid abbreviations in identifiers; use full words. For example, prefer `Context` over `Ctx`, `Symbols` over `Syms`, etc.
+
+### Number-type classes
+All functions belonging to a number type (`Real`, `Complex`, `Array`, `Matrix`, ...) must be defined **inside the class body**, never as free functions after it — follow the `array.h` pattern:
+- Functions taking the type as an argument (math builtins like `sin`/`det`/`size`, operators, internal helpers like `ForEach`) are **friend functions defined inline in the class** (hidden friends).
+- Helpers operating on the element type (e.g. `MatrixElementToInt`) are **static member functions** — hidden friends with element-type arguments are not findable by name lookup, because ADL does not associate the element type with the class.
+- The only namespace-scope declarations allowed are **non-defining forward declarations in `parser.cpp`** for the functions registered via `&func` pointers as builtins (hidden friends are otherwise invisible to ordinary lookup).
 
 ### Parenthesized expressions
 Keep the contents of parentheses (function argument lists, conditions, initializers, etc.) on a single line when it fits. Only wrap to a new line if the expression would exceed **140 columns**.

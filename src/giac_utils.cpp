@@ -2016,7 +2016,7 @@ std::string FormatGiacString(std::string str, const FormatContext& ctx)
 
 std::string JsonComma()
 {
-    return R"({"type":18,"symbol":","})";
+    return R"({"type":38,"symbol":","})";
 }
 
 //Returns the JSON element for the absolute value of a number, the caller is responsible for emitting a leading minus when the value is negative
@@ -2268,6 +2268,39 @@ std::string ExprToJson(const GiacExpression& ast, int result_type, const FormatC
     if (elems.size() == 1 && !IsCodeStringJson(elems[0]))
         return Symbolic<Real>::JsonResultWrapper(result_type, elems[0]);
     return Symbolic<Real>::JsonResultWrapper(result_type, Symbolic<Real>::JsonCodeRow(elems));
+}
+
+std::string MatrixToJson(const giac::gen& matrix, int result_type, const FormatContext& ctx, giac::context* context)
+{
+    const giac::vecteur& rows = *matrix._VECTptr;
+    std::vector<std::string> cells;
+    size_t columns = 0;
+    for (size_t row_index = 0; row_index < rows.size(); ++row_index)
+    {
+        const giac::vecteur& row = *rows[row_index]._VECTptr;
+        columns = row.size();
+        for (size_t column_index = 0; column_index < row.size(); ++column_index)
+        {
+            std::string s = PrintGen(row[column_index], context);
+            if (ctx.mode == FormatContext::Complex)
+            {
+                s = Symbolic<Real>::ReplaceSqrtSymbol(s);
+                char imag_unit = (ctx.language == Language::Russian) ? 'j' : 'i';
+                s = Symbolic<Real>::ReplaceImaginaryUnit(s, imag_unit);
+            }
+            GiacExpression ast = BuildFormattedAst(std::move(s), ctx);
+            cells.push_back(Symbolic<Real>::JsonCodeRow(EmitJson(ast, ctx)));
+        }
+    }
+    std::string el = std::string(R"({"type":60,"rows":)") + std::to_string(rows.size()) + R"(,"columns":)" + 
+        std::to_string(columns) + R"(,"elements":[)" + Symbolic<Real>::JsonShape();
+    for (size_t i = 0; i < cells.size(); ++i)
+    {
+        el += ",";
+        el += cells[i];
+    }
+    el += "," + Symbolic<Real>::JsonShape() + "]}";
+    return Symbolic<Real>::JsonResultWrapper(result_type, el);
 }
 
 bool IsInfiniteLimit(const giac::gen& lim, giac::context* ctx)

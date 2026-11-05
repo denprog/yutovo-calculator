@@ -790,4 +790,17 @@ TEST_F(CalcTestInteger, min_max1)
     ASSERT_TRUE(res.ToString(10) == U"7") << res.ToStdString(10);
 }
 
+TEST_F(CalcTestInteger, implicit_mul_div)
+{
+    parser.Parse(LogicalId{0, 0, 1}, U"a=5;");
+    auto r = parser.Parse(LogicalId{0, 0, 2}, U"2a;");
+    ASSERT_TRUE(r.ToStdString(10) == "10") << r.ToStdString(10);
+    r = parser.Parse(LogicalId{0, 0, 3}, U"2(a+1);");
+    ASSERT_TRUE(r.ToStdString(10) == "12") << r.ToStdString(10);
+    r = parser.Parse(LogicalId{0, 0, 4}, U"2abs(-3);");
+    ASSERT_TRUE(r.ToStdString(10) == "6") << r.ToStdString(10);
+    r = parser.Parse(LogicalId{0, 0, 5}, U"abs(5)a;");
+    ASSERT_TRUE(r.ToStdString(10) == "25") << r.ToStdString(10);
+}
+
 }

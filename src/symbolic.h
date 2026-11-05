@@ -476,6 +476,84 @@ public:
         return res;
     }
 
+    friend Symbolic<Number> det(const Symbolic<Number>& num)
+    {
+        Symbolic<Number> res(num.precision);
+        if (!giac::is_squarematrix(*num.expr))
+            throw MathException(IncorrectOperation);
+        GiacMpfrStateGuard mpfr_guard;
+        giac::gen result = giac::_det(*num.expr, res.Context());
+        if (giac::is_undef(result))
+            throw MathException(IncorrectOperation);
+        *res.expr = result;
+        return res;
+    }
+
+    friend Symbolic<Number> inverse(const Symbolic<Number>& num)
+    {
+        Symbolic<Number> res(num.precision);
+        if (!giac::is_squarematrix(*num.expr))
+            throw MathException(IncorrectOperation);
+        GiacMpfrStateGuard mpfr_guard;
+        giac::gen result = giac::_inv(*num.expr, res.Context());
+        if (giac::is_undef(result))
+            throw MathException(IncorrectOperation);
+        *res.expr = result;
+        return res;
+    }
+
+    friend Symbolic<Number> transpose(const Symbolic<Number>& num)
+    {
+        Symbolic<Number> res(num.precision);
+        if (!giac::ckmatrix(*num.expr))
+            throw MathException(IncorrectOperation);
+        GiacMpfrStateGuard mpfr_guard;
+        giac::gen result = giac::_tran(*num.expr, res.Context());
+        if (giac::is_undef(result))
+            throw MathException(IncorrectOperation);
+        *res.expr = result;
+        return res;
+    }
+
+    friend Symbolic<Number> trace(const Symbolic<Number>& num)
+    {
+        Symbolic<Number> res(num.precision);
+        if (!giac::is_squarematrix(*num.expr))
+            throw MathException(IncorrectOperation);
+        GiacMpfrStateGuard mpfr_guard;
+        giac::gen result = giac::ckmtrace(*num.expr, res.Context());
+        if (giac::is_undef(result))
+            throw MathException(IncorrectOperation);
+        *res.expr = result;
+        return res;
+    }
+
+    friend Symbolic<Number> rank(const Symbolic<Number>& num)
+    {
+        Symbolic<Number> res(num.precision);
+        if (!giac::ckmatrix(*num.expr))
+            throw MathException(IncorrectOperation);
+        GiacMpfrStateGuard mpfr_guard;
+        giac::gen result = giac::_rank(*num.expr, res.Context());
+        if (giac::is_undef(result))
+            throw MathException(IncorrectOperation);
+        *res.expr = result;
+        return res;
+    }
+
+    friend Symbolic<Number> rref(const Symbolic<Number>& num)
+    {
+        Symbolic<Number> res(num.precision);
+        if (!giac::ckmatrix(*num.expr))
+            throw MathException(IncorrectOperation);
+        GiacMpfrStateGuard mpfr_guard;
+        giac::gen result = giac::_rref(*num.expr, res.Context());
+        if (giac::is_undef(result))
+            throw MathException(IncorrectOperation);
+        *res.expr = result;
+        return res;
+    }
+
     friend Symbolic<Number> sin(const Symbolic<Number>& num)
     {
         Symbolic<Number> res(num.precision);
@@ -1557,6 +1635,9 @@ public:
     {
         return current_giac_context ? current_giac_context : &context;
     }
+
+    template<typename Element>
+    friend struct Solver;
 
 private:
     int precision = 0;

@@ -94,6 +94,36 @@ struct CalcTestArrayReal : public testing::Test
     Parser<Array<Real>> parser;
 };
 
+struct CalcTestMatrixReal : public testing::Test
+{
+    CalcTestMatrixReal() :
+        parser(3, Language::English)
+    {
+    }
+
+    Parser<Matrix<Real>> parser;
+};
+
+struct CalcTestMatrixRational : public testing::Test
+{
+    CalcTestMatrixRational() :
+        parser(0, Language::English)
+    {
+    }
+
+    Parser<Matrix<Rational>> parser;
+};
+
+struct CalcTestMatrixComplex : public testing::Test
+{
+    CalcTestMatrixComplex() :
+        parser(3, Language::English)
+    {
+    }
+
+    Parser<Matrix<Complex>> parser;
+};
+
 struct CalcTestSymbolicReal : public testing::Test
 {
     CalcTestSymbolicReal() :

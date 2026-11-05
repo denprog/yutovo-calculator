@@ -14,6 +14,7 @@
 #include "export.h"
 #include "giac_utils.h"
 #include "expression.h"
+#include "matrix.h"
 #include <chrono>
 #include <functional>
 #include <variant>
@@ -55,6 +56,13 @@ typedef Array<Real> (*ArrayRealTernaryFunc)(const Array<Real>& num1, const Array
 typedef Array<Real> (*ArrayRealQuaternaryFunc)(const Array<Real>& num1, const Array<Real>& num2, const Array<Real>& num3, const Array<Real>& num4);
 typedef Array<Real> (*ArrayRealTrigonometricFunc)(const Array<Real>& num);
 typedef Array<Real> (*ArrayRealPrecisionVariable)(const int precision);
+
+typedef Matrix<Real> (*MatrixRealUnaryFunc)(const Matrix<Real>& num);
+typedef Matrix<Real> (*MatrixRealBinaryFunc)(const Matrix<Real>& num1, const Matrix<Real>& num2);
+typedef Matrix<Rational> (*MatrixRationalUnaryFunc)(const Matrix<Rational>& num);
+typedef Matrix<Rational> (*MatrixRationalBinaryFunc)(const Matrix<Rational>& num1, const Matrix<Rational>& num2);
+typedef Matrix<Complex> (*MatrixComplexUnaryFunc)(const Matrix<Complex>& num);
+typedef Matrix<Complex> (*MatrixComplexBinaryFunc)(const Matrix<Complex>& num1, const Matrix<Complex>& num2);
 
 typedef Symbolic<Real> (*SymbolicUnaryFunc)(const Symbolic<Real>& num);
 typedef Symbolic<Real> (*SymbolicBinaryFunc)(const Symbolic<Real>& num1, const Symbolic<Real>& num2);
@@ -216,6 +224,30 @@ struct Solver : public boost::static_visitor<Number>
                 return Number(precision, r.ToString());
             }
             return Number(precision, _op.number);
+        }
+        else if constexpr (is_matrix_v<Number>)
+        {
+            //a number literal is a 1x1 matrix; its element follows the literal rules of the element type
+            using Element = typename Number::value_type;
+            if constexpr (std::is_same_v<Element, Rational>)
+            {
+                NumberNode<Number> _op = op;
+                auto p = _op.number.find(U'.');
+                if (p != std::string::npos)
+                {
+                    std::u32string d = U"1";
+                    for (int i = 0; i < _op.number.length() - p - 1; ++i)
+                        d += U"0";
+                    return Number(Rational(_op.number.substr(0, p)) + Rational(_op.number.substr(p + 1, _op.number.length() - p - 1)) /
+                        Rational(d));
+                }
+                return Number(Rational(_op.number));
+            }
+            else
+            {
+                NumberNode<Number> _op = op;
+                return Number(_op.number);
+            }
         }
         else
         {
@@ -1004,7 +1036,126 @@ struct Solver : public boost::static_visitor<Number>
         return res;
     }
 
-    Number ArrayElementBySubscript(const Number& array, const IdentifierNode<Number>& identifier, LogicalId error_id, int error_pos, int error_line) const;
+    Number ArrayElementBySubscript(const Number& array, const IdentifierNode<Number>& identifier, LogicalId error_id, int error_pos, 
+        int error_line) const;
+
+    Number MatrixElementBySubscript(const Number& matrix, const IdentifierNode<Number>& identifier, LogicalId error_id, int error_pos, 
+        int error_line) const
+    {
+        //the matrix itself is a dependency, so its redefinition re-solves the expression
+        IdentifierNode<Number> matrix_identifier;
+        matrix_identifier.name = identifier.name;
+        AddDependency(matrix_identifier);
+
+        //split the subscript at the top-level comma into the row and the column part
+        int depth = 0;
+        size_t comma = std::u32string::npos;
+        for (size_t i = 0; i < identifier.subscript.size(); ++i)
+        {
+            char32_t symbol = identifier.subscript[i];
+            if (symbol == U'(' || symbol == U'[' || symbol == U'{')
+                ++depth;
+            else if (symbol == U')' || symbol == U']' || symbol == U'}')
+                --depth;
+            else if (symbol == U',' && depth == 0)
+            {
+                comma = i;
+                break;
+            }
+        }
+
+        if (comma == std::u32string::npos)
+            throw SyntaxException(error_id, IncorrectOperation, U"Index of '" + identifier.name + U"' is not a pair", error_pos, 
+                identifier.name.length(), error_line);
+
+        std::u32string row_subscript = identifier.subscript.substr(0, comma);
+        std::u32string column_subscript = identifier.subscript.substr(comma + 1);
+
+        int indices[2] = {0, 0};
+        const std::u32string* parts[2] = {&row_subscript, &column_subscript};
+        for (int part = 0; part < 2; ++part)
+        {
+            const std::u32string& subscript = *parts[part];
+            Number index_value;
+            bool resolved = false;
+
+            VariableNode<Number>* index_variable = FindVariable(subscript, U"");
+            if (index_variable)
+            {
+                //a declared index variable is a dependency too, so its redefinition re-solves the expression
+                IdentifierNode<Number> dependency;
+                dependency.name = subscript;
+                AddDependency(dependency);
+                index_value = (*this)(index_variable->expression);
+                resolved = true;
+            }
+            else
+            {
+                TempVariable* index_temp = FindTempVariable(subscript);
+                if (index_temp)
+                {
+                    index_value = index_temp->second;
+                    resolved = true;
+                }
+            }
+
+            if (!resolved)
+            {
+                try
+                {
+                    indices[part] = StringToInt(subscript);
+                    continue;
+                }
+                catch (const std::exception&)
+                {
+                    //the subscript part is an arbitrary expression; its result must be an integer
+                    try
+                    {
+                        index_value = EvaluateWithTempVariables(subscript, {});
+                        resolved = true;
+                    }
+                    catch (...)
+                    {
+                        throw SyntaxException(error_id, ArgumentIsOver, U"Index of '" + identifier.name + U"' is over", error_pos,
+                            identifier.name.length(), error_line);
+                    }
+                }
+            }
+
+            if (resolved)
+            {
+                if (!index_value.IsSingleValue())
+                    throw SyntaxException(error_id, IncorrectOperation, U"Index of '" + identifier.name + U"' is not an integer", error_pos,
+                        identifier.name.length(), error_line);
+
+                const typename Number::value_type& element = index_value.GetScalar();
+                if constexpr (std::is_same_v<typename Number::value_type, Real>)
+                {
+                    if (!element.IsInteger())
+                        throw SyntaxException(error_id, IncorrectOperation, U"Index of '" + identifier.name + U"' is not an integer", error_pos,
+                            identifier.name.length(), error_line);
+                }
+                else
+                {
+                    //Rational and Complex elements are converted through their magnitude
+                }
+                try
+                {
+                    indices[part] = Number::MatrixElementToInt(element);
+                }
+                catch (const MathException&)
+                {
+                    throw SyntaxException(error_id, ArgumentIsOver, U"Index of '" + identifier.name + U"' is over", error_pos,
+                        identifier.name.length(), error_line);
+                }
+            }
+        }
+
+        if (indices[0] < matrix.Rows() && indices[0] >= 0 && indices[1] < matrix.Columns() && indices[1] >= 0)
+            return Number(matrix.Get(indices[0], indices[1]));
+        throw SyntaxException(error_id, ArgumentIsOver, U"Index of '" + identifier.name + U"' is over", error_pos, identifier.name.length(), 
+            error_line);
+    }
 
     Number NumericalDerivativeAtPoint(const std::u32string& expression_str, const std::list<DerivativeVariableNode<Number>>& variables) const
     {
@@ -1506,6 +1657,149 @@ struct Solver : public boost::static_visitor<Number>
             }
             return res;
         }
+        else if constexpr (is_matrix_v<Number>)
+        {
+            CheckBreak(parser_context);
+            if (op.array.empty())
+                throw MathException(op.id, IncorrectOperation, op.pos, 1, op.line);
+
+            //a literal whose operands are all plain scalars (no nested [..] groups) is a single row [a,b,c];
+            //a literal with nested groups stacks the evaluated blocks vertically ([[r1],[r2]]), all blocks must share the column count
+            bool has_array_group = false;
+            for (auto& operand : op.array)
+            {
+                //the elements of the literal are expressions, so a nested [..] group sits inside an ExpressionNode wrapper;
+                //parenthesized groups add more wrappers, they are skipped here
+                const typename ExpressionNode<Number>::Operand* current = &operand.first;
+                while (true)
+                {
+                    if (current->type() == typeid(ArrayNode<Number>))
+                    {
+                        has_array_group = true;
+                        break;
+                    }
+                    if (current->type() == typeid(ExpressionNode<Number>))
+                    {
+                        current = &boost::get<ExpressionNode<Number>>(*current).first;
+                        continue;
+                    }
+                    break;
+                }
+                if (has_array_group)
+                    break;
+            }
+
+            std::vector<Number> values;
+            for (auto& operand : op.array)
+            {
+                CheckBreak(parser_context);
+                values.push_back((*this)(operand));
+            }
+
+            if (!has_array_group)
+            {
+                bool all_single_values = true;
+                for (auto& value : values)
+                {
+                    if (!value.IsSingleValue())
+                    {
+                        all_single_values = false;
+                        break;
+                    }
+                }
+                if (all_single_values)
+                {
+                    Number res;
+                    res.Resize(1, (int)values.size(), values[0].GetScalar());
+                    for (int column = 0; column < (int)values.size(); ++column)
+                        res.Element(0, column) = values[column].GetScalar();
+                    return res;
+                }
+            }
+
+            Number res = values[0];
+            for (size_t i = 1; i < values.size(); ++i)
+            {
+                if (values[i].Columns() != res.Columns())
+                    throw MathException(op.id, IncorrectOperation, op.pos, 1, op.line);
+                res.AppendRows(values[i]);
+            }
+            if (res.Rows() == 0 || res.Columns() == 0)
+                throw MathException(op.id, IncorrectOperation, op.pos, 1, op.line);
+            return res;
+        }
+        else if constexpr (is_symbolic_v<Number>)
+        {
+            //the literal is built directly as a giac matrix: flat scalars form a single row,
+            //nested groups contribute their rows; all rows must have the same length
+            CheckBreak(parser_context);
+            if (op.array.empty())
+                throw MathException(op.id, IncorrectOperation, op.pos, 1, op.line);
+
+            std::vector<Number> values;
+            for (auto& operand : op.array)
+            {
+                CheckBreak(parser_context);
+                values.push_back((*this)(operand));
+            }
+
+            bool all_scalars = true;
+            for (auto& value : values)
+            {
+                if (value.expr->type == giac::_VECT)
+                {
+                    all_scalars = false;
+                    break;
+                }
+            }
+
+            giac::vecteur rows;
+            if (all_scalars)
+            {
+                giac::vecteur row;
+                for (auto& value : values)
+                    row.push_back(*value.expr);
+                rows.push_back(giac::gen(row));
+            }
+            else
+            {
+                for (auto& value : values)
+                {
+                    if (value.expr->type == giac::_VECT)
+                    {
+                        for (const auto& block : *value.expr->_VECTptr)
+                        {
+                            if (block.type == giac::_VECT)
+                                rows.push_back(block);
+                            else
+                                rows.push_back(giac::gen(giac::vecteur(1, block)));
+                        }
+                    }
+                    else
+                        rows.push_back(giac::gen(giac::vecteur(1, *value.expr)));
+                }
+            }
+
+            if (!rows.empty() && rows[0].type == giac::_VECT)
+            {
+                size_t columns = rows[0]._VECTptr->size();
+                if (columns == 0)
+                    throw MathException(op.id, IncorrectOperation, op.pos, 1, op.line);
+                for (const auto& row : rows)
+                {
+                    if (row.type != giac::_VECT || row._VECTptr->size() != columns)
+                        throw MathException(op.id, IncorrectOperation, op.pos, 1, op.line);
+                }
+            }
+            else
+            {
+                throw MathException(op.id, IncorrectOperation, op.pos, 1, op.line);
+            }
+
+            Number res(precision);
+            *res.expr = giac::gen(rows, giac::_MATRIX__VECT);
+            return res;
+        }
         else
         {
             throw MathException(op.id, IncorrectOperation, op.pos, 1, op.line);
@@ -1560,9 +1854,9 @@ struct Solver : public boost::static_visitor<Number>
             }
         }
 
-        if constexpr (std::is_same_v<Number, Real>)
+        if constexpr (std::is_same_v<Number, Real> || std::is_same_v<Number, Matrix<Real>> || std::is_same_v<Number, Matrix<Complex>>)
         {
-            if (res.angle_measure != AngleMeasure::None)
+            if (res.GetAngleMeasure() != AngleMeasure::None)
             {
                 switch (result_angle_measure)
                 {
@@ -2907,6 +3201,13 @@ private:
 
     friend struct Expression<Number>;
 
+    static Number MatrixUnaryOperation(const Solver<Number>& solver, UnaryOperationNode<Number> const& op);
+    static Number MatrixOperation(const Solver<Number>& solver, OperationNode<Number> const& op);
+    static Number MatrixIdentifier(const Solver<Number>& solver, IdentifierNode<Number> const& op);
+    static Number MatrixImplicitStringMul(const Solver<Number>& solver, ImplicitStringMulNode<Number> const& op);
+    static Number MatrixImplicitDivMul(const Solver<Number>& solver, ImplicitDivMulNode<Number> const& op);
+    static VariableNode<Number>* MatrixFindVariable(const Solver<Number>& solver, const std::u32string& name, const std::u32string& subscript);
+
     mutable LogicalId id;
     mutable int precision;
     mutable AngleMeasure default_angle_measure;
@@ -3007,6 +3308,37 @@ template<> void Solver<Symbolic<Complex>>::FillBuiltinOperations();
 template<> Symbolic<Complex> Solver<Symbolic<Complex>>::GetSuitableUnit(const LogicalId _id, const Symbolic<Complex>& val, const std::u32string& system, 
     const bool buildin) const;
 template<> Symbolic<Complex> Solver<Symbolic<Complex>>::CastToUnit(const LogicalId id, const Symbolic<Complex>& val, const Unit& unit) const;
+
+template<> Matrix<Real> Solver<Matrix<Real>>::operator()(UnaryOperationNode<Matrix<Real>> const& op) const;
+template<> Matrix<Real> Solver<Matrix<Real>>::operator()(OperationNode<Matrix<Real>> const& op) const;
+template<> Matrix<Real> Solver<Matrix<Real>>::operator()(PostfixOperationNode<Matrix<Real>> const& op) const;
+template<> Matrix<Real> Solver<Matrix<Real>>::operator()(FunctionCallNode<Matrix<Real>> const& op) const;
+template<> Matrix<Real> Solver<Matrix<Real>>::operator()(FunctionCallStringNode<Matrix<Real>> const& op) const;
+template<> Matrix<Real> Solver<Matrix<Real>>::operator()(NoFencesFunctionCallNode<Matrix<Real>> const& op) const;
+template<> Matrix<Real> Solver<Matrix<Real>>::operator()(IdentifierNode<Matrix<Real>> const& op) const;
+template<> Matrix<Real> Solver<Matrix<Real>>::operator()(ImplicitStringMulNode<Matrix<Real>> const& op) const;
+template<> Matrix<Real> Solver<Matrix<Real>>::operator()(ImplicitDivMulNode<Matrix<Real>> const& op) const;
+template<> VariableNode<Matrix<Real>>* Solver<Matrix<Real>>::FindVariable(const std::u32string& name, const std::u32string& subscript) const;
+template<> Matrix<Rational> Solver<Matrix<Rational>>::operator()(UnaryOperationNode<Matrix<Rational>> const& op) const;
+template<> Matrix<Rational> Solver<Matrix<Rational>>::operator()(OperationNode<Matrix<Rational>> const& op) const;
+template<> Matrix<Rational> Solver<Matrix<Rational>>::operator()(PostfixOperationNode<Matrix<Rational>> const& op) const;
+template<> Matrix<Rational> Solver<Matrix<Rational>>::operator()(FunctionCallNode<Matrix<Rational>> const& op) const;
+template<> Matrix<Rational> Solver<Matrix<Rational>>::operator()(FunctionCallStringNode<Matrix<Rational>> const& op) const;
+template<> Matrix<Rational> Solver<Matrix<Rational>>::operator()(NoFencesFunctionCallNode<Matrix<Rational>> const& op) const;
+template<> Matrix<Rational> Solver<Matrix<Rational>>::operator()(IdentifierNode<Matrix<Rational>> const& op) const;
+template<> Matrix<Rational> Solver<Matrix<Rational>>::operator()(ImplicitStringMulNode<Matrix<Rational>> const& op) const;
+template<> Matrix<Rational> Solver<Matrix<Rational>>::operator()(ImplicitDivMulNode<Matrix<Rational>> const& op) const;
+template<> VariableNode<Matrix<Rational>>* Solver<Matrix<Rational>>::FindVariable(const std::u32string& name, const std::u32string& subscript) const;
+template<> Matrix<Complex> Solver<Matrix<Complex>>::operator()(UnaryOperationNode<Matrix<Complex>> const& op) const;
+template<> Matrix<Complex> Solver<Matrix<Complex>>::operator()(OperationNode<Matrix<Complex>> const& op) const;
+template<> Matrix<Complex> Solver<Matrix<Complex>>::operator()(PostfixOperationNode<Matrix<Complex>> const& op) const;
+template<> Matrix<Complex> Solver<Matrix<Complex>>::operator()(FunctionCallNode<Matrix<Complex>> const& op) const;
+template<> Matrix<Complex> Solver<Matrix<Complex>>::operator()(FunctionCallStringNode<Matrix<Complex>> const& op) const;
+template<> Matrix<Complex> Solver<Matrix<Complex>>::operator()(NoFencesFunctionCallNode<Matrix<Complex>> const& op) const;
+template<> Matrix<Complex> Solver<Matrix<Complex>>::operator()(IdentifierNode<Matrix<Complex>> const& op) const;
+template<> Matrix<Complex> Solver<Matrix<Complex>>::operator()(ImplicitStringMulNode<Matrix<Complex>> const& op) const;
+template<> Matrix<Complex> Solver<Matrix<Complex>>::operator()(ImplicitDivMulNode<Matrix<Complex>> const& op) const;
+template<> VariableNode<Matrix<Complex>>* Solver<Matrix<Complex>>::FindVariable(const std::u32string& name, const std::u32string& subscript) const;
 
 };
 

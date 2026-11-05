@@ -113,6 +113,66 @@ void Export::AddVariable<Array<Real>>(const VariableNode<Array<Real>>& var)
 }
 
 template<>
+void Export::AddVariable<Matrix<Real>>(const VariableNode<Matrix<Real>>& var)
+{
+    std::scoped_lock<std::mutex> lock(export_mutex);
+    auto it = std::find_if(variables_matrix_real.begin(), variables_matrix_real.end(),
+        [var](auto& v)
+        {
+            return var.name == v.name;
+        });
+    if (it == variables_matrix_real.end())
+    {
+        VariableNode<Matrix<Real>> v(var);
+        v.exported = true;
+        variables_matrix_real.push_back(v);
+        return;
+    }
+    *it = var;
+    it->exported = true;
+}
+
+template<>
+void Export::AddVariable<Matrix<Rational>>(const VariableNode<Matrix<Rational>>& var)
+{
+    std::scoped_lock<std::mutex> lock(export_mutex);
+    auto it = std::find_if(variables_matrix_rational.begin(), variables_matrix_rational.end(),
+        [var](auto& v)
+        {
+            return var.name == v.name;
+        });
+    if (it == variables_matrix_rational.end())
+    {
+        VariableNode<Matrix<Rational>> v(var);
+        v.exported = true;
+        variables_matrix_rational.push_back(v);
+        return;
+    }
+    *it = var;
+    it->exported = true;
+}
+
+template<>
+void Export::AddVariable<Matrix<Complex>>(const VariableNode<Matrix<Complex>>& var)
+{
+    std::scoped_lock<std::mutex> lock(export_mutex);
+    auto it = std::find_if(variables_matrix_complex.begin(), variables_matrix_complex.end(),
+        [var](auto& v)
+        {
+            return var.name == v.name;
+        });
+    if (it == variables_matrix_complex.end())
+    {
+        VariableNode<Matrix<Complex>> v(var);
+        v.exported = true;
+        variables_matrix_complex.push_back(v);
+        return;
+    }
+    *it = var;
+    it->exported = true;
+}
+
+template<>
 void Export::AddFunction(const FunctionNode<Integer>& func)
 {
     std::scoped_lock<std::mutex> lock(export_mutex);
@@ -211,6 +271,67 @@ void Export::AddFunction(const FunctionNode<Array<Real>>& func)
     *it = func;
     it->exported = true;
 }
+
+template<>
+void Export::AddFunction(const FunctionNode<Matrix<Real>>& func)
+{
+    std::scoped_lock<std::mutex> lock(export_mutex);
+    auto it = std::find_if(functions_matrix_real.begin(), functions_matrix_real.end(),
+        [func](auto& f)
+        {
+            return func.name == f.name;
+        });
+    if (it == functions_matrix_real.end())
+    {
+        FunctionNode<Matrix<Real>> f(func);
+        f.exported = true;
+        functions_matrix_real.push_back(f);
+        return;
+    }
+    *it = func;
+    it->exported = true;
+}
+
+template<>
+void Export::AddFunction(const FunctionNode<Matrix<Rational>>& func)
+{
+    std::scoped_lock<std::mutex> lock(export_mutex);
+    auto it = std::find_if(functions_matrix_rational.begin(), functions_matrix_rational.end(),
+        [func](auto& f)
+        {
+            return func.name == f.name;
+        });
+    if (it == functions_matrix_rational.end())
+    {
+        FunctionNode<Matrix<Rational>> f(func);
+        f.exported = true;
+        functions_matrix_rational.push_back(f);
+        return;
+    }
+    *it = func;
+    it->exported = true;
+}
+
+template<>
+void Export::AddFunction(const FunctionNode<Matrix<Complex>>& func)
+{
+    std::scoped_lock<std::mutex> lock(export_mutex);
+    auto it = std::find_if(functions_matrix_complex.begin(), functions_matrix_complex.end(),
+        [func](auto& f)
+        {
+            return func.name == f.name;
+        });
+    if (it == functions_matrix_complex.end())
+    {
+        FunctionNode<Matrix<Complex>> f(func);
+        f.exported = true;
+        functions_matrix_complex.push_back(f);
+        return;
+    }
+    *it = func;
+    it->exported = true;
+}
+
 
 template<>
 void Export::AddUnit(const CustomUnit<Integer>& unit)
@@ -369,6 +490,49 @@ VariableNode<Array<Real>>* Export::FindVariable<Array<Real>>(const std::u32strin
 }
 
 template<>
+VariableNode<Matrix<Real>>* Export::FindVariable<Matrix<Real>>(const std::u32string& name, const std::u32string& subscript)
+{
+    std::scoped_lock<std::mutex> lock(export_mutex);
+    auto it = std::find_if(variables_matrix_real.begin(), variables_matrix_real.end(),
+        [name, subscript](auto& var)
+        {
+            return var.name.name == name && var.name.subscript == subscript;
+        });
+    if (it != variables_matrix_real.end())
+        return &(*it);
+    return nullptr;
+}
+
+template<>
+VariableNode<Matrix<Rational>>* Export::FindVariable<Matrix<Rational>>(const std::u32string& name, const std::u32string& subscript)
+{
+    std::scoped_lock<std::mutex> lock(export_mutex);
+    auto it = std::find_if(variables_matrix_rational.begin(), variables_matrix_rational.end(),
+        [name, subscript](auto& var)
+        {
+            return var.name.name == name && var.name.subscript == subscript;
+        });
+    if (it != variables_matrix_rational.end())
+        return &(*it);
+    return nullptr;
+}
+
+template<>
+VariableNode<Matrix<Complex>>* Export::FindVariable<Matrix<Complex>>(const std::u32string& name, const std::u32string& subscript)
+{
+    std::scoped_lock<std::mutex> lock(export_mutex);
+    auto it = std::find_if(variables_matrix_complex.begin(), variables_matrix_complex.end(),
+        [name, subscript](auto& var)
+        {
+            return var.name.name == name && var.name.subscript == subscript;
+        });
+    if (it != variables_matrix_complex.end())
+        return &(*it);
+    return nullptr;
+}
+
+
+template<>
 FunctionNode<Integer>* Export::FindFunction<Integer>(const std::u32string& name)
 {
     std::scoped_lock<std::mutex> lock(export_mutex);
@@ -437,6 +601,49 @@ FunctionNode<Array<Real>>* Export::FindFunction<Array<Real>>(const std::u32strin
         return &(*it);
     return nullptr;
 }
+
+template<>
+FunctionNode<Matrix<Real>>* Export::FindFunction<Matrix<Real>>(const std::u32string& name)
+{
+    std::scoped_lock<std::mutex> lock(export_mutex);
+    auto it = std::find_if(functions_matrix_real.begin(), functions_matrix_real.end(),
+        [name](auto& func)
+        {
+            return func.name.name == name;
+        });
+    if (it != functions_matrix_real.end())
+        return &(*it);
+    return nullptr;
+}
+
+template<>
+FunctionNode<Matrix<Rational>>* Export::FindFunction<Matrix<Rational>>(const std::u32string& name)
+{
+    std::scoped_lock<std::mutex> lock(export_mutex);
+    auto it = std::find_if(functions_matrix_rational.begin(), functions_matrix_rational.end(),
+        [name](auto& func)
+        {
+            return func.name.name == name;
+        });
+    if (it != functions_matrix_rational.end())
+        return &(*it);
+    return nullptr;
+}
+
+template<>
+FunctionNode<Matrix<Complex>>* Export::FindFunction<Matrix<Complex>>(const std::u32string& name)
+{
+    std::scoped_lock<std::mutex> lock(export_mutex);
+    auto it = std::find_if(functions_matrix_complex.begin(), functions_matrix_complex.end(),
+        [name](auto& func)
+        {
+            return func.name.name == name;
+        });
+    if (it != functions_matrix_complex.end())
+        return &(*it);
+    return nullptr;
+}
+
 
 template<>
 CustomUnit<Integer>* Export::FindUnit<Integer>(const std::u32string& name, const std::u32string& system)
@@ -766,6 +973,9 @@ void Export::Clear()
     variables_symbolic_rational.clear();
     variables_symbolic_complex.clear();
     variables_array_real.clear();
+    variables_matrix_real.clear();
+    variables_matrix_rational.clear();
+    variables_matrix_complex.clear();
 
     functions_integer.clear();
     functions_real.clear();
@@ -775,6 +985,9 @@ void Export::Clear()
     functions_symbolic_rational.clear();
     functions_symbolic_complex.clear();
     functions_array_real.clear();
+    functions_matrix_real.clear();
+    functions_matrix_rational.clear();
+    functions_matrix_complex.clear();
 
     units_real.clear();
     units_rational.clear();

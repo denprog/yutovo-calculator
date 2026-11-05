@@ -1964,6 +1964,23 @@ template<>
 Array<Real> Solver<Array<Real>>::operator()(ArrayNode<Array<Real>> const& op) const
 {
     CheckBreak(parser_context);
+    //a nested array literal ([[a,b],[c,d]]) is a matrix, not a flat array: reject it here so that
+    //the auto solver falls through to the symbolic parser which builds the matrix
+    for (const auto& v : op.array)
+    {
+        //the elements of the literal are expressions, a nested [..] group sits inside the operand
+        //variant directly or inside ExpressionNode wrappers added by parenthesized groups
+        const ExpressionNode<Array<Real>>::Operand* current = &v.first;
+        while (true)
+        {
+            if (boost::get<ArrayNode<Array<Real>>>(current))
+                throw MathException(op.id, IncorrectOperation, op.pos, 1, op.line);
+            auto* expr = boost::get<ExpressionNode<Array<Real>>>(current);
+            if (!expr)
+                break;
+            current = &expr->first;
+        }
+    }
     Array<Real> res;
     for (const auto& v : op.array)
     {
@@ -1971,6 +1988,466 @@ Array<Real> Solver<Array<Real>>::operator()(ArrayNode<Array<Real>> const& op) co
         res.Add((*this)(v));
     }
     return res;
+}
+
+template<typename Number>
+Number Solver<Number>::MatrixIdentifier(const Solver<Number>& solver, IdentifierNode<Number> const& op)
+{
+    CheckBreak(solver.parser_context);
+    solver.AddDependency(op);
+
+    auto* temp = solver.FindTempVariable(op.name);
+    if (temp)
+        return temp->second;
+
+    //find in the user defined variables
+    auto* variable = solver.FindVariable(op.name, op.subscript);
+    if (variable)
+    {
+        LogicalId saved_id = solver.id;
+        bool saved_exported_id = solver.exported_id;
+        solver.id = variable->id;
+        solver.exported_id = variable->exported;
+        try
+        {
+            Number res = solver(variable->expression);
+            solver.id = saved_id;
+            solver.exported_id = saved_exported_id;
+            //a subscript that is not part of the variable's own identity selects a single element
+            if (!op.subscript.empty() && variable->name.subscript != op.subscript)
+                res = solver.MatrixElementBySubscript(res, op, op.id, op.pos, op.line);
+            return res;
+        }
+        catch (...)
+        {
+            solver.id = saved_id;
+            solver.exported_id = saved_exported_id;
+            throw;
+        }
+    }
+
+    //find in the build-in variables
+    auto* builtin_variable = solver.FindBuiltinVariable(op.name);
+    if (builtin_variable)
+    {
+        try
+        {
+            typename Solver<Number>::PrecisionVariable variable_function = std::get<typename Solver<Number>::PrecisionVariable>(*builtin_variable);
+            return (*variable_function)(solver.precision);
+        }
+        catch (const std::bad_variant_access&)
+        {
+        }
+    }
+
+    if constexpr (std::is_same_v<Number, Matrix<Complex>>)
+    {
+        if (op.name == solver.im)
+        {
+            Complex element(MathHelper::ToBitPrecision(solver.precision), 0, 1);
+            Number res;
+            res.Resize(1, 1, element);
+            return res;
+        }
+    }
+
+    //there is no such an identifier
+    solver.ThrowUndeclaredVariable(op.name, op.subscript);
+    throw SyntaxException(op.id, UnknownIdentifier, U"Identifier '" + op.name + U"' not found", op.pos, op.name.length(), op.line);
+}
+
+template<typename Number>
+Number Solver<Number>::MatrixImplicitStringMul(const Solver<Number>& solver, ImplicitStringMulNode<Number> const& op)
+{
+    CheckBreak(solver.parser_context);
+    solver.AddDependency(op.identifier);
+
+    auto* temp = solver.FindTempVariable(op.identifier.name);
+    if (temp)
+        return solver(op.left) * temp->second;
+
+    //find in the user defined variables
+    auto* variable = solver.FindVariable(op.identifier.name, op.identifier.subscript);
+    if (variable)
+    {
+        LogicalId saved_id = solver.id;
+        bool saved_exported_id = solver.exported_id;
+        solver.id = variable->id;
+        solver.exported_id = variable->exported;
+        try
+        {
+            Number res = solver(variable->expression);
+            solver.id = saved_id;
+            solver.exported_id = saved_exported_id;
+            if (!op.identifier.subscript.empty() && variable->name.subscript != op.identifier.subscript)
+                res = solver.MatrixElementBySubscript(res, op.identifier, op.id, op.pos, op.line);
+            return solver(op.left) * res;
+        }
+        catch (...)
+        {
+            solver.id = saved_id;
+            solver.exported_id = saved_exported_id;
+            throw;
+        }
+    }
+
+    //find in the build-in variables
+    auto* builtin_variable = solver.FindBuiltinVariable(op.identifier.name);
+    if (builtin_variable)
+    {
+        try
+        {
+            typename Solver<Number>::PrecisionVariable variable_function = std::get<typename Solver<Number>::PrecisionVariable>(*builtin_variable);
+            return solver(op.left) * (*variable_function)(solver.precision);
+        }
+        catch (const std::bad_variant_access&)
+        {
+        }
+    }
+
+    if constexpr (std::is_same_v<Number, Matrix<Complex>>)
+    {
+        if (op.identifier.name == solver.im)
+        {
+            Complex element(MathHelper::ToBitPrecision(solver.precision), 0, 1);
+            Number imaginary_unit;
+            imaginary_unit.Resize(1, 1, element);
+            return solver(op.left) * imaginary_unit;
+        }
+    }
+
+    //there is no such an identifier
+    solver.ThrowUndeclaredVariable(op.identifier.name, op.identifier.subscript);
+    throw SyntaxException(op.id, UnknownIdentifier, U"Identifier '" + op.identifier.name + U"' not found", op.pos,
+        op.identifier.name.length(), op.line);
+}
+
+template<typename Number>
+Number Solver<Number>::MatrixImplicitDivMul(const Solver<Number>& solver, ImplicitDivMulNode<Number> const& op)
+{
+    CheckBreak(solver.parser_context);
+    solver.AddDependency(op.identifier);
+
+    auto* temp = solver.FindTempVariable(op.identifier.name);
+    if (temp)
+        return solver(op.upper) / solver(op.lower) * temp->second;
+
+    //find in the user defined variables
+    auto* variable = solver.FindVariable(op.identifier.name, op.identifier.subscript);
+    if (variable)
+    {
+        LogicalId saved_id = solver.id;
+        bool saved_exported_id = solver.exported_id;
+        solver.id = variable->id;
+        solver.exported_id = variable->exported;
+        try
+        {
+            Number res = solver(variable->expression);
+            solver.id = saved_id;
+            solver.exported_id = saved_exported_id;
+            if (!op.identifier.subscript.empty() && variable->name.subscript != op.identifier.subscript)
+                res = solver.MatrixElementBySubscript(res, op.identifier, op.id, op.pos, op.line);
+            return solver(op.upper) / solver(op.lower) * res;
+        }
+        catch (...)
+        {
+            solver.id = saved_id;
+            solver.exported_id = saved_exported_id;
+            throw;
+        }
+    }
+
+    //find in the build-in variables
+    auto* builtin_variable = solver.FindBuiltinVariable(op.identifier.name);
+    if (builtin_variable)
+    {
+        try
+        {
+            typename Solver<Number>::PrecisionVariable variable_function = std::get<typename Solver<Number>::PrecisionVariable>(*builtin_variable);
+            return solver(op.upper) / solver(op.lower) * (*variable_function)(solver.precision);
+        }
+        catch (const std::bad_variant_access&)
+        {
+        }
+    }
+
+    if constexpr (std::is_same_v<Number, Matrix<Complex>>)
+    {
+        if (op.identifier.name == solver.im)
+        {
+            Complex element(MathHelper::ToBitPrecision(solver.precision), 0, 1);
+            Number imaginary_unit;
+            imaginary_unit.Resize(1, 1, element);
+            return solver(op.upper) / solver(op.lower) * imaginary_unit;
+        }
+    }
+
+    //there is no such an identifier
+    solver.ThrowUndeclaredVariable(op.identifier.name, op.identifier.subscript);
+    throw SyntaxException(op.id, UnknownIdentifier, U"Identifier '" + op.identifier.name + U"' not found", op.pos,
+        op.identifier.name.length(), op.line);
+}
+
+template<typename Number>
+Number Solver<Number>::MatrixOperation(const Solver<Number>& solver, OperationNode<Number> const& op)
+{
+    CheckBreak(solver.parser_context);
+
+    Number right = boost::apply_visitor(solver, op.operand);
+
+    try
+    {
+        //calculate the operation
+        switch (op.op)
+        {
+        case U'+':
+            return solver.left_value + right;
+        case U'-':
+            return solver.left_value - right;
+        case U'*':
+            return solver.left_value * right;
+        case U'/':
+            return solver.left_value / right;
+        }
+    }
+    catch (MathException e)
+    {
+        throw MathException(e.id, e.ex_id, op.pos, op.line);
+    }
+
+    throw SyntaxException(op.id, SyntaxError, op.pos, 1, op.line);
+}
+
+template<typename Number>
+Number Solver<Number>::MatrixUnaryOperation(const Solver<Number>& solver, UnaryOperationNode<Number> const& op)
+{
+    CheckBreak(solver.parser_context);
+
+    Number right = boost::apply_visitor(solver, op.operand);
+    switch (op.op)
+    {
+    case U'+':
+        return right;
+    case U'-':
+        return -right;
+    }
+    throw SyntaxException(op.id, SyntaxError, op.pos, 1, op.line);
+}
+
+template<typename Number>
+VariableNode<Number>* Solver<Number>::MatrixFindVariable(const Solver<Number>& solver, const std::u32string& name, const std::u32string& subscript)
+{
+    for (int i = (int)solver.symbols->variables.size() - 1; i >= 0; --i)
+    {
+        auto& var = solver.symbols->variables[i];
+        if ((solver.exported_id || IsLess(var.id, solver.id)) && var.name.name == name)
+        {
+            if (var.name.subscript == subscript)
+                return &var;
+            if (!var.name.subscript.empty())
+                continue;
+            return &var;
+        }
+    }
+
+    if (solver.FindTempVariable(subscript))
+        return solver.FindExportVariable(name, U"");
+    return solver.FindExportVariable(name, subscript);
+}
+
+template<>
+Matrix<Real> Solver<Matrix<Real>>::operator()(UnaryOperationNode<Matrix<Real>> const& op) const
+{
+    return MatrixUnaryOperation(*this, op);
+}
+
+template<>
+Matrix<Real> Solver<Matrix<Real>>::operator()(OperationNode<Matrix<Real>> const& op) const
+{
+    return MatrixOperation(*this, op);
+}
+
+template<>
+Matrix<Real> Solver<Matrix<Real>>::operator()(PostfixOperationNode<Matrix<Real>> const& op) const
+{
+    throw SyntaxException(op.id, SyntaxError, op.pos, 1, op.line);
+}
+
+template<>
+Matrix<Real> Solver<Matrix<Real>>::operator()(FunctionCallNode<Matrix<Real>> const& op) const
+{
+    return FunctionCall(op);
+}
+
+template<>
+Matrix<Real> Solver<Matrix<Real>>::operator()(FunctionCallStringNode<Matrix<Real>> const& op) const
+{
+    //there is no such a function
+    ThrowUndeclaredFunction(op.name.name);
+    throw SyntaxException(op.id, UnknownIdentifier, op.pos, op.name.name.length(), op.line);
+}
+
+template<>
+Matrix<Real> Solver<Matrix<Real>>::operator()(NoFencesFunctionCallNode<Matrix<Real>> const& op) const
+{
+    AddDependency(op.name);
+
+    Matrix<Real> res;
+    return res;
+}
+
+template<>
+Matrix<Real> Solver<Matrix<Real>>::operator()(IdentifierNode<Matrix<Real>> const& op) const
+{
+    return MatrixIdentifier(*this, op);
+}
+
+template<>
+Matrix<Real> Solver<Matrix<Real>>::operator()(ImplicitStringMulNode<Matrix<Real>> const& op) const
+{
+    return MatrixImplicitStringMul(*this, op);
+}
+
+template<>
+Matrix<Real> Solver<Matrix<Real>>::operator()(ImplicitDivMulNode<Matrix<Real>> const& op) const
+{
+    return MatrixImplicitDivMul(*this, op);
+}
+
+template<>
+Matrix<Rational> Solver<Matrix<Rational>>::operator()(UnaryOperationNode<Matrix<Rational>> const& op) const
+{
+    return MatrixUnaryOperation(*this, op);
+}
+
+template<>
+Matrix<Rational> Solver<Matrix<Rational>>::operator()(OperationNode<Matrix<Rational>> const& op) const
+{
+    return MatrixOperation(*this, op);
+}
+
+template<>
+Matrix<Rational> Solver<Matrix<Rational>>::operator()(PostfixOperationNode<Matrix<Rational>> const& op) const
+{
+    throw SyntaxException(op.id, SyntaxError, op.pos, 1, op.line);
+}
+
+template<>
+Matrix<Rational> Solver<Matrix<Rational>>::operator()(FunctionCallNode<Matrix<Rational>> const& op) const
+{
+    return FunctionCall(op);
+}
+
+template<>
+Matrix<Rational> Solver<Matrix<Rational>>::operator()(FunctionCallStringNode<Matrix<Rational>> const& op) const
+{
+    //there is no such a function
+    ThrowUndeclaredFunction(op.name.name);
+    throw SyntaxException(op.id, UnknownIdentifier, op.pos, op.name.name.length(), op.line);
+}
+
+template<>
+Matrix<Rational> Solver<Matrix<Rational>>::operator()(NoFencesFunctionCallNode<Matrix<Rational>> const& op) const
+{
+    AddDependency(op.name);
+
+    Matrix<Rational> res;
+    return res;
+}
+
+template<>
+Matrix<Rational> Solver<Matrix<Rational>>::operator()(IdentifierNode<Matrix<Rational>> const& op) const
+{
+    return MatrixIdentifier(*this, op);
+}
+
+template<>
+Matrix<Rational> Solver<Matrix<Rational>>::operator()(ImplicitStringMulNode<Matrix<Rational>> const& op) const
+{
+    return MatrixImplicitStringMul(*this, op);
+}
+
+template<>
+Matrix<Rational> Solver<Matrix<Rational>>::operator()(ImplicitDivMulNode<Matrix<Rational>> const& op) const
+{
+    return MatrixImplicitDivMul(*this, op);
+}
+
+template<>
+Matrix<Complex> Solver<Matrix<Complex>>::operator()(UnaryOperationNode<Matrix<Complex>> const& op) const
+{
+    return MatrixUnaryOperation(*this, op);
+}
+
+template<>
+Matrix<Complex> Solver<Matrix<Complex>>::operator()(OperationNode<Matrix<Complex>> const& op) const
+{
+    return MatrixOperation(*this, op);
+}
+
+template<>
+Matrix<Complex> Solver<Matrix<Complex>>::operator()(PostfixOperationNode<Matrix<Complex>> const& op) const
+{
+    throw SyntaxException(op.id, SyntaxError, op.pos, 1, op.line);
+}
+
+template<>
+Matrix<Complex> Solver<Matrix<Complex>>::operator()(FunctionCallNode<Matrix<Complex>> const& op) const
+{
+    return FunctionCall(op);
+}
+
+template<>
+Matrix<Complex> Solver<Matrix<Complex>>::operator()(FunctionCallStringNode<Matrix<Complex>> const& op) const
+{
+    //there is no such a function
+    ThrowUndeclaredFunction(op.name.name);
+    throw SyntaxException(op.id, UnknownIdentifier, op.pos, op.name.name.length(), op.line);
+}
+
+template<>
+Matrix<Complex> Solver<Matrix<Complex>>::operator()(NoFencesFunctionCallNode<Matrix<Complex>> const& op) const
+{
+    AddDependency(op.name);
+
+    Matrix<Complex> res;
+    return res;
+}
+
+template<>
+Matrix<Complex> Solver<Matrix<Complex>>::operator()(IdentifierNode<Matrix<Complex>> const& op) const
+{
+    return MatrixIdentifier(*this, op);
+}
+
+template<>
+Matrix<Complex> Solver<Matrix<Complex>>::operator()(ImplicitStringMulNode<Matrix<Complex>> const& op) const
+{
+    return MatrixImplicitStringMul(*this, op);
+}
+
+template<>
+Matrix<Complex> Solver<Matrix<Complex>>::operator()(ImplicitDivMulNode<Matrix<Complex>> const& op) const
+{
+    return MatrixImplicitDivMul(*this, op);
+}
+
+template<>
+VariableNode<Matrix<Real>>* Solver<Matrix<Real>>::FindVariable(const std::u32string& name, const std::u32string& subscript) const
+{
+    return MatrixFindVariable(*this, name, subscript);
+}
+
+template<>
+VariableNode<Matrix<Rational>>* Solver<Matrix<Rational>>::FindVariable(const std::u32string& name, const std::u32string& subscript) const
+{
+    return MatrixFindVariable(*this, name, subscript);
+}
+
+template<>
+VariableNode<Matrix<Complex>>* Solver<Matrix<Complex>>::FindVariable(const std::u32string& name, const std::u32string& subscript) const
+{
+    return MatrixFindVariable(*this, name, subscript);
 }
 
 template<>

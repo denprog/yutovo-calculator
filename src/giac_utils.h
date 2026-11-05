@@ -743,6 +743,7 @@ std::vector<std::string> EmitJson(const GiacExpression& e, const FormatContext& 
 bool IsCodeStringJson(const std::string& str);
 std::vector<std::string> EmitJsonChildren(const std::vector<GiacExpression>& args, const FormatContext& ctx);
 std::string ExprToJson(const GiacExpression& ast, int result_type, const FormatContext& ctx);
+std::string MatrixToJson(const giac::gen& matrix, int result_type, const FormatContext& ctx, giac::context* context);
 
 }
 

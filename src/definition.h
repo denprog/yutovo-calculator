@@ -11,6 +11,7 @@
 #include <type_traits>
 #include "ast.h"
 #include "expression.h"
+#include "matrix.h"
 
 namespace yutovo_calculator
 {
@@ -67,8 +68,9 @@ struct Definition : qi::grammar<std::u32string::iterator, DefinitionNode<Number>
         str = raw[lexeme[+(alnum | '_')]];
 
 		//identifier is a name with an optional subscript and optional description
-		//the array parser accepts an arbitrary expression as the subscript, other parsers only a number or a name
 		if constexpr (std::is_same_v<Number, Array<Real>>)
+			subscript = expression.subscript.alias();
+		else if constexpr (is_matrix_v<Number>)
 			subscript = expression.subscript.alias();
 		else
 			subscript = (+char_("0-9") | name);

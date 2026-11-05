@@ -70,6 +70,12 @@ std::string Symbolic<Real>::ToStdString(int exp, Language language) const
     GiacMpfrStateGuard mpfr_guard;
     giac::decimal_digits(std::max(1, precision + 10), Context());
     giac::gen e = giac::eval(*expr, 1, Context());
+    if (e.type == giac::_VECT)
+    {
+        //matrix results bypass the format pipeline: its expression parser cannot read brackets
+        e.subtype = 0;
+        return PrintGen(e, Context());
+    }
     if (e.is_integer())
     {
         std::string int_str = PrintGen(e, Context());
@@ -116,6 +122,12 @@ std::string Symbolic<Rational>::ToStdString(int exp, Language language) const
     GiacMpfrStateGuard mpfr_guard;
     giac::decimal_digits(std::max(1, precision + 10), Context());
     giac::gen e = giac::eval(*expr, 1, Context());
+    if (e.type == giac::_VECT)
+    {
+        //matrix results bypass the format pipeline: its expression parser cannot read brackets
+        e.subtype = 0;
+        return PrintGen(e, Context());
+    }
     if (e.is_integer())
         return PrintGen(e, Context());
     std::string s = PrintGen(e, Context());
@@ -139,6 +151,12 @@ std::string Symbolic<Complex>::ToStdString(int exp, Language language) const
     GiacMpfrStateGuard mpfr_guard;
     giac::decimal_digits(std::max(1, precision + 10), Context());
     giac::gen e = giac::eval(*expr, 1, Context());
+    if (e.type == giac::_VECT)
+    {
+        //matrix results bypass the format pipeline: its expression parser cannot read brackets
+        e.subtype = 0;
+        return PrintGen(e, Context());
+    }
     if (!e.is_integer() && e.type != giac::_REAL && e.type != giac::_DOUBLE_ && e.type != giac::_CPLX && !HasUnknownSymbol(e))
         e = giac::evalf(e, 1, Context());
     if (e.is_integer())
@@ -171,6 +189,13 @@ std::string Symbolic<Real>::ToJson(int exp, Language language) const
     GiacMpfrStateGuard mpfr_guard;
     giac::decimal_digits(std::max(1, precision + 10), Context());
     giac::gen e = giac::eval(*expr, 1, Context());
+    if (e.type == giac::_VECT)
+        e.subtype = 0;
+    if (e.type == giac::_VECT)
+    {
+        FormatContext c{FormatContext::Real, precision, exp, language, true};
+        return MatrixToJson(e, 45, c, Context());
+    }
     std::string s = PrintGen(e, Context());
     FormatContext c{FormatContext::Real, precision, exp, language, true};
     GiacExpression ast = BuildFormattedAst(std::move(s), c);
@@ -186,6 +211,13 @@ std::string Symbolic<Rational>::ToJson(int exp, Language language) const
     GiacMpfrStateGuard mpfr_guard;
     giac::decimal_digits(std::max(1, precision + 10), Context());
     giac::gen e = giac::eval(*expr, 1, Context());
+    if (e.type == giac::_VECT)
+        e.subtype = 0;
+    if (e.type == giac::_VECT)
+    {
+        FormatContext c{FormatContext::Rational, precision, exp, language, true};
+        return MatrixToJson(e, 46, c, Context());
+    }
     std::string s = PrintGen(e, Context());
     FormatContext c{FormatContext::Rational, precision, exp, language, true};
     GiacExpression ast = BuildFormattedAst(std::move(s), c);
@@ -201,6 +233,13 @@ std::string Symbolic<Complex>::ToJson(int exp, Language language) const
     GiacMpfrStateGuard mpfr_guard;
     giac::decimal_digits(std::max(1, precision + 10), Context());
     giac::gen e = giac::eval(*expr, 1, Context());
+    if (e.type == giac::_VECT)
+        e.subtype = 0;
+    if (e.type == giac::_VECT)
+    {
+        FormatContext c{FormatContext::Complex, precision, exp, language, true};
+        return MatrixToJson(e, 47, c, Context());
+    }
     std::string s = PrintGen(e, Context());
     s = Symbolic<Real>::ReplaceSqrtSymbol(s);
     char imag_unit = (language == Language::Russian) ? 'j' : 'i';

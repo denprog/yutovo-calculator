@@ -138,6 +138,7 @@ set(CALCULATOR_SOURCES
     annotation.h
     export.h
     array.h
+    matrix.h
     graph.h
 )
 
@@ -283,6 +284,7 @@ install(
         complex.h
         symbolic.h
         array.h
+        matrix.h
         custom_unit.h
         script.h
         solver.h
