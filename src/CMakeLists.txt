@@ -50,9 +50,6 @@ else()
         message(FATAL_ERROR "giac library not found in ${INSTALL_PATH}/lib. Run ./build_giac.sh first.")
     endif()
 
-    message(STATUS "giac release: ${GIAC_LIBRARY_RELEASE}")
-    message(STATUS "giac debug:   ${GIAC_LIBRARY_DEBUG}")
-
     add_library(giac_imported STATIC IMPORTED)
     set_target_properties(giac_imported PROPERTIES
         IMPORTED_CONFIGURATIONS "DEBUG;RELEASE"

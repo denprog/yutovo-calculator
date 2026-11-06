@@ -455,6 +455,42 @@ public:
         return res;
     }
 
+    friend Symbolic<Number> limit(const Symbolic<Number>& expr, const Symbolic<Number>& var, const Symbolic<Number>& value,
+        int direction)
+    {
+        if (var.expr->type != giac::_IDNT)
+            throw ParserException({}, ParserExceptionCode::IncorrectOperation);
+        GiacMpfrStateGuard mpfr_guard;
+        GiacOutputGuard output_guard;
+        Symbolic<Number> res(expr.precision);
+        try
+        {
+            //an approximate point (a double or a real object) is substituted into the expression by giac::limit
+            //instead of computing the limit, so it must be converted to an exact value first
+            giac::gen point = *value.expr;
+            if (point.is_approx())
+                point = giac::exact(point, res.Context());
+            *res.expr = giac::limit(*expr.expr, *var.expr->_IDNTptr, point, direction, res.Context());
+        }
+        catch (...)
+        {
+            throw MathException(IncorrectOperation);
+        }
+        //a bounded non-convergent result (e.g. sin(x) at infinity) has no limit value
+        if (res.expr->type == giac::_SYMB && res.expr->_SYMBptr->sommet == giac::at_bounded_function)
+            return Symbolic<Number>(expr.precision, std::string("nan"));
+        //unsigned infinity means the two-sided limit does not exist — the same value the numeric parsers return
+        if (*res.expr == giac::unsigned_inf)
+            return Symbolic<Number>(expr.precision, std::string("nan"));
+        return res;
+    }
+
+    friend Symbolic<Number> limit(const Symbolic<Number>& expr, const Symbolic<Number>& var, const Symbolic<Number>& value,
+        const Symbolic<Number>& direction)
+    {
+        return limit(expr, var, value, LimitDirectionFromGen(*direction.expr, direction.Context()));
+    }
+
     friend Symbolic<Number> min(const Symbolic<Number>& num1, const Symbolic<Number>& num2)
     {
         Symbolic<Number> res(num1.precision);
@@ -1141,10 +1177,11 @@ public:
 
     static int TermDegree(const std::string& term)
     {
-        static const std::set<std::string> known_funcs = {"sin", "cos", "tan", "tg", "cot", "ctg", "sec", "csc", "cosec", "sinh", "sh", "cosh", "ch", "tanh", "th", "coth", "cth", "sech", "sch", "csch", "cosech",
-            "asinh", "acosh", "atanh", "acoth", "asech", "acsch", "arsinh", "arcosh", "artanh", "arcoth", "arsech", "arcsch",
-            "arcsinh", "arccosh", "arctanh", "arccoth", "arcsech", "arccsch", "arccosech", "arctg", "arcctg", "exp", "ln", "log", "sqrt", "root", "pow",
-            "gamma", "factorial", "min", "max", "derivative", "indefinite_integral", "definite_integral", "subs", "expand", "simplify", "evalf", "evaluate"};
+        static const std::set<std::string> known_funcs = {"sin", "cos", "tan", "tg", "cot", "ctg", "sec", "csc", "cosec", "sinh", "sh", "cosh", "ch", 
+            "tanh", "th", "coth", "cth", "sech", "sch", "csch", "cosech", "asinh", "acosh", "atanh", "acoth", "asech", "acsch", "arsinh", "arcosh", 
+            "artanh", "arcoth", "arsech", "arcsch", "arcsinh", "arccosh", "arctanh", "arccoth", "arcsech", "arccsch", "arccosech", "arctg", "arcctg", 
+            "exp", "ln", "log", "sqrt", "root", "pow", "gamma", "factorial", "min", "max", "derivative", "indefinite_integral", "definite_integral", 
+            "subs", "expand", "simplify", "evalf", "evaluate", "limit"};
         static const std::set<std::string> known_consts = {"pi", "i", "j", "e", "oo", "inf", "nan", "undef"};
         int degree = 0;
         //count explicit powers pow(var,exp)

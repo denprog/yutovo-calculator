@@ -188,7 +188,7 @@ Expression<Real>::Expression(LogicalId id, std::u32string& expr, Solver<Real>* _
     multiply = char_(U'*') > unary | char_(U'/') > unary | char_(U'%') >> unary;
 
     unary = recursion_guard >>
-        (hold[derivative_at_point] | hold[evaluate_at_point] | definite_integral | loop | compare | implicit_function_mul |
+        (hold[derivative_at_point] | hold[evaluate_at_point] | hold[limit_at_point] | definite_integral | loop | compare | implicit_function_mul |
         implicit_post_function_mul | postfix_operation | implicit_div_mul | degree_minute_second | implicit_string_mul |
         implicit_fraction_mul | mixed_division | implicit_mul | number | function_call | no_fences_function_call | identifier |
         unary_operation | '(' > expression > ')');
@@ -250,10 +250,20 @@ Expression<Real>::Expression(LogicalId id, std::u32string& expr, Solver<Real>* _
         '(' > expression > ',' > expression > ',' > symbolic_arg > ',' > name > ')';
 
     derivative_variable = name >> '=' > expression;
-    
+
     derivative_at_point = lit("derivative") >> '(' >> symbolic_arg >> ',' >> '[' >> derivative_variable % ',' >> ']' >> ')';
 
     evaluate_at_point = lit("evaluate") >> '(' >> symbolic_arg >> ',' >> '[' >> derivative_variable % ',' >> ']' >> ')';
+
+    ExpressionNode<Real> zero_limit_direction;
+    NumberNode<Real> zero_direction_node;
+    zero_direction_node.number = U"0";
+    zero_limit_direction.first = zero_direction_node;
+    //a single limit variable without brackets: the positional form limit(f, x, 0) and the equation form limit(f, x=0)
+    limit_variable = name >> omit[char_(U'=') | char_(U',')] > expression;
+
+    limit_at_point = lit("limit") >> '(' >> symbolic_arg >> ',' >> (('[' >> derivative_variable % ',' >> ']') | limit_variable) >>
+        ((',' > expression) | attr(zero_limit_direction)) >> ')';
 
     function_call = identifier >> '(' >> -(expression % ',') > ')';
     
@@ -290,8 +300,11 @@ Expression<Real>::Expression(LogicalId id, std::u32string& expr, Solver<Real>* _
     on_success(derivative_at_point, 
         boost::phoenix::function<Annotation<yutovo_calculator::Real>>(Annotation<yutovo_calculator::Real>(expr.begin(), expr.end(), id, 
         &solver->parser_context))(qi::_val, _1));
-    on_success(evaluate_at_point, 
-        boost::phoenix::function<Annotation<yutovo_calculator::Real>>(Annotation<yutovo_calculator::Real>(expr.begin(), expr.end(), id, 
+    on_success(evaluate_at_point,
+        boost::phoenix::function<Annotation<yutovo_calculator::Real>>(Annotation<yutovo_calculator::Real>(expr.begin(), expr.end(), id,
+        &solver->parser_context))(qi::_val, _1));
+    on_success(limit_at_point,
+        boost::phoenix::function<Annotation<yutovo_calculator::Real>>(Annotation<yutovo_calculator::Real>(expr.begin(), expr.end(), id,
         &solver->parser_context))(qi::_val, _1));
     on_success(no_fences_function_call, 
         boost::phoenix::function<Annotation<yutovo_calculator::Real>>(Annotation<yutovo_calculator::Real>(expr.begin(), expr.end(), id, 
@@ -368,6 +381,7 @@ Expression<yutovo_calculator::Rational>::Expression(LogicalId id, std::u32string
     using boost::spirit::qi::fail;
     using boost::spirit::qi::lit;
     using boost::spirit::qi::hold;
+    using boost::spirit::qi::attr;
     using boost::spirit::qi::eps;
     using boost::phoenix::function;
     using boost::phoenix::bind;
@@ -403,8 +417,19 @@ Expression<yutovo_calculator::Rational>::Expression(LogicalId id, std::u32string
 
     evaluate_at_point = lit("evaluate") >> '(' >> symbolic_arg >> ',' >> '[' >> derivative_variable % ',' >> ']' >> ')';
     
+    ExpressionNode<yutovo_calculator::Rational> zero_limit_direction;
+    NumberNode<yutovo_calculator::Rational> zero_direction_node;
+    zero_direction_node.number = U"0";
+    zero_limit_direction.first = zero_direction_node;
+    //a single limit variable without brackets: the positional form limit(f, x, 0) and the equation form limit(f, x=0)
+    limit_variable = name >> omit[char_(U'=') | char_(U',')] > expression;
+
+    limit_at_point = lit("limit") >> '(' >> symbolic_arg >> ',' >>
+        (('[' >> derivative_variable % ',' >> ']') | limit_variable) >>
+        ((',' > expression) | attr(zero_limit_direction)) >> ')';
+
     unary = recursion_guard >>
-        (hold[derivative_at_point] | hold[evaluate_at_point] | definite_integral | loop | array | compare | implicit_function_mul |
+        (hold[derivative_at_point] | hold[evaluate_at_point] | hold[limit_at_point] | definite_integral | loop | array | compare | implicit_function_mul |
         implicit_post_function_mul | implicit_div_mul | implicit_string_mul | implicit_fraction_mul | mixed_division | implicit_mul |
         number | function_call | identifier | no_fences_function_call | unary_operation | '(' > expression > ')');
 
@@ -486,6 +511,9 @@ Expression<yutovo_calculator::Rational>::Expression(LogicalId id, std::u32string
     on_success(evaluate_at_point,
         boost::phoenix::function<Annotation<yutovo_calculator::Rational>>(Annotation<yutovo_calculator::Rational>(expr.begin(), expr.end(), id,
         &solver->parser_context))(qi::_val, _1));
+    on_success(limit_at_point,
+        boost::phoenix::function<Annotation<yutovo_calculator::Rational>>(Annotation<yutovo_calculator::Rational>(expr.begin(), expr.end(), id,
+        &solver->parser_context))(qi::_val, _1));
 
     //work out the exceptions
     on_error<fail>(expression, 
@@ -516,6 +544,7 @@ Expression<Complex>::Expression(LogicalId id, std::u32string& expr, Solver<Compl
     using boost::spirit::qi::fail;
     using boost::spirit::qi::lit;
     using boost::spirit::qi::hold;
+    using boost::spirit::qi::attr;
     using boost::spirit::qi::eps;
     using boost::phoenix::function;
     using boost::phoenix::bind;
@@ -535,7 +564,7 @@ Expression<Complex>::Expression(LogicalId id, std::u32string& expr, Solver<Compl
     multiply = char_('*') > unary | char_('/') > unary | char_('%') > unary;
 
     unary = recursion_guard >>
-        (hold[derivative_at_point] | hold[evaluate_at_point] | definite_integral | loop | array | compare | implicit_function_mul |
+        (hold[derivative_at_point] | hold[evaluate_at_point] | hold[limit_at_point] | definite_integral | loop | array | compare | implicit_function_mul |
         implicit_post_function_mul | postfix_operation | implicit_div_mul | implicit_string_mul | implicit_fraction_mul |
         mixed_division | implicit_mul | number | function_call | no_fences_function_call | identifier | unary_operation |
         '(' > expression > ')');
@@ -592,13 +621,23 @@ Expression<Complex>::Expression(LogicalId id, std::u32string& expr, Solver<Compl
 
     evaluate_at_point = lit("evaluate") >> '(' >> symbolic_arg >> ',' >> '[' >> derivative_variable % ',' >> ']' >> ')';
 
+    ExpressionNode<yutovo_calculator::Complex> zero_limit_direction;
+    NumberNode<yutovo_calculator::Complex> zero_direction_node;
+    zero_direction_node.number = U"0";
+    zero_limit_direction.first = zero_direction_node;
+    //a single limit variable without brackets: the positional form limit(f, x, 0) and the equation form limit(f, x=0)
+    limit_variable = name >> omit[char_(U'=') | char_(U',')] > expression;
+
+    limit_at_point = lit("limit") >> '(' >> symbolic_arg >> ',' >> (('[' >> derivative_variable % ',' >> ']') | limit_variable) >>
+        ((',' > expression) | attr(zero_limit_direction)) >> ')';
+
     function_call = identifier >> '(' >> -(expression % ',') > ')';
-    
+
     no_fences_function_call = (identifier >> ':' >> *(expression >> omit[',']) >> function_param);
-    
+
     function_param = number | identifier | '(' > expression > ')';
 
-    compare = '(' >> expression >> (raw[lexeme["<>"]] | raw[lexeme["=="]] | raw[lexeme["<="]] | raw[lexeme[">="]] | 
+    compare = '(' >> expression >> (raw[lexeme["<>"]] | raw[lexeme["=="]] | raw[lexeme["<="]] | raw[lexeme[">="]] |
         raw[lexeme["<"]] | raw[lexeme[">"]]) >> expression >> ')';
 
     loop = "loop(" > variable > ',' > compare > ',' > variable > ',' > variable > ',' > variable > ')';
@@ -608,8 +647,8 @@ Expression<Complex>::Expression(LogicalId id, std::u32string& expr, Solver<Compl
     variable = identifier >> ('=' > expression);
 
     //annotate the items with the expression's position
-    on_success(unary, 
-        boost::phoenix::function<Annotation<yutovo_calculator::Complex>>(Annotation<yutovo_calculator::Complex>(expr.begin(), expr.end(), id, 
+    on_success(unary,
+        boost::phoenix::function<Annotation<yutovo_calculator::Complex>>(Annotation<yutovo_calculator::Complex>(expr.begin(), expr.end(), id,
         &solver->parser_context))(qi::_val, _1));
     on_success(addition, 
         boost::phoenix::function<Annotation<yutovo_calculator::Complex>>(Annotation<yutovo_calculator::Complex>(expr.begin(), expr.end(), id, 
@@ -629,8 +668,11 @@ Expression<Complex>::Expression(LogicalId id, std::u32string& expr, Solver<Compl
     on_success(derivative_at_point, 
         boost::phoenix::function<Annotation<yutovo_calculator::Complex>>(Annotation<yutovo_calculator::Complex>(expr.begin(), expr.end(), id, 
         &solver->parser_context))(qi::_val, _1));
-    on_success(evaluate_at_point, 
-        boost::phoenix::function<Annotation<yutovo_calculator::Complex>>(Annotation<yutovo_calculator::Complex>(expr.begin(), expr.end(), id, 
+    on_success(evaluate_at_point,
+        boost::phoenix::function<Annotation<yutovo_calculator::Complex>>(Annotation<yutovo_calculator::Complex>(expr.begin(), expr.end(), id,
+        &solver->parser_context))(qi::_val, _1));
+    on_success(limit_at_point,
+        boost::phoenix::function<Annotation<yutovo_calculator::Complex>>(Annotation<yutovo_calculator::Complex>(expr.begin(), expr.end(), id,
         &solver->parser_context))(qi::_val, _1));
     on_success(no_fences_function_call, 
         boost::phoenix::function<Annotation<yutovo_calculator::Complex>>(Annotation<yutovo_calculator::Complex>(expr.begin(), expr.end(), id, 
@@ -1276,6 +1318,7 @@ Expression<Symbolic<Real>>::Expression(LogicalId id, std::u32string& expr, Solve
     using boost::spirit::qi::no_case;
     using boost::spirit::qi::lit;
     using boost::spirit::qi::hold;
+    using boost::spirit::qi::attr;
     using boost::spirit::qi::eps;
     using boost::spirit::qi::on_error;
     using boost::spirit::qi::fail;
@@ -1297,7 +1340,7 @@ Expression<Symbolic<Real>>::Expression(LogicalId id, std::u32string& expr, Solve
     multiply = char_('*') > unary | char_('/') > unary | char_('%') >> unary;
     
     unary = recursion_guard >>
-        (hold[derivative_at_point] | hold[evaluate_at_point] | loop | array | compare | implicit_function_mul |
+        (hold[derivative_at_point] | hold[evaluate_at_point] | hold[limit_at_point] | loop | array | compare | implicit_function_mul |
         implicit_post_function_mul | postfix_operation | implicit_div_mul | implicit_string_mul | implicit_fraction_mul |
         mixed_division | implicit_mul | number | function_call | no_fences_function_call | identifier | unary_operation |
         '(' > expression > ')');
@@ -1354,6 +1397,16 @@ Expression<Symbolic<Real>>::Expression(LogicalId id, std::u32string& expr, Solve
 
     evaluate_at_point = lit("evaluate") >> '(' >> symbolic_arg >> ',' >> '[' >> derivative_variable % ',' >> ']' >> ')';
 
+    ExpressionNode<yutovo_calculator::Symbolic<Real>> zero_limit_direction;
+    NumberNode<yutovo_calculator::Symbolic<Real>> zero_direction_node;
+    zero_direction_node.number = U"0";
+    zero_limit_direction.first = zero_direction_node;
+    //a single limit variable without brackets: the positional form limit(f, x, 0) and the equation form limit(f, x=0)
+    limit_variable = name >> omit[char_(U'=') | char_(U',')] > expression;
+
+    limit_at_point = lit("limit") >> '(' >> symbolic_arg >> ',' >> (('[' >> derivative_variable % ',' >> ']') | limit_variable) >>
+        ((',' > expression) | attr(zero_limit_direction)) >> ')';
+
     no_fences_function_call = (identifier >> ':' >> *(expression >> omit[',']) >> function_param);
 
     function_param = number | identifier | '(' > expression > ')';
@@ -1387,6 +1440,9 @@ Expression<Symbolic<Real>>::Expression(LogicalId id, std::u32string& expr, Solve
         boost::phoenix::function<Annotation<yutovo_calculator::Symbolic<Real>>>(Annotation<yutovo_calculator::Symbolic<Real>>(expr.begin(), expr.end(), id,
         &solver->parser_context))(qi::_val, _1));
     on_success(evaluate_at_point,
+        boost::phoenix::function<Annotation<yutovo_calculator::Symbolic<Real>>>(Annotation<yutovo_calculator::Symbolic<Real>>(expr.begin(), expr.end(), id,
+        &solver->parser_context))(qi::_val, _1));
+    on_success(limit_at_point,
         boost::phoenix::function<Annotation<yutovo_calculator::Symbolic<Real>>>(Annotation<yutovo_calculator::Symbolic<Real>>(expr.begin(), expr.end(), id,
         &solver->parser_context))(qi::_val, _1));
     on_success(no_fences_function_call,
@@ -1494,6 +1550,7 @@ Expression<Symbolic<Rational>>::Expression(LogicalId id, std::u32string& expr, S
     using boost::spirit::qi::no_case;
     using boost::spirit::qi::lit;
     using boost::spirit::qi::hold;
+    using boost::spirit::qi::attr;
     using boost::spirit::qi::eps;
     using boost::spirit::qi::on_error;
     using boost::spirit::qi::fail;
@@ -1515,7 +1572,7 @@ Expression<Symbolic<Rational>>::Expression(LogicalId id, std::u32string& expr, S
     multiply = char_('*') > unary | char_('/') > unary | char_('%') >> unary;
 
     unary = recursion_guard >>
-        (hold[derivative_at_point] | hold[evaluate_at_point] | loop | array | compare | implicit_function_mul |
+        (hold[derivative_at_point] | hold[evaluate_at_point] | hold[limit_at_point] | loop | array | compare | implicit_function_mul |
         implicit_post_function_mul | postfix_operation | implicit_div_mul | implicit_string_mul | implicit_fraction_mul |
         mixed_division | implicit_mul | number | function_call | no_fences_function_call | identifier | unary_operation |
         '(' > expression > ')');
@@ -1572,6 +1629,16 @@ Expression<Symbolic<Rational>>::Expression(LogicalId id, std::u32string& expr, S
 
     evaluate_at_point = lit("evaluate") >> '(' >> symbolic_arg >> ',' >> '[' >> derivative_variable % ',' >> ']' >> ')';
 
+    ExpressionNode<yutovo_calculator::Symbolic<Rational>> zero_limit_direction;
+    NumberNode<yutovo_calculator::Symbolic<Rational>> zero_direction_node;
+    zero_direction_node.number = U"0";
+    zero_limit_direction.first = zero_direction_node;
+    //a single limit variable without brackets: the positional form limit(f, x, 0) and the equation form limit(f, x=0)
+    limit_variable = name >> omit[char_(U'=') | char_(U',')] > expression;
+
+    limit_at_point = lit("limit") >> '(' >> symbolic_arg >> ',' >> (('[' >> derivative_variable % ',' >> ']') | limit_variable) >>
+        ((',' > expression) | attr(zero_limit_direction)) >> ')';
+
     no_fences_function_call = (identifier >> ':' >> *(expression >> omit[',']) >> function_param);
 
     function_param = number | identifier | '(' > expression > ')';
@@ -1605,6 +1672,9 @@ Expression<Symbolic<Rational>>::Expression(LogicalId id, std::u32string& expr, S
         boost::phoenix::function<Annotation<yutovo_calculator::Symbolic<Rational>>>(Annotation<yutovo_calculator::Symbolic<Rational>>(expr.begin(), expr.end(), id,
         &solver->parser_context))(qi::_val, _1));
     on_success(evaluate_at_point,
+        boost::phoenix::function<Annotation<yutovo_calculator::Symbolic<Rational>>>(Annotation<yutovo_calculator::Symbolic<Rational>>(expr.begin(), expr.end(), id,
+        &solver->parser_context))(qi::_val, _1));
+    on_success(limit_at_point,
         boost::phoenix::function<Annotation<yutovo_calculator::Symbolic<Rational>>>(Annotation<yutovo_calculator::Symbolic<Rational>>(expr.begin(), expr.end(), id,
         &solver->parser_context))(qi::_val, _1));
     on_success(no_fences_function_call,
@@ -1670,6 +1740,7 @@ Expression<Symbolic<Complex>>::Expression(LogicalId id, std::u32string& expr, So
     using boost::spirit::qi::no_case;
     using boost::spirit::qi::lit;
     using boost::spirit::qi::hold;
+    using boost::spirit::qi::attr;
     using boost::spirit::qi::eps;
     using boost::spirit::qi::on_error;
     using boost::spirit::qi::fail;
@@ -1691,7 +1762,7 @@ Expression<Symbolic<Complex>>::Expression(LogicalId id, std::u32string& expr, So
     multiply = char_('*') > unary | char_('/') > unary | char_('%') >> unary;
 
     unary = recursion_guard >>
-        (hold[derivative_at_point] | hold[evaluate_at_point] | loop | array | compare | implicit_function_mul |
+        (hold[derivative_at_point] | hold[evaluate_at_point] | hold[limit_at_point] | loop | array | compare | implicit_function_mul |
         implicit_post_function_mul | postfix_operation | implicit_div_mul | implicit_string_mul | implicit_fraction_mul |
         mixed_division | implicit_mul | number | function_call | no_fences_function_call | identifier | unary_operation |
         '(' > expression > ')');
@@ -1743,10 +1814,20 @@ Expression<Symbolic<Complex>>::Expression(LogicalId id, std::u32string& expr, So
         (unicode::char_ - unicode::char_(U',') - unicode::char_(U'(') - unicode::char_(U')')) ) ];
 
     derivative_variable = name >> '=' > expression;
-    
+
     derivative_at_point = lit("derivative") >> '(' >> symbolic_arg >> ',' >> '[' >> derivative_variable % ',' >> ']' >> ')';
 
     evaluate_at_point = lit("evaluate") >> '(' >> symbolic_arg >> ',' >> '[' >> derivative_variable % ',' >> ']' >> ')';
+
+    ExpressionNode<yutovo_calculator::Symbolic<Complex>> zero_limit_direction;
+    NumberNode<yutovo_calculator::Symbolic<Complex>> zero_direction_node;
+    zero_direction_node.number = U"0";
+    zero_limit_direction.first = zero_direction_node;
+    //a single limit variable without brackets: the positional form limit(f, x, 0) and the equation form limit(f, x=0)
+    limit_variable = name >> omit[char_(U'=') | char_(U',')] > expression;
+
+    limit_at_point = lit("limit") >> '(' >> symbolic_arg >> ',' >> (('[' >> derivative_variable % ',' >> ']') | limit_variable) >>
+        ((',' > expression) | attr(zero_limit_direction)) >> ')';
 
     no_fences_function_call = (identifier >> ':' >> *(expression >> omit[',']) >> function_param);
 
@@ -1781,6 +1862,9 @@ Expression<Symbolic<Complex>>::Expression(LogicalId id, std::u32string& expr, So
         boost::phoenix::function<Annotation<yutovo_calculator::Symbolic<Complex>>>(Annotation<yutovo_calculator::Symbolic<Complex>>(expr.begin(), expr.end(), id,
         &solver->parser_context))(qi::_val, _1));
     on_success(evaluate_at_point,
+        boost::phoenix::function<Annotation<yutovo_calculator::Symbolic<Complex>>>(Annotation<yutovo_calculator::Symbolic<Complex>>(expr.begin(), expr.end(), id,
+        &solver->parser_context))(qi::_val, _1));
+    on_success(limit_at_point,
         boost::phoenix::function<Annotation<yutovo_calculator::Symbolic<Complex>>>(Annotation<yutovo_calculator::Symbolic<Complex>>(expr.begin(), expr.end(), id,
         &solver->parser_context))(qi::_val, _1));
     on_success(no_fences_function_call,

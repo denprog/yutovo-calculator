@@ -891,6 +891,409 @@ struct Solver : public boost::static_visitor<Number>
         }
     }
 
+    //Limit doesn't carry units
+    bool LimitPointHasUnitOrMeasure(const Number& value) const
+    {
+        if constexpr (std::is_same_v<Number, Rational>)
+            return !value.unit.IsEmpty();
+        else if constexpr (std::is_same_v<Number, Real>)
+        {
+            Number value_copy = value;
+            return !value.unit.IsEmpty() || value_copy.GetAngleMeasure() != AngleMeasure::None;
+        }
+        else if constexpr (std::is_same_v<Number, Complex>)
+        {
+            Number value_copy = value;
+            return value_copy.GetAngleMeasure() != AngleMeasure::None;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    int LimitDirection(ExpressionNode<Number> const& direction_expression) const
+    {
+        Number value = (*this)(direction_expression);
+        if constexpr (std::is_same_v<Number, Complex>)
+        {
+            if (!value.GetIm().IsZero() || !value.GetRe().IsInteger())
+                throw MathException(IncorrectOperation);
+            return LimitDirectionFromGen(NumberToGiac(value.GetRe()), nullptr);
+        }
+        else
+        {
+            return LimitDirectionFromGen(NumberToGiac(value), nullptr);
+        }
+    }
+
+    //Converts a limit point into a giac value
+    giac::gen LimitPointToGiac(const Number& value, const giac::context* ctx) const
+    {
+        if constexpr (std::is_same_v<Number, Rational>)
+        {
+            return NumberToGiac(value);
+        }
+        else
+        {
+            if (value.IsInfinity())
+            {
+                bool negative;
+                if constexpr (std::is_same_v<Number, Complex>)
+                    negative = value.GetRe().GetSign();
+                else
+                    negative = value.GetSign();
+                return ParseGen(std::string(negative ? "-inf" : "+inf"), ctx);
+            }
+            return giac::exact(NumberToGiac(value), ctx);
+        }
+    }
+
+    Number EvaluateLimitAtPoint(const std::u32string& expression_str, const std::list<DerivativeVariableNode<Number>>& variables,
+        int direction) const
+    {
+        std::lock_guard<std::mutex> lock(giac_evaluation_mutex);
+        GiacMpfrStateGuard mpfr_guard;
+        GiacOutputGuard output_guard;
+        giac::context ctx;
+        if constexpr (!std::is_same_v<Number, Rational>)
+            giac::decimal_digits(std::max(1, precision + 1), &ctx);
+        giac::gen expr_gen = ParseGen(ToBasicString(expression_str), &ctx);
+
+        //iterated limits: the variables are applied from the last one to the first one, so the first variable
+        //is the outermost limit and owns the requested direction
+        int index = 0;
+        int count = static_cast<int>(variables.size());
+        giac::gen res = expr_gen;
+        for (auto var_iter = variables.rbegin(); var_iter != variables.rend(); ++var_iter, ++index)
+        {
+            Number value = (*this)(var_iter->value);
+            int var_direction = (index == count - 1) ? direction : 0;
+            giac::identificateur var_id(ToBasicString(var_iter->name));
+            res = giac::limit(res, var_id, LimitPointToGiac(value, &ctx), var_direction, &ctx);
+        }
+
+        if (res == giac::plus_inf || res == giac::minus_inf)
+        {
+            //an infinite limit is a value for Real/Complex and is not representable for Rational
+            if constexpr (std::is_same_v<Number, Rational>)
+                throw MathException(IncorrectOperation);
+            return FromGiac<Number>(res, precision);
+        }
+        if (res == giac::unsigned_inf || giac::is_undef(res) || (res.type == giac::_SYMB && res._SYMBptr->sommet == giac::at_bounded_function))
+        {
+            //unsigned infinity, an undefined value or a bounded non-convergent value means the limit does not exist
+            if constexpr (std::is_same_v<Number, Rational>)
+                throw MathException(IncorrectOperation);
+            else
+                return Number(precision, "nan");
+        }
+        if constexpr (std::is_same_v<Number, Rational>)
+            res = giac::normal(res, &ctx);
+        else
+            res = giac::evalf(res, 1, &ctx);
+        return FromGiac<Number>(res, precision);
+    }
+
+    Number NumericalLimitAtPoint(const std::u32string& expression_str, const std::list<DerivativeVariableNode<Number>>& variables,
+        int direction) const
+    {
+        if constexpr (std::is_same_v<Number, Real> || std::is_same_v<Number, Complex>)
+        {
+            auto var_iter = variables.begin();
+            std::u32string first_variable = var_iter->name;
+            Number first_value = RaiseDerivativePrecision((*this)(var_iter->value));
+
+            std::list<std::pair<std::u32string, Number>> other_variables;
+            ++var_iter;
+            for (; var_iter != variables.end(); ++var_iter)
+                other_variables.emplace_back(var_iter->name, (*this)(var_iter->value));
+
+            auto evaluate_at =
+                [&](const Number& value) -> Number
+                {
+                    std::list<std::pair<std::u32string, Number>> variable_values = other_variables;
+                    variable_values.emplace_front(first_variable, value);
+                    return EvaluateWithTempVariables(expression_str, variable_values);
+                };
+
+            auto magnitude =
+                [&](const Number& value) -> Real
+                {
+                    if constexpr (std::is_same_v<Number, Complex>)
+                        return abs(value).GetRe();
+                    else
+                        return abs(value);
+                };
+
+            //the sign of an infinite value: for a complex value the sign of its real part
+            auto infinity_sign =
+                [&](const Number& value) -> int
+                {
+                    if constexpr (std::is_same_v<Number, Complex>)
+                        return value.GetRe().GetSign() ? -1 : 1;
+                    else
+                        return value.GetSign() ? -1 : 1;
+                };
+
+            int tolerance_digits = std::max(1, precision);
+            std::string tolerance_str = std::string("1e-") + std::to_string(tolerance_digits);
+            Real tolerance(precision, tolerance_str.c_str());
+            Real one(precision, 1);
+            int stable_steps_required = 3;
+            int max_steps = std::min(200, 3 * tolerance_digits + 60);
+
+            //Runs the sequence of sample points until the values stabilize or run away to infinity
+            auto converge =
+                [&](const std::function<Number()>& sample) -> Number
+                {
+                    Number previous;
+                    bool has_previous = false;
+                    int stable = 0;
+                    int run_infinity_sign = 0;
+                    int infinity_steps = 0;
+                    //a monotone divergence (the magnitude at least doubles every step, like 1/h for halving h)
+                    //never reaches an MPFR overflow within the step budget, so it is detected by the growth itself
+                    Real growth_factor(precision, 2);
+                    int growth_steps = 0;
+                    int growth_steps_required = 10;
+                    for (int step = 0; step <= max_steps; ++step)
+                    {
+                        CheckBreak(parser_context);
+                        Number value = sample();
+                        Real value_magnitude = magnitude(value);
+                        if (value_magnitude.IsInfinity())
+                        {
+                            int sign = infinity_sign(value);
+                            if (run_infinity_sign == 0)
+                                run_infinity_sign = sign;
+                            else if (run_infinity_sign != sign)
+                                throw MathException(IncorrectOperation);
+                            ++infinity_steps;
+                            if (infinity_steps >= stable_steps_required)
+                                return Number(precision, run_infinity_sign < 0 ? "-inf" : "inf");
+                            has_previous = false;
+                            stable = 0;
+                            growth_steps = 0;
+                            continue;
+                        }
+                        infinity_steps = 0;
+                        if (has_previous)
+                        {
+                            Real previous_magnitude = magnitude(previous);
+                            if (value_magnitude >= previous_magnitude * growth_factor && !previous_magnitude.IsZero())
+                            {
+                                ++growth_steps;
+                                if (growth_steps >= growth_steps_required)
+                                {
+                                    int sign = infinity_sign(value);
+                                    return Number(precision, sign < 0 ? "-inf" : "inf");
+                                }
+                            }
+                            else
+                            {
+                                growth_steps = 0;
+                            }
+                            Real scale = value_magnitude > one ? value_magnitude : one;
+                            if (magnitude(value - previous) <= tolerance * scale)
+                            {
+                                ++stable;
+                                if (stable >= stable_steps_required)
+                                    return value;
+                            }
+                            else
+                            {
+                                stable = 0;
+                            }
+                        }
+                        previous = value;
+                        has_previous = true;
+                    }
+                    throw MathException(IncorrectOperation);
+                };
+
+            if (first_value.IsInfinity())
+            {
+                bool negative;
+                if constexpr (std::is_same_v<Number, Complex>)
+                    negative = first_value.GetRe().GetSign();
+                else
+                    negative = first_value.GetSign();
+                //the sequence doubles the magnitude of the point: sign, 2*sign, 4*sign, ...
+                Number point = Number(Real(precision, negative ? -1 : 1));
+                Number two = Number(Real(precision, 2));
+                return converge(
+                    [&]() -> Number
+                    {
+                        Number value = evaluate_at(point);
+                        point = point * two;
+                        return value;
+                    });
+            }
+
+            auto finite_side_limit =
+                [&](int side) -> Number
+                {
+                    //the step starts at the scale of the point and halves on every iteration
+                    Real point_magnitude = magnitude(first_value);
+                    Real scale = point_magnitude > one ? point_magnitude : one;
+                    Number step_value = Number(scale);
+                    Number half = Number(Real(precision, "0.5"));
+                    return converge(
+                        [&]() -> Number
+                        {
+                            Number point = side > 0 ? first_value + step_value : first_value - step_value;
+                            step_value = step_value * half;
+                            return evaluate_at(point);
+                        });
+                };
+
+            if (direction == 1)
+                return finite_side_limit(1);
+            if (direction == -1)
+                return finite_side_limit(-1);
+
+            Number upper = finite_side_limit(1);
+            Number lower = finite_side_limit(-1);
+            Real upper_magnitude = magnitude(upper);
+            if (upper_magnitude.IsInfinity() || magnitude(lower).IsInfinity())
+            {
+                //a two-sided limit at infinity of the same sign on both sides is that infinity
+                if (upper_magnitude.IsInfinity() && magnitude(lower).IsInfinity())
+                {
+                    int upper_sign = infinity_sign(upper);
+                    int lower_sign = infinity_sign(lower);
+                    if (upper_sign == lower_sign)
+                        return Number(precision, upper_sign < 0 ? "-inf" : "inf");
+                }
+                throw MathException(IncorrectOperation);
+            }
+            Real scale = upper_magnitude > one ? upper_magnitude : one;
+            if (magnitude(upper - lower) <= tolerance * scale)
+                return (upper + lower) * Number(Real(precision, "0.5"));
+            throw MathException(IncorrectOperation);
+        }
+        else
+        {
+            throw MathException(IncorrectOperation);
+        }
+    }
+
+    Number operator()(LimitAtPointNode<Number> const& op) const
+    {
+        if constexpr (is_symbolic_v<Number>)
+        {
+            try
+            {
+                if (op.variables.empty())
+                    throw ParserException({}, ParserExceptionCode::IncorrectOperation);
+
+                const std::u32string& expression_str = boost::get<std::u32string>(op.function);
+                std::u32string expr = expression_str;
+                Expression<Number> expression(op.id, expr, const_cast<Solver<Number>*>(this));
+                ExpressionNode<Number> function_expr;
+                std::u32string::iterator iter = expr.begin();
+                std::u32string::iterator end = expr.end();
+                unicode::space_type space;
+                if (!phrase_parse(iter, end, expression, space, function_expr))
+                    throw MathException(IncorrectOperation);
+                Number result = (*this)(function_expr);
+
+                Number direction_value = (*this)(op.direction);
+                Number zero_direction(precision, U"0");
+                //iterated limits: the variables are applied from the last one to the first one, so the first
+                //variable is the outermost limit and owns the requested direction
+                for (auto var_iter = op.variables.rbegin(); var_iter != op.variables.rend(); ++var_iter)
+                {
+                    Number value = (*this)(var_iter->value);
+                    const Number& var_direction = (std::next(var_iter) == op.variables.rend()) ? direction_value : zero_direction;
+                    result = limit(result, Number(precision, var_iter->name), value, var_direction);
+                }
+                return result;
+            }
+            catch (const MathException& e)
+            {
+                throw MathException(op.id, e.ex_id, op.pos, op.line);
+            }
+            catch (const ParserException&)
+            {
+                throw MathException(op.id, ParserExceptionCode::IncorrectOperation, op.pos, op.line);
+            }
+            catch (const std::bad_variant_access&)
+            {
+                throw MathException(op.id, ParserExceptionCode::IncorrectOperation, op.pos, op.line);
+            }
+            catch (...)
+            {
+                if constexpr (std::is_same_v<Number, Symbolic<Real>> || std::is_same_v<Number, Symbolic<Complex>>)
+                    return Number(precision, std::u32string(U"nan"));
+                throw MathException(op.id, ParserExceptionCode::IncorrectOperation, op.pos, op.line);
+            }
+        }
+        else if constexpr (std::is_same_v<Number, Real> || std::is_same_v<Number, Complex> || std::is_same_v<Number, Rational>)
+        {
+            try
+            {
+                if (op.variables.empty())
+                    throw ParserException({}, ParserExceptionCode::IncorrectOperation);
+                const std::u32string& expression_str = boost::get<std::u32string>(op.function);
+                int direction = LimitDirection(op.direction);
+                bool point_has_unit_or_measure = false;
+                for (const auto& variable : op.variables)
+                    point_has_unit_or_measure = point_has_unit_or_measure || LimitPointHasUnitOrMeasure((*this)(variable.value));
+                Number result{};
+                if (point_has_unit_or_measure)
+                {
+                    if constexpr (std::is_same_v<Number, Real> || std::is_same_v<Number, Complex>)
+                        result = NumericalLimitAtPoint(expression_str, op.variables, direction);
+                    else
+                        throw MathException(op.id, ParserExceptionCode::IncorrectOperation, op.pos, op.line);
+                }
+                else
+                {
+                    try
+                    {
+                        result = EvaluateLimitAtPoint(expression_str, op.variables, direction);
+                    }
+                    catch (...)
+                    {
+                        if constexpr (std::is_same_v<Number, Real> || std::is_same_v<Number, Complex>)
+                            result = NumericalLimitAtPoint(expression_str, op.variables, direction);
+                        else
+                            throw;
+                    }
+                }
+                //a numeric result cannot be infinite or undefined - the same overflow as everywhere else
+                if constexpr (std::is_same_v<Number, Real> || std::is_same_v<Number, Complex>)
+                {
+                    if (result.IsInfinity() || result.IsNaN())
+                        throw MathException(Overflow);
+                }
+                return result;
+            }
+            catch (const MathException& e)
+            {
+                throw MathException(op.id, e.ex_id, op.pos, op.line);
+            }
+            catch (const ParserException&)
+            {
+                throw;
+            }
+            catch (const std::bad_variant_access&)
+            {
+                throw MathException(op.id, ParserExceptionCode::IncorrectOperation, op.pos, op.line);
+            }
+            catch (...)
+            {
+                throw MathException(op.id, ParserExceptionCode::IncorrectOperation, op.pos, op.line);
+            }
+        }
+        else
+        {
+            throw MathException(op.id, ParserExceptionCode::IncorrectOperation, op.pos, 1, op.line);
+        }
+    }
+
     Number operator()(DegreeMinuteSecondNode<Number> const& op) const
     {
         if constexpr (std::is_same_v<Number, Real> || std::is_same_v<Number, Array<Real>>)

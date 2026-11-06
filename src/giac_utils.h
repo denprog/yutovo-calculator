@@ -668,6 +668,7 @@ void FreezeStaticGiacIdentifiers();
 
 bool HasAmbiguousPoleArgument(const giac::gen& expr, const giac::identificateur& var, const giac::gen& value, giac::context* ctx);
 bool IsInfiniteLimit(const giac::gen& lim, giac::context* ctx);
+int LimitDirectionFromGen(const giac::gen& direction, giac::context* ctx);
 bool HasUnknownSymbol(const giac::gen& g);
 bool IsPower(const giac::gen& g, giac::gen& base, giac::gen& exp);
 giac::gen SimplifyPowerDivision(const giac::gen& n, const giac::gen& d, giac::context* ctx);

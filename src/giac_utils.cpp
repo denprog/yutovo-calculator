@@ -2316,6 +2316,30 @@ bool IsInfiniteLimit(const giac::gen& lim, giac::context* ctx)
     return false;
 }
 
+int LimitDirectionFromGen(const giac::gen& direction, giac::context* ctx)
+{
+    //extract the limit direction from a giac value: 1 (from above), -1 (from below) or 0 (two-sided).
+    giac::gen value = direction;
+    if (value.type != giac::_INT_ && value.type != giac::_DOUBLE_ && value.type != giac::_REAL)
+        value = giac::evalf(value, 1, ctx);
+    double direction_value = 0;
+    if (value.type == giac::_INT_)
+        direction_value = static_cast<double>(value.val);
+    else if (value.type == giac::_DOUBLE_)
+        direction_value = value.DOUBLE_val();
+    else if (value.type == giac::_REAL)
+        direction_value = mpfr_get_d(value._REALptr->inf, MPFR_RNDN);
+    else
+        throw ParserException({}, ParserExceptionCode::IncorrectOperation);
+    if (direction_value == 1)
+        return 1;
+    if (direction_value == 0)
+        return 0;
+    if (direction_value == -1)
+        return -1;
+    throw ParserException({}, ParserExceptionCode::IncorrectOperation);
+}
+
 bool HasAmbiguousPoleArgument(const giac::gen& expr, const giac::identificateur& var, const giac::gen& value, giac::context* ctx)
 {
     if (expr.type == giac::_SYMB)

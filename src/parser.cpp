@@ -269,6 +269,8 @@ Symbolic<Real> derivative(const Symbolic<Real>& num, const Symbolic<Real>& var);
 Symbolic<Real> subs(const Symbolic<Real>& num, const Symbolic<Real>& var, const Symbolic<Real>& value);
 Symbolic<Real> definite_integral(const Symbolic<Real>& a, const Symbolic<Real>& b, const Symbolic<Real>& expr, const Symbolic<Real>& var);
 Symbolic<Real> indefinite_integral(const Symbolic<Real>& expr, const Symbolic<Real>& var);
+Symbolic<Real> limit(const Symbolic<Real>& expr, const Symbolic<Real>& var, const Symbolic<Real>& value, int direction);
+Symbolic<Real> limit(const Symbolic<Real>& expr, const Symbolic<Real>& var, const Symbolic<Real>& value, const Symbolic<Real>& direction);
 Symbolic<Real> pow(const Symbolic<Real>& num1, const Symbolic<Real>& num2);
 Symbolic<Real> log(const Symbolic<Real>& num1, const Symbolic<Real>& num2);
 Symbolic<Real> root(const Symbolic<Real>& num1, const Symbolic<Real>& num2);
@@ -321,6 +323,8 @@ Symbolic<Rational> derivative(const Symbolic<Rational>& num, const Symbolic<Rati
 Symbolic<Rational> subs(const Symbolic<Rational>& num, const Symbolic<Rational>& var, const Symbolic<Rational>& value);
 Symbolic<Rational> definite_integral(const Symbolic<Rational>& a, const Symbolic<Rational>& b, const Symbolic<Rational>& expr, const Symbolic<Rational>& var);
 Symbolic<Rational> indefinite_integral(const Symbolic<Rational>& expr, const Symbolic<Rational>& var);
+Symbolic<Rational> limit(const Symbolic<Rational>& expr, const Symbolic<Rational>& var, const Symbolic<Rational>& value, int direction);
+Symbolic<Rational> limit(const Symbolic<Rational>& expr, const Symbolic<Rational>& var, const Symbolic<Rational>& value, const Symbolic<Rational>& direction);
 Symbolic<Rational> pow(const Symbolic<Rational>& num1, const Symbolic<Rational>& num2);
 Symbolic<Rational> log(const Symbolic<Rational>& num1, const Symbolic<Rational>& num2);
 Symbolic<Rational> root(const Symbolic<Rational>& num1, const Symbolic<Rational>& num2);
@@ -370,6 +374,8 @@ Symbolic<Complex> derivative(const Symbolic<Complex>& num, const Symbolic<Comple
 Symbolic<Complex> subs(const Symbolic<Complex>& num, const Symbolic<Complex>& var, const Symbolic<Complex>& value);
 Symbolic<Complex> definite_integral(const Symbolic<Complex>& a, const Symbolic<Complex>& b, const Symbolic<Complex>& expr, const Symbolic<Complex>& var);
 Symbolic<Complex> indefinite_integral(const Symbolic<Complex>& expr, const Symbolic<Complex>& var);
+Symbolic<Complex> limit(const Symbolic<Complex>& expr, const Symbolic<Complex>& var, const Symbolic<Complex>& value, int direction);
+Symbolic<Complex> limit(const Symbolic<Complex>& expr, const Symbolic<Complex>& var, const Symbolic<Complex>& value, const Symbolic<Complex>& direction);
 Symbolic<Complex> pow(const Symbolic<Complex>& num1, const Symbolic<Complex>& num2);
 Symbolic<Complex> log(const Symbolic<Complex>& num1, const Symbolic<Complex>& num2);
 Symbolic<Complex> root(const Symbolic<Complex>& num1, const Symbolic<Complex>& num2);
@@ -1122,6 +1128,8 @@ Parser<yutovo_calculator::Symbolic<yutovo_calculator::Real>>::Parser(const int p
     SymbolicQuaternaryFunc quaternary_func;
     quaternary_func = &definite_integral;
     solver.AddBuiltinFunction(U"definite_integral", quaternary_func);
+    quaternary_func = &limit;
+    solver.AddBuiltinFunction(U"limit", quaternary_func);
 
     solver.AddBuiltinIdentifier(U"inf", Symbolic<Real>(precision, "+infinity"));
     solver.AddBuiltinIdentifier(U"infinity", Symbolic<Real>(precision, "+infinity"));
@@ -1374,6 +1382,8 @@ Parser<yutovo_calculator::Symbolic<yutovo_calculator::Rational>>::Parser(const i
     SymbolicRationalQuaternaryFunc quaternary_func;
     quaternary_func = &definite_integral;
     solver.AddBuiltinFunction(U"definite_integral", quaternary_func);
+    quaternary_func = &limit;
+    solver.AddBuiltinFunction(U"limit", quaternary_func);
 
     solver.AddBuiltinIdentifier(U"inf", Symbolic<Rational>(precision, "+infinity"));
     solver.AddBuiltinIdentifier(U"infinity", Symbolic<Rational>(precision, "+infinity"));
@@ -1549,6 +1559,8 @@ Parser<yutovo_calculator::Symbolic<yutovo_calculator::Complex>>::Parser(const in
     SymbolicComplexQuaternaryFunc quaternary_func;
     quaternary_func = &definite_integral;
     solver.AddBuiltinFunction(U"definite_integral", quaternary_func);
+    quaternary_func = &limit;
+    solver.AddBuiltinFunction(U"limit", quaternary_func);
 
     solver.AddBuiltinIdentifier(U"inf", Symbolic<Complex>(precision, "+infinity"));
     solver.AddBuiltinIdentifier(U"infinity", Symbolic<Complex>(precision, "+infinity"));
