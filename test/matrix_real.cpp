@@ -49,6 +49,12 @@ TEST_F(CalcTestMatrixReal, for1)
     EXPECT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"for(i=1,i<=3,i=i+1,(u=u+i));"), yutovo_calculator::MathException);
 }
 
+//if() is impossible in the matrix parsers: the condition comparison always throws
+TEST_F(CalcTestMatrixReal, if1)
+{
+    EXPECT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"if(1<2, ([[1,2]]), ([[3,4]]));"), yutovo_calculator::MathException);
+}
+
 TEST_F(CalcTestMatrixReal, arithmetic1)
 {
     auto res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"[[1,2],[3,4]]+[[10,20],[30,40]];");

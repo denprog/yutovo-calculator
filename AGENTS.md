@@ -72,6 +72,8 @@ All functions belonging to a number type (`Real`, `Complex`, `Array`, `Matrix`, 
 ### Parenthesized expressions
 Keep the contents of parentheses (function argument lists, conditions, initializers, etc.) on a single line when it fits. Only wrap to a new line if the expression would exceed **140 columns**.
 When a parenthesized expression is wrapped, each continuation line uses the normal **4-space indent**; do not align arguments with the opening parenthesis.
+When a long expression wraps, break the line **after an operator** (`|`, `>>`, `,`, `&&`, etc.) so the operator stays at the end of the continued line; never put a line break between an operator and its operand — do not write `x = guard >>` on one line with the parenthesized operand starting the next line.
+When editing existing code, do not reformat or rewrap surrounding lines to match a new style — apply the edit in place, keeping the existing line layout.
 ```cpp
 // CORRECT
 void ShortFunction(int a, int b, int c);
@@ -87,6 +89,9 @@ if (condition_a && condition_b)
     // ...
 }
 
+unary = recursion_guard >> (hold[derivative_at_point] | hold[evaluate_at_point] |
+    number | function_call | identifier | '(' > expression > ')');
+
 // WRONG
 void LongFunctionName(
     const std::u32string& first_argument,
@@ -96,6 +101,10 @@ void LongFunctionName(
 void LongFunctionName(const std::u32string& first_argument,
                       const std::u32string& second_argument,
                       int third_argument);
+
+unary = recursion_guard >>
+    (hold[derivative_at_point] | hold[evaluate_at_point] |
+    number | function_call | identifier | '(' > expression > ')');
 
 try {
     // ...

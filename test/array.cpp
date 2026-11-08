@@ -168,6 +168,44 @@ TEST_F(CalcTestArrayReal, for3)
     ASSERT_TRUE(r.ToStdString(3, 3) == "[6.E+0]") << r.ToStdString(3, 3);
 }
 
+TEST_F(CalcTestArrayReal, if1)
+{
+    //a branch may return an array; the value is the last statement of the executed branch
+    auto r = parser.Parse(LogicalId{0, 0, 1}, U"if(2>1, ([1,2], [3,4]), ([5,6]));", 3);
+    ASSERT_TRUE(r.ToStdString(3, 3) == "[3.E+0,4.E+0]") << r.ToStdString(3, 3);
+    r = parser.Parse(LogicalId{0, 0, 2}, U"if(2<1, ([1,2], [3,4]), ([5,6]));", 3);
+    ASSERT_TRUE(r.ToStdString(3, 3) == "[5.E+0,6.E+0]") << r.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestArrayReal, if2)
+{
+    //an assignment in the branch accumulates arrays element-wise; the outer user variable keeps its old value
+    parser.Parse(LogicalId{0, 0, 1}, U"u=[0,0];", 3);
+    auto r = parser.Parse(LogicalId{0, 0, 2}, U"if(1<2, (u=u+[1,2], u+[10,20]), (u));", 3);
+    ASSERT_TRUE(r.ToStdString(3, 3) == "[11.E+0,22.E+0]") << r.ToStdString(3, 3);
+    r = parser.Parse(LogicalId{0, 0, 3}, U"u;", 3);
+    ASSERT_TRUE(r.ToStdString(3, 3) == "[0.E+0,0.E+0]") << r.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestArrayReal, if3)
+{
+    //a piecewise array construction inside a loop: the branches return whole arrays
+    parser.Parse(LogicalId{0, 0, 1}, U"u=[0,0];", 3);
+    auto r = parser.Parse(LogicalId{0, 0, 2}, U"for(i=1,i<=2,i=i+1,(u=u+if(i==1,([10,20]),([1,2]))));", 3);
+    ASSERT_TRUE(r.ToStdString(3, 3) == "[11.E+0,22.E+0]") << r.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestArrayReal, if4)
+{
+    //the condition compares subscript accesses; a three-level nesting selects the result
+    parser.Parse(LogicalId{0, 0, 1}, U"t=[3,-1,2];", 3);
+    auto r = parser.Parse(LogicalId{0, 0, 2}, U"if(t{0} > t{2}, (if(t{0} > 3*t{2}, (t{0}*10), (t{0}+t{2}))), (t{1}));", 3);
+    ASSERT_TRUE(r.ToStdString(3, 3) == "[5.E+0]") << r.ToStdString(3, 3);
+    //the else-branch of the outer if runs when the elements compare the other way
+    r = parser.Parse(LogicalId{0, 0, 3}, U"if(t{2} > t{0}, (100), (if(t{1} < 0, (abs(t{1})), (t{1}))));", 3);
+    ASSERT_TRUE(r.ToStdString(3, 3) == "[1.E+0]") << r.ToStdString(3, 3);
+}
+
 TEST_F(CalcTestArrayReal, variables1)
 {
     auto r = parser.Parse(LogicalId{0, 0, 1}, U"t=[2,3,4];", 3);

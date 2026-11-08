@@ -22,6 +22,7 @@ Expression<Integer>::Expression(LogicalId id, std::u32string& expr, Solver<Integ
     using unicode::char_;
     using boost::spirit::qi::raw;
     using boost::spirit::qi::lexeme;
+    using boost::spirit::qi::hold;
     using unicode::alnum;
     using unicode::alpha;
     using boost::spirit::qi::omit;
@@ -48,12 +49,12 @@ Expression<Integer>::Expression(LogicalId id, std::u32string& expr, Solver<Integ
 
     if (solver->default_notation == 16)
     {
-        unary = recursion_guard >> (loop | for_loop | array | compare | postfix_operation | implicit_mul | function_call | function_call_string |
+        unary = recursion_guard >> (loop | for_loop | if_expression | array | compare | postfix_operation | implicit_mul | function_call | function_call_string |
             no_fences_function_call | number | identifier | implicit_string_mul | unary_operation | '(' > expression > ')');
     }
     else
     {
-        unary = recursion_guard >> (loop | for_loop | array | compare | implicit_function_mul | implicit_post_function_mul | postfix_operation |
+        unary = recursion_guard >> (loop | for_loop | if_expression | array | compare | implicit_function_mul | implicit_post_function_mul | postfix_operation |
             implicit_string_mul | implicit_mul | number | function_call | function_call_string | identifier |
             no_fences_function_call | unary_operation | '(' > expression > ')');
     }
@@ -103,7 +104,7 @@ Expression<Integer>::Expression(LogicalId id, std::u32string& expr, Solver<Integ
     //for(counter=init, condition, counter=increment, (statement, ...))
     for_loop = "for(" > variable > ',' > for_condition > ',' > variable > ',' > '(' > (block_statement % ',') > ')' > ')';
 
-    for_condition = compare | (expression >> (raw[lexeme["<>"]] | raw[lexeme["=="]] | raw[lexeme["<="]] | raw[lexeme[">="]] |
+    for_condition = hold[compare] | (expression >> (raw[lexeme["<>"]] | raw[lexeme["=="]] | raw[lexeme["<="]] | raw[lexeme[">="]] |
         raw[lexeme["<"]] | raw[lexeme[">"]]) >> expression);
 
     block_statement = variable | loop_function | expression;
@@ -111,6 +112,10 @@ Expression<Integer>::Expression(LogicalId id, std::u32string& expr, Solver<Integ
     loop_function = identifier >> '(' >> argument_list >> ')' >> ('=' > expression);
 
     argument_list = -(identifier % ',');
+
+    //if(condition, (statement, ...), (statement, ...))
+    if_expression = "if(" > for_condition > ',' > '(' > (block_statement % ',') > ')' > ',' >
+        '(' > (block_statement % ',') > ')' > ')';
 
     //annotate the items with an expression's position
     on_success(unary, 
@@ -199,10 +204,10 @@ Expression<Real>::Expression(LogicalId id, std::u32string& expr, Solver<Real>* _
 
     multiply = char_(U'*') > unary | char_(U'/') > unary | char_(U'%') >> unary;
 
-    unary = recursion_guard >> (hold[derivative_at_point] | hold[evaluate_at_point] | hold[limit_at_point] | definite_integral | 
-        loop | for_loop | compare | implicit_function_mul | implicit_post_function_mul | postfix_operation | implicit_div_mul | 
-        degree_minute_second | implicit_string_mul | implicit_fraction_mul | mixed_division | implicit_mul | number | 
-        function_call | no_fences_function_call | identifier | unary_operation | '(' > expression > ')');
+    unary = recursion_guard >> (hold[derivative_at_point] | hold[evaluate_at_point] | hold[limit_at_point] | definite_integral | loop | 
+        for_loop | if_expression | compare | implicit_function_mul | implicit_post_function_mul | postfix_operation | implicit_div_mul | 
+        degree_minute_second | implicit_string_mul | implicit_fraction_mul | mixed_division | implicit_mul | number | function_call | 
+        no_fences_function_call | identifier | unary_operation | '(' > expression > ')');
 
     on_success(unary, bind(&LeaveRecursionDepth, ref(recursion_depth)));
     
@@ -292,7 +297,7 @@ Expression<Real>::Expression(LogicalId id, std::u32string& expr, Solver<Real>* _
     //for(counter=init, condition, counter=increment, (statement, ...))
     for_loop = "for(" > variable > ',' > for_condition > ',' > variable > ',' > '(' > (block_statement % ',') > ')' > ')';
 
-    for_condition = compare | (expression >> (raw[lexeme["<>"]] | raw[lexeme["=="]] | raw[lexeme["<="]] | raw[lexeme[">="]] |
+    for_condition = hold[compare] | (expression >> (raw[lexeme["<>"]] | raw[lexeme["=="]] | raw[lexeme["<="]] | raw[lexeme[">="]] |
         raw[lexeme["<"]] | raw[lexeme[">"]]) >> expression);
 
     block_statement = variable | loop_function | expression;
@@ -300,6 +305,9 @@ Expression<Real>::Expression(LogicalId id, std::u32string& expr, Solver<Real>* _
     loop_function = identifier >> '(' >> argument_list >> ')' >> ('=' > expression);
 
     argument_list = -(identifier % ',');
+
+    //if(condition, (statement, ...), (statement, ...))
+    if_expression = "if(" > for_condition > ',' > '(' > (block_statement % ',') > ')' > ',' > '(' > (block_statement % ',') > ')' > ')';
 
     //annotate the items with the expression's position
     on_success(unary, 
@@ -360,6 +368,9 @@ Expression<Real>::Expression(LogicalId id, std::u32string& expr, Solver<Real>* _
         boost::phoenix::function<Annotation<yutovo_calculator::Real>>(Annotation<yutovo_calculator::Real>(expr.begin(), expr.end(), id,
         &solver->parser_context))(qi::_val, _1));
     on_success(for_loop,
+        boost::phoenix::function<Annotation<yutovo_calculator::Real>>(Annotation<yutovo_calculator::Real>(expr.begin(), expr.end(), id,
+        &solver->parser_context))(qi::_val, _1));
+    on_success(if_expression,
         boost::phoenix::function<Annotation<yutovo_calculator::Real>>(Annotation<yutovo_calculator::Real>(expr.begin(), expr.end(), id,
         &solver->parser_context))(qi::_val, _1));
     on_success(variable, 
@@ -455,7 +466,7 @@ Expression<yutovo_calculator::Rational>::Expression(LogicalId id, std::u32string
         ((',' > expression) | attr(zero_limit_direction)) >> ')';
 
     unary = recursion_guard >> (hold[derivative_at_point] | hold[evaluate_at_point] | hold[limit_at_point] | definite_integral | 
-        loop | for_loop | array | compare | implicit_function_mul | implicit_post_function_mul | implicit_div_mul | 
+        loop | for_loop | if_expression | array | compare | implicit_function_mul | implicit_post_function_mul | implicit_div_mul | 
         implicit_string_mul | implicit_fraction_mul | mixed_division | implicit_mul | number | function_call | identifier | 
         no_fences_function_call | unary_operation | '(' > expression > ')');
 
@@ -507,7 +518,7 @@ Expression<yutovo_calculator::Rational>::Expression(LogicalId id, std::u32string
     //for(counter=init, condition, counter=increment, (statement, ...))
     for_loop = "for(" > variable > ',' > for_condition > ',' > variable > ',' > '(' > (block_statement % ',') > ')' > ')';
 
-    for_condition = compare | (expression >> (raw[lexeme["<>"]] | raw[lexeme["=="]] | raw[lexeme["<="]] | raw[lexeme[">="]] |
+    for_condition = hold[compare] | (expression >> (raw[lexeme["<>"]] | raw[lexeme["=="]] | raw[lexeme["<="]] | raw[lexeme[">="]] |
         raw[lexeme["<"]] | raw[lexeme[">"]]) >> expression);
 
     block_statement = variable | loop_function | expression;
@@ -515,6 +526,10 @@ Expression<yutovo_calculator::Rational>::Expression(LogicalId id, std::u32string
     loop_function = identifier >> '(' >> argument_list >> ')' >> ('=' > expression);
 
     argument_list = -(identifier % ',');
+
+    //if(condition, (statement, ...), (statement, ...))
+    if_expression = "if(" > for_condition > ',' > '(' > (block_statement % ',') > ')' > ',' >
+        '(' > (block_statement % ',') > ')' > ')';
 
     //annotate the items with an expression's position
     on_success(unary, boost::phoenix::function<Annotation<yutovo_calculator::Rational>>(Annotation<yutovo_calculator::Rational>(expr.begin(), 
@@ -602,7 +617,7 @@ Expression<Complex>::Expression(LogicalId id, std::u32string& expr, Solver<Compl
     multiply = char_('*') > unary | char_('/') > unary | char_('%') > unary;
 
     unary = recursion_guard >> (hold[derivative_at_point] | hold[evaluate_at_point] | hold[limit_at_point] | definite_integral | 
-        loop | for_loop | array | compare | implicit_function_mul | implicit_post_function_mul | postfix_operation | 
+        loop | for_loop | if_expression | array | compare | implicit_function_mul | implicit_post_function_mul | postfix_operation | 
         implicit_div_mul | implicit_string_mul | implicit_fraction_mul | mixed_division | implicit_mul | number | 
         function_call | no_fences_function_call | identifier | unary_operation | '(' > expression > ')');
 
@@ -686,7 +701,7 @@ Expression<Complex>::Expression(LogicalId id, std::u32string& expr, Solver<Compl
     //for(counter=init, condition, counter=increment, (statement, ...))
     for_loop = "for(" > variable > ',' > for_condition > ',' > variable > ',' > '(' > (block_statement % ',') > ')' > ')';
 
-    for_condition = compare | (expression >> (raw[lexeme["<>"]] | raw[lexeme["=="]] | raw[lexeme["<="]] | raw[lexeme[">="]] |
+    for_condition = hold[compare] | (expression >> (raw[lexeme["<>"]] | raw[lexeme["=="]] | raw[lexeme["<="]] | raw[lexeme[">="]] |
         raw[lexeme["<"]] | raw[lexeme[">"]]) >> expression);
 
     block_statement = variable | loop_function | expression;
@@ -694,6 +709,9 @@ Expression<Complex>::Expression(LogicalId id, std::u32string& expr, Solver<Compl
     loop_function = identifier >> '(' >> argument_list >> ')' >> ('=' > expression);
 
     argument_list = -(identifier % ',');
+
+    //if(condition, (statement, ...), (statement, ...))
+    if_expression = "if(" > for_condition > ',' > '(' > (block_statement % ',') > ')' > ',' > '(' > (block_statement % ',') > ')' > ')';
 
     //annotate the items with the expression's position
     on_success(unary,
@@ -797,7 +815,7 @@ Expression<Array<Real>>::Expression(LogicalId id, std::u32string& expr, Solver<A
 
     multiply = char_('*') > unary | char_('/') > unary | char_('%') >> unary;
     
-    unary = recursion_guard >> (definite_integral | loop | for_loop | array | compare | implicit_function_mul | 
+    unary = recursion_guard >> (definite_integral | loop | for_loop | if_expression | array | compare | implicit_function_mul | 
         implicit_post_function_mul | postfix_operation | implicit_div_mul | degree_minute_second | implicit_string_mul | 
         implicit_fraction_mul | mixed_division | implicit_mul | number | function_call | no_fences_function_call | 
         identifier | unary_operation | '(' > expression > ')');
@@ -879,7 +897,7 @@ Expression<Array<Real>>::Expression(LogicalId id, std::u32string& expr, Solver<A
     //for(counter=init, condition, counter=increment, (statement, ...))
     for_loop = "for(" > variable > ',' > for_condition > ',' > variable > ',' > '(' > (block_statement % ',') > ')' > ')';
 
-    for_condition = compare | (expression >> (raw[lexeme["<>"]] | raw[lexeme["=="]] | raw[lexeme["<="]] | raw[lexeme[">="]] |
+    for_condition = hold[compare] | (expression >> (raw[lexeme["<>"]] | raw[lexeme["=="]] | raw[lexeme["<="]] | raw[lexeme[">="]] |
         raw[lexeme["<"]] | raw[lexeme[">"]]) >> expression);
 
     block_statement = variable | loop_function | expression;
@@ -887,6 +905,9 @@ Expression<Array<Real>>::Expression(LogicalId id, std::u32string& expr, Solver<A
     loop_function = identifier >> '(' >> argument_list >> ')' >> ('=' > expression);
 
     argument_list = -(identifier % ',');
+
+    //if(condition, (statement, ...), (statement, ...))
+    if_expression = "if(" > for_condition > ',' > '(' > (block_statement % ',') > ')' > ',' > '(' > (block_statement % ',') > ')' > ')';
 
     //annotate the items with the expression's position
     on_success(unary, 
@@ -940,6 +961,9 @@ Expression<Array<Real>>::Expression(LogicalId id, std::u32string& expr, Solver<A
     on_success(for_loop,
         boost::phoenix::function<Annotation<yutovo_calculator::Array<Real>>>(Annotation<yutovo_calculator::Array<Real>>(expr.begin(), expr.end(), id,
         &solver->parser_context))(qi::_val, _1));
+    on_success(if_expression,
+        boost::phoenix::function<Annotation<yutovo_calculator::Array<Real>>>(Annotation<yutovo_calculator::Array<Real>>(expr.begin(), expr.end(), id,
+        &solver->parser_context))(qi::_val, _1));
     on_success(variable, 
         boost::phoenix::function<Annotation<yutovo_calculator::Array<Real>>>(Annotation<yutovo_calculator::Array<Real>>(expr.begin(), expr.end(), id, 
         &solver->parser_context))(qi::_val, _1));
@@ -973,6 +997,7 @@ Expression<Matrix<Real>>::Expression(LogicalId id, std::u32string& expr, Solver<
     using unicode::char_;
     using boost::spirit::qi::raw;
     using boost::spirit::qi::lexeme;
+    using boost::spirit::qi::hold;
     using unicode::alnum;
     using unicode::alpha;
     using boost::spirit::qi::omit;
@@ -997,7 +1022,7 @@ Expression<Matrix<Real>>::Expression(LogicalId id, std::u32string& expr, Solver<
 
     multiply = char_('*') > unary | char_('/') > unary;
 
-    unary = recursion_guard >> (loop | for_loop | array | compare | implicit_function_mul | implicit_post_function_mul |
+    unary = recursion_guard >> (loop | for_loop | if_expression | array | compare | implicit_function_mul | implicit_post_function_mul |
         implicit_div_mul | implicit_string_mul | implicit_fraction_mul | mixed_division | implicit_mul | number |
         function_call | no_fences_function_call | identifier | unary_operation | '(' > expression > ')');
 
@@ -1062,7 +1087,7 @@ Expression<Matrix<Real>>::Expression(LogicalId id, std::u32string& expr, Solver<
     //for(counter=init, condition, counter=increment, (statement, ...))
     for_loop = "for(" > variable > ',' > for_condition > ',' > variable > ',' > '(' > (block_statement % ',') > ')' > ')';
 
-    for_condition = compare | (expression >> (raw[lexeme["<>"]] | raw[lexeme["=="]] | raw[lexeme["<="]] | raw[lexeme[">="]] |
+    for_condition = hold[compare] | (expression >> (raw[lexeme["<>"]] | raw[lexeme["=="]] | raw[lexeme["<="]] | raw[lexeme[">="]] |
         raw[lexeme["<"]] | raw[lexeme[">"]]) >> expression);
 
     block_statement = variable | loop_function | expression;
@@ -1070,6 +1095,9 @@ Expression<Matrix<Real>>::Expression(LogicalId id, std::u32string& expr, Solver<
     loop_function = identifier >> '(' >> argument_list >> ')' >> ('=' > expression);
 
     argument_list = -(identifier % ',');
+
+    //if(condition, (statement, ...), (statement, ...))
+    if_expression = "if(" > for_condition > ',' > '(' > (block_statement % ',') > ')' > ',' > '(' > (block_statement % ',') > ')' > ')';
 
     //annotate the items with the expression's position
     on_success(unary,
@@ -1117,6 +1145,9 @@ Expression<Matrix<Real>>::Expression(LogicalId id, std::u32string& expr, Solver<
     on_success(for_loop,
         boost::phoenix::function<Annotation<Matrix<Real>>>(Annotation<Matrix<Real>>(expr.begin(), expr.end(), id,
         &solver->parser_context))(qi::_val, _1));
+    on_success(if_expression,
+        boost::phoenix::function<Annotation<Matrix<Real>>>(Annotation<Matrix<Real>>(expr.begin(), expr.end(), id,
+        &solver->parser_context))(qi::_val, _1));
 
     //work out the exceptions
     on_error<fail>(expression,
@@ -1131,6 +1162,7 @@ Expression<Matrix<Rational>>::Expression(LogicalId id, std::u32string& expr, Sol
     using unicode::char_;
     using boost::spirit::qi::raw;
     using boost::spirit::qi::lexeme;
+    using boost::spirit::qi::hold;
     using unicode::alnum;
     using unicode::alpha;
     using boost::spirit::qi::omit;
@@ -1154,7 +1186,7 @@ Expression<Matrix<Rational>>::Expression(LogicalId id, std::u32string& expr, Sol
 
     multiply = char_('*') > unary | char_('/') > unary;
 
-    unary = recursion_guard >> (loop | for_loop | array | compare | implicit_function_mul | implicit_post_function_mul |
+    unary = recursion_guard >> (loop | for_loop | if_expression | array | compare | implicit_function_mul | implicit_post_function_mul |
         implicit_div_mul | implicit_string_mul | implicit_fraction_mul | mixed_division | implicit_mul | number |
         function_call | no_fences_function_call | identifier | unary_operation | '(' > expression > ')');
 
@@ -1206,7 +1238,7 @@ Expression<Matrix<Rational>>::Expression(LogicalId id, std::u32string& expr, Sol
     //for(counter=init, condition, counter=increment, (statement, ...))
     for_loop = "for(" > variable > ',' > for_condition > ',' > variable > ',' > '(' > (block_statement % ',') > ')' > ')';
 
-    for_condition = compare | (expression >> (raw[lexeme["<>"]] | raw[lexeme["=="]] | raw[lexeme["<="]] | raw[lexeme[">="]] |
+    for_condition = hold[compare] | (expression >> (raw[lexeme["<>"]] | raw[lexeme["=="]] | raw[lexeme["<="]] | raw[lexeme[">="]] |
         raw[lexeme["<"]] | raw[lexeme[">"]]) >> expression);
 
     block_statement = variable | loop_function | expression;
@@ -1214,6 +1246,9 @@ Expression<Matrix<Rational>>::Expression(LogicalId id, std::u32string& expr, Sol
     loop_function = identifier >> '(' >> argument_list >> ')' >> ('=' > expression);
 
     argument_list = -(identifier % ',');
+
+    //if(condition, (statement, ...), (statement, ...))
+    if_expression = "if(" > for_condition > ',' > '(' > (block_statement % ',') > ')' > ',' > '(' > (block_statement % ',') > ')' > ')';
 
     //annotate the items with the expression's position
     on_success(unary,
@@ -1255,6 +1290,9 @@ Expression<Matrix<Rational>>::Expression(LogicalId id, std::u32string& expr, Sol
     on_success(for_loop,
         boost::phoenix::function<Annotation<Matrix<Rational>>>(Annotation<Matrix<Rational>>(expr.begin(), expr.end(), id,
         &solver->parser_context))(qi::_val, _1));
+    on_success(if_expression,
+        boost::phoenix::function<Annotation<Matrix<Rational>>>(Annotation<Matrix<Rational>>(expr.begin(), expr.end(), id,
+        &solver->parser_context))(qi::_val, _1));
 
     //work out the exceptions
     on_error<fail>(expression,
@@ -1269,6 +1307,7 @@ Expression<Matrix<Complex>>::Expression(LogicalId id, std::u32string& expr, Solv
     using unicode::char_;
     using boost::spirit::qi::raw;
     using boost::spirit::qi::lexeme;
+    using boost::spirit::qi::hold;
     using unicode::alnum;
     using unicode::alpha;
     using boost::spirit::qi::omit;
@@ -1293,7 +1332,7 @@ Expression<Matrix<Complex>>::Expression(LogicalId id, std::u32string& expr, Solv
 
     multiply = char_('*') > unary | char_('/') > unary;
 
-    unary = recursion_guard >> (loop | for_loop | array | compare | implicit_function_mul | implicit_post_function_mul |
+    unary = recursion_guard >> (loop | for_loop | if_expression | array | compare | implicit_function_mul | implicit_post_function_mul |
         implicit_div_mul | implicit_string_mul | implicit_fraction_mul | mixed_division | implicit_mul | number |
         function_call | no_fences_function_call | identifier | unary_operation | '(' > expression > ')');
 
@@ -1351,7 +1390,7 @@ Expression<Matrix<Complex>>::Expression(LogicalId id, std::u32string& expr, Solv
     //for(counter=init, condition, counter=increment, (statement, ...))
     for_loop = "for(" > variable > ',' > for_condition > ',' > variable > ',' > '(' > (block_statement % ',') > ')' > ')';
 
-    for_condition = compare | (expression >> (raw[lexeme["<>"]] | raw[lexeme["=="]] | raw[lexeme["<="]] | raw[lexeme[">="]] |
+    for_condition = hold[compare] | (expression >> (raw[lexeme["<>"]] | raw[lexeme["=="]] | raw[lexeme["<="]] | raw[lexeme[">="]] |
         raw[lexeme["<"]] | raw[lexeme[">"]]) >> expression);
 
     block_statement = variable | loop_function | expression;
@@ -1359,6 +1398,9 @@ Expression<Matrix<Complex>>::Expression(LogicalId id, std::u32string& expr, Solv
     loop_function = identifier >> '(' >> argument_list >> ')' >> ('=' > expression);
 
     argument_list = -(identifier % ',');
+
+    //if(condition, (statement, ...), (statement, ...))
+    if_expression = "if(" > for_condition > ',' > '(' > (block_statement % ',') > ')' > ',' > '(' > (block_statement % ',') > ')' > ')';
 
     //annotate the items with the expression's position
     on_success(unary,
@@ -1406,6 +1448,9 @@ Expression<Matrix<Complex>>::Expression(LogicalId id, std::u32string& expr, Solv
     on_success(for_loop,
         boost::phoenix::function<Annotation<Matrix<Complex>>>(Annotation<Matrix<Complex>>(expr.begin(), expr.end(), id,
         &solver->parser_context))(qi::_val, _1));
+    on_success(if_expression,
+        boost::phoenix::function<Annotation<Matrix<Complex>>>(Annotation<Matrix<Complex>>(expr.begin(), expr.end(), id,
+        &solver->parser_context))(qi::_val, _1));
 
     //work out the exceptions
     on_error<fail>(expression,
@@ -1447,11 +1492,10 @@ Expression<Symbolic<Real>>::Expression(LogicalId id, std::u32string& expr, Solve
 
     multiply = char_('*') > unary | char_('/') > unary | char_('%') >> unary;
     
-    unary = recursion_guard >> (hold[derivative_at_point] | hold[evaluate_at_point] | hold[limit_at_point] | loop | for_loop | 
-        array | compare | implicit_function_mul | implicit_post_function_mul | postfix_operation | implicit_div_mul | 
+    unary = recursion_guard >> (hold[derivative_at_point] | hold[evaluate_at_point] | hold[limit_at_point] | loop | 
+        for_loop | if_expression | array | compare | implicit_function_mul | implicit_post_function_mul | postfix_operation | implicit_div_mul | 
         implicit_string_mul | implicit_fraction_mul | mixed_division | implicit_mul | number | function_call | 
-        no_fences_function_call | identifier | unary_operation |
-        '(' > expression > ')');
+        no_fences_function_call | identifier | unary_operation | '(' > expression > ')');
 
     on_success(unary, bind(&LeaveRecursionDepth, ref(recursion_depth)));
 
@@ -1531,7 +1575,7 @@ Expression<Symbolic<Real>>::Expression(LogicalId id, std::u32string& expr, Solve
     //for(counter=init, condition, counter=increment, (statement, ...))
     for_loop = "for(" > variable > ',' > for_condition > ',' > variable > ',' > '(' > (block_statement % ',') > ')' > ')';
 
-    for_condition = compare | (expression >> (raw[lexeme["<>"]] | raw[lexeme["=="]] | raw[lexeme["<="]] | raw[lexeme[">="]] |
+    for_condition = hold[compare] | (expression >> (raw[lexeme["<>"]] | raw[lexeme["=="]] | raw[lexeme["<="]] | raw[lexeme[">="]] |
         raw[lexeme["<"]] | raw[lexeme[">"]]) >> expression);
 
     block_statement = variable | loop_function | expression;
@@ -1539,6 +1583,9 @@ Expression<Symbolic<Real>>::Expression(LogicalId id, std::u32string& expr, Solve
     loop_function = identifier >> '(' >> argument_list >> ')' >> ('=' > expression);
 
     argument_list = -(identifier % ',');
+
+    //if(condition, (statement, ...), (statement, ...))
+    if_expression = "if(" > for_condition > ',' > '(' > (block_statement % ',') > ')' > ',' > '(' > (block_statement % ',') > ')' > ')';
 
     //annotate the items with the expression's position
     on_success(unary,
@@ -1595,6 +1642,9 @@ Expression<Symbolic<Real>>::Expression(LogicalId id, std::u32string& expr, Solve
     on_success(for_loop,
         boost::phoenix::function<Annotation<yutovo_calculator::Symbolic<Real>>>(Annotation<yutovo_calculator::Symbolic<Real>>(expr.begin(), expr.end(), id,
         &solver->parser_context))(qi::_val, _1));
+    on_success(if_expression,
+        boost::phoenix::function<Annotation<yutovo_calculator::Symbolic<Real>>>(Annotation<yutovo_calculator::Symbolic<Real>>(expr.begin(), expr.end(), id,
+        &solver->parser_context))(qi::_val, _1));
     on_success(variable,
         boost::phoenix::function<Annotation<yutovo_calculator::Symbolic<Real>>>(Annotation<yutovo_calculator::Symbolic<Real>>(expr.begin(), expr.end(), id,
         &solver->parser_context))(qi::_val, _1));
@@ -1638,6 +1688,9 @@ Expression<Symbolic<Real>>::Expression(LogicalId id, std::u32string& expr, Solve
         boost::phoenix::function<Annotation<yutovo_calculator::Symbolic<Real>>>(Annotation<yutovo_calculator::Symbolic<Real>>(expr.begin(), expr.end(), id,
         &solver->parser_context))(qi::_val, _1));
     on_success(for_loop,
+        boost::phoenix::function<Annotation<yutovo_calculator::Symbolic<Real>>>(Annotation<yutovo_calculator::Symbolic<Real>>(expr.begin(), expr.end(), id,
+        &solver->parser_context))(qi::_val, _1));
+    on_success(if_expression,
         boost::phoenix::function<Annotation<yutovo_calculator::Symbolic<Real>>>(Annotation<yutovo_calculator::Symbolic<Real>>(expr.begin(), expr.end(), id,
         &solver->parser_context))(qi::_val, _1));
     on_success(variable,
@@ -1698,9 +1751,9 @@ Expression<Symbolic<Rational>>::Expression(LogicalId id, std::u32string& expr, S
     multiply = char_('*') > unary | char_('/') > unary | char_('%') >> unary;
 
     unary = recursion_guard >> (hold[derivative_at_point] | hold[evaluate_at_point] | hold[limit_at_point] | loop | 
-        for_loop | array | compare | implicit_function_mul | implicit_post_function_mul | postfix_operation | 
-        implicit_div_mul | implicit_string_mul | implicit_fraction_mul | mixed_division | implicit_mul | number | 
-        function_call | no_fences_function_call | identifier | unary_operation | '(' > expression > ')');
+        for_loop | if_expression | array | compare | implicit_function_mul | implicit_post_function_mul | postfix_operation | implicit_div_mul | 
+        implicit_string_mul | implicit_fraction_mul | mixed_division | implicit_mul | number | function_call | 
+        no_fences_function_call | identifier | unary_operation | '(' > expression > ')');
 
     on_success(unary, bind(&LeaveRecursionDepth, ref(recursion_depth)));
 
@@ -1780,7 +1833,7 @@ Expression<Symbolic<Rational>>::Expression(LogicalId id, std::u32string& expr, S
     //for(counter=init, condition, counter=increment, (statement, ...))
     for_loop = "for(" > variable > ',' > for_condition > ',' > variable > ',' > '(' > (block_statement % ',') > ')' > ')';
 
-    for_condition = compare | (expression >> (raw[lexeme["<>"]] | raw[lexeme["=="]] | raw[lexeme["<="]] | raw[lexeme[">="]] |
+    for_condition = hold[compare] | (expression >> (raw[lexeme["<>"]] | raw[lexeme["=="]] | raw[lexeme["<="]] | raw[lexeme[">="]] |
         raw[lexeme["<"]] | raw[lexeme[">"]]) >> expression);
 
     block_statement = variable | loop_function | expression;
@@ -1788,6 +1841,9 @@ Expression<Symbolic<Rational>>::Expression(LogicalId id, std::u32string& expr, S
     loop_function = identifier >> '(' >> argument_list >> ')' >> ('=' > expression);
 
     argument_list = -(identifier % ',');
+
+    //if(condition, (statement, ...), (statement, ...))
+    if_expression = "if(" > for_condition > ',' > '(' > (block_statement % ',') > ')' > ',' > '(' > (block_statement % ',') > ')' > ')';
 
     //annotate the items with the expression's position
     on_success(unary,
@@ -1842,6 +1898,9 @@ Expression<Symbolic<Rational>>::Expression(LogicalId id, std::u32string& expr, S
         boost::phoenix::function<Annotation<yutovo_calculator::Symbolic<Rational>>>(Annotation<yutovo_calculator::Symbolic<Rational>>(expr.begin(), expr.end(), id,
         &solver->parser_context))(qi::_val, _1));
     on_success(for_loop,
+        boost::phoenix::function<Annotation<yutovo_calculator::Symbolic<Rational>>>(Annotation<yutovo_calculator::Symbolic<Rational>>(expr.begin(), expr.end(), id,
+        &solver->parser_context))(qi::_val, _1));
+    on_success(if_expression,
         boost::phoenix::function<Annotation<yutovo_calculator::Symbolic<Rational>>>(Annotation<yutovo_calculator::Symbolic<Rational>>(expr.begin(), expr.end(), id,
         &solver->parser_context))(qi::_val, _1));
     on_success(variable,
@@ -1902,7 +1961,7 @@ Expression<Symbolic<Complex>>::Expression(LogicalId id, std::u32string& expr, So
     multiply = char_('*') > unary | char_('/') > unary | char_('%') >> unary;
 
     unary = recursion_guard >> (hold[derivative_at_point] | hold[evaluate_at_point] | hold[limit_at_point] | loop | 
-        for_loop | array | compare | implicit_function_mul | implicit_post_function_mul | postfix_operation | implicit_div_mul | 
+        for_loop | if_expression | array | compare | implicit_function_mul | implicit_post_function_mul | postfix_operation | implicit_div_mul | 
         implicit_string_mul | implicit_fraction_mul | mixed_division | implicit_mul | number | function_call | 
         no_fences_function_call | identifier | unary_operation | '(' > expression > ')');
 
@@ -1984,7 +2043,7 @@ Expression<Symbolic<Complex>>::Expression(LogicalId id, std::u32string& expr, So
     //for(counter=init, condition, counter=increment, (statement, ...))
     for_loop = "for(" > variable > ',' > for_condition > ',' > variable > ',' > '(' > (block_statement % ',') > ')' > ')';
 
-    for_condition = compare | (expression >> (raw[lexeme["<>"]] | raw[lexeme["=="]] | raw[lexeme["<="]] | raw[lexeme[">="]] |
+    for_condition = hold[compare] | (expression >> (raw[lexeme["<>"]] | raw[lexeme["=="]] | raw[lexeme["<="]] | raw[lexeme[">="]] |
         raw[lexeme["<"]] | raw[lexeme[">"]]) >> expression);
 
     block_statement = variable | loop_function | expression;
@@ -1992,6 +2051,9 @@ Expression<Symbolic<Complex>>::Expression(LogicalId id, std::u32string& expr, So
     loop_function = identifier >> '(' >> argument_list >> ')' >> ('=' > expression);
 
     argument_list = -(identifier % ',');
+
+    //if(condition, (statement, ...), (statement, ...))
+    if_expression = "if(" > for_condition > ',' > '(' > (block_statement % ',') > ')' > ',' > '(' > (block_statement % ',') > ')' > ')';
 
     //annotate the items with the expression's position
     on_success(unary,
@@ -2046,6 +2108,9 @@ Expression<Symbolic<Complex>>::Expression(LogicalId id, std::u32string& expr, So
         boost::phoenix::function<Annotation<yutovo_calculator::Symbolic<Complex>>>(Annotation<yutovo_calculator::Symbolic<Complex>>(expr.begin(), expr.end(), id,
         &solver->parser_context))(qi::_val, _1));
     on_success(for_loop,
+        boost::phoenix::function<Annotation<yutovo_calculator::Symbolic<Complex>>>(Annotation<yutovo_calculator::Symbolic<Complex>>(expr.begin(), expr.end(), id,
+        &solver->parser_context))(qi::_val, _1));
+    on_success(if_expression,
         boost::phoenix::function<Annotation<yutovo_calculator::Symbolic<Complex>>>(Annotation<yutovo_calculator::Symbolic<Complex>>(expr.begin(), expr.end(), id,
         &solver->parser_context))(qi::_val, _1));
     on_success(variable,

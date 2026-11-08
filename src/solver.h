@@ -2132,6 +2132,68 @@ struct Solver : public boost::static_visitor<Number>
         return res;
     }
 
+    Number operator()(IfNode<Number> const& op) const
+    {
+        //the value of the expression is the value of the last statement of the executed branch, so neither branch can end with a function definition
+        if (op.then_statements.back().type() == typeid(FunctionNode<Number>) || op.else_statements.back().type() == typeid(FunctionNode<Number>))
+            throw MathException(op.id, IncorrectOperation, op.pos, 1, op.line);
+
+        //the condition works for the symbolic parsers as well: the comparisons (the Symbolic ordering operators) are exact for numeric values
+        Number condition_value = (*this)(op.condition);
+        const typename IfNode<Number>::BlockStatements& statements = condition_value != 0 ? op.then_statements : op.else_statements;
+
+        LogicalId outer_id = id;
+        LogicalId base_id = outer_id;
+        base_id.push_back(0);
+
+        size_t pushed = 0;
+        Number res;
+        //branch statements run with synthesized ids (the statement's id + [0, index]) so that a function
+        //defined by one statement is visible to the following statements through FindFunction's IsLess gate
+        int statement_index = 0;
+        try
+        {
+            for (const auto& statement : statements)
+            {
+                LogicalId statement_id = base_id;
+                statement_id.push_back(statement_index);
+                ++statement_index;
+                id = statement_id;
+                if (statement.type() == typeid(VariableNode<Number>))
+                {
+                    //an assignment writes to an if-local temp variable: it is created on the first write,
+                    //so the right side reads the outer user variable before the first assignment and the assigned value after it
+                    const VariableNode<Number>& assignment = boost::get<VariableNode<Number>>(statement);
+                    res = (*this)(assignment.expression);
+                    if (FindTempVariable(assignment.name.name))
+                        SetTempVariable(assignment.name.name, res);
+                    else
+                    {
+                        PushTempVariable(assignment.name.name, res);
+                        ++pushed;
+                    }
+                }
+                else if (statement.type() == typeid(FunctionNode<Number>))
+                {
+                    AddFunction(boost::get<FunctionNode<Number>>(statement));
+                }
+                else
+                {
+                    res = (*this)(boost::get<ExpressionNode<Number>>(statement));
+                }
+            }
+        }
+        catch (...)
+        {
+            id = outer_id;
+            PopTempVariables(pushed);
+            throw;
+        }
+        id = outer_id;
+        PopTempVariables(pushed);
+        return res;
+    }
+
     Number operator()(ArrayNode<Number> const& op) const
     {
         if constexpr (std::is_same_v<Number, Array<Real>>)
