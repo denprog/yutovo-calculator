@@ -236,62 +236,62 @@ public:
 
     friend bool operator>(const Symbolic<Number>& num1, const Symbolic<Number>& num2)
     {
-        throw ParserException({}, ParserExceptionCode::IncorrectOperation);
+        return IsGiacComparisonTrue(giac::superieur_strict(*num1.expr, *num2.expr, num1.Context()));
     }
 
     friend bool operator>(const Symbolic<Number>& num1, const int num2)
     {
-        throw ParserException({}, ParserExceptionCode::IncorrectOperation);
+        return num1 > Symbolic<Number>(num1.precision, num2);
     }
 
     friend bool operator>(const int num1, const Symbolic<Number>& num2)
     {
-        throw ParserException({}, ParserExceptionCode::IncorrectOperation);
+        return Symbolic<Number>(num2.precision, num1) > num2;
     }
 
     friend bool operator>=(const Symbolic<Number>& num1, const Symbolic<Number>& num2)
     {
-        throw ParserException({}, ParserExceptionCode::IncorrectOperation);
+        return IsGiacComparisonTrue(giac::superieur_egal(*num1.expr, *num2.expr, num1.Context()));
     }
 
     friend bool operator>=(const Symbolic<Number>& num1, const int num2)
     {
-        throw ParserException({}, ParserExceptionCode::IncorrectOperation);
+        return num1 >= Symbolic<Number>(num1.precision, num2);
     }
 
     friend bool operator>=(const int num1, const Symbolic<Number>& num2)
     {
-        throw ParserException({}, ParserExceptionCode::IncorrectOperation);
+        return Symbolic<Number>(num2.precision, num1) >= num2;
     }
 
     friend bool operator<(const Symbolic<Number>& num1, const Symbolic<Number>& num2)
     {
-        throw ParserException({}, ParserExceptionCode::IncorrectOperation);
+        return IsGiacComparisonTrue(giac::inferieur_strict(*num1.expr, *num2.expr, num1.Context()));
     }
 
     friend bool operator<(const Symbolic<Number>& num1, const int num2)
     {
-        throw ParserException({}, ParserExceptionCode::IncorrectOperation);
+        return num1 < Symbolic<Number>(num1.precision, num2);
     }
 
     friend bool operator<(const int num1, const Symbolic<Number>& num2)
     {
-        throw ParserException({}, ParserExceptionCode::IncorrectOperation);
+        return Symbolic<Number>(num2.precision, num1) < num2;
     }
 
     friend bool operator<=(const Symbolic<Number>& num1, const Symbolic<Number>& num2)
     {
-        throw ParserException({}, ParserExceptionCode::IncorrectOperation);
+        return IsGiacComparisonTrue(giac::inferieur_egal(*num1.expr, *num2.expr, num1.Context()));
     }
 
     friend bool operator<=(const Symbolic<Number>& num1, const int num2)
     {
-        throw ParserException({}, ParserExceptionCode::IncorrectOperation);
+        return num1 <= Symbolic<Number>(num1.precision, num2);
     }
 
     friend bool operator<=(const int num1, const Symbolic<Number>& num2)
     {
-        throw ParserException({}, ParserExceptionCode::IncorrectOperation);
+        return Symbolic<Number>(num2.precision, num1) <= num2;
     }
 
 public:

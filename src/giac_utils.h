@@ -718,6 +718,7 @@ bool IsArithmeticConstantExpr(const GiacExpression& e);
 bool IsInertFunction(const std::string& name);
 std::string InertFunctionExpr(const std::string& name, const std::string& arg);
 bool IsGiacExpressionZero(const std::string& expr, int precision);
+bool IsGiacComparisonTrue(const giac::gen& comparison);
 std::string ExactInertArg(std::string arg);
 bool IsInverseHyperbolicInertSingularity(const std::string& name, const std::string& arg, int precision);
 std::optional<GiacExpression> InertFunctionSingularity(const std::string& name, const std::string& arg, int precision);

@@ -43,6 +43,12 @@ TEST_F(CalcTestMatrixReal, literals_errors)
     EXPECT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 3}, U"[];"), yutovo_calculator::MathException);
 }
 
+//loops are impossible in the matrix parsers: the matrix comparison operators always throw IncorrectComparison
+TEST_F(CalcTestMatrixReal, for1)
+{
+    EXPECT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"for(i=1,i<=3,i=i+1,(u=u+i));"), yutovo_calculator::MathException);
+}
+
 TEST_F(CalcTestMatrixReal, arithmetic1)
 {
     auto res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"[[1,2],[3,4]]+[[10,20],[30,40]];");

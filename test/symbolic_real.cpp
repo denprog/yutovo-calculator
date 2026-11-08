@@ -2819,4 +2819,101 @@ TEST_F(CalcTestSymbolicReal, matrix_implicit)
     ASSERT_TRUE(r.ToStdString(10) == "2.*(x*w-y*z)") << r.ToStdString(10);
 }
 
+TEST_F(CalcTestSymbolicReal, for1)
+{
+    parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"u=0;");
+    std::string s = parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"for(i=1,i<=10,i=i+1,(u=u+i));").ToStdString(3);
+    ASSERT_TRUE(s == "55.") << s;
+    //the bracketed condition form works the same way
+    s = parser.Parse(LogicalId{0, 0, 0, 0, 3}, U"for(i=1,(i<=10),i=i+1,(u=u+i));").ToStdString(3);
+    ASSERT_TRUE(s == "55.") << s;
+}
+
+TEST_F(CalcTestSymbolicReal, for2)
+{
+    parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"u=1;");
+    std::string s = parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"for(i=1,i<=5,i=i+1,(u=u*i));").ToStdString(3);
+    ASSERT_TRUE(s == "120.") << s;
+}
+
+TEST_F(CalcTestSymbolicReal, for3)
+{
+    //a function defined inside the block is used by the following statements of the block
+    std::string s = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"for(i=1,i<=3,i=i+1,(f(x)=2*x,u=f(i)));").ToStdString(3);
+    ASSERT_TRUE(s == "6.") << s;
+}
+
+TEST_F(CalcTestSymbolicReal, for4)
+{
+    //the value of the last block statement; the loop result is a regular expression operand
+    parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"u=0;");
+    std::string s = parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"for(i=1,i<=3,i=i+1,(u=u+i,u*2));").ToStdString(3);
+    ASSERT_TRUE(s == "12.") << s;
+    s = parser.Parse(LogicalId{0, 0, 0, 0, 3}, U"2*for(i=1,i<=4,i=i+1,(u=u+i))+1;").ToStdString(3);
+    ASSERT_TRUE(s == "21.") << s;
+}
+
+TEST_F(CalcTestSymbolicReal, for5)
+{
+    //the canonical nested-sum idiom (the outer block resets v, the inner block writes through); exact accumulation
+    parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"u=0;");
+    std::string s = parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"for(i=1,i<=3,i=i+1,(v=0,for(j=1,j<=4,j=j+1,(v=v+i*j)),u=u+v));").ToStdString(3);
+    ASSERT_TRUE(s == "60.") << s;
+    //a decimal bound compares exactly as well
+    parser.Parse(LogicalId{0, 0, 0, 0, 3}, U"w=0;");
+    s = parser.Parse(LogicalId{0, 0, 0, 0, 4}, U"for(i=1,i<=2.5,i=i+1,(w=w+i));").ToStdString(3);
+    ASSERT_TRUE(s == "3.") << s;
+}
+
+TEST_F(CalcTestSymbolicReal, comparison1)
+{
+    //the ordering comparison operators work for numeric symbolic values
+    std::string s = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"2*(3<=5);").ToStdString(3);
+    ASSERT_TRUE(s == "2.") << s;
+    s = parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"2*(6<=5);").ToStdString(3);
+    ASSERT_TRUE(s == "0.") << s;
+    //an undecidable comparison of two symbols is an error
+    EXPECT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 3}, U"(x<=y);"), yutovo_calculator::MathException);
+}
+
+TEST_F(CalcTestSymbolicReal, for_threads)
+{
+    constexpr int threads_count = 50;
+    constexpr int iterations = 20;
+
+    std::vector<int> failures(threads_count, 0);
+    std::vector<std::thread> threads;
+    threads.reserve(threads_count);
+    for (int t = 0; t < threads_count; ++t)
+    {
+        threads.emplace_back(
+            [&failures, t]()
+            {
+                Parser<Symbolic<Real>> p(3, Language::English);
+                for (int iter = 0; iter < iterations; ++iter)
+                {
+                    p.Parse(LogicalId{0, 0, 1}, U"u=0;", 3);
+                    std::string s = p.Parse(LogicalId{0, 0, 2}, U"for(i=1,i<=10,i=i+1,(u=u+i));", 10).ToStdString(10);
+                    if (s != "55.")
+                        ++failures[t];
+                }
+            });
+    }
+    for (std::thread& thread : threads)
+        thread.join();
+    for (int failure : failures)
+        ASSERT_TRUE(failure == 0);
+}
+
+TEST_F(CalcTestSymbolicReal, for_errors)
+{
+    //the condition cannot be decided for a symbolic bound
+    EXPECT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"for(i=1,i<=n,i=i+1,(u=u+i));"), yutovo_calculator::MathException);
+    //the body never executes, so the value of the loop is undefined
+    EXPECT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"for(i=1,i>1,i=i+1,(u=5));"), yutovo_calculator::MathException);
+    //the old loop() still does not evaluate in the symbolic parsers
+    EXPECT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 3}, U"for(i=1,i<=2,i=i+1,(u=u+loop(j=1,(j<=2),j=j+1,t=0,t=t+1)));"),
+        yutovo_calculator::MathException);
+}
+
 }

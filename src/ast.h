@@ -82,6 +82,8 @@ struct CompareNode;
 template<typename Number>
 struct LoopNode;
 template<typename Number>
+struct ForLoopNode;
+template<typename Number>
 struct ArrayNode;
 template<typename Number>
 struct ExpressionNode;
@@ -151,8 +153,9 @@ struct UnaryOperationNode : public ExpressionPosition
         boost::recursive_wrapper<DegreeMinuteSecondNode<Number>>,
         boost::recursive_wrapper<NoFencesFunctionCallNode<Number>>, 
         boost::recursive_wrapper<CompareNode<Number>>, 
-        boost::recursive_wrapper<LoopNode<Number>>, 
-        boost::recursive_wrapper<ArrayNode<Number>>, 
+        boost::recursive_wrapper<LoopNode<Number>>,
+        boost::recursive_wrapper<ForLoopNode<Number>>,
+        boost::recursive_wrapper<ArrayNode<Number>>,
         boost::recursive_wrapper<ExpressionNode<Number>>> 
         Operand;
     
@@ -186,8 +189,9 @@ struct OperationNode : ExpressionPosition
         boost::recursive_wrapper<DegreeMinuteSecondNode<Number>>,
         boost::recursive_wrapper<NoFencesFunctionCallNode<Number>>, 
         boost::recursive_wrapper<CompareNode<Number>>, 
-        boost::recursive_wrapper<LoopNode<Number>>, 
-        boost::recursive_wrapper<ArrayNode<Number>>, 
+        boost::recursive_wrapper<LoopNode<Number>>,
+        boost::recursive_wrapper<ForLoopNode<Number>>,
+        boost::recursive_wrapper<ArrayNode<Number>>,
         boost::recursive_wrapper<ExpressionNode<Number>>> 
         Operand;
     
@@ -221,8 +225,9 @@ struct PostfixOperationNode : ExpressionPosition
         boost::recursive_wrapper<DegreeMinuteSecondNode<Number>>,
         boost::recursive_wrapper<NoFencesFunctionCallNode<Number>>, 
         boost::recursive_wrapper<CompareNode<Number>>, 
-        boost::recursive_wrapper<LoopNode<Number>>, 
-        boost::recursive_wrapper<ArrayNode<Number>>, 
+        boost::recursive_wrapper<LoopNode<Number>>,
+        boost::recursive_wrapper<ForLoopNode<Number>>,
+        boost::recursive_wrapper<ArrayNode<Number>>,
         boost::recursive_wrapper<ExpressionNode<Number>>> 
         Operand;
     
@@ -436,6 +441,23 @@ struct LoopNode : ExpressionPosition
     VariableNode<Number> loop_expression;
 };
 
+//"programming" loop: for(counter=init, condition, counter=increment, (statement, ...)); a block statement is
+//an assignment, a function definition or a plain expression
+template<typename Number>
+struct ForLoopNode : ExpressionPosition
+{
+    VariableNode<Number> counter;
+    CompareNode<Number> condition;
+    VariableNode<Number> counter_increment;
+    typedef boost::variant<
+        boost::recursive_wrapper<VariableNode<Number>>,
+        boost::recursive_wrapper<FunctionNode<Number>>,
+        boost::recursive_wrapper<ExpressionNode<Number>>>
+        BlockStatement;
+    typedef std::list<BlockStatement> BlockStatements;
+    BlockStatements statements;
+};
+
 template<typename Number>
 struct ArrayNode : ExpressionPosition
 {
@@ -469,6 +491,7 @@ struct ExpressionNode : ExpressionPosition
         boost::recursive_wrapper<NoFencesFunctionCallNode<Number>>, 
         boost::recursive_wrapper<CompareNode<Number>>, 
         boost::recursive_wrapper<LoopNode<Number>>, 
+        boost::recursive_wrapper<ForLoopNode<Number>>,
         boost::recursive_wrapper<ArrayNode<Number>>,
         boost::recursive_wrapper<ExpressionNode<Number>>>
         Operand;
@@ -679,6 +702,12 @@ BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::LoopNode<yutovo_calculator::Integer
     (yutovo_calculator::VariableNode<yutovo_calculator::Integer>, loop_var)
     (yutovo_calculator::VariableNode<yutovo_calculator::Integer>, loop_expression))
 
+BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::ForLoopNode<yutovo_calculator::Integer>,
+    (yutovo_calculator::VariableNode<yutovo_calculator::Integer>, counter)
+    (yutovo_calculator::CompareNode<yutovo_calculator::Integer>, condition)
+    (yutovo_calculator::VariableNode<yutovo_calculator::Integer>, counter_increment)
+    (yutovo_calculator::ForLoopNode<yutovo_calculator::Integer>::BlockStatements, statements))
+
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::ArrayNode<yutovo_calculator::Integer>, 
     (std::list<yutovo_calculator::ExpressionNode<yutovo_calculator::Integer>>, array))
 
@@ -845,6 +874,12 @@ BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::LoopNode<yutovo_calculator::Real>,
     (yutovo_calculator::VariableNode<yutovo_calculator::Real>, loop_var)
     (yutovo_calculator::VariableNode<yutovo_calculator::Real>, loop_expression))
 
+BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::ForLoopNode<yutovo_calculator::Real>,
+    (yutovo_calculator::VariableNode<yutovo_calculator::Real>, counter)
+    (yutovo_calculator::CompareNode<yutovo_calculator::Real>, condition)
+    (yutovo_calculator::VariableNode<yutovo_calculator::Real>, counter_increment)
+    (yutovo_calculator::ForLoopNode<yutovo_calculator::Real>::BlockStatements, statements))
+
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::ArrayNode<yutovo_calculator::Real>, 
     (std::list<yutovo_calculator::ExpressionNode<yutovo_calculator::Real>>, array))
 
@@ -1005,6 +1040,12 @@ BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::LoopNode<yutovo_calculator::Rationa
     (yutovo_calculator::VariableNode<yutovo_calculator::Rational>, counter_increment)
     (yutovo_calculator::VariableNode<yutovo_calculator::Rational>, loop_var)
     (yutovo_calculator::VariableNode<yutovo_calculator::Rational>, loop_expression))
+
+BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::ForLoopNode<yutovo_calculator::Rational>,
+    (yutovo_calculator::VariableNode<yutovo_calculator::Rational>, counter)
+    (yutovo_calculator::CompareNode<yutovo_calculator::Rational>, condition)
+    (yutovo_calculator::VariableNode<yutovo_calculator::Rational>, counter_increment)
+    (yutovo_calculator::ForLoopNode<yutovo_calculator::Rational>::BlockStatements, statements))
 
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::ArrayNode<yutovo_calculator::Rational>, 
     (std::list<yutovo_calculator::ExpressionNode<yutovo_calculator::Rational>>, array))
@@ -1167,6 +1208,12 @@ BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::LoopNode<yutovo_calculator::Complex
     (yutovo_calculator::VariableNode<yutovo_calculator::Complex>, loop_var)
     (yutovo_calculator::VariableNode<yutovo_calculator::Complex>, loop_expression))
 
+BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::ForLoopNode<yutovo_calculator::Complex>,
+    (yutovo_calculator::VariableNode<yutovo_calculator::Complex>, counter)
+    (yutovo_calculator::CompareNode<yutovo_calculator::Complex>, condition)
+    (yutovo_calculator::VariableNode<yutovo_calculator::Complex>, counter_increment)
+    (yutovo_calculator::ForLoopNode<yutovo_calculator::Complex>::BlockStatements, statements))
+
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::ArrayNode<yutovo_calculator::Complex>, 
     (std::list<yutovo_calculator::ExpressionNode<yutovo_calculator::Complex>>, array))
 
@@ -1322,6 +1369,12 @@ BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::LoopNode<yutovo_calculator::Symboli
     (yutovo_calculator::VariableNode<yutovo_calculator::Symbolic<Real>>, loop_var)
     (yutovo_calculator::VariableNode<yutovo_calculator::Symbolic<Real>>, loop_expression))
 
+BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::ForLoopNode<yutovo_calculator::Symbolic<Real>>,
+    (yutovo_calculator::VariableNode<yutovo_calculator::Symbolic<Real>>, counter)
+    (yutovo_calculator::CompareNode<yutovo_calculator::Symbolic<Real>>, condition)
+    (yutovo_calculator::VariableNode<yutovo_calculator::Symbolic<Real>>, counter_increment)
+    (yutovo_calculator::ForLoopNode<yutovo_calculator::Symbolic<Real>>::BlockStatements, statements))
+
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::ArrayNode<yutovo_calculator::Symbolic<Real>>, 
     (std::list<yutovo_calculator::ExpressionNode<yutovo_calculator::Symbolic<Real>>>, array))
 
@@ -1474,6 +1527,12 @@ BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::LoopNode<yutovo_calculator::Symboli
     (yutovo_calculator::VariableNode<yutovo_calculator::Symbolic<Rational>>, counter_increment)
     (yutovo_calculator::VariableNode<yutovo_calculator::Symbolic<Rational>>, loop_var)
     (yutovo_calculator::VariableNode<yutovo_calculator::Symbolic<Rational>>, loop_expression))
+
+BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::ForLoopNode<yutovo_calculator::Symbolic<Rational>>,
+    (yutovo_calculator::VariableNode<yutovo_calculator::Symbolic<Rational>>, counter)
+    (yutovo_calculator::CompareNode<yutovo_calculator::Symbolic<Rational>>, condition)
+    (yutovo_calculator::VariableNode<yutovo_calculator::Symbolic<Rational>>, counter_increment)
+    (yutovo_calculator::ForLoopNode<yutovo_calculator::Symbolic<Rational>>::BlockStatements, statements))
 
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::ArrayNode<yutovo_calculator::Symbolic<Rational>>, 
     (std::list<yutovo_calculator::ExpressionNode<yutovo_calculator::Symbolic<Rational>>>, array))
@@ -1628,6 +1687,12 @@ BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::LoopNode<yutovo_calculator::Symboli
     (yutovo_calculator::VariableNode<yutovo_calculator::Symbolic<Complex>>, loop_var)
     (yutovo_calculator::VariableNode<yutovo_calculator::Symbolic<Complex>>, loop_expression))
 
+BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::ForLoopNode<yutovo_calculator::Symbolic<Complex>>,
+    (yutovo_calculator::VariableNode<yutovo_calculator::Symbolic<Complex>>, counter)
+    (yutovo_calculator::CompareNode<yutovo_calculator::Symbolic<Complex>>, condition)
+    (yutovo_calculator::VariableNode<yutovo_calculator::Symbolic<Complex>>, counter_increment)
+    (yutovo_calculator::ForLoopNode<yutovo_calculator::Symbolic<Complex>>::BlockStatements, statements))
+
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::ArrayNode<yutovo_calculator::Symbolic<Complex>>, 
     (std::list<yutovo_calculator::ExpressionNode<yutovo_calculator::Symbolic<Complex>>>, array))
 
@@ -1777,6 +1842,12 @@ BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::LoopNode<yutovo_calculator::Array<y
     (yutovo_calculator::VariableNode<yutovo_calculator::Array<yutovo_calculator::Real>>, loop_var)
     (yutovo_calculator::VariableNode<yutovo_calculator::Array<yutovo_calculator::Real>>, loop_expression))
 
+BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::ForLoopNode<yutovo_calculator::Array<yutovo_calculator::Real>>,
+    (yutovo_calculator::VariableNode<yutovo_calculator::Array<yutovo_calculator::Real>>, counter)
+    (yutovo_calculator::CompareNode<yutovo_calculator::Array<yutovo_calculator::Real>>, condition)
+    (yutovo_calculator::VariableNode<yutovo_calculator::Array<yutovo_calculator::Real>>, counter_increment)
+    (yutovo_calculator::ForLoopNode<yutovo_calculator::Array<yutovo_calculator::Real>>::BlockStatements, statements))
+
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::ArrayNode<yutovo_calculator::Array<yutovo_calculator::Real>>, 
     (std::list<yutovo_calculator::ExpressionNode<yutovo_calculator::Array<yutovo_calculator::Real>>>, array))
 
@@ -1925,6 +1996,12 @@ BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::LoopNode<yutovo_calculator::Matrix<
     (yutovo_calculator::VariableNode<yutovo_calculator::Matrix<yutovo_calculator::Real>>, counter_increment)
     (yutovo_calculator::VariableNode<yutovo_calculator::Matrix<yutovo_calculator::Real>>, loop_var)
     (yutovo_calculator::VariableNode<yutovo_calculator::Matrix<yutovo_calculator::Real>>, loop_expression))
+
+BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::ForLoopNode<yutovo_calculator::Matrix<yutovo_calculator::Real>>,
+    (yutovo_calculator::VariableNode<yutovo_calculator::Matrix<yutovo_calculator::Real>>, counter)
+    (yutovo_calculator::CompareNode<yutovo_calculator::Matrix<yutovo_calculator::Real>>, condition)
+    (yutovo_calculator::VariableNode<yutovo_calculator::Matrix<yutovo_calculator::Real>>, counter_increment)
+    (yutovo_calculator::ForLoopNode<yutovo_calculator::Matrix<yutovo_calculator::Real>>::BlockStatements, statements))
 
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::ArrayNode<yutovo_calculator::Matrix<yutovo_calculator::Real>>, 
     (std::list<yutovo_calculator::ExpressionNode<yutovo_calculator::Matrix<yutovo_calculator::Real>>>, array))
@@ -2076,6 +2153,12 @@ BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::LoopNode<yutovo_calculator::Matrix<
     (yutovo_calculator::VariableNode<yutovo_calculator::Matrix<yutovo_calculator::Rational>>, loop_var)
     (yutovo_calculator::VariableNode<yutovo_calculator::Matrix<yutovo_calculator::Rational>>, loop_expression))
 
+BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::ForLoopNode<yutovo_calculator::Matrix<yutovo_calculator::Rational>>,
+    (yutovo_calculator::VariableNode<yutovo_calculator::Matrix<yutovo_calculator::Rational>>, counter)
+    (yutovo_calculator::CompareNode<yutovo_calculator::Matrix<yutovo_calculator::Rational>>, condition)
+    (yutovo_calculator::VariableNode<yutovo_calculator::Matrix<yutovo_calculator::Rational>>, counter_increment)
+    (yutovo_calculator::ForLoopNode<yutovo_calculator::Matrix<yutovo_calculator::Rational>>::BlockStatements, statements))
+
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::ArrayNode<yutovo_calculator::Matrix<yutovo_calculator::Rational>>, 
     (std::list<yutovo_calculator::ExpressionNode<yutovo_calculator::Matrix<yutovo_calculator::Rational>>>, array))
 
@@ -2225,6 +2308,12 @@ BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::LoopNode<yutovo_calculator::Matrix<
     (yutovo_calculator::VariableNode<yutovo_calculator::Matrix<yutovo_calculator::Complex>>, counter_increment)
     (yutovo_calculator::VariableNode<yutovo_calculator::Matrix<yutovo_calculator::Complex>>, loop_var)
     (yutovo_calculator::VariableNode<yutovo_calculator::Matrix<yutovo_calculator::Complex>>, loop_expression))
+
+BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::ForLoopNode<yutovo_calculator::Matrix<yutovo_calculator::Complex>>,
+    (yutovo_calculator::VariableNode<yutovo_calculator::Matrix<yutovo_calculator::Complex>>, counter)
+    (yutovo_calculator::CompareNode<yutovo_calculator::Matrix<yutovo_calculator::Complex>>, condition)
+    (yutovo_calculator::VariableNode<yutovo_calculator::Matrix<yutovo_calculator::Complex>>, counter_increment)
+    (yutovo_calculator::ForLoopNode<yutovo_calculator::Matrix<yutovo_calculator::Complex>>::BlockStatements, statements))
 
 BOOST_FUSION_ADAPT_STRUCT(yutovo_calculator::ArrayNode<yutovo_calculator::Matrix<yutovo_calculator::Complex>>, 
     (std::list<yutovo_calculator::ExpressionNode<yutovo_calculator::Matrix<yutovo_calculator::Complex>>>, array))

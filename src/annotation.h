@@ -39,8 +39,9 @@ struct Annotation
 		boost::recursive_wrapper<DegreeMinuteSecondNode<Number>>,
 		boost::recursive_wrapper<NoFencesFunctionCallNode<Number>>, 
 		boost::recursive_wrapper<CompareNode<Number>>, 
-		boost::recursive_wrapper<LoopNode<Number>>, 
-		boost::recursive_wrapper<ArrayNode<Number>>, 
+		boost::recursive_wrapper<LoopNode<Number>>,
+		boost::recursive_wrapper<ForLoopNode<Number>>,
+		boost::recursive_wrapper<ArrayNode<Number>>,
 		boost::recursive_wrapper<ExpressionNode<Number>>>
 		Operand;
 
@@ -360,6 +361,11 @@ struct Annotation
 		UpdatePosition(pos, op);
 	}
 
+	void operator()(ForLoopNode<Number>& op, std::u32string::iterator pos) const
+	{
+		UpdatePosition(pos, op);
+	}
+
 	void operator()(ArrayNode<Number>& op, std::u32string::iterator pos) const
 	{
 		UpdatePosition(pos, op);
@@ -508,6 +514,11 @@ struct Annotation
 		}
 
 		void operator()(LoopNode<Num> const& op) const
+		{
+			annotation->UpdatePosition(iter, op);
+		}
+
+		void operator()(ForLoopNode<Num> const& op) const
 		{
 			annotation->UpdatePosition(iter, op);
 		}

@@ -145,6 +145,29 @@ TEST_F(CalcTestArrayReal, sum3)
     ASSERT_TRUE(r.ToStdString(3, 3) == "[-41.77E+0]") << r.ToStdString(3, 3);
 }
 
+TEST_F(CalcTestArrayReal, for1)
+{
+    auto r = parser.Parse(LogicalId{0, 0, 1}, U"var=[1,2,3];", 3);
+    //t=0 inside the block resets t on every iteration, so u is twice the last element
+    r = parser.Parse(LogicalId{0, 0, 2}, U"for(i=0,i<=size(var)-1,i=i+1,(t=0,t=t+var{i},u=t*2));", 3);
+    ASSERT_TRUE(r.ToStdString(3, 3) == "[6.E+0]") << r.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestArrayReal, for2)
+{
+    auto r = parser.Parse(LogicalId{0, 0, 1}, U"u=[0,0];", 3);
+    r = parser.Parse(LogicalId{0, 0, 2}, U"for(i=1,i<=3,i=i+1,(u=u+[i,2*i]));", 3);
+    ASSERT_TRUE(r.ToStdString(3, 3) == "[6.E+0,12.E+0]") << r.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestArrayReal, for3)
+{
+    //a function defined inside the block with a subscript access in the call
+    auto r = parser.Parse(LogicalId{0, 0, 1}, U"var=[1,2,3];", 3);
+    r = parser.Parse(LogicalId{0, 0, 2}, U"for(i=0,i<=2,i=i+1,(f(x)=2*x,u=f(var{i})));", 3);
+    ASSERT_TRUE(r.ToStdString(3, 3) == "[6.E+0]") << r.ToStdString(3, 3);
+}
+
 TEST_F(CalcTestArrayReal, variables1)
 {
     auto r = parser.Parse(LogicalId{0, 0, 1}, U"t=[2,3,4];", 3);

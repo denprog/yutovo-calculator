@@ -2313,6 +2313,167 @@ TEST_F(CalcTestReal, max_time3)
     ASSERT_TRUE(s == "11.E+0") << s;
 }
 
+TEST_F(CalcTestReal, for1)
+{
+    parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"u=0;");
+    std::string s = parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"for(i=1,i<=10,i=i+1,(u=u+i));").ToStdString(3, 3);
+    ASSERT_TRUE(s == "55.E+0") << s;
+    //a single parse works too: the block statements run with a synthesized id bigger than the statement's id,
+    //so a variable defined by a previous statement of the same script is visible inside the block
+    s = parser.Parse(LogicalId{0, 0, 0, 0, 3}, U"v=0;for(i=1,i<=10,i=i+1,(v=v+i));").ToStdString(3, 3);
+    ASSERT_TRUE(s == "55.E+0") << s;
+
+    try
+    {
+        parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"i;");
+    }
+    catch (yutovo_calculator::SyntaxException& ex)
+    {
+        ASSERT_TRUE((ex.id == LogicalId{0, 0, 0, 0, 2}) && ex.ex_id == ParserExceptionCode::UnknownIdentifier && ex.pos == 0) << LogicalIdToString(ex.id);
+        return;
+    }
+    ASSERT_FALSE(true);
+}
+
+TEST_F(CalcTestReal, for2)
+{
+    parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"u=1;");
+    std::string s = parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"for(i=1,i<=5,i=i+1,(u=u*i));").ToStdString(3, 3);
+    ASSERT_TRUE(s == "120.E+0") << s;
+    //an assignment in the block resets the variable on every iteration
+    s = parser.Parse(LogicalId{0, 0, 0, 0, 3}, U"for(i=1,i<=5,i=i+1,(u=1,u=u*i));").ToStdString(3, 3);
+    ASSERT_TRUE(s == "5.E+0") << s;
+}
+
+TEST_F(CalcTestReal, for3)
+{
+    //a function defined inside the block is used by the following statements of the block
+    std::string s = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"for(i=1,i<=3,i=i+1,(f(x)=2*x,u=f(i)));").ToStdString(3, 3);
+    ASSERT_TRUE(s == "6.E+0") << s;
+}
+
+TEST_F(CalcTestReal, for4)
+{
+    //a function defined inside the block survives the loop and is callable from a later statement
+    parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"for(i=0,i<=1,i=i+1,(f(x)=x+1,u=f(i)));");
+    std::string s = parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"f(3);").ToStdString(3, 3);
+    ASSERT_TRUE(s == "4.E+0") << s;
+}
+
+TEST_F(CalcTestReal, for5)
+{
+    //the value of the loop is the value of the last block statement of the last iteration
+    parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"u=0;");
+    std::string s = parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"for(i=1,i<=3,i=i+1,(u=u+i,u*2));").ToStdString(3, 3);
+    ASSERT_TRUE(s == "12.E+0") << s;
+}
+
+TEST_F(CalcTestReal, for6)
+{
+    //the condition in brackets is accepted as well
+    parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"u=0;");
+    std::string s = parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"for(i=1,(i<=10),i=i+1,(u=u+i));").ToStdString(3, 3);
+    ASSERT_TRUE(s == "55.E+0") << s;
+}
+
+TEST_F(CalcTestReal, for7)
+{
+    //the loop result is a regular expression operand; an inner sum loop runs inside the block
+    parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"u=0;");
+    std::string s = parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"2*for(i=1,i<=4,i=i+1,(u=u+i))+1;").ToStdString(3, 3);
+    ASSERT_TRUE(s == "21.E+0") << s;
+    parser.Parse(LogicalId{0, 0, 0, 0, 3}, U"w=0;");
+    s = parser.Parse(LogicalId{0, 0, 0, 0, 4}, U"for(i=1,i<=3,i=i+1,(w=w+loop(j=1,(j<=3),j=j+1,t=0,t=t+i*j)));").ToStdString(3, 3);
+    ASSERT_TRUE(s == "36.E+0") << s;
+}
+
+TEST_F(CalcTestReal, for8)
+{
+    //the canonical nested-sum idiom: the outer block resets the inner accumulator v once per outer iteration,
+    //the inner block writes through to the outer temp v, and u accumulates the per-iteration sums;
+    //an assignment inside an inner block without an enclosing temp would be local to one run of the inner loop
+    parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"u=0;");
+    std::string s = parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"for(i=1,i<=3,i=i+1,(v=0,for(j=1,j<=4,j=j+1,(v=v+i*j)),u=u+v));").ToStdString(3, 3);
+    ASSERT_TRUE(s == "60.E+0") << s;
+    //a for() inside the accumulator body of the old loop(); the user variable v re-seeds every run of the inner block
+    parser.Parse(LogicalId{0, 0, 0, 0, 3}, U"v=0;");
+    s = parser.Parse(LogicalId{0, 0, 0, 0, 4}, U"loop(i=1,(i<=3),i=i+1,t=0,t=t+for(j=1,j<=2,j=j+1,(v=v+j)));").ToStdString(3, 3);
+    ASSERT_TRUE(s == "9.E+0") << s;
+}
+
+TEST_F(CalcTestReal, for9)
+{
+    //the body may modify the counter; the increment is still applied after the body
+    parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"u=0;");
+    std::string s = parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"for(i=0,i<6,i=i+1,(i=i+1,u=u+i));").ToStdString(3, 3);
+    ASSERT_TRUE(s == "9.E+0") << s;
+    //a bare function call as the last statement; the last case is a parenthesized expression statement
+    parser.Parse(LogicalId{0, 0, 0, 0, 3}, U"f(x)=x+1;");
+    s = parser.Parse(LogicalId{0, 0, 0, 0, 4}, U"for(i=1,i<=3,i=i+1,(u=i,f(u)));").ToStdString(3, 3);
+    ASSERT_TRUE(s == "4.E+0") << s;
+    s = parser.Parse(LogicalId{0, 0, 0, 0, 5}, U"u=0;for(i=1,i<=2,i=i+1,(u=u+i,(u)*2));").ToStdString(3, 3);
+    ASSERT_TRUE(s == "6.E+0") << s;
+    //a function defined in a nested inner block survives both loops and is callable after them
+    s = parser.Parse(LogicalId{0, 0, 0, 0, 6}, U"for(i=1,i<=1,i=i+1,(for(j=1,j<=1,j=j+1,(g(x)=x*3,u=g(j)))));").ToStdString(3, 3);
+    ASSERT_TRUE(s == "3.E+0") << s;
+    s = parser.Parse(LogicalId{0, 0, 0, 0, 7}, U"g(2);").ToStdString(3, 3);
+    ASSERT_TRUE(s == "6.E+0") << s;
+}
+
+TEST_F(CalcTestReal, for_threads)
+{
+    constexpr int threads_count = 50;
+    constexpr int iterations = 20;
+
+    std::vector<int> failures(threads_count, 0);
+    std::vector<std::thread> threads;
+    threads.reserve(threads_count);
+    for (int t = 0; t < threads_count; ++t)
+    {
+        threads.emplace_back(
+            [&failures, t]()
+            {
+                Parser<Real> p(3, Language::English);
+                for (int iter = 0; iter < iterations; ++iter)
+                {
+                    p.Parse(LogicalId{0, 0, 1}, U"u=0;");
+                    std::string s = p.Parse(LogicalId{0, 0, 2}, U"for(i=1,i<=10,i=i+1,(u=u+i));").ToStdString(3, 3);
+                    if (s != "55.E+0")
+                        ++failures[t];
+                }
+            });
+    }
+    for (std::thread& thread : threads)
+        thread.join();
+    for (int failure : failures)
+        ASSERT_TRUE(failure == 0);
+}
+
+TEST_F(CalcTestReal, for_identifier)
+{
+    //'for' without a call is still a valid identifier
+    parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"for=5;");
+    std::string s = parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"for;").ToStdString(3, 3);
+    ASSERT_TRUE(s == "5.E+0") << s;
+}
+
+TEST_F(CalcTestReal, for_errors)
+{
+    //the body never executes, so the value of the loop is undefined
+    EXPECT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"for(i=1,i>1,i=i+1,(u=5));"), yutovo_calculator::MathException);
+    //the block cannot end with a function definition
+    EXPECT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"for(i=1,i<=3,i=i+1,(u=i,f(x)=x));"), yutovo_calculator::MathException);
+    //an empty block is a syntax error
+    EXPECT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 3}, U"for(i=1,i<=3,i=i+1,());"), yutovo_calculator::SyntaxException);
+    //the condition must be a comparison
+    EXPECT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 4}, U"for(i=1,10,i=i+1,(u=1));"), yutovo_calculator::SyntaxException);
+    //an unknown name on the right side of an assignment
+    EXPECT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 5}, U"for(i=1,i<=3,i=i+1,(u=u+i));"), yutovo_calculator::SyntaxException);
+    //a missing argument and an extra argument after the block
+    EXPECT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 6}, U"for(i=1,i<=3);"), yutovo_calculator::SyntaxException);
+    EXPECT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 7}, U"for(i=1,i<=3,i=i+1,(u=1),5);"), yutovo_calculator::SyntaxException);
+}
+
 TEST_F(CalcTestReal, list_identifiers1)
 {
     std::vector<std::pair<std::u32string, std::u32string>> variables;

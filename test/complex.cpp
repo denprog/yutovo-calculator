@@ -824,6 +824,34 @@ TEST_F(CalcTestComplex, prod1)
     ASSERT_TRUE(s == "110.E+0+i*74.E+0") << s;
 }
 
+TEST_F(CalcTestComplex, for1)
+{
+    parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"u=0;");
+    std::string s = parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"for(k=1,k<=10,k=k+1,(u=u+k));").ToStdString(3, 3);
+    ASSERT_TRUE(s == "55.E+0") << s;
+}
+
+TEST_F(CalcTestComplex, for2)
+{
+    parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"u=0;");
+    std::string s = parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"for(k=1,k<=3,k=k+1,(u=u+k+2*i));").ToStdString(3, 3);
+    ASSERT_TRUE(s == "6.E+0+i*6.E+0") << s;
+}
+
+TEST_F(CalcTestComplex, for3)
+{
+    std::string s = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"for(k=1,k<=3,k=k+1,(f(x)=2*x,u=f(k)));").ToStdString(3, 3);
+    ASSERT_TRUE(s == "6.E+0") << s;
+}
+
+TEST_F(CalcTestComplex, for4)
+{
+    //the canonical nested-sum idiom; the inner sums are multiplied by the imaginary unit
+    parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"u=0;");
+    std::string s = parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"for(k=1,k<=2,k=k+1,(v=0,for(j=1,j<=2,j=j+1,(v=v+k*j)),u=u+v*i));").ToStdString(3, 3);
+    ASSERT_TRUE(s == "i*9.E+0") << s;
+}
+
 TEST_F(CalcTestComplex, errors1)
 {
     try

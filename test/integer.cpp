@@ -625,6 +625,42 @@ TEST_F(CalcTestInteger, prod1)
     ASSERT_TRUE(s == "3628800") << s;
 }
 
+TEST_F(CalcTestInteger, for1)
+{
+    parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"u=0;");
+    std::string s = parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"for(i=1,i<=10,i=i+1,(u=u+i));").ToStdString();
+    ASSERT_TRUE(s == "55") << s;
+}
+
+TEST_F(CalcTestInteger, for2)
+{
+    parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"u=1;");
+    std::string s = parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"for(i=1,i<=5,i=i+1,(u=u*i));").ToStdString();
+    ASSERT_TRUE(s == "120") << s;
+}
+
+TEST_F(CalcTestInteger, for3)
+{
+    std::string s = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"for(i=1,i<=3,i=i+1,(f(x)=2*x,u=f(i)));").ToStdString();
+    ASSERT_TRUE(s == "6") << s;
+}
+
+TEST_F(CalcTestInteger, for4)
+{
+    //the canonical nested-sum idiom: the outer block resets v once per iteration, the inner block writes through
+    parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"u=0;");
+    std::string s = parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"for(i=1,i<=3,i=i+1,(v=0,for(j=1,j<=4,j=j+1,(v=v+i*j)),u=u+v));").ToStdString();
+    ASSERT_TRUE(s == "60") << s;
+}
+
+TEST_F(CalcTestInteger, for5)
+{
+    //a for() inside the accumulator body of the old loop(); the user variable v re-seeds every run of the inner block
+    parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"v=0;");
+    std::string s = parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"loop(i=1,(i<=3),i=i+1,t=0,t=t+for(j=1,j<=2,j=j+1,(v=v+j)));").ToStdString();
+    ASSERT_TRUE(s == "9") << s;
+}
+
 TEST_F(CalcTestInteger, user_functions1)
 {
     parser.Parse(LogicalId{0, 0, 1}, U"f(x)=5;");

@@ -2047,6 +2047,91 @@ struct Solver : public boost::static_visitor<Number>
         }
     }
 
+    Number operator()(ForLoopNode<Number> const& op) const
+    {
+        if (op.statements.back().type() == typeid(FunctionNode<Number>))
+            throw MathException(op.id, IncorrectOperation, op.pos, 1, op.line);
+
+        Number counter = (*this)(op.counter.expression);
+        PushTempVariable(op.counter.name.name, counter);
+        size_t pushed = 1;
+        Number condition_value;
+        try
+        {
+            condition_value = (*this)(op.condition);
+        }
+        catch (...)
+        {
+            PopTempVariables(pushed);
+            throw;
+        }
+        //the body never executes, so the value of the loop is undefined
+        if (condition_value == 0)
+        {
+            PopTempVariables(pushed);
+            throw MathException(op.id, IncorrectOperation, op.pos, 1, op.line);
+        }
+
+        LogicalId outer_id = id;
+        LogicalId base_id = outer_id;
+        base_id.push_back(0);
+
+        Number res;
+        while (condition_value != 0)
+        {
+            CheckBreak(parser_context);
+
+            //block statements run with synthesized ids (the statement's id + [0, index]) so that a function
+            //defined by one statement is visible to the following statements through FindFunction's IsLess gate
+            int statement_index = 0;
+            try
+            {
+                for (const auto& statement : op.statements)
+                {
+                    LogicalId statement_id = base_id;
+                    statement_id.push_back(statement_index);
+                    ++statement_index;
+                    id = statement_id;
+                    if (statement.type() == typeid(VariableNode<Number>))
+                    {
+                        //an assignment writes to a loop-local temp variable: it is created on the first write, so the right side reads 
+                        //the outer user variable in the first iteration and the accumulated value in the following ones
+                        const VariableNode<Number>& assignment = boost::get<VariableNode<Number>>(statement);
+                        res = (*this)(assignment.expression);
+                        if (FindTempVariable(assignment.name.name))
+                            SetTempVariable(assignment.name.name, res);
+                        else
+                        {
+                            PushTempVariable(assignment.name.name, res);
+                            ++pushed;
+                        }
+                    }
+                    else if (statement.type() == typeid(FunctionNode<Number>))
+                    {
+                        AddFunction(boost::get<FunctionNode<Number>>(statement));
+                    }
+                    else
+                    {
+                        res = (*this)(boost::get<ExpressionNode<Number>>(statement));
+                    }
+                }
+                id = outer_id;
+                counter = (*this)(op.counter_increment.expression);
+                SetTempVariable(op.counter.name.name, counter);
+                condition_value = (*this)(op.condition);
+            }
+            catch (...)
+            {
+                id = outer_id;
+                PopTempVariables(pushed);
+                throw;
+            }
+        }
+        id = outer_id;
+        PopTempVariables(pushed);
+        return res;
+    }
+
     Number operator()(ArrayNode<Number> const& op) const
     {
         if constexpr (std::is_same_v<Number, Array<Real>>)

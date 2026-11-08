@@ -2149,4 +2149,29 @@ TEST_F(CalcTestSymbolicComplex, implicit_mul_div)
     ASSERT_TRUE(r.ToStdString(10) == "sin(x)*x") << r.ToStdString(10);
 }
 
+TEST_F(CalcTestSymbolicComplex, for1)
+{
+    parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"u=0;");
+    std::string s = parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"for(k=1,k<=3,k=k+1,(u=u+k));").ToStdString(10);
+    ASSERT_TRUE(s == "6") << s;
+    //the counter name must not shadow the imaginary unit
+    parser.Parse(LogicalId{0, 0, 0, 0, 3}, U"w=0;");
+    s = parser.Parse(LogicalId{0, 0, 0, 0, 4}, U"for(k=1,k<=3,k=k+1,(w=w+k*i));").ToStdString(10);
+    ASSERT_TRUE(s == "6.*i") << s;
+}
+
+TEST_F(CalcTestSymbolicComplex, for_errors)
+{
+    //a condition on a complex value cannot be decided
+    EXPECT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"for(k=1,k<=i,k=k+1,(u=1));"), yutovo_calculator::MathException);
+}
+
+TEST_F(CalcTestSymbolicComplex, for2)
+{
+    //the canonical nested-sum idiom; the inner sums are multiplied by the imaginary unit
+    parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"u=0;");
+    std::string s = parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"for(k=1,k<=2,k=k+1,(v=0,for(j=1,j<=2,j=j+1,(v=v+k*j)),u=u+v*i));").ToStdString(10);
+    ASSERT_TRUE(s == "9.*i") << s;
+}
+
 }

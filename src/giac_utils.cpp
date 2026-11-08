@@ -1282,6 +1282,13 @@ bool IsGiacExpressionZero(const std::string& expr, int precision)
     return false;
 }
 
+bool IsGiacComparisonTrue(const giac::gen& comparison)
+{
+    if (comparison.type == giac::_INT_)
+        return comparison.val != 0;
+    throw MathException(ParserExceptionCode::IncorrectComparison);
+}
+
 std::string ExactInertArg(std::string arg)
 {
     for (size_t i = 0; i < arg.size(); )

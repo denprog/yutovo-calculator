@@ -707,6 +707,34 @@ TEST_F(CalcTestRational, prod1)
     ASSERT_TRUE(s == "145152/390625") << s;
 }
 
+TEST_F(CalcTestRational, for1)
+{
+    parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"u=0;");
+    std::string s = parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"for(i=1,i<=4,i=i+1,(u=u+1/i));").ToStdString();
+    ASSERT_TRUE(s == "25/12") << s;
+}
+
+TEST_F(CalcTestRational, for2)
+{
+    parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"u=1;");
+    std::string s = parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"for(i=1,i<=4,i=i+1,(u=u*1/i));").ToStdString();
+    ASSERT_TRUE(s == "1/24") << s;
+}
+
+TEST_F(CalcTestRational, for3)
+{
+    std::string s = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"for(i=1,i<=3,i=i+1,(f(x)=2*x,u=f(i)));").ToStdString();
+    ASSERT_TRUE(s == "6") << s;
+}
+
+TEST_F(CalcTestRational, for4)
+{
+    //the canonical nested-sum idiom with exact fraction accumulation
+    parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"u=0;");
+    std::string s = parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"for(i=1,i<=3,i=i+1,(v=0,for(j=1,j<=4,j=j+1,(v=v+i/j)),u=u+v));").ToStdString();
+    ASSERT_TRUE(s == "25/2") << s;
+}
+
 TEST_F(CalcTestRational, money1)
 {
     auto r = parser.Parse(LogicalId{0, 0, 1}, U"1₽;", 3);
