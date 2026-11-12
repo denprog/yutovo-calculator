@@ -57,6 +57,9 @@ add_executable(${PROJECT_NAME}_tests
 	real_matrix.cpp
 	rational_matrix.cpp
 	complex_matrix.cpp
+	real_vector.cpp
+	rational_vector.cpp
+	complex_vector.cpp
 	symbolic_real_numbers.cpp
 	symbolic_real_arithmetic.cpp
 	symbolic_real_variables.cpp

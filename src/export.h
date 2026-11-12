@@ -13,6 +13,7 @@
 #include "ast.h"
 #include "custom_unit.h"
 #include "matrix.h"
+#include "vector.h"
 
 namespace yutovo_calculator
 {
@@ -71,6 +72,9 @@ private:
     std::vector<VariableNode<Matrix<Real>>> variables_matrix_real;
     std::vector<VariableNode<Matrix<Rational>>> variables_matrix_rational;
     std::vector<VariableNode<Matrix<Complex>>> variables_matrix_complex;
+    std::vector<VariableNode<Vector<Real>>> variables_vector_real;
+    std::vector<VariableNode<Vector<Rational>>> variables_vector_rational;
+    std::vector<VariableNode<Vector<Complex>>> variables_vector_complex;
 
     std::vector<FunctionNode<Integer>> functions_integer;
     std::vector<FunctionNode<Real>> functions_real;
@@ -83,6 +87,9 @@ private:
     std::vector<FunctionNode<Matrix<Real>>> functions_matrix_real;
     std::vector<FunctionNode<Matrix<Rational>>> functions_matrix_rational;
     std::vector<FunctionNode<Matrix<Complex>>> functions_matrix_complex;
+    std::vector<FunctionNode<Vector<Real>>> functions_vector_real;
+    std::vector<FunctionNode<Vector<Rational>>> functions_vector_rational;
+    std::vector<FunctionNode<Vector<Complex>>> functions_vector_complex;
 
     std::vector<CustomUnit<Real>> units_real;
     std::vector<CustomUnit<Rational>> units_rational;

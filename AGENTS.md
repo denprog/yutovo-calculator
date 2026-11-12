@@ -24,6 +24,8 @@ Always place braces on their own line for control structures.
 
 Never leave two blank lines in a row — use at most one blank line between definitions or statements.
 
+Comments that precede a function, method, or class (header/descriptive comments above the definition) start with a capital letter, e.g. `//The shared body of the identifier resolution for the vector parsers`. Comments inside a function body start with a lowercase letter, e.g. `//a zero column makes the determinant zero`.
+
 For constructors, place the colon of the initializer list on the same line as the constructor signature. Put each initializer/base on its own line with a normal 4-space indent, and place the opening brace on its own line:
 ```cpp
 // CORRECT
@@ -70,7 +72,7 @@ All functions belonging to a number type (`Real`, `Complex`, `Array`, `Matrix`, 
 - The only namespace-scope declarations allowed are **non-defining forward declarations in `parser.cpp`** for the functions registered via `&func` pointers as builtins (hidden friends are otherwise invisible to ordinary lookup).
 
 ### Parenthesized expressions
-Keep the contents of parentheses (function argument lists, conditions, initializers, etc.) on a single line when it fits. Only wrap to a new line if the expression would exceed **140 columns**.
+Keep the contents of parentheses (function argument lists, conditions, initializers, etc.) on a single line when it fits. Only wrap to a new line if the expression would exceed **150 columns**.
 When a parenthesized expression is wrapped, each continuation line uses the normal **4-space indent**; do not align arguments with the opening parenthesis.
 When a long expression wraps, break the line **after an operator** (`|`, `>>`, `,`, `&&`, etc.) so the operator stays at the end of the continued line; never put a line break between an operator and its operand — do not write `x = guard >>` on one line with the parenthesized operand starting the next line.
 When editing existing code, do not reformat or rewrap surrounding lines to match a new style — apply the edit in place, keeping the existing line layout.

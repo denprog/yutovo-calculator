@@ -113,4 +113,69 @@ TEST_F(CalcTestSymbolicReal, matrix_implicit)
     ASSERT_TRUE(r.ToStdString(10) == "2.*(x*w-y*z)") << r.ToStdString(10);
 }
 
+//Symbolic vectors: a vector literal is a single-row matrix, the operations go through giac
+TEST_F(CalcTestSymbolicReal, vectors1)
+{
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"dot([1,2,3],[4,5,6]);");
+    ASSERT_TRUE(res.ToStdString(10) == "32.") << res.ToStdString(10);
+    res = parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"dot([[1],[2]],[[3],[4]]);");
+    ASSERT_TRUE(res.ToStdString(10) == "11.") << res.ToStdString(10);
+    res = parser.Parse(LogicalId{0, 0, 0, 0, 3}, U"norm([3,4]);");
+    ASSERT_TRUE(res.ToStdString(10) == "5.") << res.ToStdString(10);
+    res = parser.Parse(LogicalId{0, 0, 0, 0, 4}, U"normalize([3,4]);");
+    ASSERT_TRUE(res.ToStdString(10) == "[[3/5,4/5]]") << res.ToStdString(10);
+    res = parser.Parse(LogicalId{0, 0, 0, 0, 5}, U"cross([1,0,0],[0,1,0]);");
+    ASSERT_TRUE(res.ToStdString(10) == "[[0,0,1]]") << res.ToStdString(10);
+    res = parser.Parse(LogicalId{0, 0, 0, 0, 6}, U"angle([1,0],[0,1]);");
+    ASSERT_TRUE(res.ToStdString(10) == "1.571") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicReal, vectors_symbolic_arguments)
+{
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"dot([x,y],[y,x]);");
+    ASSERT_TRUE(res.ToStdString(10) == "x*y+y*x") << res.ToStdString(10);
+    res = parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"cross([x,y,z],[1,0,0]);");
+    ASSERT_TRUE(res.ToStdString(10) == "[[0,z,-y]]") << res.ToStdString(10);
+    res = parser.Parse(LogicalId{0, 0, 0, 0, 3}, U"norm([x,y]);");
+    ASSERT_TRUE(res.ToStdString(10) == "sqrt(pow(x,2.)+pow(y,2.))") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicReal, vectors_matrix_product)
+{
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"[[1,2],[3,4]]*[[1],[2]];");
+    ASSERT_TRUE(res.ToStdString(10) == "[[5],[11]]") << res.ToStdString(10);
+    res = parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"[1,2,3]*[[1],[2],[3]];");
+    ASSERT_TRUE(res.ToStdString(10) == "[[14]]") << res.ToStdString(10);
+}
+
+//Symbolic vector variables: the dot product of a vector with itself
+TEST_F(CalcTestSymbolicReal, vectors2)
+{
+    parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"u=[x,y];");
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"dot(u,u);");
+    ASSERT_TRUE(res.ToStdString(10) == "pow(x,2.)+pow(y,2.)") << res.ToStdString(10);
+}
+
+//A user function returning a vector, used inside the dot product
+TEST_F(CalcTestSymbolicReal, vectors3)
+{
+    parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"f(t)=t*[1,2];");
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"dot(f(2),[1,1]);");
+    ASSERT_TRUE(res.ToStdString(10) == "6.") << res.ToStdString(10);
+}
+
+//Vector operations inside a bigger expression
+TEST_F(CalcTestSymbolicReal, vectors4)
+{
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"2*dot([1,2],[3,4])+norm([3,4]);");
+    ASSERT_TRUE(res.ToStdString(10) == "27.") << res.ToStdString(10);
+}
+
+//The matrix-vector product with symbolic entries
+TEST_F(CalcTestSymbolicReal, vectors5)
+{
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"[[x,0],[0,y]]*[[1],[2]];");
+    ASSERT_TRUE(res.ToStdString(10) == "[[x],[y*2]]") << res.ToStdString(10);
+}
+
 }

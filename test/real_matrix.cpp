@@ -43,7 +43,7 @@ TEST_F(CalcTestMatrixReal, literals_errors)
     EXPECT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 3}, U"[];"), yutovo_calculator::MathException);
 }
 
-//loops are impossible in the matrix parsers: the matrix comparison operators always throw IncorrectComparison
+//Loops are impossible in the matrix parsers: the matrix comparison operators always throw IncorrectComparison
 TEST_F(CalcTestMatrixReal, for1)
 {
     EXPECT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"for(i=1,i<=3,i=i+1,(u=u+i));"), yutovo_calculator::MathException);
@@ -268,6 +268,73 @@ TEST_F(CalcTestMatrixReal, implicit_mul_div)
     ASSERT_TRUE(r.ToStdString(3, 3) == "[[-4.E+0]]") << r.ToStdString(3, 3);
     r = parser.Parse(LogicalId{0, 0, 10}, U"det(A)A;");
     ASSERT_TRUE(r.ToStdString(3, 3) == "[[-2.E+0,-4.E+0],[-6.E+0,-8.E+0]]") << r.ToStdString(3, 3);
+}
+
+//A vector is a matrix with a single row or a single column; both orientations are accepted
+TEST_F(CalcTestMatrixReal, vectors_dot)
+{
+    auto res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"dot([1,2,3],[4,5,6]);");
+    ASSERT_TRUE(res.ToStdString(3, 3) == "[[32.E+0]]") << res.ToStdString(3, 3);
+    res = parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"dot([[1],[2]],[[3],[4]]);");
+    ASSERT_TRUE(res.ToStdString(3, 3) == "[[11.E+0]]") << res.ToStdString(3, 3);
+    res = parser.Parse(LogicalId{0, 0, 0, 0, 3}, U"dot([1,2],[[3],[4]]);");
+    ASSERT_TRUE(res.ToStdString(3, 3) == "[[11.E+0]]") << res.ToStdString(3, 3);
+    EXPECT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 4}, U"dot([1,2],[1,2,3]);"), yutovo_calculator::MathException);
+    EXPECT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 5}, U"dot([[1,2],[3,4]],[[1,2],[3,4]]);"), yutovo_calculator::MathException);
+}
+
+TEST_F(CalcTestMatrixReal, vectors_cross)
+{
+    auto res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"cross([1,0,0],[0,1,0]);");
+    ASSERT_TRUE(res.ToStdString(3, 3) == "[[0.E+0],[0.E+0],[1.E+0]]") << res.ToStdString(3, 3);
+    res = parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"cross([2,3,4],[5,6,7]);");
+    ASSERT_TRUE(res.ToStdString(3, 3) == "[[-3.E+0],[6.E+0],[-3.E+0]]") << res.ToStdString(3, 3);
+    EXPECT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 3}, U"cross([1,2],[3,4]);"), yutovo_calculator::MathException);
+    EXPECT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 4}, U"cross([[1,2],[3,4]],[1,2]);"), yutovo_calculator::MathException);
+}
+
+TEST_F(CalcTestMatrixReal, vectors_norm)
+{
+    auto res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"norm([3,4]);");
+    ASSERT_TRUE(res.ToStdString(3, 3) == "[[5.E+0]]") << res.ToStdString(3, 3);
+    res = parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"norm([[3],[4]]);");
+    ASSERT_TRUE(res.ToStdString(3, 3) == "[[5.E+0]]") << res.ToStdString(3, 3);
+    res = parser.Parse(LogicalId{0, 0, 0, 0, 3}, U"norm([1,2]);");
+    ASSERT_TRUE(res.ToStdString(3, 3) == "[[2.236E+0]]") << res.ToStdString(3, 3);
+    //a multi-row multi-column matrix is not a vector
+    EXPECT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 4}, U"norm([[1,2],[3,4]]);"), yutovo_calculator::MathException);
+}
+
+TEST_F(CalcTestMatrixReal, vectors_normalize)
+{
+    auto res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"normalize([3,4]);");
+    ASSERT_TRUE(res.ToStdString(3, 3) == "[[0.6E+0,0.8E+0]]") << res.ToStdString(3, 3);
+    //the orientation of the argument is preserved
+    res = parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"normalize([[3],[4]]);");
+    ASSERT_TRUE(res.ToStdString(3, 3) == "[[0.6E+0],[0.8E+0]]") << res.ToStdString(3, 3);
+    EXPECT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 3}, U"normalize([0,0]);"), yutovo_calculator::MathException);
+}
+
+TEST_F(CalcTestMatrixReal, vectors_angle)
+{
+    auto res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"angle([1,0],[0,1]);");
+    ASSERT_TRUE(res.ToStdString(3, 3) == "[[1.571E+0]]") << res.ToStdString(3, 3);
+    res = parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"angle([[1],[0]],[[1],[1]]);");
+    ASSERT_TRUE(res.ToStdString(3, 3) == "[[0.785E+0]]") << res.ToStdString(3, 3);
+    EXPECT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 3}, U"angle([1,0],[0,0]);"), yutovo_calculator::MathException);
+}
+
+//The matrix-vector product: a column vector is an n x 1 matrix
+TEST_F(CalcTestMatrixReal, matrix_vector_product)
+{
+    auto res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"[[1,2],[3,4]]*[[1],[2]];");
+    ASSERT_TRUE(res.ToStdString(3, 3) == "[[5.E+0],[11.E+0]]") << res.ToStdString(3, 3);
+    //transpose turns a row literal into a column
+    res = parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"[[1,2],[3,4]]*transpose([1,2]);");
+    ASSERT_TRUE(res.ToStdString(3, 3) == "[[5.E+0],[11.E+0]]") << res.ToStdString(3, 3);
+    //the product of a row by a column is the dot product
+    res = parser.Parse(LogicalId{0, 0, 0, 0, 3}, U"[1,2,3]*[[1],[2],[3]];");
+    ASSERT_TRUE(res.ToStdString(3, 3) == "[[14.E+0]]") << res.ToStdString(3, 3);
 }
 
 }

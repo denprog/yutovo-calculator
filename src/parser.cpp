@@ -242,6 +242,46 @@ Matrix<Complex> cols(const Matrix<Complex>& matrix);
 Matrix<Complex> size(const Matrix<Complex>& matrix);
 Matrix<Complex> linsolve(const Matrix<Complex>& left, const Matrix<Complex>& right);
 
+Matrix<Real> dot(const Matrix<Real>& left, const Matrix<Real>& right);
+Matrix<Real> cross(const Matrix<Real>& left, const Matrix<Real>& right);
+Matrix<Real> norm(const Matrix<Real>& matrix);
+Matrix<Real> normalize(const Matrix<Real>& matrix);
+Matrix<Real> angle(const Matrix<Real>& left, const Matrix<Real>& right);
+
+Matrix<Rational> dot(const Matrix<Rational>& left, const Matrix<Rational>& right);
+Matrix<Rational> cross(const Matrix<Rational>& left, const Matrix<Rational>& right);
+Matrix<Rational> norm(const Matrix<Rational>& matrix);
+Matrix<Rational> normalize(const Matrix<Rational>& matrix);
+
+Matrix<Complex> dot(const Matrix<Complex>& left, const Matrix<Complex>& right);
+Matrix<Complex> cross(const Matrix<Complex>& left, const Matrix<Complex>& right);
+Matrix<Complex> norm(const Matrix<Complex>& matrix);
+Matrix<Complex> normalize(const Matrix<Complex>& matrix);
+Matrix<Complex> angle(const Matrix<Complex>& left, const Matrix<Complex>& right);
+
+Vector<Real> dot(const Vector<Real>& left, const Vector<Real>& right);
+Vector<Real> cross(const Vector<Real>& left, const Vector<Real>& right);
+Vector<Real> norm(const Vector<Real>& num);
+Vector<Real> normalize(const Vector<Real>& num);
+Vector<Real> angle(const Vector<Real>& left, const Vector<Real>& right);
+Vector<Real> abs(const Vector<Real>& num);
+Vector<Real> size(const Vector<Real>& num);
+
+Vector<Rational> dot(const Vector<Rational>& left, const Vector<Rational>& right);
+Vector<Rational> cross(const Vector<Rational>& left, const Vector<Rational>& right);
+Vector<Rational> norm(const Vector<Rational>& num);
+Vector<Rational> normalize(const Vector<Rational>& num);
+Vector<Rational> abs(const Vector<Rational>& num);
+Vector<Rational> size(const Vector<Rational>& num);
+
+Vector<Complex> dot(const Vector<Complex>& left, const Vector<Complex>& right);
+Vector<Complex> cross(const Vector<Complex>& left, const Vector<Complex>& right);
+Vector<Complex> norm(const Vector<Complex>& num);
+Vector<Complex> normalize(const Vector<Complex>& num);
+Vector<Complex> angle(const Vector<Complex>& left, const Vector<Complex>& right);
+Vector<Complex> abs(const Vector<Complex>& num);
+Vector<Complex> size(const Vector<Complex>& num);
+
 Real definite_integral_real(const Real& a, const Real& b, const Real& c, const Real& d);
 Complex definite_integral_complex(const Complex& a, const Complex& b, const Complex& c, const Complex& d);
 Array<Real> definite_integral_array(const Array<Real>& a, const Array<Real>& b, const Array<Real>& c, const Array<Real>& d);
@@ -303,6 +343,11 @@ Symbolic<Real> exp(const Symbolic<Real>& num);
 Symbolic<Real> sqrt(const Symbolic<Real>& num);
 Symbolic<Real> abs(const Symbolic<Real>& num);
 Symbolic<Real> det(const Symbolic<Real>& num);
+Symbolic<Real> dot(const Symbolic<Real>& left, const Symbolic<Real>& right);
+Symbolic<Real> cross(const Symbolic<Real>& left, const Symbolic<Real>& right);
+Symbolic<Real> norm(const Symbolic<Real>& num);
+Symbolic<Real> normalize(const Symbolic<Real>& num);
+Symbolic<Real> angle(const Symbolic<Real>& left, const Symbolic<Real>& right);
 Symbolic<Real> inverse(const Symbolic<Real>& num);
 Symbolic<Real> transpose(const Symbolic<Real>& num);
 Symbolic<Real> trace(const Symbolic<Real>& num);
@@ -357,6 +402,11 @@ Symbolic<Rational> exp(const Symbolic<Rational>& num);
 Symbolic<Rational> sqrt(const Symbolic<Rational>& num);
 Symbolic<Rational> abs(const Symbolic<Rational>& num);
 Symbolic<Rational> det(const Symbolic<Rational>& num);
+Symbolic<Rational> dot(const Symbolic<Rational>& left, const Symbolic<Rational>& right);
+Symbolic<Rational> cross(const Symbolic<Rational>& left, const Symbolic<Rational>& right);
+Symbolic<Rational> norm(const Symbolic<Rational>& num);
+Symbolic<Rational> normalize(const Symbolic<Rational>& num);
+Symbolic<Rational> angle(const Symbolic<Rational>& left, const Symbolic<Rational>& right);
 Symbolic<Rational> inverse(const Symbolic<Rational>& num);
 Symbolic<Rational> transpose(const Symbolic<Rational>& num);
 Symbolic<Rational> trace(const Symbolic<Rational>& num);
@@ -408,6 +458,11 @@ Symbolic<Complex> exp(const Symbolic<Complex>& num);
 Symbolic<Complex> sqrt(const Symbolic<Complex>& num);
 Symbolic<Complex> abs(const Symbolic<Complex>& num);
 Symbolic<Complex> det(const Symbolic<Complex>& num);
+Symbolic<Complex> dot(const Symbolic<Complex>& left, const Symbolic<Complex>& right);
+Symbolic<Complex> cross(const Symbolic<Complex>& left, const Symbolic<Complex>& right);
+Symbolic<Complex> norm(const Symbolic<Complex>& num);
+Symbolic<Complex> normalize(const Symbolic<Complex>& num);
+Symbolic<Complex> angle(const Symbolic<Complex>& left, const Symbolic<Complex>& right);
 Symbolic<Complex> inverse(const Symbolic<Complex>& num);
 Symbolic<Complex> transpose(const Symbolic<Complex>& num);
 Symbolic<Complex> trace(const Symbolic<Complex>& num);
@@ -905,9 +960,19 @@ Parser<yutovo_calculator::Matrix<yutovo_calculator::Real>>::Parser(const int pre
     solver.AddBuiltinFunction(U"cols", unary_func);
     unary_func = &size;
     solver.AddBuiltinFunction(U"size", unary_func);
+    unary_func = &norm;
+    solver.AddBuiltinFunction(U"norm", unary_func);
+    unary_func = &normalize;
+    solver.AddBuiltinFunction(U"normalize", unary_func);
 
     MatrixRealBinaryFunc binary_func = &linsolve;
     solver.AddBuiltinFunction(U"linsolve", binary_func);
+    binary_func = &dot;
+    solver.AddBuiltinFunction(U"dot", binary_func);
+    binary_func = &cross;
+    solver.AddBuiltinFunction(U"cross", binary_func);
+    binary_func = &angle;
+    solver.AddBuiltinFunction(U"angle", binary_func);
 }
 
 template<>
@@ -938,9 +1003,17 @@ Parser<yutovo_calculator::Matrix<yutovo_calculator::Rational>>::Parser(const int
     solver.AddBuiltinFunction(U"cols", unary_func);
     unary_func = &size;
     solver.AddBuiltinFunction(U"size", unary_func);
+    unary_func = &norm;
+    solver.AddBuiltinFunction(U"norm", unary_func);
+    unary_func = &normalize;
+    solver.AddBuiltinFunction(U"normalize", unary_func);
 
     MatrixRationalBinaryFunc binary_func = &linsolve;
     solver.AddBuiltinFunction(U"linsolve", binary_func);
+    binary_func = &dot;
+    solver.AddBuiltinFunction(U"dot", binary_func);
+    binary_func = &cross;
+    solver.AddBuiltinFunction(U"cross", binary_func);
 }
 
 template<>
@@ -971,9 +1044,103 @@ Parser<yutovo_calculator::Matrix<yutovo_calculator::Complex>>::Parser(const int 
     solver.AddBuiltinFunction(U"cols", unary_func);
     unary_func = &size;
     solver.AddBuiltinFunction(U"size", unary_func);
+    unary_func = &norm;
+    solver.AddBuiltinFunction(U"norm", unary_func);
+    unary_func = &normalize;
+    solver.AddBuiltinFunction(U"normalize", unary_func);
 
     MatrixComplexBinaryFunc binary_func = &linsolve;
     solver.AddBuiltinFunction(U"linsolve", binary_func);
+    binary_func = &dot;
+    solver.AddBuiltinFunction(U"dot", binary_func);
+    binary_func = &cross;
+    solver.AddBuiltinFunction(U"cross", binary_func);
+    binary_func = &angle;
+    solver.AddBuiltinFunction(U"angle", binary_func);
+
+    switch (language)
+    {
+    case Language::Russian:
+        solver.im = U"j";
+        break;
+    default:
+        solver.im = U"i";
+        break;
+    }
+}
+
+template<>
+Parser<yutovo_calculator::Vector<yutovo_calculator::Real>>::Parser(const int precision, const Language _language) :
+    solver(precision, AngleMeasure::Radian),
+    language(_language),
+    last_language(_language)
+{
+    InitThreadTime();
+
+    VectorRealUnaryFunc unary_func = &norm;
+    solver.AddBuiltinFunction(U"norm", unary_func);
+    unary_func = &normalize;
+    solver.AddBuiltinFunction(U"normalize", unary_func);
+    unary_func = &size;
+    solver.AddBuiltinFunction(U"size", unary_func);
+    unary_func = &abs;
+    solver.AddBuiltinFunction(U"abs", unary_func);
+
+    VectorRealBinaryFunc binary_func = &dot;
+    solver.AddBuiltinFunction(U"dot", binary_func);
+    binary_func = &cross;
+    solver.AddBuiltinFunction(U"cross", binary_func);
+    binary_func = &angle;
+    solver.AddBuiltinFunction(U"angle", binary_func);
+}
+
+template<>
+Parser<yutovo_calculator::Vector<yutovo_calculator::Rational>>::Parser(const int precision, const Language _language) :
+    solver(precision, AngleMeasure::Radian),
+    language(_language),
+    last_language(_language)
+{
+    InitThreadTime();
+
+    //angle is not registered: the arccosine of a rational value is generally not rational
+    VectorRationalUnaryFunc unary_func = &norm;
+    solver.AddBuiltinFunction(U"norm", unary_func);
+    unary_func = &normalize;
+    solver.AddBuiltinFunction(U"normalize", unary_func);
+    unary_func = &size;
+    solver.AddBuiltinFunction(U"size", unary_func);
+    unary_func = &abs;
+    solver.AddBuiltinFunction(U"abs", unary_func);
+
+    VectorRationalBinaryFunc binary_func = &dot;
+    solver.AddBuiltinFunction(U"dot", binary_func);
+    binary_func = &cross;
+    solver.AddBuiltinFunction(U"cross", binary_func);
+}
+
+template<>
+Parser<yutovo_calculator::Vector<yutovo_calculator::Complex>>::Parser(const int precision, const Language _language) :
+    solver(precision, AngleMeasure::Radian),
+    language(_language),
+    last_language(_language)
+{
+    InitThreadTime();
+
+    VectorComplexUnaryFunc unary_func = &norm;
+    solver.AddBuiltinFunction(U"norm", unary_func);
+    unary_func = &normalize;
+    solver.AddBuiltinFunction(U"normalize", unary_func);
+    unary_func = &size;
+    solver.AddBuiltinFunction(U"size", unary_func);
+    unary_func = &abs;
+    solver.AddBuiltinFunction(U"abs", unary_func);
+
+    VectorComplexBinaryFunc binary_func = &dot;
+    solver.AddBuiltinFunction(U"dot", binary_func);
+    binary_func = &cross;
+    solver.AddBuiltinFunction(U"cross", binary_func);
+    binary_func = &angle;
+    solver.AddBuiltinFunction(U"angle", binary_func);
 
     switch (language)
     {
@@ -1108,6 +1275,16 @@ Parser<yutovo_calculator::Symbolic<yutovo_calculator::Real>>::Parser(const int p
     binary_func = &derivative;
     solver.AddBuiltinFunction(U"derivative", binary_func);
     solver.AddBuiltinFunction(U"diff", binary_func);
+    binary_func = &dot;
+    solver.AddBuiltinFunction(U"dot", binary_func);
+    binary_func = &cross;
+    solver.AddBuiltinFunction(U"cross", binary_func);
+    binary_func = &angle;
+    solver.AddBuiltinFunction(U"angle", binary_func);
+    unary_func = &norm;
+    solver.AddBuiltinFunction(U"norm", unary_func);
+    unary_func = &normalize;
+    solver.AddBuiltinFunction(U"normalize", unary_func);
     binary_func = &indefinite_integral;
     solver.AddBuiltinFunction(U"indefinite_integral", binary_func);
     binary_func = &pow;
@@ -1212,6 +1389,36 @@ void Parser<yutovo_calculator::Matrix<yutovo_calculator::Rational>>::SetLocale(L
 
 template<>
 void Parser<yutovo_calculator::Matrix<yutovo_calculator::Complex>>::SetLocale(Language _language)
+{
+    language = _language;
+    switch (language)
+    {
+    case Language::Russian:
+        solver.im = U"j";
+        break;
+    default:
+        solver.im = U"i";
+        break;
+    }
+    last_language = language;
+}
+
+template<>
+void Parser<yutovo_calculator::Vector<yutovo_calculator::Real>>::SetLocale(Language _language)
+{
+    language = _language;
+    last_language = language;
+}
+
+template<>
+void Parser<yutovo_calculator::Vector<yutovo_calculator::Rational>>::SetLocale(Language _language)
+{
+    language = _language;
+    last_language = language;
+}
+
+template<>
+void Parser<yutovo_calculator::Vector<yutovo_calculator::Complex>>::SetLocale(Language _language)
 {
     language = _language;
     switch (language)
@@ -1362,6 +1569,16 @@ Parser<yutovo_calculator::Symbolic<yutovo_calculator::Rational>>::Parser(const i
     binary_func = &derivative;
     solver.AddBuiltinFunction(U"derivative", binary_func);
     solver.AddBuiltinFunction(U"diff", binary_func);
+    binary_func = &dot;
+    solver.AddBuiltinFunction(U"dot", binary_func);
+    binary_func = &cross;
+    solver.AddBuiltinFunction(U"cross", binary_func);
+    binary_func = &angle;
+    solver.AddBuiltinFunction(U"angle", binary_func);
+    unary_func = &norm;
+    solver.AddBuiltinFunction(U"norm", unary_func);
+    unary_func = &normalize;
+    solver.AddBuiltinFunction(U"normalize", unary_func);
     binary_func = &indefinite_integral;
     solver.AddBuiltinFunction(U"indefinite_integral", binary_func);
     binary_func = &pow;
@@ -1539,6 +1756,16 @@ Parser<yutovo_calculator::Symbolic<yutovo_calculator::Complex>>::Parser(const in
     binary_func = &derivative;
     solver.AddBuiltinFunction(U"derivative", binary_func);
     solver.AddBuiltinFunction(U"diff", binary_func);
+    binary_func = &dot;
+    solver.AddBuiltinFunction(U"dot", binary_func);
+    binary_func = &cross;
+    solver.AddBuiltinFunction(U"cross", binary_func);
+    binary_func = &angle;
+    solver.AddBuiltinFunction(U"angle", binary_func);
+    unary_func = &norm;
+    solver.AddBuiltinFunction(U"norm", unary_func);
+    unary_func = &normalize;
+    solver.AddBuiltinFunction(U"normalize", unary_func);
     binary_func = &indefinite_integral;
     solver.AddBuiltinFunction(U"indefinite_integral", binary_func);
     binary_func = &pow;

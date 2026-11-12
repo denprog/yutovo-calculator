@@ -64,6 +64,13 @@ typedef Matrix<Rational> (*MatrixRationalBinaryFunc)(const Matrix<Rational>& num
 typedef Matrix<Complex> (*MatrixComplexUnaryFunc)(const Matrix<Complex>& num);
 typedef Matrix<Complex> (*MatrixComplexBinaryFunc)(const Matrix<Complex>& num1, const Matrix<Complex>& num2);
 
+typedef Vector<Real> (*VectorRealUnaryFunc)(const Vector<Real>& num);
+typedef Vector<Real> (*VectorRealBinaryFunc)(const Vector<Real>& num1, const Vector<Real>& num2);
+typedef Vector<Rational> (*VectorRationalUnaryFunc)(const Vector<Rational>& num);
+typedef Vector<Rational> (*VectorRationalBinaryFunc)(const Vector<Rational>& num1, const Vector<Rational>& num2);
+typedef Vector<Complex> (*VectorComplexUnaryFunc)(const Vector<Complex>& num);
+typedef Vector<Complex> (*VectorComplexBinaryFunc)(const Vector<Complex>& num1, const Vector<Complex>& num2);
+
 typedef Symbolic<Real> (*SymbolicUnaryFunc)(const Symbolic<Real>& num);
 typedef Symbolic<Real> (*SymbolicBinaryFunc)(const Symbolic<Real>& num1, const Symbolic<Real>& num2);
 typedef Symbolic<Real> (*SymbolicTernaryFunc)(const Symbolic<Real>& num1, const Symbolic<Real>& num2, const Symbolic<Real>& num3);
@@ -238,8 +245,30 @@ struct Solver : public boost::static_visitor<Number>
                     std::u32string d = U"1";
                     for (int i = 0; i < _op.number.length() - p - 1; ++i)
                         d += U"0";
-                    return Number(Rational(_op.number.substr(0, p)) + Rational(_op.number.substr(p + 1, _op.number.length() - p - 1)) /
-                        Rational(d));
+                    return Number(Rational(_op.number.substr(0, p)) + Rational(_op.number.substr(p + 1, _op.number.length() - p - 1)) / Rational(d));
+                }
+                return Number(Rational(_op.number));
+            }
+            else
+            {
+                NumberNode<Number> _op = op;
+                return Number(_op.number);
+            }
+        }
+        else if constexpr (is_vector_v<Number>)
+        {
+            //a number literal is a one-element vector; its element follows the literal rules of the element type
+            using Element = typename Number::value_type;
+            if constexpr (std::is_same_v<Element, Rational>)
+            {
+                NumberNode<Number> _op = op;
+                auto p = _op.number.find(U'.');
+                if (p != std::string::npos)
+                {
+                    std::u32string d = U"1";
+                    for (int i = 0; i < _op.number.length() - p - 1; ++i)
+                        d += U"0";
+                    return Number(Rational(_op.number.substr(0, p)) + Rational(_op.number.substr(p + 1, _op.number.length() - p - 1)) / Rational(d));
                 }
                 return Number(Rational(_op.number));
             }
@@ -1560,6 +1589,97 @@ struct Solver : public boost::static_visitor<Number>
             error_line);
     }
 
+    //Resolves the single subscript expression of a vector element access v{i}
+    Number VectorElementBySubscript(const Number& vector_value, const IdentifierNode<Number>& identifier, LogicalId error_id, int error_pos,
+        int error_line) const
+    {
+        //the vector itself is a dependency, so its redefinition re-solves the expression
+        IdentifierNode<Number> vector_identifier;
+        vector_identifier.name = identifier.name;
+        AddDependency(vector_identifier);
+
+        const std::u32string& subscript = identifier.subscript;
+        Number index_value;
+        bool resolved = false;
+
+        //the subscript is looked up as a declared variable, a temp variable, a literal or an expression
+        VariableNode<Number>* index_variable = FindVariable(subscript, U"");
+        if (index_variable)
+        {
+            //a declared index variable is a dependency too, so its redefinition re-solves the expression
+            IdentifierNode<Number> dependency;
+            dependency.name = subscript;
+            AddDependency(dependency);
+            index_value = (*this)(index_variable->expression);
+            resolved = true;
+        }
+        else
+        {
+            TempVariable* index_temp = FindTempVariable(subscript);
+            if (index_temp)
+            {
+                index_value = index_temp->second;
+                resolved = true;
+            }
+        }
+
+        int index = 0;
+        if (!resolved)
+        {
+            try
+            {
+                index = StringToInt(subscript);
+            }
+            catch (const std::exception&)
+            {
+                //the subscript is an arbitrary expression; its result must be an integer
+                try
+                {
+                    index_value = EvaluateWithTempVariables(subscript, {});
+                }
+                catch (...)
+                {
+                    throw SyntaxException(error_id, ArgumentIsOver, U"Index of '" + identifier.name + U"' is over", error_pos,
+                        identifier.name.length(), error_line);
+                }
+                resolved = true;
+            }
+        }
+
+        if (resolved)
+        {
+            if (!index_value.IsSingleValue())
+                throw SyntaxException(error_id, IncorrectOperation, U"Index of '" + identifier.name + U"' is not an integer", error_pos,
+                    identifier.name.length(), error_line);
+            const typename Number::value_type& element = index_value.GetScalar();
+            if constexpr (std::is_same_v<typename Number::value_type, Real>)
+            {
+                if (!element.IsInteger())
+                    throw SyntaxException(error_id, IncorrectOperation, U"Index of '" + identifier.name + U"' is not an integer", error_pos,
+                        identifier.name.length(), error_line);
+            }
+            else
+            {
+                //Rational and Complex elements are converted through their magnitude
+            }
+            try
+            {
+                index = Number::VectorElementToInt(element);
+            }
+            catch (const MathException&)
+            {
+                throw SyntaxException(error_id, ArgumentIsOver, U"Index of '" + identifier.name + U"' is over", error_pos,
+                    identifier.name.length(), error_line);
+            }
+        }
+
+        if (index < vector_value.Size() && index >= 0)
+            return Number(vector_value.Get(index));
+
+        throw SyntaxException(error_id, ArgumentIsOver, U"Index of '" + identifier.name + U"' is over", error_pos, identifier.name.length(), 
+            error_line);
+    }
+
     Number NumericalDerivativeAtPoint(const std::u32string& expression_str, const std::list<DerivativeVariableNode<Number>>& variables) const
     {
         auto var_iter = variables.begin();
@@ -2278,6 +2398,24 @@ struct Solver : public boost::static_visitor<Number>
                 throw MathException(op.id, IncorrectOperation, op.pos, 1, op.line);
             return res;
         }
+        else if constexpr (is_vector_v<Number>)
+        {
+            CheckBreak(parser_context);
+            if (op.array.empty())
+                throw MathException(op.id, IncorrectOperation, op.pos, 1, op.line);
+
+            //a literal builds a column vector: every operand contributes exactly one element
+            Number res;
+            for (auto& operand : op.array)
+            {
+                CheckBreak(parser_context);
+                Number value = (*this)(operand);
+                if (!value.IsSingleValue())
+                    throw MathException(op.id, IncorrectOperation, op.pos, 1, op.line);
+                res.Add(value.GetScalar());
+            }
+            return res;
+        }
         else if constexpr (is_symbolic_v<Number>)
         {
             //the literal is built directly as a giac matrix: flat scalars form a single row,
@@ -2404,7 +2542,8 @@ struct Solver : public boost::static_visitor<Number>
             }
         }
 
-        if constexpr (std::is_same_v<Number, Real> || std::is_same_v<Number, Matrix<Real>> || std::is_same_v<Number, Matrix<Complex>>)
+        if constexpr (std::is_same_v<Number, Real> || std::is_same_v<Number, Matrix<Real>> || std::is_same_v<Number, Matrix<Complex>> ||
+            std::is_same_v<Number, Vector<Real>> || std::is_same_v<Number, Vector<Complex>>)
         {
             if (res.GetAngleMeasure() != AngleMeasure::None)
             {
@@ -3758,6 +3897,13 @@ private:
     static Number MatrixImplicitDivMul(const Solver<Number>& solver, ImplicitDivMulNode<Number> const& op);
     static VariableNode<Number>* MatrixFindVariable(const Solver<Number>& solver, const std::u32string& name, const std::u32string& subscript);
 
+    static Number VectorUnaryOperation(const Solver<Number>& solver, UnaryOperationNode<Number> const& op);
+    static Number VectorOperation(const Solver<Number>& solver, OperationNode<Number> const& op);
+    static Number VectorIdentifier(const Solver<Number>& solver, IdentifierNode<Number> const& op);
+    static Number VectorImplicitStringMul(const Solver<Number>& solver, ImplicitStringMulNode<Number> const& op);
+    static Number VectorImplicitDivMul(const Solver<Number>& solver, ImplicitDivMulNode<Number> const& op);
+    static VariableNode<Number>* VectorFindVariable(const Solver<Number>& solver, const std::u32string& name, const std::u32string& subscript);
+
     mutable LogicalId id;
     mutable int precision;
     mutable AngleMeasure default_angle_measure;
@@ -3889,6 +4035,37 @@ template<> Matrix<Complex> Solver<Matrix<Complex>>::operator()(IdentifierNode<Ma
 template<> Matrix<Complex> Solver<Matrix<Complex>>::operator()(ImplicitStringMulNode<Matrix<Complex>> const& op) const;
 template<> Matrix<Complex> Solver<Matrix<Complex>>::operator()(ImplicitDivMulNode<Matrix<Complex>> const& op) const;
 template<> VariableNode<Matrix<Complex>>* Solver<Matrix<Complex>>::FindVariable(const std::u32string& name, const std::u32string& subscript) const;
+
+template<> Vector<Real> Solver<Vector<Real>>::operator()(UnaryOperationNode<Vector<Real>> const& op) const;
+template<> Vector<Real> Solver<Vector<Real>>::operator()(OperationNode<Vector<Real>> const& op) const;
+template<> Vector<Real> Solver<Vector<Real>>::operator()(PostfixOperationNode<Vector<Real>> const& op) const;
+template<> Vector<Real> Solver<Vector<Real>>::operator()(FunctionCallNode<Vector<Real>> const& op) const;
+template<> Vector<Real> Solver<Vector<Real>>::operator()(FunctionCallStringNode<Vector<Real>> const& op) const;
+template<> Vector<Real> Solver<Vector<Real>>::operator()(NoFencesFunctionCallNode<Vector<Real>> const& op) const;
+template<> Vector<Real> Solver<Vector<Real>>::operator()(IdentifierNode<Vector<Real>> const& op) const;
+template<> Vector<Real> Solver<Vector<Real>>::operator()(ImplicitStringMulNode<Vector<Real>> const& op) const;
+template<> Vector<Real> Solver<Vector<Real>>::operator()(ImplicitDivMulNode<Vector<Real>> const& op) const;
+template<> VariableNode<Vector<Real>>* Solver<Vector<Real>>::FindVariable(const std::u32string& name, const std::u32string& subscript) const;
+template<> Vector<Rational> Solver<Vector<Rational>>::operator()(UnaryOperationNode<Vector<Rational>> const& op) const;
+template<> Vector<Rational> Solver<Vector<Rational>>::operator()(OperationNode<Vector<Rational>> const& op) const;
+template<> Vector<Rational> Solver<Vector<Rational>>::operator()(PostfixOperationNode<Vector<Rational>> const& op) const;
+template<> Vector<Rational> Solver<Vector<Rational>>::operator()(FunctionCallNode<Vector<Rational>> const& op) const;
+template<> Vector<Rational> Solver<Vector<Rational>>::operator()(FunctionCallStringNode<Vector<Rational>> const& op) const;
+template<> Vector<Rational> Solver<Vector<Rational>>::operator()(NoFencesFunctionCallNode<Vector<Rational>> const& op) const;
+template<> Vector<Rational> Solver<Vector<Rational>>::operator()(IdentifierNode<Vector<Rational>> const& op) const;
+template<> Vector<Rational> Solver<Vector<Rational>>::operator()(ImplicitStringMulNode<Vector<Rational>> const& op) const;
+template<> Vector<Rational> Solver<Vector<Rational>>::operator()(ImplicitDivMulNode<Vector<Rational>> const& op) const;
+template<> VariableNode<Vector<Rational>>* Solver<Vector<Rational>>::FindVariable(const std::u32string& name, const std::u32string& subscript) const;
+template<> Vector<Complex> Solver<Vector<Complex>>::operator()(UnaryOperationNode<Vector<Complex>> const& op) const;
+template<> Vector<Complex> Solver<Vector<Complex>>::operator()(OperationNode<Vector<Complex>> const& op) const;
+template<> Vector<Complex> Solver<Vector<Complex>>::operator()(PostfixOperationNode<Vector<Complex>> const& op) const;
+template<> Vector<Complex> Solver<Vector<Complex>>::operator()(FunctionCallNode<Vector<Complex>> const& op) const;
+template<> Vector<Complex> Solver<Vector<Complex>>::operator()(FunctionCallStringNode<Vector<Complex>> const& op) const;
+template<> Vector<Complex> Solver<Vector<Complex>>::operator()(NoFencesFunctionCallNode<Vector<Complex>> const& op) const;
+template<> Vector<Complex> Solver<Vector<Complex>>::operator()(IdentifierNode<Vector<Complex>> const& op) const;
+template<> Vector<Complex> Solver<Vector<Complex>>::operator()(ImplicitStringMulNode<Vector<Complex>> const& op) const;
+template<> Vector<Complex> Solver<Vector<Complex>>::operator()(ImplicitDivMulNode<Vector<Complex>> const& op) const;
+template<> VariableNode<Vector<Complex>>* Solver<Vector<Complex>>::FindVariable(const std::u32string& name, const std::u32string& subscript) const;
 
 };
 

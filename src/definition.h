@@ -69,9 +69,11 @@ struct Definition : qi::grammar<std::u32string::iterator, DefinitionNode<Number>
 
 		//identifier is a name with an optional subscript and optional description
 		if constexpr (std::is_same_v<Number, Array<Real>>)
-			subscript = expression.subscript.alias();
+			subscript = expression.subscript.alias(); //the array parser accepts an arbitrary expression as the subscript
 		else if constexpr (is_matrix_v<Number>)
-			subscript = expression.subscript.alias();
+			subscript = expression.subscript.alias(); //the matrix parsers accept two comma-separated expressions (the row and the column index)
+		else if constexpr (is_vector_v<Number>)
+			subscript = expression.subscript.alias(); //the vector parsers accept a single expression (the element index)
 		else
 			subscript = (+char_("0-9") | name);
 		identifier = name >> -('{' > subscript > '}') >> -('`' > description > '`');

@@ -249,6 +249,11 @@ private:
             return abs(value);
     }
 
+    static bool MatrixIsVector(const Matrix<Number>& matrix)
+    {
+        return matrix.rows == 1 || matrix.columns == 1;
+    }
+
     static Number MatrixElementFromInt(const Number& sample, int value)
     {
         Number res = sample;
@@ -596,6 +601,86 @@ public:
             solution.Element(row, 0) = value / augmented.Get(row, row);
         }
         return solution;
+    }
+
+    //The dot product of two vectors given as matrices with a single row or a single column
+    friend Matrix<Number> dot(const Matrix<Number>& num1, const Matrix<Number>& num2)
+    {
+        if (num1.rows == 0 || num2.rows == 0 || !MatrixIsVector(num1) || !MatrixIsVector(num2) ||
+            num1.numbers.size() != num2.numbers.size())
+        {
+            throw MathException(IncorrectOperation);
+        }
+        Number sum = MatrixElementFromInt(num1.numbers[0], 0);
+        for (size_t i = 0; i < num1.numbers.size(); ++i)
+            sum = sum + num1.numbers[i] * num2.numbers[i];
+        return MatrixFromScalar(sum);
+    }
+
+    //The cross product of two 3-dimensional vectors; the result is a column vector
+    friend Matrix<Number> cross(const Matrix<Number>& num1, const Matrix<Number>& num2)
+    {
+        if (!MatrixIsVector(num1) || !MatrixIsVector(num2) || num1.numbers.size() != 3 || num2.numbers.size() != 3)
+            throw MathException(IncorrectOperation);
+        Matrix<Number> res;
+        res.Resize(3, 1, num1.numbers[0]);
+        res.Element(0, 0) = num1.numbers[1] * num2.numbers[2] - num1.numbers[2] * num2.numbers[1];
+        res.Element(1, 0) = num1.numbers[2] * num2.numbers[0] - num1.numbers[0] * num2.numbers[2];
+        res.Element(2, 0) = num1.numbers[0] * num2.numbers[1] - num1.numbers[1] * num2.numbers[0];
+        return res;
+    }
+
+    //The Euclidean norm (the length) of a vector; for rational elements the result must stay exact
+    friend Matrix<Number> norm(const Matrix<Number>& matrix)
+    {
+        if (matrix.rows == 0 || !MatrixIsVector(matrix))
+            throw MathException(IncorrectOperation);
+        if constexpr (std::is_same_v<Number, Complex>)
+        {
+            //the sum of the squared modules is a real value, so the norm is real as well
+            Real squares = module(matrix.numbers[0]) * module(matrix.numbers[0]);
+            for (size_t i = 1; i < matrix.numbers.size(); ++i)
+                squares = squares + module(matrix.numbers[i]) * module(matrix.numbers[i]);
+            return MatrixFromScalar(Number(sqrt(squares)));
+        }
+        else
+        {
+            Number squares = matrix.numbers[0] * matrix.numbers[0];
+            for (size_t i = 1; i < matrix.numbers.size(); ++i)
+                squares = squares + matrix.numbers[i] * matrix.numbers[i];
+            return MatrixFromScalar(sqrt(squares));
+        }
+    }
+
+    //The vector of length 1 in the same direction, keeping the orientation of the argument
+    friend Matrix<Number> normalize(const Matrix<Number>& matrix)
+    {
+        Matrix<Number> length = norm(matrix);
+        if (length.numbers[0] == 0)
+            throw MathException(DivisionByZero);
+        Matrix<Number> res(matrix);
+        for (auto& element : res.numbers)
+            element = element / length.numbers[0];
+        return res;
+    }
+
+    //The angle between two vectors; the result carries the radian measure
+    friend Matrix<Number> angle(const Matrix<Number>& num1, const Matrix<Number>& num2)
+    {
+        if (num1.rows == 0 || !MatrixIsVector(num1) || !MatrixIsVector(num2) || num1.numbers.size() != num2.numbers.size())
+            throw MathException(IncorrectOperation);
+        Matrix<Number> length1 = norm(num1);
+        Matrix<Number> length2 = norm(num2);
+        if (length1.numbers[0] == 0 || length2.numbers[0] == 0)
+            throw MathException(DivisionByZero);
+        Number cosine = dot(num1, num2).numbers[0] / (length1.numbers[0] * length2.numbers[0]);
+        if constexpr (std::is_same_v<Number, Complex>)
+        {
+            int result_position = 0;
+            return MatrixFromScalar(arccos(cosine, result_position));
+        }
+        else
+            return MatrixFromScalar(arccos(cosine));
     }
 
 public:

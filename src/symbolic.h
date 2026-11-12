@@ -590,6 +590,93 @@ public:
         return res;
     }
 
+    //The dot product of two vectors
+    friend Symbolic<Number> dot(const Symbolic<Number>& num1, const Symbolic<Number>& num2)
+    {
+        Symbolic<Number> res(num1.precision);
+        giac::vecteur first;
+        giac::vecteur second;
+        if (!SymbolicVectorElements(num1, first) || !SymbolicVectorElements(num2, second) || first.size() != second.size())
+            throw MathException(IncorrectOperation);
+        GiacMpfrStateGuard mpfr_guard;
+        giac::gen result = giac::dotvecteur(giac::gen(first), giac::gen(second));
+        if (giac::is_undef(result))
+            throw MathException(IncorrectOperation);
+        *res.expr = result;
+        return res;
+    }
+
+    //The cross product of two 3-dimensional vectors
+    friend Symbolic<Number> cross(const Symbolic<Number>& num1, const Symbolic<Number>& num2)
+    {
+        Symbolic<Number> res(num1.precision);
+        giac::vecteur first;
+        giac::vecteur second;
+        if (!SymbolicVectorElements(num1, first) || !SymbolicVectorElements(num2, second) || first.size() != 3 || second.size() != 3)
+            throw MathException(IncorrectOperation);
+        GiacMpfrStateGuard mpfr_guard;
+        giac::gen result = giac::cross(giac::gen(first), giac::gen(second), res.Context());
+        if (giac::is_undef(result) || result.type != giac::_VECT || result._VECTptr->size() != 3)
+            throw MathException(IncorrectOperation);
+        *res.expr = SymbolicVectorResult(*result._VECTptr);
+        return res;
+    }
+
+    //The Euclidean norm (the length) of a vector
+    friend Symbolic<Number> norm(const Symbolic<Number>& num)
+    {
+        Symbolic<Number> res(num.precision);
+        giac::vecteur elements;
+        if (!SymbolicVectorElements(num, elements))
+            throw MathException(IncorrectOperation);
+        GiacMpfrStateGuard mpfr_guard;
+        giac::gen result = giac::l2norm(elements, res.Context());
+        if (giac::is_undef(result))
+            throw MathException(IncorrectOperation);
+        *res.expr = result;
+        return res;
+    }
+
+    //The vector of length 1 in the same direction
+    friend Symbolic<Number> normalize(const Symbolic<Number>& num)
+    {
+        Symbolic<Number> res(num.precision);
+        giac::vecteur elements;
+        if (!SymbolicVectorElements(num, elements))
+            throw MathException(IncorrectOperation);
+        GiacMpfrStateGuard mpfr_guard;
+        giac::gen length = giac::l2norm(elements, res.Context());
+        if (giac::is_undef(length) || length == giac::gen(0))
+            throw MathException(DivisionByZero);
+        giac::vecteur result;
+        for (const auto& element : elements)
+            result.push_back(giac::rdiv(element, length, res.Context()));
+        *res.expr = SymbolicVectorResult(result);
+        return res;
+    }
+
+    //The angle between two vectors
+    friend Symbolic<Number> angle(const Symbolic<Number>& num1, const Symbolic<Number>& num2)
+    {
+        Symbolic<Number> res(num1.precision);
+        giac::vecteur first;
+        giac::vecteur second;
+        if (!SymbolicVectorElements(num1, first) || !SymbolicVectorElements(num2, second) || first.size() != second.size())
+            throw MathException(IncorrectOperation);
+        GiacMpfrStateGuard mpfr_guard;
+        giac::gen length1 = giac::l2norm(first, res.Context());
+        giac::gen length2 = giac::l2norm(second, res.Context());
+        if (giac::is_undef(length1) || giac::is_undef(length2) || length1 == giac::gen(0) || length2 == giac::gen(0))
+            throw MathException(DivisionByZero);
+        giac::gen cosine = giac::rdiv(giac::dotvecteur(giac::gen(first), giac::gen(second)),
+            giac::operator_times(length1, length2, res.Context()), res.Context());
+        giac::gen result = giac::acos(cosine, res.Context());
+        if (giac::is_undef(result))
+            throw MathException(IncorrectOperation);
+        *res.expr = result;
+        return res;
+    }
+
     friend Symbolic<Number> sin(const Symbolic<Number>& num)
     {
         Symbolic<Number> res(num.precision);
@@ -1677,6 +1764,44 @@ public:
     friend struct Solver;
 
 private:
+    //A symbolic vector is a matrix with a single row or a single column; extracts its elements
+    static bool SymbolicVectorElements(const Symbolic<Number>& num, giac::vecteur& elements)
+    {
+        const giac::gen& value = *num.expr;
+        if (value.type != giac::_VECT)
+            return false;
+        const giac::vecteur& rows = *value._VECTptr;
+        if (rows.empty())
+            return false;
+        if (value.subtype == giac::_MATRIX__VECT)
+        {
+            //the matrix form [[a,b,c]] (a single row) or [[a],[b],[c]] (a single column)
+            if (rows.size() == 1 && rows.front().type == giac::_VECT)
+            {
+                elements = *rows.front()._VECTptr;
+                return !elements.empty();
+            }
+            elements.clear();
+            for (const auto& row : rows)
+            {
+                if (row.type != giac::_VECT || row._VECTptr->size() != 1)
+                    return false;
+                elements.push_back(row._VECTptr->front());
+            }
+            return true;
+        }
+        elements = rows;
+        return true;
+    }
+
+    //Wraps a vector back into the single-row matrix form, so a vector result prints like a vector literal
+    static giac::gen SymbolicVectorResult(const giac::vecteur& elements)
+    {
+        giac::vecteur rows;
+        rows.push_back(giac::gen(elements));
+        return giac::gen(rows, giac::_MATRIX__VECT);
+    }
+
     int precision = 0;
     mutable giac::context context;
     std::unique_ptr<giac::gen> expr;

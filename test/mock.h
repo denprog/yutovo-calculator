@@ -124,6 +124,36 @@ struct CalcTestMatrixComplex : public testing::Test
     Parser<Matrix<Complex>> parser;
 };
 
+struct CalcTestVectorReal : public testing::Test
+{
+    CalcTestVectorReal() :
+        parser(3, Language::English)
+    {
+    }
+
+    Parser<Vector<Real>> parser;
+};
+
+struct CalcTestVectorRational : public testing::Test
+{
+    CalcTestVectorRational() :
+        parser(0, Language::English)
+    {
+    }
+
+    Parser<Vector<Rational>> parser;
+};
+
+struct CalcTestVectorComplex : public testing::Test
+{
+    CalcTestVectorComplex() :
+        parser(3, Language::English)
+    {
+    }
+
+    Parser<Vector<Complex>> parser;
+};
+
 struct CalcTestSymbolicReal : public testing::Test
 {
     CalcTestSymbolicReal() :

@@ -2450,6 +2450,469 @@ VariableNode<Matrix<Complex>>* Solver<Matrix<Complex>>::FindVariable(const std::
     return MatrixFindVariable(*this, name, subscript);
 }
 
+//The shared body of the identifier resolution for the vector parsers; resolves variables, the imaginary unit and vector element subscripts
+template<typename Number>
+Number Solver<Number>::VectorIdentifier(const Solver<Number>& solver, IdentifierNode<Number> const& op)
+{
+    CheckBreak(solver.parser_context);
+    solver.AddDependency(op);
+
+    auto* temp = solver.FindTempVariable(op.name);
+    if (temp)
+        return temp->second;
+
+    //find in the user defined variables
+    auto* variable = solver.FindVariable(op.name, op.subscript);
+    if (variable)
+    {
+        LogicalId saved_id = solver.id;
+        bool saved_exported_id = solver.exported_id;
+        solver.id = variable->id;
+        solver.exported_id = variable->exported;
+        try
+        {
+            Number res = solver(variable->expression);
+            solver.id = saved_id;
+            solver.exported_id = saved_exported_id;
+            //a subscript that is not part of the variable's own identity selects a single element
+            if (!op.subscript.empty() && variable->name.subscript != op.subscript)
+                res = solver.VectorElementBySubscript(res, op, op.id, op.pos, op.line);
+            return res;
+        }
+        catch (...)
+        {
+            solver.id = saved_id;
+            solver.exported_id = saved_exported_id;
+            throw;
+        }
+    }
+
+    //find in the build-in variables
+    auto* builtin_variable = solver.FindBuiltinVariable(op.name);
+    if (builtin_variable)
+    {
+        try
+        {
+            typename Solver<Number>::PrecisionVariable variable_function = std::get<typename Solver<Number>::PrecisionVariable>(*builtin_variable);
+            return (*variable_function)(solver.precision);
+        }
+        catch (const std::bad_variant_access&)
+        {
+        }
+    }
+
+    if constexpr (std::is_same_v<Number, Vector<Complex>>)
+    {
+        if (op.name == solver.im)
+        {
+            Complex element(MathHelper::ToBitPrecision(solver.precision), 0, 1);
+            Number res(element);
+            return res;
+        }
+    }
+
+    //there is no such an identifier
+    solver.ThrowUndeclaredVariable(op.name, op.subscript);
+    throw SyntaxException(op.id, UnknownIdentifier, U"Identifier '" + op.name + U"' not found", op.pos, op.name.length(), op.line);
+}
+
+//The shared body of the implicit string multiplication (2A, 2A{0,1}) for the vector parsers
+template<typename Number>
+Number Solver<Number>::VectorImplicitStringMul(const Solver<Number>& solver, ImplicitStringMulNode<Number> const& op)
+{
+    CheckBreak(solver.parser_context);
+    solver.AddDependency(op.identifier);
+
+    auto* temp = solver.FindTempVariable(op.identifier.name);
+    if (temp)
+        return solver(op.left) * temp->second;
+
+    //find in the user defined variables
+    auto* variable = solver.FindVariable(op.identifier.name, op.identifier.subscript);
+    if (variable)
+    {
+        LogicalId saved_id = solver.id;
+        bool saved_exported_id = solver.exported_id;
+        solver.id = variable->id;
+        solver.exported_id = variable->exported;
+        try
+        {
+            Number res = solver(variable->expression);
+            solver.id = saved_id;
+            solver.exported_id = saved_exported_id;
+            if (!op.identifier.subscript.empty() && variable->name.subscript != op.identifier.subscript)
+                res = solver.VectorElementBySubscript(res, op.identifier, op.id, op.pos, op.line);
+            return solver(op.left) * res;
+        }
+        catch (...)
+        {
+            solver.id = saved_id;
+            solver.exported_id = saved_exported_id;
+            throw;
+        }
+    }
+
+    //find in the build-in variables
+    auto* builtin_variable = solver.FindBuiltinVariable(op.identifier.name);
+    if (builtin_variable)
+    {
+        try
+        {
+            typename Solver<Number>::PrecisionVariable variable_function = std::get<typename Solver<Number>::PrecisionVariable>(*builtin_variable);
+            return solver(op.left) * (*variable_function)(solver.precision);
+        }
+        catch (const std::bad_variant_access&)
+        {
+        }
+    }
+
+    if constexpr (std::is_same_v<Number, Vector<Complex>>)
+    {
+        if (op.identifier.name == solver.im)
+        {
+            Complex element(MathHelper::ToBitPrecision(solver.precision), 0, 1);
+            Number imaginary_unit(element);
+            return solver(op.left) * imaginary_unit;
+        }
+    }
+
+    //there is no such an identifier
+    solver.ThrowUndeclaredVariable(op.identifier.name, op.identifier.subscript);
+    throw SyntaxException(op.id, UnknownIdentifier, U"Identifier '" + op.identifier.name + U"' not found", op.pos,
+        op.identifier.name.length(), op.line);
+}
+
+//The shared body of the implicit division multiplication ((a)/(b)A) for the vector parsers
+template<typename Number>
+Number Solver<Number>::VectorImplicitDivMul(const Solver<Number>& solver, ImplicitDivMulNode<Number> const& op)
+{
+    CheckBreak(solver.parser_context);
+    solver.AddDependency(op.identifier);
+
+    auto* temp = solver.FindTempVariable(op.identifier.name);
+    if (temp)
+        return solver(op.upper) / solver(op.lower) * temp->second;
+
+    //find in the user defined variables
+    auto* variable = solver.FindVariable(op.identifier.name, op.identifier.subscript);
+    if (variable)
+    {
+        LogicalId saved_id = solver.id;
+        bool saved_exported_id = solver.exported_id;
+        solver.id = variable->id;
+        solver.exported_id = variable->exported;
+        try
+        {
+            Number res = solver(variable->expression);
+            solver.id = saved_id;
+            solver.exported_id = saved_exported_id;
+            if (!op.identifier.subscript.empty() && variable->name.subscript != op.identifier.subscript)
+                res = solver.VectorElementBySubscript(res, op.identifier, op.id, op.pos, op.line);
+            return solver(op.upper) / solver(op.lower) * res;
+        }
+        catch (...)
+        {
+            solver.id = saved_id;
+            solver.exported_id = saved_exported_id;
+            throw;
+        }
+    }
+
+    //find in the build-in variables
+    auto* builtin_variable = solver.FindBuiltinVariable(op.identifier.name);
+    if (builtin_variable)
+    {
+        try
+        {
+            typename Solver<Number>::PrecisionVariable variable_function = std::get<typename Solver<Number>::PrecisionVariable>(*builtin_variable);
+            return solver(op.upper) / solver(op.lower) * (*variable_function)(solver.precision);
+        }
+        catch (const std::bad_variant_access&)
+        {
+        }
+    }
+
+    if constexpr (std::is_same_v<Number, Vector<Complex>>)
+    {
+        if (op.identifier.name == solver.im)
+        {
+            Complex element(MathHelper::ToBitPrecision(solver.precision), 0, 1);
+            Number imaginary_unit(element);
+            return solver(op.upper) / solver(op.lower) * imaginary_unit;
+        }
+    }
+
+    //there is no such an identifier
+    solver.ThrowUndeclaredVariable(op.identifier.name, op.identifier.subscript);
+    throw SyntaxException(op.id, UnknownIdentifier, U"Identifier '" + op.identifier.name + U"' not found", op.pos,
+        op.identifier.name.length(), op.line);
+}
+
+//The shared body of the arithmetic operation for the vector parsers
+template<typename Number>
+Number Solver<Number>::VectorOperation(const Solver<Number>& solver, OperationNode<Number> const& op)
+{
+    CheckBreak(solver.parser_context);
+
+    Number right = boost::apply_visitor(solver, op.operand);
+
+    try
+    {
+        //calculate the operation
+        switch (op.op)
+        {
+        case U'+':
+            return solver.left_value + right;
+        case U'-':
+            return solver.left_value - right;
+        case U'*':
+            return solver.left_value * right;
+        case U'/':
+            return solver.left_value / right;
+        }
+    }
+    catch (MathException e)
+    {
+        throw MathException(e.id, e.ex_id, op.pos, op.line);
+    }
+
+    throw SyntaxException(op.id, SyntaxError, op.pos, 1, op.line);
+}
+
+//The shared body of the unary operation for the vector parsers
+template<typename Number>
+Number Solver<Number>::VectorUnaryOperation(const Solver<Number>& solver, UnaryOperationNode<Number> const& op)
+{
+    CheckBreak(solver.parser_context);
+
+    Number right = boost::apply_visitor(solver, op.operand);
+    switch (op.op)
+    {
+    case U'+':
+        return right;
+    case U'-':
+        return -right;
+    }
+    throw SyntaxException(op.id, SyntaxError, op.pos, 1, op.line);
+}
+
+//The shared body of the variable lookup for the vector parsers; an access with a subscript falls back to the variable declared without one
+template<typename Number>
+VariableNode<Number>* Solver<Number>::VectorFindVariable(const Solver<Number>& solver, const std::u32string& name, const std::u32string& subscript)
+{
+    for (int i = (int)solver.symbols->variables.size() - 1; i >= 0; --i)
+    {
+        auto& var = solver.symbols->variables[i];
+        if ((solver.exported_id || IsLess(var.id, solver.id)) && var.name.name == name)
+        {
+            if (var.name.subscript == subscript)
+                return &var;
+            if (!var.name.subscript.empty())
+                continue;
+            return &var;
+        }
+    }
+
+    if (solver.FindTempVariable(subscript))
+        return solver.FindExportVariable(name, U"");
+    return solver.FindExportVariable(name, subscript);
+}
+
+template<>
+Vector<Real> Solver<Vector<Real>>::operator()(UnaryOperationNode<Vector<Real>> const& op) const
+{
+    return VectorUnaryOperation(*this, op);
+}
+
+template<>
+Vector<Real> Solver<Vector<Real>>::operator()(OperationNode<Vector<Real>> const& op) const
+{
+    return VectorOperation(*this, op);
+}
+
+template<>
+Vector<Real> Solver<Vector<Real>>::operator()(PostfixOperationNode<Vector<Real>> const& op) const
+{
+    throw SyntaxException(op.id, SyntaxError, op.pos, 1, op.line);
+}
+
+template<>
+Vector<Real> Solver<Vector<Real>>::operator()(FunctionCallNode<Vector<Real>> const& op) const
+{
+    return FunctionCall(op);
+}
+
+template<>
+Vector<Real> Solver<Vector<Real>>::operator()(FunctionCallStringNode<Vector<Real>> const& op) const
+{
+    //there is no such a function
+    ThrowUndeclaredFunction(op.name.name);
+    throw SyntaxException(op.id, UnknownIdentifier, op.pos, op.name.name.length(), op.line);
+}
+
+template<>
+Vector<Real> Solver<Vector<Real>>::operator()(NoFencesFunctionCallNode<Vector<Real>> const& op) const
+{
+    AddDependency(op.name);
+
+    Vector<Real> res;
+    return res;
+}
+
+template<>
+Vector<Real> Solver<Vector<Real>>::operator()(IdentifierNode<Vector<Real>> const& op) const
+{
+    return VectorIdentifier(*this, op);
+}
+
+template<>
+Vector<Real> Solver<Vector<Real>>::operator()(ImplicitStringMulNode<Vector<Real>> const& op) const
+{
+    return VectorImplicitStringMul(*this, op);
+}
+
+template<>
+Vector<Real> Solver<Vector<Real>>::operator()(ImplicitDivMulNode<Vector<Real>> const& op) const
+{
+    return VectorImplicitDivMul(*this, op);
+}
+
+template<>
+Vector<Rational> Solver<Vector<Rational>>::operator()(UnaryOperationNode<Vector<Rational>> const& op) const
+{
+    return VectorUnaryOperation(*this, op);
+}
+
+template<>
+Vector<Rational> Solver<Vector<Rational>>::operator()(OperationNode<Vector<Rational>> const& op) const
+{
+    return VectorOperation(*this, op);
+}
+
+template<>
+Vector<Rational> Solver<Vector<Rational>>::operator()(PostfixOperationNode<Vector<Rational>> const& op) const
+{
+    throw SyntaxException(op.id, SyntaxError, op.pos, 1, op.line);
+}
+
+template<>
+Vector<Rational> Solver<Vector<Rational>>::operator()(FunctionCallNode<Vector<Rational>> const& op) const
+{
+    return FunctionCall(op);
+}
+
+template<>
+Vector<Rational> Solver<Vector<Rational>>::operator()(FunctionCallStringNode<Vector<Rational>> const& op) const
+{
+    //there is no such a function
+    ThrowUndeclaredFunction(op.name.name);
+    throw SyntaxException(op.id, UnknownIdentifier, op.pos, op.name.name.length(), op.line);
+}
+
+template<>
+Vector<Rational> Solver<Vector<Rational>>::operator()(NoFencesFunctionCallNode<Vector<Rational>> const& op) const
+{
+    AddDependency(op.name);
+
+    Vector<Rational> res;
+    return res;
+}
+
+template<>
+Vector<Rational> Solver<Vector<Rational>>::operator()(IdentifierNode<Vector<Rational>> const& op) const
+{
+    return VectorIdentifier(*this, op);
+}
+
+template<>
+Vector<Rational> Solver<Vector<Rational>>::operator()(ImplicitStringMulNode<Vector<Rational>> const& op) const
+{
+    return VectorImplicitStringMul(*this, op);
+}
+
+template<>
+Vector<Rational> Solver<Vector<Rational>>::operator()(ImplicitDivMulNode<Vector<Rational>> const& op) const
+{
+    return VectorImplicitDivMul(*this, op);
+}
+
+template<>
+Vector<Complex> Solver<Vector<Complex>>::operator()(UnaryOperationNode<Vector<Complex>> const& op) const
+{
+    return VectorUnaryOperation(*this, op);
+}
+
+template<>
+Vector<Complex> Solver<Vector<Complex>>::operator()(OperationNode<Vector<Complex>> const& op) const
+{
+    return VectorOperation(*this, op);
+}
+
+template<>
+Vector<Complex> Solver<Vector<Complex>>::operator()(PostfixOperationNode<Vector<Complex>> const& op) const
+{
+    throw SyntaxException(op.id, SyntaxError, op.pos, 1, op.line);
+}
+
+template<>
+Vector<Complex> Solver<Vector<Complex>>::operator()(FunctionCallNode<Vector<Complex>> const& op) const
+{
+    return FunctionCall(op);
+}
+
+template<>
+Vector<Complex> Solver<Vector<Complex>>::operator()(FunctionCallStringNode<Vector<Complex>> const& op) const
+{
+    //there is no such a function
+    ThrowUndeclaredFunction(op.name.name);
+    throw SyntaxException(op.id, UnknownIdentifier, op.pos, op.name.name.length(), op.line);
+}
+
+template<>
+Vector<Complex> Solver<Vector<Complex>>::operator()(NoFencesFunctionCallNode<Vector<Complex>> const& op) const
+{
+    AddDependency(op.name);
+
+    Vector<Complex> res;
+    return res;
+}
+
+template<>
+Vector<Complex> Solver<Vector<Complex>>::operator()(IdentifierNode<Vector<Complex>> const& op) const
+{
+    return VectorIdentifier(*this, op);
+}
+
+template<>
+Vector<Complex> Solver<Vector<Complex>>::operator()(ImplicitStringMulNode<Vector<Complex>> const& op) const
+{
+    return VectorImplicitStringMul(*this, op);
+}
+
+template<>
+Vector<Complex> Solver<Vector<Complex>>::operator()(ImplicitDivMulNode<Vector<Complex>> const& op) const
+{
+    return VectorImplicitDivMul(*this, op);
+}
+
+template<>
+VariableNode<Vector<Real>>* Solver<Vector<Real>>::FindVariable(const std::u32string& name, const std::u32string& subscript) const
+{
+    return VectorFindVariable(*this, name, subscript);
+}
+
+template<>
+VariableNode<Vector<Rational>>* Solver<Vector<Rational>>::FindVariable(const std::u32string& name, const std::u32string& subscript) const
+{
+    return VectorFindVariable(*this, name, subscript);
+}
+
+template<>
+VariableNode<Vector<Complex>>* Solver<Vector<Complex>>::FindVariable(const std::u32string& name, const std::u32string& subscript) const
+{
+    return VectorFindVariable(*this, name, subscript);
+}
+
 template<>
 Integer Solver<Integer>::operator()(ScriptNode<Integer> const& script, LogicalId _id, AngleMeasure _default_angle_measure,
     AngleMeasure _result_angle_measure, int _precision, Dependencies* _dependencies) const

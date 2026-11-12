@@ -105,6 +105,8 @@ public:
     friend Rational min(const Rational& num1, const Rational& num2);
     friend Rational max(const Rational& num1, const Rational& num2);
 
+    friend Rational sqrt(const Rational& num);
+
 public:
     Integer GetNumerator() const;
     Integer GetDenomerator() const;

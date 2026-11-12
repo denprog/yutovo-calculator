@@ -595,6 +595,30 @@ Rational abs(const Rational &num)
     return num;
 }
 
+Rational sqrt(const Rational& num)
+{
+    if (num < 0)
+        throw MathException(IncorrectOperation);
+    mpq_srcptr source = num.GetNumber();
+    if (!mpz_perfect_square_p(mpq_numref(source)) || !mpz_perfect_square_p(mpq_denref(source)))
+        throw MathException(IncorrectOperation);
+ 
+    //the result is representable only when both the numerator and the denominator are perfect squares
+    mpz_t root_numerator;
+    mpz_t root_denominator;
+    mpz_inits(root_numerator, root_denominator, nullptr);
+    mpz_sqrt(root_numerator, mpq_numref(source));
+    mpz_sqrt(root_denominator, mpq_denref(source));
+    char* numerator_string = mpz_get_str(nullptr, 10, root_numerator);
+    char* denominator_string = mpz_get_str(nullptr, 10, root_denominator);
+    Rational res(std::u32string(numerator_string, numerator_string + strlen(numerator_string)));
+    Rational root(std::u32string(denominator_string, denominator_string + strlen(denominator_string)));
+    free(numerator_string);
+    free(denominator_string);
+    mpz_clears(root_numerator, root_denominator, nullptr);
+    return res / root;
+}
+
 Rational min(const Rational& num1, const Rational& num2)
 {
     return num1 < num2 ? num1 : num2;

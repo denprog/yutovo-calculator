@@ -129,4 +129,19 @@ TEST_F(CalcTestMatrixRational, implicit_mul_div)
     ASSERT_TRUE(r.ToString() == U"[[-2,-4],[-6,-8]]") << r.ToStdString(3, 3);
 }
 
+//The vector operations stay exact for rational elements
+TEST_F(CalcTestMatrixRational, vectors_exact)
+{
+    auto res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"dot([1/2,1/3],[1/4,1/5]);");
+    ASSERT_TRUE(res.ToString() == U"[[23/120]]") << res.ToStdString(3, 3);
+    res = parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"norm([3,4]);");
+    ASSERT_TRUE(res.ToString() == U"[[5]]") << res.ToStdString(3, 3);
+    //the square root of 2 is not rational, so the norm is not representable
+    EXPECT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 3}, U"norm([1,1]);"), yutovo_calculator::MathException);
+    res = parser.Parse(LogicalId{0, 0, 0, 0, 4}, U"normalize([3,4]);");
+    ASSERT_TRUE(res.ToString() == U"[[3/5,4/5]]") << res.ToStdString(3, 3);
+    res = parser.Parse(LogicalId{0, 0, 0, 0, 5}, U"cross([1,2,3],[4,5,6]);");
+    ASSERT_TRUE(res.ToString() == U"[[-3],[6],[-3]]") << res.ToStdString(3, 3);
+}
+
 }

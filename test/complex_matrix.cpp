@@ -101,4 +101,17 @@ TEST_F(CalcTestMatrixComplex, implicit_mul_div)
     ASSERT_TRUE(r.ToStdString(3, 3) == "[[-16.E+0,0.E+0],[0.E+0,i*32.E+0]]") << r.ToStdString(3, 3);
 }
 
+//The vector operations over complex elements; the norm uses the element modules
+TEST_F(CalcTestMatrixComplex, vectors)
+{
+    auto res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"norm([3,4*i]);");
+    ASSERT_TRUE(res.ToStdString(3, 3) == "[[5.E+0]]") << res.ToStdString(3, 3);
+    res = parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"dot([1+i,1-i],[1-i,1+i]);");
+    ASSERT_TRUE(res.ToStdString(3, 3) == "[[4.E+0]]") << res.ToStdString(3, 3);
+    res = parser.Parse(LogicalId{0, 0, 0, 0, 3}, U"cross([i,0,0],[0,i,0]);");
+    ASSERT_TRUE(res.ToStdString(3, 3) == "[[0.E+0],[0.E+0],[-1.E+0]]") << res.ToStdString(3, 3);
+    res = parser.Parse(LogicalId{0, 0, 0, 0, 4}, U"angle([1,0],[0,1]);");
+    ASSERT_TRUE(res.ToStdString(3, 3) == "[[1.571E+0]]") << res.ToStdString(3, 3);
+}
+
 }

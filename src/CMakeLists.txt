@@ -136,6 +136,7 @@ set(CALCULATOR_SOURCES
     export.h
     array.h
     matrix.h
+    vector.h
     graph.h
 )
 
@@ -282,6 +283,7 @@ install(
         symbolic.h
         array.h
         matrix.h
+        vector.h
         custom_unit.h
         script.h
         solver.h
