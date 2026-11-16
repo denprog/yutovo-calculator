@@ -595,6 +595,15 @@ Rational abs(const Rational &num)
     return num;
 }
 
+Rational sign(const Rational &num)
+{
+    if (num < 0)
+        return Rational(num.GetPrecision(), -1);
+    if (num > 0)
+        return Rational(num.GetPrecision(), 1);
+    return Rational(num.GetPrecision(), 0);
+}
+
 Rational sqrt(const Rational& num)
 {
     if (num < 0)

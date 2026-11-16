@@ -40,6 +40,14 @@ TEST_F(CalcTestArrayReal, functions4)
     ASSERT_TRUE(r.ToStdString(3, 3) == "[2.3E+0,2.3E+0]") << r.ToStdString(3, 3);
 }
 
+TEST_F(CalcTestArrayReal, sign1)
+{
+    auto r = parser.Parse(LogicalId{0, 0, 1}, U"[sign(-2.3),sign(2.3),sign(0)];", 3);
+    ASSERT_TRUE(r.ToStdString(3, 3) == "[-1.E+0,1.E+0,0.E+0]") << r.ToStdString(3, 3);
+    r = parser.Parse(LogicalId{0, 0, 1}, U"sign([-2.3,4.5,0]);", 3);
+    ASSERT_TRUE(r.ToStdString(3, 3) == "[-1.E+0,1.E+0,0.E+0]") << r.ToStdString(3, 3);
+}
+
 TEST_F(CalcTestArrayReal, functions5)
 {
     auto r = parser.Parse(LogicalId{0, 0, 1}, U"[integer(-2.3),integer(-2.7),integer(2.3),integer(2.6)];", 3);

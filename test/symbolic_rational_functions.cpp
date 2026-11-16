@@ -241,6 +241,17 @@ TEST_F(CalcTestSymbolicRational, abs2)
     ASSERT_TRUE(s == "abs(x)") << s;
 }
 
+TEST_F(CalcTestSymbolicRational, sign1)
+{
+    Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"sign(-(1)/(2));");
+    ASSERT_TRUE(res.ToStdString(10) == "-1") << res.ToStdString(10);
+    res = parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"sign((1)/(3));");
+    ASSERT_TRUE(res.ToStdString(10) == "1") << res.ToStdString(10);
+    res = parser.Parse(LogicalId{0, 0, 0, 0, 3}, U"sign(x);");
+    std::string s2 = res.ToStdString(10);
+    ASSERT_TRUE(s2 == "sign(x)") << s2;
+}
+
 TEST_F(CalcTestSymbolicRational, log_x_base)
 {
     Symbolic<Rational> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"log(x,2);");

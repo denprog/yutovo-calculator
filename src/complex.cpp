@@ -669,6 +669,15 @@ Complex abs(const Complex& num)
     return res;
 }
 
+Complex sign(const Complex& num)
+{
+    //the sign of a complex number is the number of module 1 in the same direction
+    if (num.IsZero())
+        return num;
+
+    return num / abs(num);
+}
+
 Complex min(const Complex& num1, const Complex& num2, int& res_pos)
 {
     (void)res_pos;

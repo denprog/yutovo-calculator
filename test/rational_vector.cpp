@@ -73,6 +73,16 @@ TEST_F(CalcTestVectorRational, normalize_exact)
     EXPECT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 3}, U"normalize([0,0]);"), yutovo_calculator::MathException);
 }
 
+TEST_F(CalcTestVectorRational, sign_exact)
+{
+    auto res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"sign([3,4]);");
+    ASSERT_TRUE(res.ToString() == U"[[3/5],[4/5]]") << res.ToStdString(3, 3);
+    res = parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"sign([0,0]);");
+    ASSERT_TRUE(res.ToString() == U"[[0],[0]]") << res.ToStdString(3, 3);
+    res = parser.Parse(LogicalId{0, 0, 0, 0, 3}, U"sign(-(1)/(2));");
+    ASSERT_TRUE(res.ToString() == U"[[-1]]") << res.ToStdString(3, 3);
+}
+
 //Angle is not registered for rational vectors: the arccosine is generally not rational
 TEST_F(CalcTestVectorRational, angle_not_registered)
 {

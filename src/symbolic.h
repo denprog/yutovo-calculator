@@ -512,6 +512,13 @@ public:
         return res;
     }
 
+    friend Symbolic<Number> sign(const Symbolic<Number>& num)
+    {
+        Symbolic<Number> res(num.precision);
+        *res.expr = giac::sign(*num.expr, res.Context());
+        return res;
+    }
+
     friend Symbolic<Number> det(const Symbolic<Number>& num)
     {
         Symbolic<Number> res(num.precision);

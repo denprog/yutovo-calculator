@@ -21,6 +21,8 @@ Integer reminder(const Integer& num1, const Integer& num2);
 
 Integer abs(const Integer &num);
 
+Integer sign(const Integer &num);
+
 Integer min(const Integer& num1, const Integer& num2);
 Integer max(const Integer& num1, const Integer& num2);
 
@@ -40,6 +42,8 @@ static Complex infinity(const int precision, const AngleMeasure /*angle_measure*
 }
 
 Rational abs(const Rational &num);
+
+Rational sign(const Rational &num);
 
 Rational min(const Rational& num1, const Rational& num2);
 Rational max(const Rational& num1, const Rational& num2);
@@ -85,6 +89,7 @@ Real root(const Real& num1, const Real& num2);
 Real integer(const Real &num);
 Real fract(const Real &num);
 Real abs(const Real &num);
+Real sign(const Real &num);
 Real min(const Real& num1, const Real& num2);
 Real max(const Real& num1, const Real& num2);
 Real ceil(const Real &num);
@@ -135,6 +140,7 @@ Complex sqrt(const Complex& num, int& res_pos);
 Complex root(const Complex& num1, const Complex& num2, int& res_pos);
 
 Complex abs(const Complex &num);
+Complex sign(const Complex &num);
 Complex min(const Complex& num1, const Complex& num2, int& res_pos);
 Complex max(const Complex& num1, const Complex& num2, int& res_pos);
 
@@ -166,6 +172,7 @@ Array<Real> root(const Array<Real>& num1, const Array<Real>& num2);
 Array<Real> integer(const Array<Real> &num);
 Array<Real> fract(const Array<Real> &num);
 Array<Real> abs(const Array<Real> &num);
+Array<Real> sign(const Array<Real> &num);
 Array<Real> ceil(const Array<Real> &num);
 Array<Real> floor(const Array<Real> &num);
 Array<Real> round(const Array<Real> &num);
@@ -265,6 +272,7 @@ Vector<Real> norm(const Vector<Real>& num);
 Vector<Real> normalize(const Vector<Real>& num);
 Vector<Real> angle(const Vector<Real>& left, const Vector<Real>& right);
 Vector<Real> abs(const Vector<Real>& num);
+Vector<Real> sign(const Vector<Real>& num);
 Vector<Real> size(const Vector<Real>& num);
 
 Vector<Rational> dot(const Vector<Rational>& left, const Vector<Rational>& right);
@@ -272,6 +280,7 @@ Vector<Rational> cross(const Vector<Rational>& left, const Vector<Rational>& rig
 Vector<Rational> norm(const Vector<Rational>& num);
 Vector<Rational> normalize(const Vector<Rational>& num);
 Vector<Rational> abs(const Vector<Rational>& num);
+Vector<Rational> sign(const Vector<Rational>& num);
 Vector<Rational> size(const Vector<Rational>& num);
 
 Vector<Complex> dot(const Vector<Complex>& left, const Vector<Complex>& right);
@@ -280,6 +289,7 @@ Vector<Complex> norm(const Vector<Complex>& num);
 Vector<Complex> normalize(const Vector<Complex>& num);
 Vector<Complex> angle(const Vector<Complex>& left, const Vector<Complex>& right);
 Vector<Complex> abs(const Vector<Complex>& num);
+Vector<Complex> sign(const Vector<Complex>& num);
 Vector<Complex> size(const Vector<Complex>& num);
 
 Real definite_integral_real(const Real& a, const Real& b, const Real& c, const Real& d);
@@ -342,6 +352,7 @@ Symbolic<Real> acsch(const Symbolic<Real>& num);
 Symbolic<Real> exp(const Symbolic<Real>& num);
 Symbolic<Real> sqrt(const Symbolic<Real>& num);
 Symbolic<Real> abs(const Symbolic<Real>& num);
+Symbolic<Real> sign(const Symbolic<Real>& num);
 Symbolic<Real> det(const Symbolic<Real>& num);
 Symbolic<Real> dot(const Symbolic<Real>& left, const Symbolic<Real>& right);
 Symbolic<Real> cross(const Symbolic<Real>& left, const Symbolic<Real>& right);
@@ -401,6 +412,7 @@ Symbolic<Rational> acsch(const Symbolic<Rational>& num);
 Symbolic<Rational> exp(const Symbolic<Rational>& num);
 Symbolic<Rational> sqrt(const Symbolic<Rational>& num);
 Symbolic<Rational> abs(const Symbolic<Rational>& num);
+Symbolic<Rational> sign(const Symbolic<Rational>& num);
 Symbolic<Rational> det(const Symbolic<Rational>& num);
 Symbolic<Rational> dot(const Symbolic<Rational>& left, const Symbolic<Rational>& right);
 Symbolic<Rational> cross(const Symbolic<Rational>& left, const Symbolic<Rational>& right);
@@ -457,6 +469,7 @@ Symbolic<Complex> acsch(const Symbolic<Complex>& num);
 Symbolic<Complex> exp(const Symbolic<Complex>& num);
 Symbolic<Complex> sqrt(const Symbolic<Complex>& num);
 Symbolic<Complex> abs(const Symbolic<Complex>& num);
+Symbolic<Complex> sign(const Symbolic<Complex>& num);
 Symbolic<Complex> det(const Symbolic<Complex>& num);
 Symbolic<Complex> dot(const Symbolic<Complex>& left, const Symbolic<Complex>& right);
 Symbolic<Complex> cross(const Symbolic<Complex>& left, const Symbolic<Complex>& right);
@@ -496,6 +509,8 @@ Parser<yutovo_calculator::Integer>::Parser(const int precision, const Language _
 
     IntegerUnaryFunc unary_func = &abs;
     solver.AddBuiltinFunction(U"abs", unary_func);
+    unary_func = &sign;
+    solver.AddBuiltinFunction(U"sign", unary_func);
 
     binary_func = &min;
     solver.AddBuiltinFunction(U"min", binary_func);
@@ -539,6 +554,8 @@ Parser<yutovo_calculator::Real>::Parser(const int precision, const Language _lan
     solver.AddBuiltinFunction(U"fract", unary_func);
     unary_func = &abs;
     solver.AddBuiltinFunction(U"abs", unary_func);
+    unary_func = &sign;
+    solver.AddBuiltinFunction(U"sign", unary_func);
     unary_func = &ceil;
     solver.AddBuiltinFunction(U"ceil", unary_func);
     unary_func = &floor;
@@ -658,6 +675,8 @@ Parser<yutovo_calculator::Rational>::Parser(const int precision, const Language 
 
     RationalUnaryFunc unary_func = &abs;
     solver.AddBuiltinFunction(U"abs", unary_func);
+    unary_func = &sign;
+    solver.AddBuiltinFunction(U"sign", unary_func);
 
     binary_func = &min;
     solver.AddBuiltinFunction(U"min", binary_func);
@@ -715,6 +734,8 @@ Parser<yutovo_calculator::Complex>::Parser(const int precision, const Language _
     solver.AddBuiltinFunction(U"arg", func);
     func = &abs;
     solver.AddBuiltinFunction(U"abs", func);
+    func = &sign;
+    solver.AddBuiltinFunction(U"sign", func);
 
     unary_func = &sin;
     solver.AddBuiltinFunction(U"sin", unary_func);
@@ -823,6 +844,8 @@ Parser<yutovo_calculator::Array<yutovo_calculator::Real>>::Parser(const int prec
     solver.AddBuiltinFunction(U"fract", unary_func);
     unary_func = &abs;
     solver.AddBuiltinFunction(U"abs", unary_func);
+    unary_func = &sign;
+    solver.AddBuiltinFunction(U"sign", unary_func);
     unary_func = &ceil;
     solver.AddBuiltinFunction(U"ceil", unary_func);
     unary_func = &floor;
@@ -1085,6 +1108,8 @@ Parser<yutovo_calculator::Vector<yutovo_calculator::Real>>::Parser(const int pre
     solver.AddBuiltinFunction(U"size", unary_func);
     unary_func = &abs;
     solver.AddBuiltinFunction(U"abs", unary_func);
+    unary_func = &sign;
+    solver.AddBuiltinFunction(U"sign", unary_func);
 
     VectorRealBinaryFunc binary_func = &dot;
     solver.AddBuiltinFunction(U"dot", binary_func);
@@ -1111,6 +1136,8 @@ Parser<yutovo_calculator::Vector<yutovo_calculator::Rational>>::Parser(const int
     solver.AddBuiltinFunction(U"size", unary_func);
     unary_func = &abs;
     solver.AddBuiltinFunction(U"abs", unary_func);
+    unary_func = &sign;
+    solver.AddBuiltinFunction(U"sign", unary_func);
 
     VectorRationalBinaryFunc binary_func = &dot;
     solver.AddBuiltinFunction(U"dot", binary_func);
@@ -1134,6 +1161,8 @@ Parser<yutovo_calculator::Vector<yutovo_calculator::Complex>>::Parser(const int 
     solver.AddBuiltinFunction(U"size", unary_func);
     unary_func = &abs;
     solver.AddBuiltinFunction(U"abs", unary_func);
+    unary_func = &sign;
+    solver.AddBuiltinFunction(U"sign", unary_func);
 
     VectorComplexBinaryFunc binary_func = &dot;
     solver.AddBuiltinFunction(U"dot", binary_func);
@@ -1210,6 +1239,8 @@ Parser<yutovo_calculator::Symbolic<yutovo_calculator::Real>>::Parser(const int p
     solver.AddBuiltinFunction(U"sqrt", unary_func);
     unary_func = &abs;
     solver.AddBuiltinFunction(U"abs", unary_func);
+    unary_func = &sign;
+    solver.AddBuiltinFunction(U"sign", unary_func);
 
     unary_func = &det;
     solver.AddBuiltinFunction(U"det", unary_func);
@@ -1504,6 +1535,8 @@ Parser<yutovo_calculator::Symbolic<yutovo_calculator::Rational>>::Parser(const i
     solver.AddBuiltinFunction(U"sqrt", unary_func);
     unary_func = &abs;
     solver.AddBuiltinFunction(U"abs", unary_func);
+    unary_func = &sign;
+    solver.AddBuiltinFunction(U"sign", unary_func);
 
     unary_func = &det;
     solver.AddBuiltinFunction(U"det", unary_func);
@@ -1691,6 +1724,8 @@ Parser<yutovo_calculator::Symbolic<yutovo_calculator::Complex>>::Parser(const in
     solver.AddBuiltinFunction(U"sqrt", unary_func);
     unary_func = &abs;
     solver.AddBuiltinFunction(U"abs", unary_func);
+    unary_func = &sign;
+    solver.AddBuiltinFunction(U"sign", unary_func);
 
     unary_func = &det;
     solver.AddBuiltinFunction(U"det", unary_func);

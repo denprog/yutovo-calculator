@@ -114,6 +114,8 @@ public:
 
     friend Integer abs(const Integer& num);
 
+    friend Integer sign(const Integer& num);
+
     friend Integer min(const Integer& num1, const Integer& num2);
 
     friend Integer max(const Integer& num1, const Integer& num2);

@@ -28,6 +28,7 @@ Real sqrt(const Real& num);
 Real root(const Real& num1, const Real& num2);
 
 Real abs(const Real& num);
+Real sign(const Real& num);
 Real floor(const Real& num);
 Real trunc(const Real& num);
 Real ceil(const Real& num);
@@ -475,6 +476,11 @@ public:
     friend Array<Number> abs(const Array<Number>& num)
     {
         return ForEach(abs, num);
+    }
+
+    friend Array<Number> sign(const Array<Number>& num)
+    {
+        return ForEach(sign, num);
     }
 
     friend Array<Number> min(const Array<Number>& num)

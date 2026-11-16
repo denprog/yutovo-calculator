@@ -128,6 +128,16 @@ TEST_F(CalcTestInteger, builtin_functions3)
     ASSERT_TRUE(r.ToStdString(10) == "2") << r.ToStdString(10);
 }
 
+TEST_F(CalcTestInteger, sign1)
+{
+    Integer res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"sign(-5);");
+    ASSERT_TRUE(res.ToStdString() == "-1") << res.ToStdString();
+    res = parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"sign(7);");
+    ASSERT_TRUE(res.ToStdString() == "1") << res.ToStdString();
+    res = parser.Parse(LogicalId{0, 0, 0, 0, 3}, U"sign(0);");
+    ASSERT_TRUE(res.ToStdString() == "0") << res.ToStdString();
+}
+
 TEST_F(CalcTestInteger, user_functions1)
 {
     parser.Parse(LogicalId{0, 0, 1}, U"f(x)=5;");

@@ -109,6 +109,16 @@ TEST_F(CalcTestReal, functions9)
     ASSERT_TRUE(r.ToStdString(3, 3) == "2.3E+0") << r.ToStdString(3, 3);
 }
 
+TEST_F(CalcTestReal, sign1)
+{
+    auto r = parser.Parse(LogicalId{0, 0, 1}, U"sign(-2.3);", 3);
+    ASSERT_TRUE(r.ToStdString(3, 3) == "-1.E+0") << r.ToStdString(3, 3);
+    r = parser.Parse(LogicalId{0, 0, 1}, U"sign(2.3);", 3);
+    ASSERT_TRUE(r.ToStdString(3, 3) == "1.E+0") << r.ToStdString(3, 3);
+    r = parser.Parse(LogicalId{0, 0, 1}, U"sign(0);", 3);
+    ASSERT_TRUE(r.ToStdString(3, 3) == "0.E+0") << r.ToStdString(3, 3);
+}
+
 TEST_F(CalcTestReal, functions10)
 {
     auto r = parser.Parse(LogicalId{0, 0, 1}, U"integer(-2.3);", 3);

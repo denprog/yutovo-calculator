@@ -138,6 +138,18 @@ TEST_F(CalcTestVectorReal, normalize1)
     EXPECT_THROW(parser.Parse(LogicalId{0, 0, 0, 0, 3}, U"normalize([0,0]);"), yutovo_calculator::MathException);
 }
 
+TEST_F(CalcTestVectorReal, sign1)
+{
+    //the sign of a vector is the vector of length 1 in the same direction
+    auto res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"sign([3,4]);");
+    ASSERT_TRUE(res.ToStdString(3, 3) == "[[0.6E+0],[0.8E+0]]") << res.ToStdString(3, 3);
+    //the sign of a zero vector is a zero vector, unlike normalize
+    res = parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"sign([0,0]);");
+    ASSERT_TRUE(res.ToStdString(3, 3) == "[[0.E+0],[0.E+0]]") << res.ToStdString(3, 3);
+    res = parser.Parse(LogicalId{0, 0, 0, 0, 3}, U"sign(-5);");
+    ASSERT_TRUE(res.ToStdString(3, 3) == "[[-1.E+0]]") << res.ToStdString(3, 3);
+}
+
 TEST_F(CalcTestVectorReal, angle1)
 {
     auto res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"angle([1,0],[0,1]);");

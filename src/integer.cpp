@@ -491,6 +491,13 @@ Integer abs(const Integer& num)
     return res;
 }
 
+Integer sign(const Integer& num)
+{
+    Integer res;
+    mpz_set_si(res.number, mpz_sgn(num.number));
+    return res;
+}
+
 Integer min(const Integer& num1, const Integer& num2)
 {
     return num1 < num2 ? num1 : num2;

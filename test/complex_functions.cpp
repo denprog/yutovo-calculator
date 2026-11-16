@@ -102,6 +102,19 @@ TEST_F(CalcTestComplex, functions11)
     ASSERT_TRUE(r.ToStdString(3, 3) == r1.ToStdString(3, 3)) << r.ToStdString(3, 3);
 }
 
+TEST_F(CalcTestComplex, sign1)
+{
+    //the sign of a complex number is the number of module 1 in the same direction
+    auto r = parser.Parse(LogicalId{0, 0, 1}, U"sign(3+4*i);", 3);
+    ASSERT_TRUE(r.ToStdString(3, 3) == "0.6E+0+i*0.8E+0") << r.ToStdString(3, 3);
+    r = parser.Parse(LogicalId{0, 0, 1}, U"sign(-2);", 3);
+    ASSERT_TRUE(r.ToStdString(3, 3) == "-1.E+0") << r.ToStdString(3, 3);
+    r = parser.Parse(LogicalId{0, 0, 1}, U"sign(i);", 3);
+    ASSERT_TRUE(r.ToStdString(3, 3) == "i*1.E+0") << r.ToStdString(3, 3);
+    r = parser.Parse(LogicalId{0, 0, 1}, U"sign(0);", 3);
+    ASSERT_TRUE(r.ToStdString(3, 3) == "0.E+0") << r.ToStdString(3, 3);
+}
+
 TEST_F(CalcTestComplex, user_functions1)
 {
     parser.Parse(LogicalId{0, 0, 1}, U"f(x)=5;");

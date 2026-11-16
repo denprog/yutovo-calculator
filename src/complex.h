@@ -138,6 +138,8 @@ public:
 
     friend Complex abs(const Complex& num);
 
+    friend Complex sign(const Complex& num);
+
     friend Complex min(const Complex& num1, const Complex& num2, int& res_pos);
 
     friend Complex max(const Complex& num1, const Complex& num2, int& res_pos);

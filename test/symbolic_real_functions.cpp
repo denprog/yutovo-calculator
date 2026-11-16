@@ -448,6 +448,27 @@ TEST_F(CalcTestSymbolicReal, abs3)
     ASSERT_TRUE(res.ToStdString(10) == "3.") << res.ToStdString(10);
 }
 
+TEST_F(CalcTestSymbolicReal, sign1)
+{
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"sign(-5.2);");
+    ASSERT_TRUE(res.ToStdString(10) == "-1.") << res.ToStdString(10);
+    res = parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"sign(5.2);");
+    ASSERT_TRUE(res.ToStdString(10) == "1.") << res.ToStdString(10);
+    res = parser.Parse(LogicalId{0, 0, 0, 0, 3}, U"sign(0);");
+    ASSERT_TRUE(res.ToStdString(10) == "0.") << res.ToStdString(10);
+}
+
+TEST_F(CalcTestSymbolicReal, sign2)
+{
+    Symbolic<Real> res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"sign(x);");
+    std::string s = res.ToStdString(10);
+    ASSERT_TRUE(s == "sign(x)") << s;
+    std::string json = res.ToJson(10);
+    ASSERT_TRUE(json ==
+        "{\"type\":45,\"elements\":[{\"type\":7,\"elements\":[{\"type\":8,\"elements\":\"sign\"},{\"type\":19,\"symbol\":\"(\"},{\"type\":8,\"elements\":\"x\"},{\"type\":20,\"symbol\":\")\"}]}]}"
+        ) << json;
+}
+
 
 TEST_F(CalcTestSymbolicReal, root2)
 {

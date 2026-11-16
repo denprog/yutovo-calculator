@@ -336,6 +336,23 @@ public:
         return norm(num);
     }
 
+    friend Vector<Number> sign(const Vector<Number>& num)
+    {
+        //the sign of a vector is the vector of length 1 in the same direction, the sign of a zero vector is a zero vector
+        Vector<Number> length = norm(num);
+        if (length.numbers[0] == 0)
+        {
+            Vector<Number> res(num);
+            for (auto& element : res.numbers)
+                element = element - element;
+            return res;
+        }
+        Vector<Number> res(num);
+        for (auto& element : res.numbers)
+            element = element / length.numbers[0];
+        return res;
+    }
+
     friend Vector<Number> size(const Vector<Number>& num)
     {
         if (num.numbers.empty())

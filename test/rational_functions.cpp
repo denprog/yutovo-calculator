@@ -56,6 +56,16 @@ TEST_F(CalcTestRational, functions5)
     ASSERT_TRUE(r.ToStdString() == "2/3") << r.ToStdString();
 }
 
+TEST_F(CalcTestRational, sign1)
+{
+    auto r = parser.Parse(LogicalId{0, 0, 1}, U"sign(-(1)/(2));", 3);
+    ASSERT_TRUE(r.ToStdString() == "-1") << r.ToStdString();
+    r = parser.Parse(LogicalId{0, 0, 1}, U"sign((3)/(4));", 3);
+    ASSERT_TRUE(r.ToStdString() == "1") << r.ToStdString();
+    r = parser.Parse(LogicalId{0, 0, 1}, U"sign(0);", 3);
+    ASSERT_TRUE(r.ToStdString() == "0") << r.ToStdString();
+}
+
 TEST_F(CalcTestRational, functions6)
 {
     Rational res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"pow((5)/(2),-3);");

@@ -68,6 +68,16 @@ TEST_F(CalcTestVectorComplex, normalize_complex)
     ASSERT_TRUE(res.ToStdString(3, 3) == "[[0.6E+0],[i*0.8E+0]]") << res.ToStdString(3, 3);
 }
 
+TEST_F(CalcTestVectorComplex, sign_complex)
+{
+    auto res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"sign([3,4*i]);");
+    ASSERT_TRUE(res.ToStdString(3, 3) == "[[0.6E+0],[i*0.8E+0]]") << res.ToStdString(3, 3);
+    res = parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"sign([3+4*i]);");
+    ASSERT_TRUE(res.ToStdString(3, 3) == "[[0.6E+0+i*0.8E+0]]") << res.ToStdString(3, 3);
+    res = parser.Parse(LogicalId{0, 0, 0, 0, 3}, U"sign([0,0]);");
+    ASSERT_TRUE(res.ToStdString(3, 3) == "[[0.E+0],[0.E+0]]") << res.ToStdString(3, 3);
+}
+
 TEST_F(CalcTestVectorComplex, angle1)
 {
     auto res = parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"angle([1,0],[0,1]);");

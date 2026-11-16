@@ -1312,6 +1312,21 @@ Real abs(const Real& num)
     return res;
 }
 
+Real sign(const Real& num)
+{
+    Real res(num.GetBitPrecision(), num.angle_measure);
+
+    if (num.IsNaN())
+        mpfr_set_nan(res.number);
+    else
+        mpfr_set_si(res.number, num.IsZero() ? 0 : (num.GetSign() ? -1 : 1), DEFAULT_RND);
+
+#ifdef TRACE_OUTPUT
+    res.UpdateNumberStr();
+#endif
+    return res;
+}
+
 Real min(const Real& num1, const Real& num2)
 {
     return num1 < num2 ? num1 : num2;
