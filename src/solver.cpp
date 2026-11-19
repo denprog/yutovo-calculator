@@ -3286,6 +3286,7 @@ void Solver<Symbolic<Rational>>::FillBuiltinOperations()
     symbols->builtin_operations.push_back(U"sub");
     symbols->builtin_operations.push_back(U"sum");
     symbols->builtin_operations.push_back(U"prod");
+    FillBuiltinStatements();
 }
 
 template<>

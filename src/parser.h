@@ -288,6 +288,11 @@ struct Parser
         solver.ListBuiltinOperations(operations);
     }
 
+    void ListBuiltinStatements(std::vector<std::u32string>& statements)
+    {
+        solver.ListBuiltinStatements(statements);
+    }
+
     void ListUserStrings(std::vector<std::u32string>& strings)
     {
         solver.ListUserStrings(strings);

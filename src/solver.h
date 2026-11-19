@@ -134,6 +134,7 @@ struct SolverSymbols
     std::map<std::u32string, Number> builtin_identifiers;
 
     std::vector<std::u32string> builtin_operations;
+    std::vector<std::u32string> builtin_statements;
 
     std::u32string last_unit_system;
     bool buildin_elements = false;
@@ -174,6 +175,7 @@ struct Solver : public boost::static_visitor<Number>
         if (!symbols)
             symbols.reset(new SolverSymbols<Number>());
         FillBuiltinOperations();
+        FillBuiltinStatements();
     }
 
     Solver(int _precision, AngleMeasure _default_angle_measure, AngleMeasure _result_angle_measure, int _default_notation, const std::u32string& _im, 
@@ -189,6 +191,7 @@ struct Solver : public boost::static_visitor<Number>
         if (!symbols)
             symbols.reset(new SolverSymbols<Number>());
         FillBuiltinOperations();
+        FillBuiltinStatements();
     }
     
     Number operator()(Number n) const
@@ -2957,6 +2960,15 @@ struct Solver : public boost::static_visitor<Number>
         symbols->builtin_operations.push_back(U"prod");
     }
 
+    void FillBuiltinStatements()
+    {
+        if (!symbols->builtin_statements.empty())
+            return;
+        symbols->builtin_statements.push_back(U"for");
+        symbols->builtin_statements.push_back(U"if");
+        symbols->builtin_statements.push_back(U"loop");
+    }
+
     BuiltinFunction* FindBuiltinFunction(const std::u32string& name) const
     {
         typename std::map<std::u32string, BuiltinFunction>::const_iterator iter = symbols->buildin_functions.find(name);
@@ -3437,6 +3449,11 @@ struct Solver : public boost::static_visitor<Number>
     void ListBuiltinOperations(std::vector<std::u32string>& operations)
     {
         operations = symbols->builtin_operations;
+    }
+
+    void ListBuiltinStatements(std::vector<std::u32string>& statements)
+    {
+        statements = symbols->builtin_statements;
     }
 
     void ListUserStrings(std::vector<std::u32string>& strings)

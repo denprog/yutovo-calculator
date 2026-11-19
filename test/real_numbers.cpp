@@ -274,5 +274,20 @@ TEST_F(CalcTestReal, recursion_depth4)
     ASSERT_TRUE(res.ToStdString(3, 3) == parser.Parse(LogicalId{0, 0, 1}, U"1;").ToStdString(3, 3)) << res.ToStdString(3, 3);
 }
 
+//The call keywords of the grammar are statements, not operations
+TEST_F(CalcTestReal, builtin_operations)
+{
+    std::vector<std::u32string> operations;
+    parser.ListBuiltinOperations(operations);
+    for (auto name : {U"sum", U"prod", U"plus"})
+        ASSERT_TRUE(std::find(operations.begin(), operations.end(), name) != operations.end()) << ToBasicString(name);
+    for (auto name : {U"for", U"if", U"loop"})
+        ASSERT_TRUE(std::find(operations.begin(), operations.end(), name) == operations.end()) << ToBasicString(name);
+
+    std::vector<std::u32string> statements;
+    parser.ListBuiltinStatements(statements);
+    for (auto name : {U"for", U"if", U"loop"})
+        ASSERT_TRUE(std::find(statements.begin(), statements.end(), name) != statements.end()) << ToBasicString(name);
+}
 
 }
