@@ -153,6 +153,15 @@ TEST_F(CalcTestReal, for3)
     ASSERT_TRUE(s == "6.E+0") << s;
 }
 
+TEST_F(CalcTestReal, for_declaration)
+{
+    //a for loop with a function defined in the body as the right part of a declaration (the help library form);
+    //reading the variable re-evaluates the loop
+    parser.Parse(LogicalId{0, 0, 0, 0, 1}, U"f=for(i=1,(i<=3),i=i+1,(g(x)=2*x,w=g(i)));");
+    std::string s = parser.Parse(LogicalId{0, 0, 0, 0, 2}, U"f;").ToStdString(3, 3);
+    ASSERT_TRUE(s == "6.E+0") << s;
+}
+
 TEST_F(CalcTestReal, for4)
 {
     //a function defined inside the block survives the loop and is callable from a later statement
