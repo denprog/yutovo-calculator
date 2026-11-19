@@ -98,7 +98,14 @@ Array<Real> Solver<Array<Real>>::operator()(LineGraphNode<Array<Real>> const& op
     Array<Real> y_div = abs(y_bottom - y_top) / 20;
     Array<Real> y_eighth = abs(y_bottom - y_top) / 8;
     Array<Real> y_gap = abs(y_bottom - y_top) / 100;
+    //the pole markers must sit beyond the frame on their own side: y_top * 10 / y_bottom * 10 land inside the frame when both bounds 
+    //are positive or both negative
+    Array<Real> y_out_top = y_top + (y_top - y_bottom) * 10;
+    Array<Real> y_out_bottom = y_bottom - (y_top - y_bottom) * 10;
     Array<Real> y, _y;
+    Array<Real> x_mid;
+    Array<Real> x_quarter, y_quarter;
+    Array<Real> y_zero = 0;
     Array<Real> y_prev = 0;
 
     auto is_increasing = 
@@ -124,26 +131,45 @@ Array<Real> Solver<Array<Real>>::operator()(LineGraphNode<Array<Real>> const& op
         {
             Array<Real> x_div = x1 + (x2 - x1) / 2;
             SetTempVariable(op.identifier.name, x_div);
-            get_next_point(_y);
+            //a local value: the shared _y would be overwritten by the nested calls before this level emits
+            Array<Real> y_mid;
+            get_next_point(y_mid);
 
             if (div_depth > 0 && x_div != x1)
             {
-                if (_y > y_bottom && abs(_y - y1) > y_div)
-                    div_segment(x1, x_div, y1, _y, div_depth - 1);
-                if (_y < y_top && abs(_y - y2) > y_div)
-                    div_segment(x_div, x2, _y, y2, div_depth - 1);
+                //refine a diverging half unless it is a monotone out-of-frame stretch: both values beyond the same bound and the midpoint 
+                //probe of the half stays beyond it too; a wall of a pole hidden inside such a half crosses the visible area between the endpoints
+                auto out_of_frame_half =
+                    [&](const Array<Real>& x_a, const Array<Real>& y_a, const Array<Real>& x_b, const Array<Real>& y_b) -> bool
+                    {
+                        if (!(y_a < y_bottom && y_b < y_bottom) && !(y_a > y_top && y_b > y_top))
+                            return false;
+                        Array<Real> x_p = (x_a + x_b) / 2;
+                        SetTempVariable(op.identifier.name, x_p);
+                        get_next_point(y_quarter);
+                        if (y_quarter.IsNaN())
+                            return false;
+                        if (y_a < y_bottom)
+                            return y_quarter < y_bottom;
+                        return y_quarter > y_top;
+                    };
+                if (abs(y_mid - y1) > y_div && !out_of_frame_half(x1, y1, x_div, y_mid))
+                    div_segment(x1, x_div, y1, y_mid, div_depth - 1);
+                if (abs(y_mid - y2) > y_div && !out_of_frame_half(x_div, y_mid, x2, y2))
+                    div_segment(x_div, x2, y_mid, y2, div_depth - 1);
             }
-            
-            bool incr = is_increasing();
-            if (abs(_y - y_prev) > y_div && ((incr && _y < y_prev) || (!incr && _y > y_prev)))
+
+            //a straddling pair (one value beyond the top, the other beyond the bottom) belongs to the opposite walls of a pole: the segment 
+            //between them would run a vertical line through the whole frame, it must be broken; same-direction wall steps stay connected
+            if ((y_prev > y_top && y_mid < y_bottom) || (y_prev < y_bottom && y_mid > y_top))
             {
                 res.Add(x_div);
                 res.Add(nan);
             }
 
             res.Add(x_div);
-            res.Add(_y);
-            y_prev = _y;
+            res.Add(y_mid);
+            y_prev = y_mid;
         };
 
     //next items are points of the graph x, y
@@ -163,42 +189,192 @@ Array<Real> Solver<Array<Real>>::operator()(LineGraphNode<Array<Real>> const& op
 
         if (!y.IsNaN() && !y_prev.IsNaN())
         {
-            if (abs(y - y_prev) > y_eighth)
+            bool endpoints_in_frame = y >= y_bottom && y <= y_top && y_prev >= y_bottom && y_prev <= y_top;
+            //a jump of a piecewise function keeps both its levels inside the bounds, while the pole machinery below works with out-of-range 
+            //values and markers - the jump probe must not touch those gaps
+            bool endpoints_beyond_same = (y > y_top && y_prev > y_top) || (y < y_bottom && y_prev < y_bottom);
+            //one endpoint beyond the top, the other beyond the bottom: the curve crosses the whole frame inside the gap (a pole between 
+            //an above-frame and a below-frame sample) - it is always bisected, the pole markers below would only add isolated points here
+            bool endpoints_beyond_opposite = (y > y_top && y_prev < y_bottom) || (y < y_bottom && y_prev > y_top);
+            if (endpoints_beyond_opposite && abs(y - y_prev) > y_gap)
             {
-                bool incr = is_increasing();
-                if (incr && y < y_prev)
+                div_segment(x - inc, x, y_prev, y, 20);
+                if ((y_prev > y_top && y < y_bottom) || (y_prev < y_bottom && y > y_top))
                 {
                     res.Add(x);
-                    res.Add(y_top * 10);
+                    res.Add(nan);
+                }
+                res.Add(x);
+                res.Add(y);
+                if (y < y_bottom || y > y_top)
+                {
+                    res.Add(x);
+                    res.Add(nan);
+                }
+                y_prev = y;
+                x += inc;
+                continue;
+            }
+            if ((endpoints_in_frame || endpoints_beyond_same) && abs(y - y_prev) > y_gap)
+            {
+                x_mid = x - inc / 2;
+                SetTempVariable(op.identifier.name, x_mid);
+                get_next_point(_y);
+                if (endpoints_in_frame)
+                {
+                Array<Real> y_low = y_prev < y ? y_prev : y;
+                Array<Real> y_high = y_prev > y ? y_prev : y;
+                Array<Real> y_band = abs(y - y_prev) / 10;
+                if (!_y.IsNaN() && _y >= y_bottom && _y <= y_top &&
+                    _y >= y_low - y_band && _y <= y_high + y_band &&
+                    abs(_y - (y_prev + y) / 2) * 20 > abs(y - y_prev) * 9)
+                {
+                    //certify the half between the mid level and the far endpoint: bisect it descending into the half with the largest value 
+                    //span - a jump keeps every probe inside the endpoint band through the whole half
+                    bool mid_on_left = abs(_y - y_prev) <= abs(_y - y);
+                    Array<Real> xa = mid_on_left ? x_mid : x - inc;
+                    Array<Real> xb = mid_on_left ? x : x_mid;
+                    Array<Real> ya = mid_on_left ? _y : y_prev;
+                    Array<Real> yb = mid_on_left ? y : _y;
+                    bool jump = true;
+                    for (int level = 0; level < 7; ++level)
+                    {
+                        x_quarter = (xa + xb) / 2;
+                        SetTempVariable(op.identifier.name, x_quarter);
+                        get_next_point(y_quarter);
+                        if (y_quarter.IsNaN() || y_quarter < y_low - y_band || y_quarter > y_high + y_band)
+                        {
+                            jump = false;
+                            break;
+                        }
+                        if (abs(y_quarter - ya) > abs(y_quarter - yb))
+                        {
+                            xb = x_quarter;
+                            yb = y_quarter;
+                        }
+                        else
+                        {
+                            xa = x_quarter;
+                            ya = y_quarter;
+                        }
+                    }
+                    if (jump)
+                    {
+                        res.Add(x);
+                        res.Add(nan);
+                        res.Add(x);
+                        res.Add(y);
+                        if (y < y_bottom || y > y_top)
+                        {
+                            res.Add(x);
+                            res.Add(nan);
+                        }
+                        y_prev = y;
+                        x += inc;
+                        continue;
+                    }
+                }
+                //the probe left the endpoint band: a pole hides inside the gap - investigate it with the bisection even when the endpoint 
+                //difference alone would not trigger it (a very coarse grid step keeps both pole neighbours small and close together)
+                if (abs(y - y_prev) <= y_div && (_y.IsNaN() || _y < y_low - y_band || _y > y_high + y_band))
+                {
+                    div_segment(x - inc, x, y_prev, y, 20);
+                    if ((y_prev > y_top && y < y_bottom) || (y_prev < y_bottom && y > y_top))
+                    {
+                        res.Add(x);
+                        res.Add(nan);
+                    }
+                }
+                }
+                else
+                {
+                    //both endpoints beyond the same bound: the midpoint probe inside the frame or beyond the opposite bound means the curve 
+                    //crosses the visible area inside the gap; a single probe can miss a pole sitting close to a gap end
+                    bool crosses = _y.IsNaN() || (_y >= y_bottom && _y <= y_top) || (y < y_bottom && _y > y_top) || (y > y_top && _y < y_bottom);
+                    if (!crosses)
+                    {
+                        Array<Real> xa = x - inc, xb = x, ya = y_prev, yb = y;
+                        for (int level = 0; level < 7; ++level)
+                        {
+                            x_quarter = (xa + xb) / 2;
+                            SetTempVariable(op.identifier.name, x_quarter);
+                            get_next_point(y_quarter);
+                            if (y_quarter.IsNaN() || (y_quarter >= y_bottom && y_quarter <= y_top) ||
+                                (y < y_bottom && y_quarter > y_top) || (y > y_top && y_quarter < y_bottom))
+                            {
+                                crosses = true;
+                                break;
+                            }
+                            if (abs(y_quarter - ya) > abs(y_quarter - yb))
+                            {
+                                xb = x_quarter;
+                                yb = y_quarter;
+                            }
+                            else
+                            {
+                                xa = x_quarter;
+                                ya = y_quarter;
+                            }
+                        }
+                    }
+                    if (crosses)
+                    {
+                        //the bisection draws the crossing branch out through both frame edges; the sample is appended right away, 
+                        //the pole markers below would only connect isolated points here
+                        div_segment(x - inc, x, y_prev, y, 20);
+                        if ((y_prev > y_top && y < y_bottom) || (y_prev < y_bottom && y > y_top))
+                        {
+                            res.Add(x);
+                            res.Add(nan);
+                        }
+                        res.Add(x);
+                        res.Add(y);
+                        if (y < y_bottom || y > y_top)
+                        {
+                            res.Add(x);
+                            res.Add(nan);
+                        }
+                        y_prev = y;
+                        x += inc;
+                        continue;
+                    }
+                }
+            }
+            //the pole markers connect the last visible sample of one branch with the first visible sample of the next one across a gap 
+            //that hides an asymptote: the previous sample stays inside the frame, the current one escapes it
+            if (abs(y - y_prev) > y_eighth && y_prev >= y_bottom && y_prev <= y_top &&
+                (y > y_top || y < y_bottom) && (y > y_zero) != (y_prev > y_zero))
+            {
+                if (y < y_bottom)
+                {
+                    res.Add(x);
+                    res.Add(y_out_top);
                     res.Add(x);
                     res.Add(nan);
                     x += inc;
                     res.Add(x);
-                    res.Add(y_bottom * 10);
-                    y_prev = y_bottom * 10;
+                    res.Add(y_out_bottom);
+                    y_prev = y_out_bottom;
                     x += inc;
                     continue;
                 }
-                if (!incr && y > y_prev)
-                {
-                    res.Add(x);
-                    res.Add(y_bottom * 10);
-                    res.Add(x);
-                    res.Add(nan);
-                    x += inc;
-                    res.Add(x);
-                    res.Add(y_top * 10);
-                    y_prev = y_top * 10;
-                    x += inc;
-                    continue;
-                }
+                res.Add(x);
+                res.Add(y_out_bottom);
+                res.Add(x);
+                res.Add(nan);
+                x += inc;
+                res.Add(x);
+                res.Add(y_out_top);
+                y_prev = y_out_top;
+                x += inc;
+                continue;
             }
             if (abs(y - y_prev) > y_div)
             {
                 div_segment(x - inc, x, y_prev, y, 20);
 
-                bool incr = is_increasing();
-                if ((incr && y < y_prev) || (!incr && y > y_prev))
+                //the sample must not connect to the opposite wall of a pole either
+                if ((y_prev > y_top && y < y_bottom) || (y_prev < y_bottom && y > y_top))
                 {
                     res.Add(x);
                     res.Add(nan);

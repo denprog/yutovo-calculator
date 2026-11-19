@@ -104,6 +104,89 @@ TEST_F(CalcTestArrayReal, graph8)
         yutovo_calculator::TimeExceedException);
 }
 
+TEST_F(CalcTestArrayReal, graph9)
+{
+    yutovo_calculator::ParserContext parser_context;
+    parser_context.Init(100);
+    auto res = parser.Parse(LogicalId{0, 0, 1}, U"graph_line(if(x>3,(x+1),(x-1)),x,0,6,-1,6,100);", &parser_context);
+    //the jump at x=3 breaks the line: the left branch ends at (3,2), the right branch starts at (3.06,4.06)
+    ASSERT_TRUE(res.ToStdString(3, 3).find("2.94E+0,1.94E+0,3.E+0,2.E+0,3.06E+0,NAN,3.06E+0,4.06E+0,3.12E+0,4.12E+0") != std::string::npos) <<
+        res.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestArrayReal, graph10)
+{
+    yutovo_calculator::ParserContext parser_context;
+    parser_context.Init(100);
+    auto res = parser.Parse(LogicalId{0, 0, 1}, U"graph_line(if(x>3,(x-1),(x+1)),x,0,6,-1,6,100);", &parser_context);
+    //the downward jump breaks the line without the out-of-range pole markers
+    std::string str = res.ToStdString(3, 3);
+    ASSERT_TRUE(str.find("2.94E+0,3.94E+0,3.E+0,4.E+0,3.06E+0,NAN,3.06E+0,2.06E+0,3.12E+0,2.12E+0") != std::string::npos) << str;
+    ASSERT_TRUE(str.find("6.E+1") == std::string::npos && str.find("-1.E+1") == std::string::npos) << str;
+}
+
+TEST_F(CalcTestArrayReal, graph11)
+{
+    yutovo_calculator::ParserContext parser_context;
+    parser_context.Init(100);
+    auto res = parser.Parse(LogicalId{0, 0, 1}, U"graph_line(tan(x),x,-2,2,-5,5,100);", &parser_context);
+    //the pole gap (an above-frame sample against a below-frame one) is bisected: the wall hug
+    //chain runs off through the frame edges with breaks between the opposite walls
+    std::string str = res.ToStdString(3, 3);
+    ASSERT_TRUE(str.find("-1.6E+0,34.233E+0,-1.6E+0,NAN,-1.571E+0,9.678E+7") != std::string::npos) << str;
+}
+
+TEST_F(CalcTestArrayReal, graph12)
+{
+    yutovo_calculator::ParserContext parser_context;
+    parser_context.Init(100);
+    auto res = parser.Parse(LogicalId{0, 0, 1}, U"graph_line(pow(x,3),x,0,10,0,1000,50);", &parser_context);
+    //a steep but continuous function must not be broken
+    ASSERT_TRUE(res.ToStdString(3, 3).find("NAN") == std::string::npos) << res.ToStdString(3, 3);
+}
+
+TEST_F(CalcTestArrayReal, graph13)
+{
+    yutovo_calculator::ParserContext parser_context;
+    parser_context.Init(100);
+    //the wide y range keeps the pole neighbours finite and inside the bounds: the pole gap is crossed by
+    //the marker pair - the top marker connects to the last finite sample of the left branch (the curve
+    //reaches the top frame edge), the bottom marker connects to the samples of the right branch (the curve
+    //enters from the bottom frame edge)
+    auto res = parser.Parse(LogicalId{0, 0, 1}, U"graph_line(tan(x),x,-2,2,-16,86,100);", &parser_context);
+    std::string str = res.ToStdString(3, 3);
+    ASSERT_TRUE(str.find("-1.56E+0,1.106E+3,-1.56E+0,NAN,-1.52E+0,-1.036E+3,-1.51E+0,-16.428E+0") != std::string::npos) << str;
+    ASSERT_TRUE(str.find("1.56E+0,92.62E+0,1.56E+0,NAN,1.571E+0,NAN,1.571E+0,-9.678E+7") != std::string::npos) << str;
+}
+
+TEST_F(CalcTestArrayReal, graph14)
+{
+    yutovo_calculator::ParserContext parser_context;
+    parser_context.Init(100);
+    //both bounds positive: the old pole markers y_bottom*10 = 23.41 landed inside the frame and drew
+    //spurious vertical lines through the visible area; the markers must sit beyond the frame, the
+    //bottom one connects to the below-frame samples of the right branch (entry from the bottom edge)
+    auto res = parser.Parse(LogicalId{0, 0, 1}, U"graph_line(tg(x),x,-15,-1,2.341,104,200);", &parser_context);
+    std::string str = res.ToStdString(3, 3);
+    ASSERT_TRUE(str.find("-14.09E+0,1.121E+3,-14.09E+0,NAN,-14.02E+0,-1.014E+3,-13.985E+0,-6.521E+0") != std::string::npos) << str;
+    ASSERT_TRUE(str.find("-10.94E+0,1.121E+3,-10.94E+0,NAN,-10.87E+0,-1.014E+3,-10.835E+0,-6.174E+0") != std::string::npos) << str;
+}
+
+TEST_F(CalcTestArrayReal, graph15)
+{
+    //a wide x range makes the grid step coarse enough to catch a pole inside one step with both
+    //neighbours inside the bounds; the solve is heavy by itself, so the context budget is generous
+    yutovo_calculator::ParserContext parser_context;
+    parser_context.Init(1000);
+    //the walls of a caught pole escape through the bounds and the opposite walls are separated by
+    //breaks - no vertical line through the frame, no mid-air branch stop (the certification probe
+    //vetoes the false jump)
+    auto res = parser.Parse(LogicalId{0, 0, 1}, U"graph_line(tan(x),x,-66,45,-80,80,400);", &parser_context);
+    std::string str = res.ToStdString(3, 3);
+    ASSERT_TRUE(str.find("-64.403E+0,-1.064E+6,-64.403E+0,NAN,-64.403E+0,8.441E+6") != std::string::npos) << str;
+    ASSERT_TRUE(str.find("-64.403E+0,6.694E+4,-64.403E+0,NAN,-64.403E+0,-5.003E+5") != std::string::npos) << str;
+}
+
 TEST_F(CalcTestArrayReal, surface_graph1)
 {
     auto res = parser.Parse(LogicalId{0, 0, 1}, U"graph_surface(x+y,x,y,0,1,0,1,3,3);", AngleMeasure::Radian, AngleMeasure::Radian);
